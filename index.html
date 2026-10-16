@@ -308,6 +308,7 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
 @keyframes photoIn{from{opacity:0;transform:translateY(18px) rotate(-7deg)}to{opacity:1;transform:rotate(2deg)}}
 @keyframes develop{from{filter:sepia(1) brightness(1.7) contrast(.45)}to{filter:none}}
 .lcd.ott .lcd-tx span,.lcd.ott .lcd-st{color:#F6C9CF}
+.topbar>div:last-child{cursor:pointer}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -829,10 +830,10 @@ const DIFF={
 };
 /* Ruf: Respekt öffnet Türen */
 const RUF=[
- {min:0,name:'Neuling',perk:'Noch kennt dich kaum jemand an der Strecke.'},
- {min:40,name:'Bekannt',perk:'Am Rasthof geht der Imbiss ab und zu aufs Haus, und Jupp gibt dir 10 % Rabatt.'},
- {min:100,name:'Geschätzt',perk:'Kunden zahlen dir 10 % mehr, am Rasthof wirst du öfter eingeladen, Jupp gibt 15 % Rabatt, und die Polizei winkt dich bei Kontrollen ohne Wartezeit durch.'},
- {min:180,name:'Legende der Landstraße',perk:'Kunden zahlen dir 20 % mehr, Jupp gibt 20 % Rabatt, und Kollegen warnen dich auch ohne Funkgerät vor Hindernissen.'}
+ {min:0,name:'Neuling',perk:'Noch kennt dich kaum jemand an der Strecke. Mit jedem Respektpunkt ändert sich das ein bisschen.'},
+ {min:40,name:'Bekannt',perk:'Man kennt dich an der Strecke. Jupp gibt dir Rabatt, und am Rasthof geht der Imbiss ab und zu aufs Haus. Beides wird mit mehr Respekt besser.'},
+ {min:100,name:'Geschätzt',perk:'Kunden zahlen dir jetzt mehr, und die Polizei winkt dich bei Kontrollen manchmal einfach durch. Auch das wächst mit deinem Respekt.'},
+ {min:180,name:'Legende der Landstraße',perk:'Kollegen fangen an, dich auch ohne Funkgerät vor Hindernissen zu warnen. Und alles andere wird weiter besser.'}
 ];
 const RUF_RABATT=[0,.1,.15,.2],RUF_LOHN=[0,0,.1,.2];
 /* Betriebskosten */
@@ -1031,7 +1032,10 @@ const duftLv=()=>S.up.duft;
 const duftEff=()=>UP[0].eff[duftLv()]*(S.duftFrisch/100);
 const rufLv=()=>{let l=0;RUF.forEach((r,i)=>{if(S.respect>=r.min)l=i});return l};
 // Preise: Schwierigkeit, Ruf und Jupps Rabatttag wirken zusammen
-const price=c=>Math.round(c*DIFF[S.diff].priceMul*(1-RUF_RABATT[rufLv()])*(S.rabatt===S.day?2/3:1));
+/* Die Vorteile von Respekt wachsen mit jedem Punkt, statt in Stufen zu springen */
+const lerpR=(r,a,b,max)=>Math.max(0,Math.min(max,(r-a)/(b-a)*max));
+function rufPerks(){const r=S.respect;return {rabatt:lerpR(r,0,250,.25),free:lerpR(r,20,230,.6),lohn:lerpR(r,60,240,.2),polizei:lerpR(r,60,200,1),warn:lerpR(r,170,280,1)}}
+const price=c=>Math.round(c*DIFF[S.diff].priceMul*(1-rufPerks().rabatt)*(S.rabatt===S.day?2/3:1));
 const washPrice=()=>Math.round(20*DIFF[S.diff].priceMul);
 // Kalles Erholung: bestimmt, wie wach er eine Tour beginnt
 const startEnergy=()=>100;
@@ -1200,7 +1204,12 @@ function renderHof(){
   $('#ruf').textContent=rl?'★'.repeat(rl)+' '+RUF[rl].name:'';$('#ruf').title=RUF[rl].perk;
   $('#btn-tree').hidden=!duftLv();$('#btn-tree').disabled=S.money<3||S.duftFrisch>=100;
 }
-function rufCheck(){const l=rufLv();if(l>(S.rufSeen||0)){S.rufSeen=l;save();setTimeout(()=>openCard('<p class="eyebrow">Dein Ruf wächst</p><h2>'+RUF[l].name+'</h2><p class="typed" style="margin:0">'+RUF[l].perk+'</p>',[{label:'Schön',fn:closeCard}]),400)}}
+function rufText(){const p=rufPerks(),pc=v=>Math.round(v*100)+' %';
+  const rows=[['Rabatt bei Jupp',pc(p.rabatt)],['Imbiss aufs Haus',pc(p.free)],['Mehr Lohn',pc(p.lohn)],['Ohne Kontrolle durchgewinkt',pc(p.polizei)]];
+  if(p.warn>0)rows.push(['Warnungen von Kollegen',pc(p.warn)]);
+  return '<div class="ledger">'+rows.map(r=>'<span>'+r[0]+'</span><b>'+r[1]+'</b>').join('')+'</div>'}
+function rufCard(){const l=rufLv();openCard('<p class="eyebrow">Dein Ruf · '+S.respect+' Respekt</p><h2>'+RUF[l].name+'</h2><p class="typed" style="margin:0">'+RUF[l].perk+'</p>'+rufText()+(RUF[l+1]?'<p class="center" style="margin:0;font-size:12px;color:var(--muted)">Ab '+RUF[l+1].min+' Respekt: '+RUF[l+1].name+'</p>':''),[{label:'Schön',fn:closeCard}])}
+function rufCheck(){const l=rufLv();if(l>(S.rufSeen||0)){S.rufSeen=l;save();setTimeout(()=>openCard('<p class="eyebrow">Dein Ruf wächst</p><h2>'+RUF[l].name+'</h2><p class="typed" style="margin:0">'+RUF[l].perk+'</p>'+rufText(),[{label:'Schön',fn:closeCard}]),400)}}
 function rest(){if(S.fit>=100||daysLeft()<=1)return;S.day++;S.fit=Math.min(100,S.fit+40);save();AU.fx('yawn');toast('Kalle schläft sich aus. Ein Tag ist vergangen.');show('hof')}
 function wash(){
   const wp=washPrice();if(S.money<wp||S.glanz>=100)return;S.money-=wp;S.stats.washed=true;save();
@@ -1213,6 +1222,7 @@ function puffs(n){const P=$('#puffs');if(!P)return;for(let i=0;i<(n||1);i++){con
 setInterval(()=>{if(curScreen==='hof'&&!document.hidden)puffs(1)},3200);
 $('#btn-wash').addEventListener('click',wash);
 $('#btn-tree').addEventListener('click',newTree);
+$('#t-resp').parentElement.addEventListener('click',()=>{if(S){AU.fx('click');rufCard()}});
 $('#hilde-btn').addEventListener('click',()=>{const hb=$('#hilde-btn');hb.classList.remove('honk');void hb.offsetWidth;hb.classList.add('honk');AU.fx(S&&S.up.fanfare?'fanfare':'horn');puffs(2)});
 
 /* Hof-Ereignisse zwischen zwei Touren */
@@ -1273,7 +1283,7 @@ function brief(t){
 
 /* ================= Werkstatt ================= */
 function renderShop(){
-  $('#jupp').textContent=JUPP[S.day%JUPP.length]+(S.rabatt===S.day?' Heute ein Drittel billiger.':'')+(rufLv()?' Für dich '+Math.round(RUF_RABATT[rufLv()]*100)+' % Stammkundenrabatt.':'')+' · Kasse: '+eur(S.money);
+  $('#jupp').textContent=JUPP[S.day%JUPP.length]+(S.rabatt===S.day?' Heute ein Drittel billiger.':'')+(rufPerks().rabatt>=.01?' Für dich '+Math.round(rufPerks().rabatt*100)+' % Stammkundenrabatt.':'')+' · Kasse: '+eur(S.money);
   const L=$('#shoplist');L.innerHTML='';
   UP.forEach(u=>{
     const lv=S.up[u.id],maxed=lv>=u.max,cost=maxed?0:price(u.cost[lv]);
@@ -1534,7 +1544,7 @@ function spawnRow(){
     const o=addObj(type,l,spawnY());if(!o)return;
     if(OB[type].weave){o.weaveT=rnd(1,1.8)}
     if(type==='traktor'||type==='kutsche'||type==='kuh')soundNear(type);
-    if((S.up.funk||rufLv()>=3)&&OB[type].rel===1&&Math.random()<.35&&D.funkT<=0){D.funkT=3;msg('Funk: '+OB[type].name+' auf der '+['linken','mittleren','rechten'][l]+' Spur','funk')}
+    if((S.up.funk||Math.random()<rufPerks().warn)&&OB[type].rel===1&&Math.random()<.35&&D.funkT<=0){D.funkT=3;msg('Funk: '+OB[type].name+' auf der '+['linken','mittleren','rechten'][l]+' Spur','funk')}
   });
 }
 function soundNear(type){setTimeout(()=>{if(!D||D.paused)return;if(type==='kutsche')AU.fx('neigh');else if(type==='kuh')AU.fx('moo')},1200)}
@@ -1682,7 +1692,7 @@ function update(dt){
     else if(e.type==='polizei')startPolizei();
     else if(e.type==='faehre'){return openFaehre()}
     else if(e.type==='polizei2'){return openKontrolle()}
-    else if(e.type==='kisten'){if(S.up.funk||rufLv()>=3)ticker('„Hier hat einer Kisten verloren. Over.“','cb');later(.8,spawnKisten)}
+    else if(e.type==='kisten'){if(S.up.funk||Math.random()<rufPerks().warn)ticker('„Hier hat einer Kisten verloren. Over.“','cb');later(.8,spawnKisten)}
     else if(e.type==='schwer'){verkehrsfunk('Schwertransport auf zwei Spuren.');later(1.6,spawnSchwer)}
     else if(e.type==='korso'){spawnKorso();msg('Ein Hochzeitskorso!','good')}
     else if(e.type==='kinder')spawnOverpass();
@@ -1868,7 +1878,7 @@ function openKontrolle(){
   const fine=DIFF[S.diff].fine;
   if(D.lenk>4.5){txt='Die Beamtin liest deine Fahrerkarte aus. Du bist '+fmtDur(D.lenk)+' Stunden ohne Pause gefahren. Sie schreibt ein Bußgeld über '+fine+' € auf, und du musst sofort 45 Minuten Pause machen.';
     resp=-4;D.fined=true;D.fineNow=fine;D.lenk=0;D.clock+=.75;D.pauses++;S.stats.fines++}
-  else if(rufLv()>=2){txt='Die Beamten erkennen Hilde schon von Weitem und winken dich gleich weiter. „Gute Fahrt, Kalle!“';resp=1}
+  else if(Math.random()<rufPerks().polizei){txt='Die Beamten erkennen Hilde schon von Weitem und winken dich gleich weiter. „Gute Fahrt, Kalle!“';resp=1}
   else{txt='Die Beamten lesen deine Fahrerkarte aus. Lenkzeit '+fmtDur(D.lenk)+' Stunden, alles in Ordnung.';resp=2;D.clock+=.2;
     if(D.cargo>=90){txt+=' Sie loben außerdem, wie sauber die Ladung gesichert ist.';resp+=2}}
   D.extraResp.push(['Polizeikontrolle',resp]);
@@ -1904,7 +1914,7 @@ function openRast(name){
   D.paused=true;AU.engineSet({paused:true});AU.fx('dingdong');const H0=host(name);
   const hitch=!D.anhalter&&!D._hitchAsked&&Math.random()<.35?pick(ANHALTER):null;D._hitchAsked=true;
   // Je bekannter Kalle ist, desto öfter geht der Imbiss aufs Haus
-  const free=Math.random()<[0,.25,.4,.55][rufLv()];
+  const free=Math.random()<rufPerks().free;
   const render=(line)=>{const kettLabel=H0.food+(free?' <span>spendiert</span>':S.money>=4?' <span>4 €</span>':' <span>anschreiben</span>');
     const opts=[{label:kettLabel,disabled:D._kett,fn:()=>{D._kett=true;if(free)S.stats.kettFrei=(S.stats.kettFrei||0)+1;if(!free){if(S.money>=4)S.money-=4;else S.tab=(S.tab||0)+4}D.energy=100;D.hunger=0;D.kett++;AU.fx('slurp');render(H0.line.replace('&amp;','&'))}},
        {label:'45 Minuten Pause <span>+0:45 h</span>',disabled:D._pause,fn:()=>{D._pause=true;D.lenk=0;D.clock+=.75;D.napStreak=0;D.energy=S.up.matratze?100:Math.min(100,D.energy+35);D.pauses++;render(S.up.matratze?'Auf der guten Matratze schläft Kalle tief und fest. Er ist wieder ganz wach, und die Lenkzeit beginnt bei null.':'Kalle schläft eine Runde in der Kabine. Die Lenkzeit beginnt wieder bei null.')}},
@@ -2383,7 +2393,7 @@ function finishDrive(ok,aborted){
   const R=(label,v)=>{if(v){rl.push([label,v]);resp+=v}};
   if(ok){
     const cargoF=.4+.6*D.cargo/100,glanzF=1+S.glanz/500,timeF=onTime?1.15:1,eilF=D.eilig?1.35:1;
-    const rl2=rufLv();const base=Math.round(t.pay*TUNE.payMul*DIFF[S.diff].payMul*eilF*(1+RUF_LOHN[rl2]));
+    const rl2=rufLv();const base=Math.round(t.pay*TUNE.payMul*DIFF[S.diff].payMul*eilF*(1+rufPerks().lohn));
     pay=Math.round(base*cargoF*glanzF*timeF);
     if(!t.final)lines.push(['Lohn <small>('+Math.round(D.cargo)+' % heil, '+(onTime?'pünktlich':'verspätet')+')</small>','+ '+eur(pay)]);
     if(!t.final&&D.cargo>=80&&Math.random()<.3){tip=Math.round(rnd(10,30));lines.push(['Trinkgeld','+ '+eur(tip)])}
@@ -2508,7 +2518,7 @@ function ending(){
 }
 
 /* Testzugang, nur aktiv wenn window.__FW_TEST vor dem Laden gesetzt wird */
-if(window.__FW_TEST){window.__FW={price,rufLv,steerDelay,startEnergy,fitLossFor,needDays,SONGS,AU,TUNE,get S(){return S},set S(v){S=v},get D(){return D},update,startDrive,finishDrive,flash,fresh,greetTarget,score,closeCard,TOURS,UP,OB,DIFF,breaksNeeded,unlocked,fits,available,daysLeft,offer,openRast,resume,geo:()=>({truckY,TH,laneW,SC,H,roadX,roadW,TW}),laneX}}
+if(window.__FW_TEST){window.__FW={price,rufLv,rufPerks,steerDelay,startEnergy,fitLossFor,needDays,SONGS,AU,TUNE,get S(){return S},set S(v){S=v},get D(){return D},update,startDrive,finishDrive,flash,fresh,greetTarget,score,closeCard,TOURS,UP,OB,DIFF,breaksNeeded,unlocked,fits,available,daysLeft,offer,openRast,resume,geo:()=>({truckY,TH,laneW,SC,H,roadX,roadW,TW}),laneX}}
 renderTitle();
 show('title');
 
