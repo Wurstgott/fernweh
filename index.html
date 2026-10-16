@@ -299,6 +299,15 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
 .crate span{position:relative;z-index:1;background:var(--cream);color:var(--ink);font-size:9px;font-weight:700;padding:0 3px;letter-spacing:.05em}
 .next.final .btn{color:var(--ink)}
 .next.final .eyebrow{letter-spacing:.14em;text-align:left}
+
+/* v2.6: Foto auf dem Lieferschein, Ottilie im Radio */
+.polaroid{margin:0 auto;background:#FFFDF8;padding:8px 8px 4px;width:min(210px,68%);box-shadow:0 1px 0 rgba(43,34,48,.15),0 6px 14px rgba(43,34,48,.18);transform:rotate(2deg);position:relative;animation:photoIn .7s .45s cubic-bezier(.2,1.3,.4,1) backwards}
+.polaroid::before{content:'';position:absolute;top:-8px;left:50%;width:54px;height:15px;margin-left:-27px;background:rgba(227,175,180,.8);transform:rotate(-4deg)}
+.polaroid>svg{display:block;width:100%;height:auto;outline:1px solid rgba(43,34,48,.12);animation:develop 2.2s .7s ease-out backwards}
+.polaroid figcaption{font-family:var(--type);font-size:12px;text-align:center;padding:6px 0 2px;color:var(--ink)}
+@keyframes photoIn{from{opacity:0;transform:translateY(18px) rotate(-7deg)}to{opacity:1;transform:rotate(2deg)}}
+@keyframes develop{from{filter:sepia(1) brightness(1.7) contrast(.45)}to{filter:none}}
+.lcd.ott .lcd-tx span,.lcd.ott .lcd-st{color:#F6C9CF}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -323,13 +332,13 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
     <details class="howto"><summary>So wird gespielt</summary><ol>
 <li>Tippe links oder rechts auf den Bildschirm, um die Spur zu wechseln. Jeder Zusammenstoß beschädigt die Ladung.</li>
 <li>Nach 4:30 Stunden am Steuer sind 45 Minuten Pause Pflicht. Zum Rasthof kommst du über die rechte Spur.</li>
-<li>Kalle wird schnell müde und hungrig, jeder Spurwechsel kostet Kraft. Kaffee macht wach, satt wird er nur am Rasthof.</li>
+<li>Kalle wird schnell müde und hungrig, jeder Spurwechsel kostet Kraft. Kaffee macht wach, satt wird er nur am Rasthof. Nickt er zu oft am Steuer ein, ist die Tour vorbei.</li>
 <li>Fährt ein Kollege vor dir, gib Lichthupe. Er grüßt zurück, und das bringt Respekt.</li>
 <li>Jede Strecke hat ihre Eigenheiten, etwa Nebel, Gänse, Seitenwind oder eine Fähre. Sie stehen auf dem Lieferschein.</li>
 <li>Jede Tour kostet Kalendertage. Bring die Kiste vor dem Jubiläum ans Nordkap.</li>
 <li>Am Ende zählen Respekt, verschiedene Ziele, übrige Tage und dein Erspartes.</li>
 </ol></details>
-    <p class="best">Fernweh · Version 2.5 · Oktober 2026</p>
+    <p class="best">Fernweh · Version 2.6 · Oktober 2026</p>
   </section>
 
   <!-- BRIEF -->
@@ -393,7 +402,7 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
     <details class="howto"><summary>So wird gespielt</summary><ol>
 <li>Tippe links oder rechts auf den Bildschirm, um die Spur zu wechseln. Jeder Zusammenstoß beschädigt die Ladung.</li>
 <li>Nach 4:30 Stunden am Steuer sind 45 Minuten Pause Pflicht. Zum Rasthof kommst du über die rechte Spur.</li>
-<li>Kalle wird schnell müde und hungrig, jeder Spurwechsel kostet Kraft. Kaffee macht wach, satt wird er nur am Rasthof.</li>
+<li>Kalle wird schnell müde und hungrig, jeder Spurwechsel kostet Kraft. Kaffee macht wach, satt wird er nur am Rasthof. Nickt er zu oft am Steuer ein, ist die Tour vorbei.</li>
 <li>Fährt ein Kollege vor dir, gib Lichthupe. Er grüßt zurück, und das bringt Respekt.</li>
 <li>Jede Strecke hat ihre Eigenheiten, etwa Nebel, Gänse, Seitenwind oder eine Fähre. Sie stehen auf dem Lieferschein.</li>
 <li>Jede Tour kostet Kalendertage. Bring die Kiste vor dem Jubiläum ans Nordkap.</li>
@@ -676,13 +685,27 @@ const AU=(function(){
       case 'cheer':{const g=gain(0,D);const bp=filt('bandpass',1500,.6,g);noise(t,1.3,bp);envASR(g,t,.09,.15,.7,.4);for(let i=0;i<5;i++){const s=t+.1+i*.18;const g2=gain(0,D);const o=_osc('triangle',800+Math.random()*500,s,g2);o.frequency.linearRampToValueAtTime(1200+Math.random()*400,s+.12);envAD(g2,s,.025,.01,.12);o.start(s);o.stop(s+.15)}break}
       case 'hochzeit':{[[523,0],[659,.12],[784,.24],[659,.42],[784,.54],[1047,.66]].forEach(([f,d])=>{const g=gain(0,D);const lp=filt('lowpass',1800,1,g);const o=_osc('sawtooth',f,t+d,lp);envASR(g,t+d,.035,.01,.08,.04);o.start(t+d);o.stop(t+d+.2)});break}
       case 'arrival':{
-        // Paukenwirbel, Bläserfanfare, Becken und ein Glockenspiel obendrauf
-        const g=gain(0,D);const lp=filt('lowpass',160,1,g);noise(t,.7,lp);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.35,t+.6);g.gain.linearRampToValueAtTime(0,t+.72);
-        const s0=t+.6;[[67,0,.12],[72,.12,.12],[76,.24,.12],[79,.36,.28]].forEach(([m,d,l])=>inst('brass',m,s0+d,l,.11,D));
-        [72,76,79,84].forEach(m=>inst('brass',m,s0+.66,.9,.06,D));[48,55].forEach(m=>inst('tuba',m,s0+.66,.8,.25,D));
-        const gc=gain(0,D);const hp=filt('highpass',5000,.7,gc);noise(s0+.66,1.6,hp);envAD(gc,s0+.66,.22,.005,1.4);
-        const gk=gain(0,D);const ok=_osc('sine',120,s0+.66,gk);ok.frequency.exponentialRampToValueAtTime(50,s0+.9);envAD(gk,s0+.66,.6,.003,.35);ok.start(s0+.66);ok.stop(s0+1.1);
-        [96,100,103,108,103,108].forEach((m,i)=>inst('celesta',m,s0+.8+i*.09,.3,.07,D));break}
+        // Paukenwirbel, Auftakt der Bläser, dann ein lang gehaltener Schlussakkord mit Becken und Glockenspiel
+        const big=!!(opt&&opt.big),rl=big?.8:.6;
+        const g=gain(0,D);const lp=filt('lowpass',170,1,g);noise(t,rl+.12,lp);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.38,t+rl);g.gain.linearRampToValueAtTime(0,t+rl+.12);
+        const s0=t+rl;
+        const up=big?[[67,0,.14],[72,.15,.14],[76,.3,.14],[79,.45,.32],[77,.8,.12],[76,.93,.12],[74,1.06,.12]]:[[67,0,.12],[72,.12,.12],[76,.24,.12],[79,.36,.28]];
+        up.forEach(([m,d,l])=>inst('brass',m,s0+d,l,.11,D));
+        const hit=s0+(big?1.2:.66),L=big?3.6:2.8;
+        if(big)[60,62,64,65,67,69,71,72,74,76,77,79].forEach((m,i)=>inst('harp',m+12,s0+.82+i*.03,.2,.05,D));
+        const sus=(m,v,cut)=>{const f=mtof(m);const g2=gain(0,D);const l2=filt('lowpass',600,1.2,g2);l2.frequency.setValueAtTime(600,hit);l2.frequency.linearRampToValueAtTime(cut,hit+.07);l2.frequency.exponentialRampToValueAtTime(Math.min(cut,900),hit+L);
+          [1,1.0045].forEach(k=>{const o=_osc('sawtooth',f*k,hit,l2);o.start(hit);o.stop(hit+L+.05)});
+          g2.gain.setValueAtTime(0,hit);g2.gain.linearRampToValueAtTime(v,hit+.04);g2.gain.linearRampToValueAtTime(v*.72,hit+.4);g2.gain.setValueAtTime(v*.72,hit+L*.42);g2.gain.exponentialRampToValueAtTime(.0004,hit+L)};
+        (big?[67,72,76,79,84]:[72,76,79,84]).forEach(m=>sus(m,.032,2400));[36,48,55].forEach(m=>sus(m,m===36?.05:.06,700));
+        const gr=gain(0,D);const lr=filt('lowpass',150,1,gr);noise(hit,L*.7,lr);gr.gain.setValueAtTime(.22,hit);gr.gain.exponentialRampToValueAtTime(.001,hit+L*.65);
+        const gc=gain(0,D);const hp=filt('highpass',5000,.7,gc);noise(hit,2.6,hp);envAD(gc,hit,.22,.005,2.4);
+        const gk=gain(0,D);const ok=_osc('sine',120,hit,gk);ok.frequency.exponentialRampToValueAtTime(48,hit+.3);envAD(gk,hit,.65,.003,.5);ok.start(hit);ok.stop(hit+.8);
+        [84,88,91,96,100,103,108].forEach((m,i)=>inst('celesta',m,hit+.12+i*.08,.3,.06,D));
+        inst('bell',96,hit+1.3,.6,.05,D);if(big)inst('bell',103,hit+2.1,.8,.045,D);
+        break}
+      case 'ring':{for(let r=0;r<2;r++){const st=t+r*.55;const g=gain(0,D);const bp=filt('bandpass',1300,3,g);const o=_osc('square',1250,st,bp);const lf=_osc('square',22,st,gain(80,o.frequency));envASR(g,st,.045,.01,.32,.05);o.start(st);o.stop(st+.42);lf.start(st);lf.stop(st+.42)}break}
+      case 'rumble':{const g=gain(0,D);const lp=filt('lowpass',220,1,g);noise(t,1.2,lp);const am=_osc('square',26,t,gain(.18,g.gain));am.start(t);am.stop(t+1.2);envASR(g,t,.3,.03,.85,.25);break}
+      case 'pssh':{const g=gain(0,D);const hp=filt('highpass',3000,.5,g);noise(t,.75,hp);envAD(g,t,.2,.01,.65);break}
       case 'pop':{const g=gain(0,D);const o=_osc('sine',300,t,g);o.frequency.exponentialRampToValueAtTime(900,t+.08);envAD(g,t,.1,.002,.08);o.start(t);o.stop(t+.12);break}
     }
   }
@@ -797,18 +820,18 @@ const REGION_SONG={de:'shanty',alpen:'laendler',italia:'tarantella',nord:'nordis
 /* Schwierigkeit wirkt auf viele Stellschrauben:
    Zeit, Verkehr, Schaden, Müdigkeit, Lieferfenster, Preise, Lohn, Bußgelder, Kontrollen, Pech unterwegs. */
 const DIFF={
-  lehrling:{name:'Lehrling',days:40,dmg:.75,speed:.88,drain:.8,dblMul:.6,money:120,window:1.0,priceMul:1,payMul:1,fine:80,evBad:.5,coffee:2,sleepAt:12,fitLoss:.7,kontrolle:.1,
+  lehrling:{name:'Lehrling',days:40,dmg:.75,speed:.88,drain:.8,dblMul:.6,money:120,window:1.0,priceMul:1,payMul:1,fine:80,evBad:.5,coffee:2,sleepAt:15,napMax:4,fitLoss:.7,kontrolle:.1,
     blurb:'Du hast 40 Tage Zeit, und auf den Straßen ist wenig los.'},
-  geselle:{name:'Geselle',days:30,dmg:1,speed:1,drain:1.05,dblMul:1.05,money:60,window:.5,priceMul:1,payMul:1,fine:120,evBad:1,coffee:1,sleepAt:22,fitLoss:1,kontrolle:.25,
+  geselle:{name:'Geselle',days:30,dmg:1,speed:1,drain:1.05,dblMul:1.05,money:60,window:.5,priceMul:1,payMul:1,fine:120,evBad:1,coffee:1,sleepAt:25,napMax:3,fitLoss:1,kontrolle:.25,
     blurb:'Du hast 30 Tage Zeit. Der Verkehr ist dicht, und Pausen wollen geplant sein.'},
-  meister:{name:'Meister',days:25,dmg:1.25,speed:1.12,drain:1.2,dblMul:1.3,money:30,window:.25,priceMul:1.2,payMul:1,fine:180,evBad:1.6,coffee:0,sleepAt:30,fitLoss:1.15,kontrolle:.45,
+  meister:{name:'Meister',days:25,dmg:1.25,speed:1.12,drain:1.27,dblMul:1.3,money:30,window:.25,priceMul:1.2,payMul:1,fine:180,evBad:1.6,coffee:1,sleepAt:32,napMax:3,fitLoss:1.15,kontrolle:.45,
     blurb:'Du hast nur 25 Tage Zeit. Alles ist härter, teurer und strenger.'}
 };
 /* Ruf: Respekt öffnet Türen */
 const RUF=[
  {min:0,name:'Neuling',perk:'Noch kennt dich kaum jemand an der Strecke.'},
- {min:40,name:'Bekannt',perk:'Am Rasthof ist der Imbiss für dich umsonst, und Jupp gibt dir 10 % Rabatt.'},
- {min:100,name:'Geschätzt',perk:'Kunden zahlen dir 10 % mehr, Jupp gibt 15 % Rabatt, und die Polizei winkt dich bei Kontrollen ohne Wartezeit durch.'},
+ {min:40,name:'Bekannt',perk:'Am Rasthof geht der Imbiss ab und zu aufs Haus, und Jupp gibt dir 10 % Rabatt.'},
+ {min:100,name:'Geschätzt',perk:'Kunden zahlen dir 10 % mehr, am Rasthof wirst du öfter eingeladen, Jupp gibt 15 % Rabatt, und die Polizei winkt dich bei Kontrollen ohne Wartezeit durch.'},
  {min:180,name:'Legende der Landstraße',perk:'Kunden zahlen dir 20 % mehr, Jupp gibt 20 % Rabatt, und Kollegen warnen dich auch ohne Funkgerät vor Hindernissen.'}
 ];
 const RUF_RABATT=[0,.1,.15,.2],RUF_LOHN=[0,0,.1,.2];
@@ -875,7 +898,7 @@ const TOURS=[
   seg:{faehre:.47,bruecke:[.7,.78]},signs:[[.5,'Danmark','grenze'],[.695,'Storstrøm','fluss']],
   note:'Auf dem Schulhof warten zwölf Kinder auf ihre Räder. Als Hilde einbiegt, klingeln alle gleichzeitig.'},
  {id:'nord',ch:4,to:'Nordkap',km:2600,hours:9,days:6,pay:0,region:'nord',scen:'tundra',start:13,final:true,
-  cargo:'Eine Kiste von 1926, die nie zugestellt wurde',rast:['Rasteplass Alta','Rasteplass Olderfjord','Rasteplass Russenes'],traits:['schnee','rentiere','tunnel','polarlicht'],wx:[[0,'snow'],[.4,'sun'],[.7,'snow']],
+  cargo:'Eine Kiste von 1926, die nie zugestellt wurde',rast:['Rasteplass Alta','Rasteplass Olderfjord','Rasteplass Russenes'],traits:['schnee','rentiere','tunnel','polarlicht'],wx:[[0,'snow'],[.4,'sun'],[.7,'snow'],[.9,'sun']],
   seg:{tunnel:[.8,.88]},signs:[[.79,'Nordkapptunnelen','tunnel']],
   note:'Am Ende der Straße wartet eine alte Frau mit einem Zettel von 1926. Erst hat ihre Mutter auf die Kiste gewartet, dann sie selbst. Sie weint ein bisschen. Dann lacht sie und kocht Kalle einen Kaffee.'}
 ];
@@ -934,6 +957,15 @@ const JUPP=['„Hilde ist älter als du, Junge. Behandle sie gut.“','„Ein La
 const CB=['„Hier Brummi-Bär, ich grüße den gelben Laster. Over.“','„Achtung, Kollegen: Doris hat heute Senf aus Bautzen. Over.“','„Hier Rosi aus Gießen. Hat jemand meine Sonnenbrille gesehen? Over.“','„Hier Diesel-Dieter. Mein Navi will, dass ich wende. Ich wende nicht. Over.“','„Hier Ayşe, ich steh am Kasseler Berg und singe. Wer singt mit? Over.“','„Hier Opa Henning, 41 Jahre unfallfrei. Fahrt vorsichtig, Kinder. Over.“'];
 /* Ereignisse auf dem Hof zwischen zwei Touren */
 /* Ereignisse auf dem Hof zwischen zwei Touren. Manche lassen dir die Wahl. */
+/* Ottilie kennt Kalle seit dreißig Jahren. Sie ruft an, wenn sie merkt, dass er müde wird. */
+const OTT={
+ start:['Kalle, hier ist Ottilie. Hundert Jahre hat die Kiste gewartet. Fahr vorsichtig, ja? Ich bin sehr stolz auf dich.'],
+ kaffee:['Kalle, ich hör doch, wie du gähnst. Trink deinen Kaffee, solange er warm ist.','Du summst wieder. Das machst du nur, wenn du müde bist. Trink einen Kaffee, ja?','Kalle, in der Thermoskanne ist noch Kaffee. Den hab ich dir nicht zum Anschauen gekocht.'],
+ pause:['Kalle, du klingst müde. Fahr am nächsten Rasthof raus und mach die Augen zu. Die Kiste läuft nicht weg.','Ich kenn dich doch. Wenn du so still bist, brauchst du eine Pause. Nächster Rasthof, versprochen?','Mein Vater hat immer gesagt: Wer müde fährt, kommt später an. Mach bitte eine Pause, Kalle.'],
+ hunger:['Hast du heute schon was gegessen? Am Rasthof gibt es Kettwurst. Iss eine, bevor du mir umfällst.','Kalle, dein Magen knurrt bis hierher. Halt am Rasthof an und iss etwas Warmes.'],
+ nap1:['Kalle? Bist du noch da? Das hat mir gar nicht gefallen. Mach bitte eine Pause, mir zuliebe.','Kalle, das war knapp. Am nächsten Rasthof fährst du raus. Ich mein das ernst.'],
+ nap2:['Kalle, hör mir zu. Noch einmal, und du hältst sofort an. Keine Widerrede.','Bitte, Kalle. Ich will dich heil zurück, nicht pünktlich. Fahr raus und schlaf dich aus.']
+};
 const HOFEV=[
  {id:'kinder',t:'Die Nachbarskinder haben Hilde gewaschen. Als Lohn wollten sie nur einmal hupen dürfen.',opts:[{btn:'Hupen lassen',fx:'horn',go:S=>{S.glanz=100}}]},
  {id:'rabatt',t:'Jupp hat heute gute Laune. In der Werkstatt kostet heute alles ein Drittel weniger.',opts:[{btn:'Zur Werkstatt',go:S=>{S.rabatt=S.day},tab:'shop'},{btn:'Später',go:S=>{S.rabatt=S.day}}]},
@@ -947,10 +979,12 @@ const HOFEV=[
  {id:'anlasser',t:'Hilde springt heute nicht an. Jupp könnte sofort kommen, das kostet 40 €. Oder du wartest bis morgen, dann macht er es umsonst.',opts:[{btn:'Jupp rufen · 40 €',cond:S=>S.money>=40,go:S=>{S.money-=40;return 'Jupp tauscht das Relais in zehn Minuten. „Das war der Kuss“, sagt er.'},fx:'wrench'},{btn:'Bis morgen warten',go:S=>{S.day++;return 'Kalle nutzt den freien Tag und schläft sich aus. Ein Tag ist vergangen.'}}]},
  {id:'zeitung',t:'Die Lokalzeitung möchte einen Artikel über Kalle schreiben.',opts:[{btn:'Interview geben',go:S=>{if(S.respect>=60){S.respect+=5;return 'Der Artikel heißt „Der freundlichste Lastwagen der Stadt“. Sogar Jupp schneidet ihn aus.'}return 'Der Artikel wird sehr kurz: „Mann fährt Lastwagen.“ Immerhin mit Foto.'}}]},
  {id:'geburtstag',t:'Ottilie hat heute Geburtstag. Sie wird 94.',opts:[{btn:'Blumen kaufen · 15 €',cond:S=>S.money>=15,go:S=>{S.money-=15;S.respect+=4;return 'Ottilie stellt die Blumen auf den Schreibtisch, direkt neben das Foto ihres Vaters.'}},{btn:'Eine Karte schreiben',go:S=>{S.respect+=1;return 'Ottilie liest die Karte zweimal und lächelt.'}}]},
- {id:'praktikum',t:'Die Nachbarstochter Jule will Fernfahrerin werden. Sie fragt, ob sie auf der nächsten Tour mitfahren darf.',opts:[{btn:'Klar, steig ein',go:S=>{S.beifahrer='Jule';return 'Jule packt Proviant und einen Atlas ein. Mit ihr an Bord wird Kalle langsamer müde.'}},{btn:'Lieber nicht',go:S=>{}}]},
+ {id:'praktikum',t:'Die Nachbarstochter Jule will Fernfahrerin werden. Sie fragt, ob sie auf der nächsten Tour mitfahren darf.',opts:[{btn:'Klar, steig ein',go:S=>{S.beifahrer='Jule';return 'Jule packt Proviant und einen Atlas ein.'}},{btn:'Lieber nicht',go:S=>{}}]},
  {id:'knoellchen',t:'Hilde stand gestern im Halteverbot vor der Bäckerei. Ein Strafzettel über 25 € klemmt unter dem Scheibenwischer.',opts:[{btn:'Bezahlen',go:S=>{S.money=Math.max(0,S.money-25)}}]},
  {id:'feuerwehr',t:'Die Freiwillige Feuerwehr feiert ihr Sommerfest. Hilde darf in der Parade mitfahren, wenn sie ordentlich glänzt.',opts:[{btn:'Mitfahren',go:S=>{if(S.glanz>=70){S.respect+=4;return 'Hilde fährt direkt hinter dem Löschzug. Die Kinder winken, und Kalle darf die Glocke läuten.'}return 'Hilde ist zu schmutzig. Der Kommandant schickt Kalle freundlich nach Hause.'}}]},
  {id:'konkurrenz',t:'Die Spedition Eilig & Söhne bietet Kalle eine Stelle an. Mehr Geld, aber kaum Pausen.',opts:[{btn:'Höflich ablehnen',go:S=>{S.respect+=3;return 'Ottilie erfährt davon. Sie sagt nichts, aber am nächsten Morgen steht ein Kaffee auf Hildes Trittbrett.'}},{btn:'Mit Ottilie verhandeln',go:S=>{S.money+=40;S.respect=Math.max(0,S.respect-2);return 'Ottilie legt dir wortlos 40 € Prämie hin. Es ist ein bisschen peinlich.'}}]},
+ {id:'postkarte1',t:'Im Briefkasten liegt eine Postkarte. „Lieber Kalle, danke fürs Mitnehmen! Ich habe allen von dem gelben Laster erzählt.“',cond:S=>(S.stats.anhalter||0)>=2,opts:[{btn:'An die Pinnwand',go:S=>{S.respect+=5;return 'Die Karte hängt jetzt neben dem Dienstplan. Die Kollegen lesen sie alle.'}}]},
+ {id:'postkarte2',t:'Wieder eine Postkarte, diesmal mit vier Unterschriften. Alle sind mal bei Kalle mitgefahren.',cond:S=>(S.stats.anhalter||0)>=4&&S.evSeen.includes('postkarte1'),opts:[{btn:'Schön',go:S=>{S.respect+=8;S.glanz=Math.min(100,S.glanz+10);return 'Ottilie hängt die Karte ins Büro. Sie sagt, so etwas habe es zuletzt bei ihrem Vater gegeben.'}}]},
  {id:'gewitter',t:'In der Nacht zieht ein Gewitter über den Hof. Hilde steht im Schlamm.',opts:[{btn:'Oje',go:S=>{S.glanz=Math.max(0,S.glanz-15)}}]}
 ];
 
@@ -1306,7 +1340,8 @@ function startDrive(t){
      exits,exitIdx:0,exitBlock:false,msgs:[],shake:0,flash:0,paused:false,ended:false,drift:2,scroll:0,off:0,hint:3.6,funkT:0,
      eilig:o.eilig,events:[],wx:weatherAt(0,t),wxA:{rain:0,fog:0,snow:0,storm:0},bolt:0,boltT:rnd(4,8),gust:null,gustT:rnd(3,6),
      speedF:1,helped:0,anhalter:null,kuchen:S.kuchen,tipT:rnd(18,26),cbT:rnd(25,40),puffT:0,blinkT:0,ending:0,rad:0,extraLines:[],extraResp:[],
-     hunger:S.kuchen?0:25,musicRegion:t.region,stauGap:1,bauSign:false,timers:[],minE:100,naps:0,nap:null,hits:0,bonus:0,contest:null,rainbow:0,oldieN:0};
+     hunger:S.kuchen?0:25,musicRegion:t.region,stauGap:1,bauSign:false,timers:[],minE:100,naps:0,nap:null,hits:0,bonus:0,contest:null,rainbow:0,oldieN:0,napStreak:0,ottT:0,ottN:0,endPad:0};
+  D.endPad=150*SC/(TUNE.scroll*SC*DIFF[S.diff].speed*(1+TUNE.chScroll*(t.ch-1))*D.dur);
   D.minE=D.energy;
   if(S.beifahrer){D.anhalter={n:S.beifahrer,d:'die Nachbarstochter Jule mitgenommen, die jetzt unbedingt Fernfahrerin werden will'};S.beifahrer=null}
   if(S.kuchen){S.kuchen=false}
@@ -1323,6 +1358,7 @@ function startDrive(t){
   if(has('nebel'))ev.push({at:.01,type:'vf',text:'Nebel, Sichtweite unter hundert Metern.'});
   if(has('wind'))ev.push({at:.03,type:'vf',text:'Starker Seitenwind an der Küste.'});
   if(has('gewitter'))ev.push({at:.44,type:'vf',text:'Gewitter über der A9.'});
+  if(t.final){ev.push({at:.02,type:'ottStart'});ev.push({at:.885,type:'spalier'})}
   if(has('vespa'))ev.push({at:.6,type:'msg',text:'Benvenuti in Italia! Hier fahren die Motorroller, wie sie wollen.',kind:'good'});
   // Unerwartetes unterwegs: je nach Schwierigkeit mehr Pech oder mehr Glück
   const eb=DIFF[S.diff].evBad;
@@ -1389,15 +1425,18 @@ function ticker(text,kind,dur){
   if(!text)return;const lcd=$('#btn-radio');const st=STATIONS[AU.set.station];
   const el=$('#r-tick');el.textContent=text;el.style.animationDuration=Math.max(9,text.length*.16)+'s';
   el.style.animation='none';void el.offsetWidth;el.style.animation='';el.style.animationDuration=Math.max(9,text.length*.16)+'s';
-  lcd.classList.remove('vf','cb','win');if(kind)lcd.classList.add(kind);
-  $('#r-name').textContent=kind==='vf'?'Verkehr':kind==='cb'?'Funk':kind==='win'?'Gewinnspiel':(st.list?st.freq:'Radio');
+  lcd.classList.remove('vf','cb','win','ott');if(kind)lcd.classList.add(kind);
+  $('#r-name').textContent=kind==='vf'?'Verkehr':kind==='cb'?'Funk':kind==='win'?'Gewinnspiel':kind==='ott'?'Ottilie':(st.list?st.freq:'Radio');
   clearTimeout(tickT);
-  tickT=setTimeout(()=>{if(!D)return;lcd.classList.remove('vf','cb','win');$('#r-name').textContent=st.list?st.freq:'Radio';
+  tickT=setTimeout(()=>{if(!D)return;lcd.classList.remove('vf','cb','win','ott');$('#r-name').textContent=st.list?st.freq:'Radio';
     if(RAD.now&&st.list){el.textContent=st.name+' · '+RAD.now;el.style.animationDuration=Math.max(9,el.textContent.length*.16)+'s'}},dur||Math.max(9000,text.length*160));
 }
 $('#btn-radio').addEventListener('click',e=>{e.stopPropagation();AU.init();
   if(D&&D.contest)return resolveContest();
   AU.fx('static');AU.setStation((AU.set.station+1)%STATIONS.length);radioTune(false)});
+/* Ottilie ruft an. Sie meldet sich höchstens dreimal pro Tour, außer nach einem Sekundenschlaf. */
+function ottilie(key,force){if(!D||D.ended||(!force&&(D.ottT>0||D.ottN>=3)))return false;D.ottT=40;D.ottN++;
+  AU.fx('ring');AU.setDuck(true);setTimeout(()=>AU.setDuck(false),7000);setTimeout(()=>{if(D&&!D.ended)ticker(pick(OTT[key]),'ott',13000)},700);return true}
 function verkehrsfunk(text){AU.fx('dingdong');AU.setDuck(true);setTimeout(()=>AU.setDuck(false),3500);ticker(text.replace(/^Verkehrsfunk: /,''),'vf')}
 /* Gewinnspiel im Radio: Wer schnell aufs Radio tippt, kommt vielleicht durch */
 function startContest(){if(!STATIONS[AU.set.station].list)return;D.contest={t:7};AU.fx('dingdong');ticker('Wer jetzt anruft, gewinnt! Schnell aufs Radio tippen.','win',7000)}
@@ -1407,15 +1446,17 @@ function resolveContest(){D.contest=null;
 
 /* ---------- Steuerung ---------- */
 // Je müder Kalle ist, desto später reagiert er
+const STEER_COST=1.8;
 function steerDelay(e){return e>=60?0:e>=45?.05:e>=30?.1:e>=15?.16:.22}
 function later(sec,fn){if(D)D.timers.push({t:sec,fn})}
 function msg(text,kind){if(!D)return;D.msgs.push({text,kind:kind||'info',t:2.6});if(D.msgs.length>3)D.msgs.shift()}
 function floatText(text,x,y,col){D.floats.push({text,x,y,t:1.4,col:col||'#2F6F73'})}
 function steer(dir){
   if(!D||D.paused||D.ended)return;
-  const go=()=>{if(!D||D.paused)return;let nl=clamp(D.lane+dir,0,2);
+  if(D.ending){if(D.arrive>D.skipAt)finishDrive(true);return}
+  const go=()=>{if(!D||D.paused||D.ending)return;let nl=clamp(D.lane+dir,0,2);
     if(segIn('bau')&&nl===0){msg('Die linke Spur ist gesperrt.','warn');return}
-    if(nl!==D.lane){D.lane=nl;D.energy=Math.max(0,D.energy-1.4*DIFF[S.diff].drain);AU.fx('whoosh')}};
+    if(nl!==D.lane){D.lane=nl;D.energy=Math.max(0,D.energy-STEER_COST*DIFF[S.diff].drain);AU.fx('whoosh')}};
   if(D.nap)return;
   const dl=steerDelay(D.energy);if(dl)setTimeout(go,dl*1000);else go();
 }
@@ -1507,8 +1548,10 @@ function spawnKollege(){
   addObj('kollege',l,spawnY()-70*SC,{col:['#2F6F73','#BFD8E6','#BFDCC8','#7B2D3B'][Math.floor(Math.random()*4)]});
 }
 function spawnHerd(kind){
-  const n=kind==='gans'?4:kind==='ente'?5:3,dir=Math.random()<.5?1:-1,sp=kind==='gans'?.3:kind==='ente'?.17:.2,gap=kind==='gans'?.08:kind==='ente'?.05:.13;
+  const n=kind==='gans'?4:kind==='ente'?5:3,dir=Math.random()<.5?1:-1,sp=kind==='gans'?.3:kind==='ente'?.17:.17,gap=kind==='gans'?.08:kind==='ente'?.05:.2;
   const y0=spawnY()-40*SC;
+  // Rund um die Herde fährt sonst niemand, damit immer eine Lücke bleibt
+  D.objs.forEach(q=>{if(!q.deco&&!q.cross&&q.type!=='exit'&&q.y<0&&Math.abs(q.y-y0)<300*SC)q.gone=true});
   for(let i=0;i<n;i++){
     const fx=(dir>0?-.12:1.12)-dir*i*gap;
     addObj(kind,1,y0-(i%2)*14*SC,{cross:true,fx,vx:dir*sp,dir,lx:1,mama:kind==='ente'&&i===0});
@@ -1561,11 +1604,15 @@ function update(dt){
   // Tempo: Stau bremst, am Ziel rollt Hilde aus
   let target=1;
   if(segIn('stau'))target=.45;
-  if(D.prog>.975)target=Math.max(.25,1-(D.prog-.975)*30);
   D.speedF+=(target-D.speedF)*Math.min(1,dt*1.5);
+  // Am Ziel bremst Hilde gleichmäßig und hält genau vor der Rampe
+  const stopOff=(1+D.endPad)*D.K,rem=stopOff-D.off,BL=560*SC;
+  if(rem<BL){D.speedF=Math.min(D.speedF,Math.sqrt(Math.max(0,rem)/BL));
+    if(!D.braked&&rem<BL*.55){D.braked=true;AU.fx('brake');AU.stop()}}
   D.scroll=TUNE.scroll*SC*df.speed*(1+TUNE.chScroll*(D.ch-1))*D.speedF;
   D.off+=D.scroll*dt;
-  const dprog=dt/D.dur*D.speedF;
+  let dprog=dt/D.dur*D.speedF;
+  if(D.off>=stopOff){D.off=stopOff;dprog=Math.max(0,1+D.endPad-D.prog);if(!D.ending)startArrival()}
   const dh=dprog*D.hours;
   D.prog+=dprog;D.clock+=dh;D.lenk+=dh;
   if(D.hint>0){D.hint-=dt;if(D.hint<=0)$('#hint').style.opacity=0}
@@ -1580,10 +1627,10 @@ function update(dt){
   D.bolt=Math.max(0,D.bolt-dt*2.5);
   // Müdigkeit
   // Kalle bekommt unterwegs Hunger. Hungrig wird er schneller müde; satt macht nur echtes Essen.
-  D.hunger=Math.min(100,D.hunger+11*df.drain*dh);
+  D.hunger=Math.min(100,D.hunger+14*df.drain*dh);
   if(D.hunger>=70&&!D.hungry){D.hungry=true;AU.fx('grunt');msg('Kalles Magen knurrt.','info')}
   if(D.hunger<70)D.hungry=false;
-  let drain=22*df.drain*(1-duftEff())*(D.kick>0?.5:1)*(D.hunger>=70?1.4:1);if(segIn('tunnel'))drain*=1.2;if(D.wx==='sun'&&D.clock%24>12&&D.clock%24<16)drain*=1.1;
+  let drain=26*df.drain*(1-duftEff())*(D.kick>0?.5:1)*(D.hunger>=70?1.4:1);if(segIn('tunnel'))drain*=1.2;if(D.wx==='sun'&&D.clock%24>12&&D.clock%24<16)drain*=1.1;
   if(D.anhalter)drain*=.8;if(D.kuchen)drain*=.8;
   D.energy=Math.max(0,D.energy-drain*dh);
   // Lenken: Nässe und Schnee machen Hilde träge, gute Reifen helfen
@@ -1601,12 +1648,29 @@ function update(dt){
   D.xOff=D.gustOff;
   // Wachheit: Gähnen warnt, unterhalb der Schwelle drohen Sekundenschlaf und Spurwechsel ohne Absicht
   D.minE=Math.min(D.minE,D.energy);
-  if(D.energy<50&&!D.yawned){D.yawned=true;AU.fx('yawn');msg('Kalle gähnt und lenkt träge.','info')}
+  if(D.energy<50&&!D.yawned&&!D.ending){D.yawned=true;AU.fx('yawn');msg('Kalle gähnt und lenkt träge.','info')}
   if(D.energy>62)D.yawned=false;
   if(D.nap){const n=D.nap;n.t+=dt;
-    if(n.drift&&!n.drifted&&n.t>n.dur*.5){n.drifted=true;const nl=clamp(D.lane+n.drift,0,2);if(!(segIn('bau')&&nl===0))D.lane=nl}
-    if(n.t>n.dur){D.nap=null;D.energy=Math.min(100,D.energy+6);AU.fx('wake');msg('Kalle schreckt hoch!','warn')}}
-  else{const sa=df.sleepAt;if(D.energy<sa&&D.t>2&&Math.random()<dt*(.04+.35*(sa-D.energy)/sa)){D.nap={t:0,dur:rnd(.7,1.1),drift:Math.random()<.55?(Math.random()<.5?-1:1):0};D.naps++;AU.fx('heart');msg('Sekundenschlaf!','warn')}}
+    if(n.final){
+      if(n.t>1.5&&!n.rumbled){n.rumbled=true;AU.fx('rumble');D.shake=1.6;D.lane=2;try{navigator.vibrate&&navigator.vibrate([80,40,80,40,120])}catch(e){}}
+      if(n.t>3)return asleep();
+    }else{
+      if(n.drift&&!n.drifted&&n.t>n.dur*.5){n.drifted=true;const nl=clamp(D.lane+n.drift,0,2);if(!(segIn('bau')&&nl===0))D.lane=nl}
+      if(n.t>n.dur){D.nap=null;D.energy=Math.min(100,D.energy+6);AU.fx('wake');msg(n.k>1?'Kalle schreckt hoch. Das war knapp!':'Kalle schreckt hoch!','warn');
+        if(n.k===df.napMax-1)later(1.4,()=>ottilie('nap2',true));else if(n.k===1)later(1.4,()=>ottilie('nap1',true))}}}
+  else if(!D.ending){const sa=df.sleepAt;if(D.energy<sa&&D.t>2&&Math.random()<dt*(.04+.35*(sa-D.energy)/sa)){
+    // Wer jemanden auf dem Beifahrersitz hat, wird einmal rechtzeitig angestupst
+    if(D.anhalter&&!D.anhWake){D.anhWake=true;D.energy=Math.min(100,D.energy+14);AU.fx('wake');msg(D.anhalter.n+' stupst Kalle an.','good')}
+    else{D.napStreak++;D.naps++;const k=D.napStreak;
+      if(k>=df.napMax){D.nap={t:0,final:true};D.noHit=true;AU.fx('heart');msg('Kalle schläft ein …','warn')}
+      else{D.nap={t:0,k,dur:rnd(.7,1)+.45*(k-1),drift:Math.random()<Math.min(1,.4+.3*k)?(Math.random()<.5?-1:1):0};AU.fx('heart');msg(k>1?'Schon wieder Sekundenschlaf!':'Sekundenschlaf!','warn')}}}}
+  // Ottilie kennt Kalle und merkt, wenn er müde oder hungrig ist
+  D.ottT-=dt;
+  if(!D.nap&&!D.ending&&D.t>8){
+    if(D.energy<42&&!D.ottE){if(D.coffee>0&&!D.kick)D.ottE=ottilie('kaffee');else if(D.coffee<=0&&D.exitIdx<D.exits.length)D.ottE=ottilie('pause')}
+    if(D.energy>70)D.ottE=false;
+    if(D.hunger>=75&&!D.ottH&&D.exitIdx<D.exits.length)D.ottH=ottilie('hunger');
+  }
   if(D.contest){D.contest.t-=dt;if(D.contest.t<=0){D.contest=null;ticker('Zu spät. Das Gewinnspiel ist vorbei.','')}}
   D.funkT-=dt;
   // Ereignisse
@@ -1625,6 +1689,8 @@ function update(dt){
     else if(e.type==='enten'){verkehrsfunk('Verkehrsfunk: Eine Entenfamilie ist auf dem Weg zum Teich. Bitte bremsbereit sein.');later(1.4,()=>spawnHerd('ente'))}
     else if(e.type==='oldie'){D.oldieN=3;msg('Eine Oldtimer-Rallye ist unterwegs.','info')}
     else if(e.type==='gewinnspiel')startContest();
+    else if(e.type==='ottStart')later(2.5,()=>ottilie('start',true));
+    else if(e.type==='spalier'){D.spalier=true;D.honkT=1.2;later(.6,()=>ticker('„Hier sind die Kollegen vom Nordkap. Wir stehen Spalier für dich, Kalle. Over.“','cb',12000));msg('Die Kollegen stehen Spalier.','good')}
   }
   // Baustelle: Kegel auf der linken Spur
   const bs=D.tour.seg&&D.tour.seg.bau;
@@ -1651,9 +1717,11 @@ function update(dt){
   // Ziel: Ortsschild
   for(const sg of D.signs){if(!sg.done&&yOf(sg.p)>-70*SC){sg.done=true;D.objs.push({type:'gantry',deco:true,y:yOf(sg.p),h:30*SC,rel:1,text:sg.text,kind:sg.kind,out:sg.out})}}
   D.kollT-=dt;
-  if(D.kollT<=0&&D.prog<.9&&D.t>2){D.kollT=9+Math.random()*5;spawnKollege()}
+  if(D.kollT<=0&&D.prog<(D.tour.final?.85:.9)&&D.t>2){D.kollT=9+Math.random()*5;spawnKollege()}
   D.spawnT-=dt;
-  if(D.spawnT<=0&&D.prog<.94&&D.t>1.4&&!segIn('stau')&&!segAtY('stau',-60*SC)){spawnRow();D.spawnT=interval()*(.8+Math.random()*.45)}
+  if(D.spawnT<=0&&D.prog<(D.tour.final?.875:.94)&&D.t>1.4&&!segIn('stau')&&!segAtY('stau',-60*SC)){spawnRow();D.spawnT=interval()*(.8+Math.random()*.45)}
+  // Spalier am Nordkap: Die Kollegen hupen, wenn Hilde vorbeifährt
+  if(D.spalier&&!D.ending){D.honkT-=dt;if(D.honkT<=0){D.honkT=rnd(.9,1.6);AU.fx('hornBack')}}
   // Radio und Funk
   D.tipT-=dt;if(D.tipT<=0){D.tipT=rnd(22,30);const st=STATIONS[AU.set.station];if(st.talk)ticker(pick(st.talk),'')}
   if(S.up.funk){D.cbT-=dt;if(D.cbT<=0){D.cbT=rnd(30,45);ticker(pick(CB),'cb')}}
@@ -1678,7 +1746,7 @@ function update(dt){
     }
     if(Math.abs(ox-tx)>(o.w+TW)/2*.86)continue;
     if(o.y+o.h/2>top&&o.y-o.h/2<bot){
-      if(D.inv>0)continue;
+      if(D.inv>0||D.ending||D.noHit)continue;
       o.done=true;
       const def=OB[o.type]||{dmg:o.type==='kegel'?5:3,name:o.type==='kegel'?'Leitkegel':'Warndreieck'};
       let dmg=def.dmg*df.dmg*(1-.15*S.up.reifen);if(D.tour.fragile)dmg*=1.15;
@@ -1704,20 +1772,41 @@ function update(dt){
   D.inv-=dt;D.shake=Math.max(0,D.shake-dt*3);D.flash=Math.max(0,D.flash-dt*2.5);
   D.msgs.forEach(m=>m.t-=dt);D.msgs=D.msgs.filter(m=>m.t>0);
   AU.engineSet({speed:D.speedF,rain:D.wxA.rain,tunnel:segIn('tunnel')});
-  if(D.prog>=1&&!D.ending){D.ending=1;AU.fx('brake');later(.35,()=>{D.arrive=0.001;confetti();AU.fx('arrival');AU.fx(S.up.fanfare?'fanfare':'horn')});later(.9,()=>AU.fx('cheer'));later(2.6,()=>finishDrive(true))}
   if(D.arrive)D.arrive+=dt;
-  if(D.ending){D.prog=Math.min(D.prog,1.01)}
+  ['banner','rays','fade'].forEach(k=>{if(D[k])D[k]+=dt});D.hop=Math.max(0,(D.hop||0)-dt*2.4);
 }
 function burst(x,y,type){
   const col=type==='gans'?'#FBF1E6':type==='ren'||type==='reh'||type==='elch'?'#A0704C':'#B5832A';
   for(let i=0;i<12;i++)D.parts.push({k:i<7?'box':'dust',x,y,vx:(Math.random()-.5)*220,vy:-Math.random()*180-40,g:520,life:.9,max:.9,r:(i<7?5:9)*SC,col,rot:Math.random()*6,vr:(Math.random()-.5)*12});
   if(type==='gans'||type==='ren'){for(let i=0;i<6;i++)D.parts.push({k:'feather',x,y,vx:(Math.random()-.5)*120,vy:-Math.random()*90,g:60,life:1.4,max:1.4,r:4*SC,col})}
 }
+/* Ankunft in Etappen: Hilde steht, zischt, hupt zweimal. Dann Trommelwirbel, das Banner fällt,
+   und genau auf dem Schlussakkord gehen die Konfettikanonen los. */
+function startArrival(){
+  D.ending=1;D.arrive=0.001;D.inv=0;D.speedF=0;D.nap=null;$('#hint').style.opacity=0;
+  D.objs=D.objs.filter(o=>o.deco||o.y>truckY+TH);
+  const big=!!D.tour.final,hit=big?3:2.26,card=big?7.2:5.6;D.skipAt=hit+.3;
+  AU.engineSet({speed:.2});AU.fx('pssh');
+  const tx=D.x+sway(truckY);for(let i=0;i<14;i++){const sd=i%2?1:-1;D.parts.push({k:'puff',x:tx+sd*TW*.55,y:truckY+TH*.3,vx:sd*(40+Math.random()*60),vy:(Math.random()-.5)*30,life:1.1,max:1.1,r:6*SC})}
+  later(.55,()=>AU.fx('horn'));later(.9,()=>AU.fx(S.up.fanfare?'fanfare':'horn'));
+  later(1,()=>AU.fx('arrival',{big}));
+  later(hit-.62,()=>{D.banner=0.001});
+  later(hit,()=>{confetti();D.hop=1;D.rays=0.001;D.flashA=1;later(.12,()=>AU.fx('cheer'))});
+  if(big)later(hit+1.6,()=>{confetti(true);AU.fx('cheer')});
+  later(card-.5,()=>{D.fade=0.001});
+  later(card,()=>finishDrive(true));
+}
+/* Kalle schläft am Steuer ein: Hilde rumpelt über den Randstreifen, die Tour ist vorbei */
+function asleep(){
+  D.paused=true;AU.engineSet({paused:true});AU.stop();
+  openCard('<p class="eyebrow">Auf dem Seitenstreifen</p><h2>Kalle ist eingeschlafen</h2><p class="typed" style="margin:0">Hilde ist über den Randstreifen gerumpelt, und davon ist Kalle aufgewacht. Es ist nichts passiert. Aber so kann er nicht weiterfahren. Er stellt Hilde ab und ruft Ottilie an.</p>',
+    [{label:'Ottilie anrufen',fn:()=>{closeCard();finishDrive(false,'schlaf')}}]);
+}
 /* Ankunft: Zwei Konfettikanonen schießen von unten in die Mitte, dazu Luftschlangen und Funkeln */
-function confetti(){
+function confetti(second){
   const c=['#D8A23A','#7B2D3B','#2F6F73','#E3AFB4','#BFDCC8','#FBF1E6','#F0C566','#C8432F'];
   [[0,1],[W,-1]].forEach(([x0,dir])=>{
-    for(let i=0;i<70;i++){const a=(-Math.PI/2)+dir*(.25+Math.random()*.55),v=420+Math.random()*420;
+    for(let i=0;i<(second?40:70);i++){const a=(-Math.PI/2)+dir*(.25+Math.random()*.55),v=420+Math.random()*420;
       D.parts.push({k:'conf',x:x0,y:H-60*SC,vx:Math.cos(a)*v*dir*dir,vy:Math.sin(a)*v,g:300,drag:.985,life:2.8+Math.random(),max:3.6,r:(4+Math.random()*3)*SC,col:pick(c),rot:Math.random()*6,vr:(Math.random()-.5)*10,flip:Math.random()*6})}
     for(let i=0;i<6;i++){const a=(-Math.PI/2)+dir*(.3+Math.random()*.4),v=380+Math.random()*300;
       D.parts.push({k:'streamer',x:x0,y:H-60*SC,vx:Math.cos(a)*v,vy:Math.sin(a)*v,g:220,drag:.982,life:3,max:3,r:4*SC,col:pick(c),ph:Math.random()*6,trail:[]})}
@@ -1814,14 +1903,15 @@ const ANHALTER=[
 function openRast(name){
   D.paused=true;AU.engineSet({paused:true});AU.fx('dingdong');const H0=host(name);
   const hitch=!D.anhalter&&!D._hitchAsked&&Math.random()<.35?pick(ANHALTER):null;D._hitchAsked=true;
-  const render=(line)=>{
-    const free=rufLv()>=1;const kettLabel=H0.food+(free?' <span>spendiert</span>':S.money>=4?' <span>4 €</span>':' <span>anschreiben</span>');
-    const opts=[{label:kettLabel,disabled:D._kett,fn:()=>{D._kett=true;if(!free){if(S.money>=4)S.money-=4;else S.tab=(S.tab||0)+4}D.energy=100;D.hunger=0;D.kett++;AU.fx('slurp');render(H0.line.replace('&amp;','&'))}},
-       {label:'45 Minuten Pause <span>+0:45 h</span>',disabled:D._pause,fn:()=>{D._pause=true;D.lenk=0;D.clock+=.75;D.energy=S.up.matratze?100:Math.min(100,D.energy+35);D.pauses++;render(S.up.matratze?'Auf der guten Matratze schläft Kalle tief und fest. Er ist wieder ganz wach, und die Lenkzeit beginnt bei null.':'Kalle schläft eine Runde in der Kabine. Die Lenkzeit beginnt wieder bei null.')}},
+  // Je bekannter Kalle ist, desto öfter geht der Imbiss aufs Haus
+  const free=Math.random()<[0,.25,.4,.55][rufLv()];
+  const render=(line)=>{const kettLabel=H0.food+(free?' <span>spendiert</span>':S.money>=4?' <span>4 €</span>':' <span>anschreiben</span>');
+    const opts=[{label:kettLabel,disabled:D._kett,fn:()=>{D._kett=true;if(free)S.stats.kettFrei=(S.stats.kettFrei||0)+1;if(!free){if(S.money>=4)S.money-=4;else S.tab=(S.tab||0)+4}D.energy=100;D.hunger=0;D.kett++;AU.fx('slurp');render(H0.line.replace('&amp;','&'))}},
+       {label:'45 Minuten Pause <span>+0:45 h</span>',disabled:D._pause,fn:()=>{D._pause=true;D.lenk=0;D.clock+=.75;D.napStreak=0;D.energy=S.up.matratze?100:Math.min(100,D.energy+35);D.pauses++;render(S.up.matratze?'Auf der guten Matratze schläft Kalle tief und fest. Er ist wieder ganz wach, und die Lenkzeit beginnt bei null.':'Kalle schläft eine Runde in der Kabine. Die Lenkzeit beginnt wieder bei null.')}},
        {label:'Hilde abspritzen <span>'+Math.round(6*DIFF[S.diff].priceMul)+' €</span>',disabled:D._wash||S.money<Math.round(6*DIFF[S.diff].priceMul),fn:()=>{D._wash=true;S.money-=Math.round(6*DIFF[S.diff].priceMul);S.glanz=Math.min(100,S.glanz+30);AU.fx('bubbles');render('Am Waschplatz ist Hilde gleich wieder sauber.')}}];
     if(duftLv()&&S.duftFrisch<70)opts.push({label:'Neues Duftbäumchen <span>3 €</span>',disabled:D._tree||S.money<3,fn:()=>{D._tree=true;S.money-=3;S.duftFrisch=100;AU.fx('pop');render('Das neue Bäumchen riecht nach '+UP[0].lv[duftLv()-1]+'.')}});
     const cap=DIFF[S.diff].coffee+S.up.thermos;if(cap>0&&D.coffee<cap)opts.push({label:'Thermoskanne auffüllen <span>2 €</span>',disabled:D._fill||S.money<2,fn:()=>{D._fill=true;S.money-=2;D.coffee=cap;AU.fx('slurp');render('Die Kanne ist wieder voll. '+cap+' Becher für unterwegs.')}});
-    if(hitch&&!D.anhalter)opts.push({label:'Anhalter mitnehmen',fn:()=>{D.anhalter=hitch;render(hitch.n+' steigt ein und bedankt sich. Mit jemandem zum Reden wird Kalle langsamer müde.')}});
+    if(hitch&&!D.anhalter)opts.push({label:'Anhalter mitnehmen',fn:()=>{D.anhalter=hitch;render(hitch.n+' steigt ein und bedankt sich.')}});
     opts.push({label:'Weiterfahren',cls:'teal',fn:()=>{closeCard();D._kett=D._pause=D._wash=D._tree=D._fill=false;resume()}});
     openCard('<p class="eyebrow">Rasthof</p><h2>'+name.replace(/^(Rasthof|Raststätte|Rasteplass|Rasteplads|Autogrill) /,'')+'</h2>'+
       '<p class="typed center" style="margin:0">'+(line||H0.who+' steht hinter dem Tresen und kennt deinen Namen.'+(hitch?' An der Tür wartet '+hitch.n+' mit einem Pappschild.':''))+'</p>'+
@@ -1869,7 +1959,7 @@ const SCEN={
 };
 function clipRegion(r){cx.save();cx.beginPath();cx.rect(-20,r[0],W+40,r[1]-r[0]);cx.clip()}
 function draw(dt){
-  const night=darkness();
+  let night=darkness();if(D.arrive)night*=1-.5*Math.min(1,D.arrive/1.5);
   const scen=SCEN[D.tour.scen]||SCEN.feld;
   const rTun=region('tunnel'),rWat=region('bruecke'),rCity=region('stadt'),rBau=region('bau');
   const inTunnel=segIn('tunnel');
@@ -1885,12 +1975,14 @@ function draw(dt){
   if(snowy){cx.fillStyle='rgba(255,255,255,'+(.22*Math.max(D.wxA.snow,D.tour.scen==='tundra'?.5:0))+')';cx.fillRect(-20,0,W+40,H)}
   // Straße
   drawRoad(rBau);
+  if(D.spalier)drawSpalier();
+  drawDest();
   if(rWat)drawRails(rWat,'#7B2D3B');
   if(rTun)drawRails(rTun,'#2B2230');
   // Objekte, Lastwagen, Partikel
   for(const o of D.objs)if(o.type!=='gantry'&&o.type!=='overpass')drawObj(o);
   for(const p of D.parts)if(p.k==='puff'||p.k==='spray')drawPart(p);
-  {const ty=truckY,tx=D.x+D.xOff+(D.wob||0)+sway(ty);cx.save();cx.translate(tx,ty);cx.rotate(slope(ty)+(D.wob||0)/laneW*.12);drawTruck(0,0,true);cx.restore()}
+  {const ty=truckY,tx=D.x+D.xOff+(D.wob||0)+sway(ty);cx.save();cx.translate(tx,ty);cx.rotate(slope(ty)+(D.wob||0)/laneW*.12);if(D.hop){const hp=1+Math.sin((1-D.hop)*Math.PI)*.07;cx.scale(hp,hp)}drawTruck(0,0,true);cx.restore()}
   for(const p of D.parts)if(p.k!=='puff'&&p.k!=='spray')drawPart(p);
   for(const o of D.objs)if(o.type==='gantry')drawGantry(o);else if(o.type==='overpass')drawOverpass(o);
   // Tunnel: Decke, Lampen, Portale
@@ -1907,23 +1999,14 @@ function draw(dt){
     for(const o of D.objs){if(['pkw','trabi','wowa','kollege','traktor','vespa','polizei','panne'].includes(o.type)){const ox=laneX(o.lx)+sway(o.y);cx.fillStyle='rgba(255,80,60,'+(glow*1.4)+')';cx.beginPath();cx.arc(ox-o.w*.32,o.y+o.h/2,6*SC,0,7);cx.arc(ox+o.w*.32,o.y+o.h/2,6*SC,0,7);cx.fill()}}
     cx.globalCompositeOperation='source-over';
   }
-  if(night>.3&&has('polarlicht')&&!inTunnel)drawAurora(night);
+  if(darkness()>.3&&has('polarlicht')&&!inTunnel)drawAurora(Math.max(night,.4));
   if(D.flash>0){const tx=D.x+D.xOff+sway(truckY);cx.fillStyle='rgba(255,246,200,'+(D.flash*.35)+')';cx.beginPath();cx.moveTo(tx-TW*.4,truckY-TH/2);cx.lineTo(tx+TW*.4,truckY-TH/2);cx.lineTo(tx+laneW*1.4,0);cx.lineTo(tx-laneW*1.4,0);cx.closePath();cx.fill()}
   if(D.rainbow>0&&!inTunnel)drawRainbow();
   // Wetter (im Tunnel trocken)
   if(!inTunnel)drawWeather(dt);
   if(D.bolt>0){cx.fillStyle='rgba(255,255,255,'+(D.bolt*.55)+')';cx.fillRect(-20,0,W+40,H)}
   cx.restore();
-  // Ankunftsbanner
-  if(D.arrive){const k=Math.min(1,D.arrive/.35),bounce=1+Math.sin(Math.min(1,D.arrive/.5)*Math.PI)*.12;
-    cx.save();cx.translate(W/2,H*.34);cx.rotate(-.04);cx.scale(k*bounce,k*bounce);cx.globalAlpha=k;
-    const bw=Math.min(W-40,300*SC),bh=74*SC;
-    cx.fillStyle='#7B2D3B';cx.beginPath();cx.moveTo(-bw/2-18*SC,-bh/2+10*SC);cx.lineTo(-bw/2,-bh/2+10*SC);cx.lineTo(-bw/2,bh/2+10*SC);cx.lineTo(-bw/2-18*SC,bh/2+10*SC);cx.lineTo(-bw/2-8*SC,10*SC);cx.closePath();cx.fill();
-    cx.beginPath();cx.moveTo(bw/2+18*SC,-bh/2+10*SC);cx.lineTo(bw/2,-bh/2+10*SC);cx.lineTo(bw/2,bh/2+10*SC);cx.lineTo(bw/2+18*SC,bh/2+10*SC);cx.lineTo(bw/2+8*SC,10*SC);cx.closePath();cx.fill();
-    cx.fillStyle='#D8A23A';cx.strokeStyle='#2B2230';cx.lineWidth=3;rr(-bw/2,-bh/2,bw,bh,4*SC);cx.fill();cx.stroke();
-    cx.textAlign='center';cx.fillStyle='#2B2230';cx.font='600 '+Math.round(11*SC)+'px Jost, Futura, sans-serif';cx.fillText('ANGEKOMMEN IN',0,-12*SC);
-    cx.font='700 '+Math.round(26*SC)+'px Jost, Futura, sans-serif';cx.fillText(D.tour.to.toUpperCase(),0,20*SC,bw-20);
-    cx.restore()}
+  drawArrivalFx();
   if(D.kickFx>0){D.kickFx=Math.max(0,D.kickFx-.03);cx.fillStyle='rgba(255,232,170,'+(D.kickFx*.25)+')';cx.fillRect(0,0,W,H)}
   // Spiegel
   if(S.up.spiegel){const y=HUDB+6;for(const o of D.objs){if(o.y+o.h/2<0&&!o.deco&&o.type!=='exit'&&o.type!=='dreieck'&&o.type!=='kegel'){const x=(o.cross?roadX+clamp(o.fx,0,1)*roadW:laneX(o.lx))+sway(y);cx.fillStyle='#D8A23A';cx.strokeStyle='#2B2230';cx.lineWidth=2;cx.beginPath();cx.moveTo(x,y+14);cx.lineTo(x+11,y);cx.lineTo(x-11,y);cx.closePath();cx.fill();cx.stroke()}}}
@@ -1931,7 +2014,11 @@ function draw(dt){
   if(D.gust&&D.gust.t<1){cx.globalAlpha=Math.floor(D.t*6)%2?1:.5;drawSock(Math.max(22*SC,roadX-24*SC),truckY-TH*.2);cx.globalAlpha=1}
   // Müdigkeit
   if(D.energy<55){const a=(55-D.energy)/55*.7;const g=cx.createRadialGradient(W/2,truckY,H*.15,W/2,truckY,H*.75);g.addColorStop(0,'rgba(43,34,48,0)');g.addColorStop(1,'rgba(43,34,48,'+a+')');cx.fillStyle=g;cx.fillRect(0,0,W,H)}
-  if(D.nap){const n=D.nap,k=Math.min(1,n.t/.18,(n.dur-n.t)/.2);if(k>0){const h=H*.44*k;cx.fillStyle='rgba(26,21,32,.94)';cx.fillRect(0,0,W,h);cx.fillRect(0,H-h,W,h);
+  if(D.nap){const n=D.nap;let k;
+    // Je öfter Kalle wegnickt, desto weiter fallen die Lider. Beim letzten Mal flattern sie und gehen ganz zu.
+    if(n.final){const t=n.t;k=t<.5?t/.5*.75:t<.8?.75-(t-.5)/.3*.35:t<1.5?Math.min(1,.4+(t-.8)/.5):t<1.8?.6:1}
+    else k=Math.min(1,n.t/.18,(n.dur-n.t)/.2);
+    if(k>0){const h=H*(n.final?.5:.42+.03*(n.k||1))*k;cx.fillStyle='rgba(26,21,32,.94)';cx.fillRect(0,0,W,h);cx.fillRect(0,H-h,W,h);
     cx.strokeStyle='#3A2F40';cx.lineWidth=6;cx.beginPath();cx.moveTo(0,h);cx.quadraticCurveTo(W/2,h+24*k,W,h);cx.moveTo(0,H-h);cx.quadraticCurveTo(W/2,H-h-24*k,W,H-h);cx.stroke()}}
   // schwebende Texte
   cx.textAlign='center';cx.font='700 '+Math.round(14*SC)+'px Jost, Futura, sans-serif';
@@ -2072,6 +2159,99 @@ function drawAurora(night){
     for(let x=W+20;x>=-20;x-=20)cx.lineTo(x,H*(.12+b*.08)+Math.sin(x/80+D.t*.6+b)*30*SC-60*SC);cx.closePath();cx.fill()}
   cx.restore();
 }
+/* Menschen von oben: Schultern, Kopf, ein winkender Arm */
+function personTop(x,y,body,hair,wave,ph,s){
+  s=s||SC;const ink='#2B2230';
+  cx.fillStyle='rgba(43,34,48,.16)';cx.beginPath();cx.ellipse(x+2*s,y+3*s,10*s,6*s,0,0,7);cx.fill();
+  cx.strokeStyle=body;cx.lineWidth=3.4*s;cx.lineCap='round';
+  cx.beginPath();cx.moveTo(x-7*s,y);cx.lineTo(x-9*s,y+6*s);cx.stroke();
+  const hx=x+14*s,hy=y+(wave?-3+Math.sin(D.t*10+ph)*5:5)*s;
+  cx.beginPath();cx.moveTo(x+7*s,y);cx.lineTo(hx,hy);cx.stroke();
+  cx.fillStyle='#E8C4A8';cx.beginPath();cx.arc(hx,hy,2*s,0,7);cx.fill();
+  cx.fillStyle=body;cx.strokeStyle=ink;cx.lineWidth=1.5;cx.beginPath();cx.ellipse(x,y,8.5*s,5*s,0,0,7);cx.fill();cx.stroke();
+  cx.fillStyle=hair;cx.beginPath();cx.arc(x,y-.5*s,4.4*s,0,7);cx.fill();cx.stroke();
+}
+function drawBunting(y){
+  const cols=['#7B2D3B','#D8A23A','#2F6F73','#E3AFB4','#FBF1E6'];const n=12,sag=14*SC;
+  const P=i=>{const u=i/n;return [u*W,y+Math.sin(u*Math.PI)*sag]};
+  cx.strokeStyle='#2B2230';cx.lineWidth=1.2;cx.beginPath();for(let i=0;i<=n;i++){const [x,yy]=P(i);i?cx.lineTo(x,yy):cx.moveTo(x,yy)}cx.stroke();
+  for(let i=0;i<n;i++){const [x1,y1]=P(i+.15),[x2,y2]=P(i+.85),[xm,ym]=P(i+.5);const fl=Math.sin(D.t*3+i)*2*SC;
+    cx.fillStyle=cols[i%cols.length];cx.beginPath();cx.moveTo(x1,y1);cx.lineTo(x2,y2);cx.lineTo(xm+fl,ym+14*SC);cx.closePath();cx.fill();cx.stroke()}
+}
+/* Am Nordkap stehen die Kollegen auf beiden Seiten am Straßenrand */
+function drawSpalier(){
+  const s=SC,step=92*s/D.K,vests=['#E8742C','#F0C566','#E8742C','#BFDCC8'],hairs=['#5E4A2E','#2B2230','#C9B79C','#8C6248'];
+  for(let p=.889;p<.99;p+=step){const y=yOf(p);if(y<-30||y>H+30)continue;const i=Math.round(p/step);
+    [0,1].forEach(side=>{const x=(side?roadX+roadW+24*s:roadX-24*s)+sway(y);
+      cx.fillStyle=Math.floor(D.t*3+i+side)%2?'#F0A830':'rgba(240,168,48,.25)';cx.beginPath();cx.arc(side?W-5*s:5*s,y+10*s,4.5*s,0,7);cx.fill();
+      personTop(x,y,vests[(i+side)%4],hairs[(i*3+side)%4],true,i*1.7+side,s*.95)})}
+}
+/* Das Ziel: ein Vorplatz vor der Rampe. Am Nordkap stattdessen der Globus über dem Meer. */
+function drawDest(){
+  if(D.prog<.95)return;
+  const s=SC,edge=truckY-TH/2-16*s-((1+D.endPad)*D.K-D.off);
+  if(edge<-10)return;
+  const nk=!!D.tour.final,tx=D.x+sway(truckY),wave=D.arrive>.4;
+  cx.save();
+  cx.fillStyle=nk?'#E6E3DC':'#DCD2C6';cx.fillRect(-20,-20,W+40,edge+20);
+  cx.strokeStyle='rgba(43,34,48,.07)';cx.lineWidth=1;const g=24*s;
+  for(let yy=edge-g;yy>-g;yy-=g){cx.beginPath();cx.moveTo(-20,yy);cx.lineTo(W+20,yy);cx.stroke()}
+  for(let xx=(W/2)%g;xx<W;xx+=g){cx.beginPath();cx.moveTo(xx,-20);cx.lineTo(xx,edge);cx.stroke()}
+  cx.fillStyle='#B9AEA4';cx.fillRect(-20,edge-3*s,W+40,5*s);
+  if(nk){
+    const sea=edge-270*s;
+    if(sea>-20){cx.fillStyle='#5E8FA8';cx.fillRect(-20,-20,W+40,sea+20);
+            cx.strokeStyle='rgba(255,255,255,.35)';cx.lineWidth=1.5;for(let i=0;i<9;i++){const wy=sea-16*s-i*24*s;if(wy<-10)break;cx.beginPath();for(let x=-20;x<W+20;x+=8)cx.lineTo(x,wy+Math.sin(x/22+D.t*1.4+i)*2*s);cx.stroke()}
+      cx.fillStyle='#4A4250';cx.beginPath();cx.moveTo(-20,sea+16*s);for(let x=-20;x<=W+20;x+=16)cx.lineTo(x,sea+(hash(x*.37)*9-4)*s);cx.lineTo(W+20,sea+16*s);cx.closePath();cx.fill()}
+    const gx=W/2,gy=edge-160*s;
+    cx.fillStyle='rgba(43,34,48,.18)';cx.beginPath();cx.arc(gx+5*s,gy+6*s,42*s,0,7);cx.fill();
+    cx.fillStyle='#BDB7AE';cx.strokeStyle='#2B2230';cx.lineWidth=2;cx.beginPath();cx.arc(gx,gy,42*s,0,7);cx.fill();cx.stroke();
+    cx.strokeStyle='#59616B';cx.lineWidth=2.6*s;[31,22,12].forEach(r=>{cx.beginPath();cx.arc(gx,gy,r*s,0,7);cx.stroke()});
+    for(let k=0;k<8;k++){const a=k/8*Math.PI*2+.2;cx.beginPath();cx.moveTo(gx+Math.cos(a)*4*s,gy+Math.sin(a)*4*s);cx.lineTo(gx+Math.cos(a)*31*s,gy+Math.sin(a)*31*s);cx.stroke()}
+    cx.fillStyle='#59616B';cx.beginPath();cx.arc(gx,gy,4*s,0,7);cx.fill();
+    const ox=clamp(tx+(tx<W/2?62:-62)*s,26,W-26),oy=edge-34*s;
+    personTop(ox,oy,'#C8432F','#DAD5CD',wave,0,s*1.55);
+    cx.fillStyle='#FBF1E6';cx.strokeStyle='#2B2230';cx.lineWidth=1;cx.beginPath();cx.arc(ox-16*s,oy+9*s,4*s,0,7);cx.fill();cx.stroke();
+    if(D.arrive&&Math.random()<.12)D.parts.push({k:'steam',x:ox-16*s,y:oy+5*s,vx:0,vy:-16,life:1,max:1,r:2.4*s});
+  }else{
+    const bw=Math.min(W*.9,340*s),bh=110*s,by=edge-176*s;
+    const col=['#7B2D3B','#2F6F73','#2B5C9A','#8C6248'][Math.floor(hash(D.tour.km)*4)];
+    cx.fillStyle='rgba(43,34,48,.2)';cx.fillRect(W/2-bw/2+6,by+6,bw,bh);
+    cx.fillStyle=col;cx.strokeStyle='#2B2230';cx.lineWidth=2;cx.fillRect(W/2-bw/2,by,bw,bh);cx.strokeRect(W/2-bw/2,by,bw,bh);
+    cx.strokeStyle='rgba(255,255,255,.16)';for(let i=1;i<7;i++){cx.beginPath();cx.moveTo(W/2-bw/2,by+i*bh/7);cx.lineTo(W/2+bw/2,by+i*bh/7);cx.stroke()}
+    cx.fillStyle='#9C98A0';cx.strokeStyle='#2B2230';cx.fillRect(tx-TW*.8,by+bh,TW*1.6,18*s);cx.strokeRect(tx-TW*.8,by+bh,TW*1.6,18*s);
+    cx.fillStyle='#F0C566';for(let i=0;i<5;i++)cx.fillRect(tx-TW*.8+i*TW*.34,by+bh+13*s,TW*.17,4*s);
+    cx.fillStyle='#FBF1E6';rr(W/2-72*s,by+bh*.25,144*s,30*s,4*s);cx.fill();cx.stroke();
+    cx.fillStyle='#2B2230';cx.textAlign='center';cx.font='700 '+Math.round(12*s)+'px Jost, Futura, sans-serif';cx.fillText('WARENANNAHME',W/2,by+bh*.25+20*s,134*s);
+    drawBunting(edge-74*s);
+    const cl=['#2F6F73','#D8A23A','#7B2D3B'],hr=['#5E4A2E','#C9B79C','#2B2230'];
+    [-62,62,118].forEach((dx,i)=>{const px=clamp(tx+(tx>W*.6&&i===2?-118:dx)*s,24*s,W-24*s);personTop(px,edge-30*s-(i%2)*8*s,cl[i],hr[i],wave,i*2.1,s*1.45)});
+  }
+  cx.restore();
+}
+/* Banner, Lichtstrahlen und Blitz der Ankunft */
+function drawArrivalFx(){
+  if(!D.arrive)return;
+  const cyB=H*.37,s=SC,big=!!D.tour.final;
+  if(D.rays){const k=Math.min(1,D.rays/.6);cx.save();cx.translate(W/2,cyB);cx.rotate(D.t*.1);cx.globalAlpha=.15*k;cx.fillStyle='#F0C566';
+    for(let i=0;i<16;i++){cx.rotate(Math.PI/8);cx.beginPath();cx.moveTo(0,0);cx.lineTo(-W*.07,-H);cx.lineTo(W*.07,-H);cx.closePath();cx.fill()}cx.restore()}
+  if(D.flashA){cx.fillStyle='rgba(255,246,214,'+(D.flashA*.5)+')';cx.fillRect(0,0,W,H);D.flashA=Math.max(0,D.flashA-.06)}
+  if(D.banner){const t=D.banner,d=Math.min(1,t/.6),c1=1.5,eb=1+(c1+1)*Math.pow(d-1,3)+c1*Math.pow(d-1,2);
+    const y=-140*s+(cyB+140*s)*eb,sw=t>.6?.12*Math.exp(-2.3*(t-.6))*Math.sin(7*(t-.6)):0;
+    const bw=Math.min(W-44,300*s),bh=(big?92:76)*s;
+    cx.save();cx.translate(W/2,y-260*s);cx.rotate(sw);cx.translate(0,260*s);
+    cx.strokeStyle='#2B2230';cx.lineWidth=1.5;cx.beginPath();cx.moveTo(-bw/2+16*s,-bh/2);cx.lineTo(-bw/2+16*s,-H);cx.moveTo(bw/2-16*s,-bh/2);cx.lineTo(bw/2-16*s,-H);cx.stroke();
+    cx.fillStyle='rgba(43,34,48,.22)';rr(-bw/2+5,-bh/2+6,bw,bh,4*s);cx.fill();
+    cx.fillStyle='#7B2D3B';[-1,1].forEach(sd=>{cx.beginPath();cx.moveTo(sd*(bw/2+20*s),-bh/2+12*s);cx.lineTo(sd*bw/2,-bh/2+12*s);cx.lineTo(sd*bw/2,bh/2+12*s);cx.lineTo(sd*(bw/2+20*s),bh/2+12*s);cx.lineTo(sd*(bw/2+9*s),12*s);cx.closePath();cx.fill()});
+    cx.fillStyle='#D8A23A';cx.strokeStyle='#2B2230';cx.lineWidth=3;rr(-bw/2,-bh/2,bw,bh,4*s);cx.fill();cx.stroke();
+    cx.strokeStyle='rgba(43,34,48,.35)';cx.lineWidth=1;rr(-bw/2+6*s,-bh/2+6*s,bw-12*s,bh-12*s,2*s);cx.stroke();
+    cx.textAlign='center';cx.fillStyle='#2B2230';
+    cx.font='600 '+Math.round(11*s)+'px Jost, Futura, sans-serif';cx.fillText(big?'ANGEKOMMEN AM':'ANGEKOMMEN IN',0,-bh/2+22*s);
+    cx.font='700 '+Math.round(27*s)+'px Jost, Futura, sans-serif';cx.fillText(D.tour.to.toUpperCase(),0,-bh/2+52*s,bw-30*s);
+    if(big){cx.font='600 '+Math.round(11*s)+'px "Courier Prime", monospace';cx.fillStyle='#7B2D3B';cx.fillText('1926 · 2026',0,-bh/2+74*s)}
+    cx.restore()}
+  if(D.fade){cx.fillStyle='rgba(251,241,230,'+Math.min(1,D.fade/.5)+')';cx.fillRect(0,0,W,H)}
+}
 function drawSock(x,y){cx.fillStyle='#FBF1E6';cx.strokeStyle='#2B2230';cx.lineWidth=2;cx.beginPath();cx.arc(x,y,18*SC,0,7);cx.fill();cx.stroke();cx.fillStyle='#C8432F';cx.beginPath();cx.moveTo(x-10*SC,y-5*SC);cx.lineTo(x+12*SC,y-3*SC);cx.lineTo(x+12*SC,y+3*SC);cx.lineTo(x-10*SC,y+5*SC);cx.closePath();cx.fill();cx.fillStyle='#2B2230';cx.fillRect(x-12*SC,y-8*SC,2,16*SC)}
 function drawPart(p){
   const a=Math.max(0,p.life/p.max);
@@ -2160,6 +2340,51 @@ function drawObj(o){
   if(o.blink&&Math.floor(D.t*4)%2){cx.fillStyle='#F0A830';cx.beginPath();cx.arc(x+o.w*.45,y+o.h/2-5*s,4*s,0,7);cx.arc(x+o.w*.45,y-o.h/2+5*s,4*s,0,7);cx.fill()}
 }
 
+/* Ein Foto für den Lieferschein: Kalle hat beim Empfänger ein Bild gemacht */
+function figSVG(x,y,coat,hair,o){
+  o=o||{};let g='<g stroke="#2B2230" stroke-width="1.6" stroke-linejoin="round">';
+  g+='<rect x="'+(x-5)+'" y="'+(y-10)+'" width="4" height="10" fill="#2B2230"/><rect x="'+(x+1)+'" y="'+(y-10)+'" width="4" height="10" fill="#2B2230"/>';
+  g+='<path d="M'+(x-9)+' '+(y-8)+' L'+(x-6)+' '+(y-30)+' L'+(x+6)+' '+(y-30)+' L'+(x+9)+' '+(y-8)+' Z" fill="'+coat+'"/>';
+  g+='<path d="M'+(x+5)+' '+(y-28)+' L'+(x+15)+' '+(y-40)+'" fill="none" stroke="'+coat+'" stroke-width="4" stroke-linecap="round"/><circle cx="'+(x+15.5)+'" cy="'+(y-41)+'" r="2.4" fill="#E8C4A8"/>';
+  g+='<path d="M'+(x-5)+' '+(y-28)+' L'+(x-10)+' '+(y-17)+'" fill="none" stroke="'+coat+'" stroke-width="4" stroke-linecap="round"/>';
+  g+='<circle cx="'+x+'" cy="'+(y-37)+'" r="6.5" fill="#E8C4A8"/>';
+  g+='<path d="M'+(x-6.5)+' '+(y-38)+' A6.5 6.5 0 0 1 '+(x+6.5)+' '+(y-38)+' Z" fill="'+hair+'"/>';
+  if(o.bun)g+='<circle cx="'+x+'" cy="'+(y-45)+'" r="3.4" fill="'+hair+'"/>';
+  if(o.cup)g+='<rect x="'+(x-13)+'" y="'+(y-19)+'" width="6" height="6" rx="1" fill="#FBF1E6"/><path d="M'+(x-11)+' '+(y-21)+' q2 -3 0 -6" fill="none" stroke="#FBF1E6" stroke-width="1"/>';
+  return g+'</g>';
+}
+function deliveryPic(t){
+  const nk=!!t.final,sc=t.scen||'feld';
+  const sky={alpen:'#CFE2EC',tundra:'#E3ECF0',kueste:'#D6E6EC',stadt:'#E8DCD8'}[sc]||'#F3E3C8';
+  const gr={alpen:'#B9D6A5',tundra:'#F2F1EC',kueste:'#D9E6B8',stadt:'#CFC6CC',wein:'#B7CF95'}[sc]||'#C9DD9B';
+  let g='<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Foto vom Empfänger"><rect width="200" height="140" fill="'+sky+'"/>';
+  if(nk){
+    g+='<rect width="200" height="76" fill="#2E3558"/><path d="M0 34 Q40 14 80 30 T160 22 T200 30 V44 Q160 34 120 44 T40 40 T0 48 Z" fill="#6FE0A8" opacity=".55"/><path d="M20 22 Q70 6 120 18 T200 12 V20 Q150 26 100 26 T20 30 Z" fill="#A08CF0" opacity=".4"/>';
+    [[18,12],[64,40],[142,52],[176,38],[100,58],[34,60]].forEach(([x,y])=>g+='<circle cx="'+x+'" cy="'+y+'" r="1" fill="#FBF1E6"/>');
+    g+='<rect y="76" width="200" height="22" fill="#3F6C86"/>';
+    g+='<path d="M0 84 h200 M0 90 h200" stroke="#FBF1E6" stroke-opacity=".35" stroke-width="1"/>';
+    g+='<path d="M0 98 L40 94 L90 96 L140 93 L200 97 V140 H0 Z" fill="#E6E3DC" stroke="#2B2230" stroke-width="1.5"/>';
+    g+='<g fill="none" stroke="#59616B" stroke-width="2"><circle cx="56" cy="80" r="17"/><ellipse cx="56" cy="80" rx="7" ry="17"/><ellipse cx="56" cy="80" rx="13" ry="17"/><path d="M39 80 h34 M42 71 h28 M42 89 h28"/></g>';
+    g+='<rect x="42" y="97" width="28" height="11" fill="#BDB7AE" stroke="#2B2230" stroke-width="1.5"/>';
+    g+=figSVG(112,124,'#C8432F','#DAD5CD',{bun:true,cup:true});
+    g+='<g stroke="#2B2230" stroke-width="1.5"><rect x="132" y="102" width="34" height="22" fill="#B5832A"/><path d="M132 108 h34" stroke="#7B5A2E"/></g><text x="149" y="119" text-anchor="middle" font-family="Courier Prime,monospace" font-size="8" font-weight="700" fill="#2B2230">1926</text>';
+  }else{
+    if(sc==='alpen')g+='<path d="M0 100 L30 58 L52 80 L84 40 L120 86 L150 54 L200 96 V100 H0 Z" fill="#9FB7C4"/><path d="M84 40 L76 52 L92 52 Z M150 54 L144 63 L157 63 Z" fill="#FBF1E6"/>';
+    else if(sc==='kueste')g+='<rect y="84" width="200" height="16" fill="#7FA9BF"/><rect x="164" y="54" width="9" height="32" fill="#FBF1E6" stroke="#2B2230" stroke-width="1.2"/><rect x="164" y="64" width="9" height="6" fill="#C8432F"/>';
+    else if(sc==='stadt')g+='<path d="M0 100 V70 h26 V58 h22 V76 h30 V50 h24 V72 h28 V62 h30 V80 h40 V100 Z" fill="#B7A9B4"/>';
+    else if(sc==='tundra')g+='<path d="M0 100 Q60 80 120 92 T200 86 V100 H0 Z" fill="#DCE6E4"/>';
+    else g+='<path d="M0 100 Q50 76 100 90 T200 82 V100 H0 Z" fill="#A9C482"/><circle cx="176" cy="78" r="10" fill="#6E9E73"/><rect x="175" y="86" width="2" height="8" fill="#5E4A2E"/>';
+    g+='<rect y="98" width="200" height="42" fill="'+gr+'"/>';
+    g+=hildeSVG({text:true}).replace('<svg ','<svg x="6" y="44" width="92" height="88" ');
+    const cols=['#2F6F73','#7B2D3B','#2B5C9A','#8C6248'],hairs=['#5E4A2E','#C9B79C','#2B2230','#8C6248'],h=Math.floor(hash(t.km)*4);
+    g+=figSVG(122,128,cols[h],hairs[h]);
+    if(hash(t.km*3)<.6)g+=figSVG(176,130,cols[(h+1)%4],hairs[(h+2)%4]);
+    g+='<g stroke="#2B2230" stroke-width="1.5"><rect x="136" y="110" width="28" height="20" fill="#B5832A"/><path d="M150 110 v20 M136 118 h28" stroke="#E3C88A" stroke-width="2.5"/></g>';
+  }
+  g+='</svg>';
+  const cap=nk?'Nordkap, 2026':t.to+', Tag '+(S.day-t.days);
+  return '<figure class="polaroid">'+g+'<figcaption>'+cap+'</figcaption></figure>';
+}
 /* ================= Auswertung einer Tour ================= */
 function finishDrive(ok,aborted){
   if(!D||D.ended)return;D.ended=true;cancelAnimationFrame(raf);
@@ -2183,12 +2408,11 @@ function finishDrive(ok,aborted){
     if(S.glanz>=70)R('Hilde glänzt',2);
     if(t.final)R('Die Kiste von 1926',30);
   }else{
-    R(aborted?'Tour abgebrochen':'Ladung verloren',-2);S.stats.fails++;
+    R(aborted==='schlaf'?'Am Steuer eingeschlafen':aborted?'Tour abgebrochen':'Ladung verloren',aborted==='schlaf'?-6:-2);S.stats.fails++;
   }
   R('Grüße unterwegs ('+D.greets+')',D.greets*(1+S.up.funk+S.up.licht));
   if(D.helped)R('Einer Kollegin geholfen',6*D.helped);
-  if(D.anhalter)R(D.anhalter.n==='Jule'?'Jule mitgenommen':'Anhalter mitgenommen',3);
-  if(D.naps)R('Sekundenschlaf am Steuer ('+D.naps+')',-Math.min(8,2*D.naps));
+  if(D.naps&&aborted!=='schlaf')R('Sekundenschlaf am Steuer ('+D.naps+')',-Math.min(8,2*D.naps));
   if(ok&&D.minE>=40&&t.hours>=2)R('Ausgeruht gefahren',2);
   D.extraResp.forEach(([l,v])=>R(l,v));
   if(D.fineNow)fine+=D.fineNow;
@@ -2214,12 +2438,13 @@ function finishDrive(ok,aborted){
   if(duftLv())S.duftFrisch=Math.max(0,S.duftFrisch-UP[0].fade[duftLv()]);
   S.stats.km+=ok?t.km:Math.round(t.km*D.prog);S.stats.greets+=D.greets;S.stats.kett+=D.kett;S.stats.pauses+=D.pauses;
   if(ok){S.done[t.id]=(S.done[t.id]||0)+1;if(t.final)S.finale=true}
+  if(ok&&D.anhalter&&D.anhalter.n!=='Jule')S.stats.anhalter=(S.stats.anhalter||0)+1;
   delete S.driving;delete S.offers[t.id];
-  let note=ok?t.note:(aborted?'Kalle hat die Tour nach '+t.to+' abgebrochen. Jupp sagt: „Besser umkehren als liegen bleiben.“':'Die Ladung nach '+t.to+' war nicht mehr zu retten. Kalle hat sich beim Empfänger entschuldigt. Der hat ihm trotzdem einen Kaffee gegeben.');
+  let note=ok?t.note:aborted==='schlaf'?'Auf dem Weg nach '+t.to+' ist Kalle am Steuer eingeschlafen. Zum Glück ist nichts passiert. Ottilie hat einen Ersatzfahrer geschickt. Sie hat nicht geschimpft, sondern Kalle eine Decke mitgebracht.':(aborted?'Kalle hat die Tour nach '+t.to+' abgebrochen. Jupp sagt: „Besser umkehren als liegen bleiben.“':'Die Ladung nach '+t.to+' war nicht mehr zu retten. Kalle hat sich beim Empfänger entschuldigt. Der hat ihm trotzdem einen Kaffee gegeben.');
   if(D.anhalter)note+=' Unterwegs hat Kalle '+D.anhalter.d+'.';
   if(D.helped)note+=' Außerdem hat er einer Kollegin bei einer Reifenpanne geholfen.';
   if(D.korsoDone)note+=' Unterwegs hat ihm ein Brautpaar aus dem Hochzeitskorso zugewinkt.';
-  if(D.naps)note+=' Einmal ist er am Steuer kurz eingenickt. Das soll nicht wieder passieren.';
+  if(D.naps&&aborted!=='schlaf')note+=D.naps===1?' Einmal ist er am Steuer kurz eingenickt. Das soll nicht wieder passieren.':' Er ist '+D.naps+'-mal am Steuer eingenickt. Ottilie macht sich Sorgen.';
   S.log.push({day:S.day-t.days,to:t.to,ok,note});
   save();
   $('#drive').hidden=true;$('#app').style.visibility='';
@@ -2227,6 +2452,7 @@ function finishDrive(ok,aborted){
   setTimeout(()=>AU.fx('stamp'),180);
   let html='<p class="eyebrow">Tag '+(S.day-t.days)+' · '+t.to+'</p>';
   html+='<div class="bigstamp'+(ok?'':' bad')+'">'+(ok?'Zugestellt':'Nicht zugestellt')+'</div>';
+  if(ok)html+=deliveryPic(t);
   html+='<p class="typed" style="margin:0" id="r-note"></p>';
   if(!t.final||lines.length>4){html+='<div class="ledger">';lines.forEach(l=>html+='<span>'+l[0]+'</span><b>'+l[1]+'</b>');html+='<span class="sum">Unterm Strich</span><b class="sum countup" id="r-pay">0 €</b></div>'}
   html+='<div class="ledger">';rl.forEach(l=>html+='<span>'+l[0]+'</span><b>'+(l[1]>0?'+':'')+l[1]+'</b>');html+='<span class="sum">Respekt</span><b class="sum">'+(resp>=0?'+':'')+resp+'</b></div>';
