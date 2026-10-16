@@ -520,7 +520,7 @@ const AU=(function(){
       case 'zither':{const end=t+1.3;const g=gain(0,dest);O('triangle',f,t,g,end);O('sine',f*2.003,t,gain(.4,g),end);envAD(g,t,v,.003,1.1);break}
       case 'mandolin':{const end=t+dur+.15;const g=gain(1,dest);const eg=gain(0,g);const lp=filt('lowpass',Math.min(9000,f*5),1,eg);O('sawtooth',f,t,lp,end);
         const st=.055;for(let x=t;x<t+dur;x+=st){eg.gain.setValueAtTime(v,x);eg.gain.exponentialRampToValueAtTime(v*.25,x+st*.9)}eg.gain.setTargetAtTime(0,t+dur,.03);break}
-      case 'celesta':{const end=t+1.4;const g=gain(0,dest);O('sine',f,t,g,end);O('sine',f*2,t,gain(.18,g),end);O('sine',f*3,t,gain(.04,g),end);envAD(g,t,v,.004,Math.min(1.2,dur+.7));break}
+      case 'celesta':{const end=t+1.4;const g=gain(0,dest);O('sine',f,t,g,end);O('sine',f*2,t,gain(.18,g),end);O('sine',f*3,t,gain(.04,g),end);envAD(g,t,v,.004,Math.min(.9,dur+.25));break}
       case 'harp':{const end=t+1.2;const g=gain(0,dest);const lp=filt('lowpass',Math.min(6000,f*4),.7,g);O('triangle',f,t,lp,end);O('sine',f*2,t,gain(.2,lp),end);envAD(g,t,v,.003,.95);break}
       case 'pizz':{const end=t+.5;const g=gain(0,dest);const lp=filt('lowpass',900,.7,g);O('triangle',f,t,lp,end);O('sine',f,t,gain(.6,g),end);envAD(g,t,v,.004,.32);break}
       case 'bell':{const end=t+1.5;const g=gain(0,dest);O('sine',f,t,g,end);O('sine',f*4.01,t,gain(.22,g),end);envAD(g,t,v,.005,1.3);break}
@@ -533,7 +533,7 @@ const AU=(function(){
       case 'epiano':{const end=t+Math.min(2.4,dur+1);const g=gain(0,dest);const trem=gain(1,g);O('sine',f,t,trem,end);O('sine',f*2,t,gain(.15,trem),end);O('sine',4.2,t,gain(.25,trem.gain),end);envAD(g,t,v,.01,Math.min(2.2,dur+.8));break}
       case 'bass':{const end=t+.9;const g=gain(0,dest);O('triangle',f,t,g,end);O('sine',f/2,t,gain(.5,g),end);envAD(g,t,v,.006,Math.min(.7,dur+.15));break}
       case 'tuba':{const end=t+dur+.2;const g=gain(0,dest);const lp=filt('lowpass',420,1.5,g);O('sawtooth',f,t,lp,end);envASR(g,t,v,.02,Math.max(.03,dur*.6),.08);break}
-      case 'pad':{const end=t+dur+.6;const g=gain(0,dest);const lp=filt('lowpass',900,.5,g);O('sawtooth',f,t,gain(.3,lp),end);O('triangle',f*1.004,t,lp,end);envASR(g,t,v,.35,Math.max(.05,dur-.6),.5);break}
+      case 'pad':{const end=t+dur+.25;const g=gain(0,dest);const lp=filt('lowpass',900,.5,g);O('sawtooth',f,t,gain(.3,lp),end);O('triangle',f*1.004,t,lp,end);envASR(g,t,v,.25,Math.max(.05,dur-.42),.2);break}
       case 'brass':{const end=t+dur+.2;const g=gain(0,dest);const lp=filt('lowpass',600,2,g);lp.frequency.setValueAtTime(600,t);lp.frequency.linearRampToValueAtTime(2200,t+.06);O('sawtooth',f,t,lp,end);envASR(g,t,v,.03,Math.max(.03,dur-.06),.1);break}
     }
   }
@@ -693,7 +693,7 @@ const AU=(function(){
       case 'static':{const g=gain(0,D);const bp=filt('bandpass',2400,.4,g);noise(t,.3,bp);envASR(g,t,.06,.01,.18,.08);break}
       case 'brake':{const g=gain(0,D);const bp=filt('bandpass',1400,1.2,g);noise(t,.8,bp);envASR(g,t,.05,.15,.35,.3);
         const g2=gain(0,D);const o=_osc('sine',70,t,filt('lowpass',200,1,g2));o.frequency.linearRampToValueAtTime(42,t+.9);envASR(g2,t,.1,.05,.6,.25);o.start(t);o.stop(t+1);break}
-      case 'arrive':{[[65,0],[69,.12],[72,.24],[77,.36]].forEach(([m,d])=>inst('brass',m,t+d,d===.36?.6:.14,.09,D));inst('bell',89,t+.4,.4,.08,D);break}
+      case 'arrive':{[[62,0],[66,.12],[69,.24],[74,.36]].forEach(([m,d])=>inst('brass',m,t+d,d===.36?.6:.14,.07,D));inst('bell',86,t+.4,.4,.06,D);break}
       case 'sad':{[[67,0],[66,.25],[65,.5],[64,.75]].forEach(([m,d])=>inst('tuba',m-12,t+d,.3,.2,D));break}
       case 'yawn':{const g=gain(0,D);const lp=filt('lowpass',900,4,g);const o=_osc('sawtooth',230,t,lp);o.frequency.linearRampToValueAtTime(320,t+.4);o.frequency.linearRampToValueAtTime(150,t+1.2);lp.frequency.linearRampToValueAtTime(400,t+1.2);envASR(g,t,.07,.15,.7,.4);o.start(t);o.stop(t+1.4);break}
       case 'heart':{[0,.28].forEach(d=>{const g=gain(0,D);const o=_osc('sine',62,t+d,g);envAD(g,t+d,.5,.005,.18);o.start(t+d);o.stop(t+d+.25)});break}
@@ -767,12 +767,12 @@ const SONGS={
     chords:['D','D','G','D','Bm','Em','A','A7','D','D','G','Gm','D','G','A7','D'],
     parts:[{i:'pizz',p:'1 . . . 5 .',o:-12,v:.34},{i:'harp',p:'. . x . x .',o:0,v:.2}],
     leadI:'celesta',leadV:.15,
-    lead:'a4 - d5 - f#5 - | a5 - f#5 - d5 - | b4 - d5 - g5 - | f#5 - - - e5 d5 | d5 - f#5 - b5 - | g5 - e5 - b4 - | c#5 - e5 - a5 - | g5 - - - f#5 e5 | a4 - d5 - f#5 - | a5 - - - f#5 . | g5 - b5 - d6 - | a#5 - g5 - d5 - | f#5 - - - a5 - | g5 - - - b5 - | a5 - g5 - e5 - | d5 - - - . .'},
+    lead:'a4 - d5 - f#5 - | a5 - f#5 - d5 - | b4 - d5 - g5 a5 | f#5 - - - e5 d5 | d5 - f#5 - b5 - | g5 - e5 - b4 - | c#5 - e5 - a5 - | g5 - - - e5 - | a4 - d5 - f#5 - | a5 - - - f#5 . | g5 - b5 - d6 - | a#5 - g5 - d5 - | f#5 - - - a5 - | g5 - - - b5 - | a5 - g5 - e5 - | d5 - - - . .'},
   ende:{id:'ende',name:'Abspann',bpm:76,spb:2,bar:6,
     chords:['D','D','G','D','Bm','Em','A','A7','D','D','G','Gm','D','G','A7','D'],
     parts:[{i:'pizz',p:'1 . . . . .',o:-12,v:.3},{i:'pad',p:'x - - - - -',o:0,v:.16},{i:'harp',p:'. . 5 . 8 .',o:12,v:.1}],
     leadI:'celesta',leadV:.15,
-    lead:'a4 - d5 - f#5 - | a5 - f#5 - d5 - | b4 - d5 - g5 - | f#5 - - - e5 d5 | d5 - f#5 - b5 - | g5 - e5 - b4 - | c#5 - e5 - a5 - | g5 - - - f#5 e5 | a4 - d5 - f#5 - | a5 - - - f#5 . | g5 - b5 - d6 - | a#5 - g5 - d5 - | f#5 - - - a5 - | g5 - - - b5 - | a5 - g5 - e5 - | d5 - - - . .'},
+    lead:'a4 - d5 - f#5 - | a5 - f#5 - d5 - | b4 - d5 - g5 a5 | f#5 - - - e5 d5 | d5 - f#5 - b5 - | g5 - e5 - b4 - | c#5 - e5 - a5 - | g5 - - - e5 - | a4 - d5 - f#5 - | a5 - - - f#5 . | g5 - b5 - d6 - | a#5 - g5 - d5 - | f#5 - - - a5 - | g5 - - - b5 - | a5 - g5 - e5 - | d5 - - - . .'},
   polka:{id:'polka',name:'Polka',vol:.6,bpm:126,spb:2,bar:4,
     chords:['F','F','C7','C7','C7','C7','F','F','F','F','Bb','Bb','F','C7','F','F'],
     parts:[{i:'tuba',p:'1 . 5 .',o:-12,v:.42},{i:'accordion',p:'. x . x',o:0,v:.2},{d:'k t k t',v:.3,fill:1}],
