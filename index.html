@@ -323,13 +323,13 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
     <details class="howto"><summary>So wird gespielt</summary><ol>
 <li>Tippe links oder rechts auf den Bildschirm, um die Spur zu wechseln. Jeder Zusammenstoß beschädigt die Ladung.</li>
 <li>Nach 4:30 Stunden am Steuer sind 45 Minuten Pause Pflicht. Zum Rasthof kommst du über die rechte Spur.</li>
-<li>Kalle wird mit der Zeit müde. Kaffee, ein Imbiss, Pausen und ein frisches Duftbäumchen halten ihn wach.</li>
+<li>Kalle wird schnell müde und hungrig, jeder Spurwechsel kostet Kraft. Kaffee macht wach, satt wird er nur am Rasthof.</li>
 <li>Fährt ein Kollege vor dir, gib Lichthupe. Er grüßt zurück, und das bringt Respekt.</li>
 <li>Jede Strecke hat ihre Eigenheiten, etwa Nebel, Gänse, Seitenwind oder eine Fähre. Sie stehen auf dem Lieferschein.</li>
 <li>Jede Tour kostet Kalendertage. Bring die Kiste vor dem Jubiläum ans Nordkap.</li>
 <li>Am Ende zählen Respekt, verschiedene Ziele, übrige Tage und dein Erspartes.</li>
 </ol></details>
-    <p class="best">Fernweh · Version 2.4 · Oktober 2026</p>
+    <p class="best">Fernweh · Version 2.5 · Oktober 2026</p>
   </section>
 
   <!-- BRIEF -->
@@ -359,15 +359,13 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
       <div class="puffs" id="puffs"></div>
       <div class="bubbles" id="bubbles"></div>
     </div>
-    <div class="stats three">
-      <div class="meter"><div class="row between"><span>Kalle</span><b class="num" id="m-fit"></b></div><div class="bar"><span id="b-fit"></span></div><p class="eff" id="e-fit"></p></div>
+    <div class="stats">
       <div class="meter"><div class="row between"><span>Glanz</span><b class="num" id="m-glanz"></b></div><div class="bar"><span id="b-glanz"></span></div><p class="eff" id="e-glanz"></p></div>
       <div class="meter"><div class="row between"><span>Duft</span><b id="m-duft"></b></div><div class="bar"><span id="b-duft"></span></div><p class="eff" id="e-duft"></p></div>
     </div>
     <div class="row wrap">
       <button class="btn alt small" id="btn-wash">Hilde waschen · 20 €</button>
       <button class="btn alt small" id="btn-tree">Neues Bäumchen · 3 €</button>
-      <button class="btn alt small" id="btn-rest">Ausruhen · 1 Tag</button>
     </div>
     <div class="row wrap">
       <button class="btn alt small tgl" data-tgl="music">Musik: an</button>
@@ -395,7 +393,7 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
     <details class="howto"><summary>So wird gespielt</summary><ol>
 <li>Tippe links oder rechts auf den Bildschirm, um die Spur zu wechseln. Jeder Zusammenstoß beschädigt die Ladung.</li>
 <li>Nach 4:30 Stunden am Steuer sind 45 Minuten Pause Pflicht. Zum Rasthof kommst du über die rechte Spur.</li>
-<li>Kalle wird mit der Zeit müde. Kaffee, ein Imbiss, Pausen und ein frisches Duftbäumchen halten ihn wach.</li>
+<li>Kalle wird schnell müde und hungrig, jeder Spurwechsel kostet Kraft. Kaffee macht wach, satt wird er nur am Rasthof.</li>
 <li>Fährt ein Kollege vor dir, gib Lichthupe. Er grüßt zurück, und das bringt Respekt.</li>
 <li>Jede Strecke hat ihre Eigenheiten, etwa Nebel, Gänse, Seitenwind oder eine Fähre. Sie stehen auf dem Lieferschein.</li>
 <li>Jede Tour kostet Kalendertage. Bring die Kiste vor dem Jubiläum ans Nordkap.</li>
@@ -890,7 +888,7 @@ const UP=[
  {id:'funk',name:'CB-Funk',max:1,cost:[180],desc:'Kollegen melden dir Hindernisse, bevor du sie siehst. Jeder Gruß bringt einen Respektpunkt mehr.'},
  {id:'fanfare',name:'Dreiklang-Hupe',max:1,cost:[90],desc:'Eine Hupe mit drei Tönen. Kollegen hören dich schon von Weitem und grüßen früher zurück.'},
  {id:'licht',name:'Lichterkette',max:1,cost:[60],desc:'Bunte Lämpchen in der Kabine. Jeder Gruß bringt einen Respektpunkt mehr, und nachts leuchten deine Scheinwerfer weiter.'},
- {id:'matratze',name:'Gute Matratze',max:1,cost:[160],desc:'Eine richtige Matratze in der Schlafkabine. Pausen am Rasthof machen Kalle ganz wach, und auf jeder Tour verliert er ein Drittel weniger Erholung.'}
+ {id:'matratze',name:'Gute Matratze',max:1,cost:[160],desc:'Eine richtige Matratze in der Schlafkabine. Pausen am Rasthof machen Kalle ganz wach.'}
 ];
 /* Hindernisse. w: Breite in Spuren. rel: eigene Geschwindigkeit relativ zur Straße (1 = steht still). */
 const OB={
@@ -940,13 +938,13 @@ const HOFEV=[
  {id:'kinder',t:'Die Nachbarskinder haben Hilde gewaschen. Als Lohn wollten sie nur einmal hupen dürfen.',opts:[{btn:'Hupen lassen',fx:'horn',go:S=>{S.glanz=100}}]},
  {id:'rabatt',t:'Jupp hat heute gute Laune. In der Werkstatt kostet heute alles ein Drittel weniger.',opts:[{btn:'Zur Werkstatt',go:S=>{S.rabatt=S.day},tab:'shop'},{btn:'Später',go:S=>{S.rabatt=S.day}}]},
  {id:'spatz',t:'Über Nacht hat es geregnet, und ein Spatz hat auf Hilde gesessen. Mehrmals.',opts:[{btn:'Na toll',go:S=>{S.glanz=Math.max(0,S.glanz-20)}}]},
- {id:'kuchen',t:'Ottilie bringt dir Streuselkuchen. Kalle fühlt sich gleich erholter, und auf der nächsten Tour wird er langsamer müde.',opts:[{btn:'Danke, Ottilie',go:S=>{S.kuchen=true;S.fit=Math.min(100,S.fit+20)}}]},
+ {id:'kuchen',t:'Ottilie bringt dir Streuselkuchen. Auf der nächsten Tour hat Kalle erst mal keinen Hunger und wird langsamer müde.',opts:[{btn:'Danke, Ottilie',go:S=>{S.kuchen=true}}]},
  {id:'radio',t:'Radio Kilometerstein sucht den freundlichsten Fahrer des Landes. Jemand hat dich vorgeschlagen.',opts:[{btn:'Mal sehen',go:S=>{const win=S.respect>=12*Object.keys(S.done).length;if(win){S.money+=60;S.respect+=3}return win?'Du hast gewonnen! Es gibt 60 € und drei Respektpunkte.':'Du wirst Zweiter. Es gibt eine Tasse mit dem Logo des Senders.'}}]},
  {id:'doris',t:'Doris ruft an. Du hast bei ihr noch etwas offen. Sie sagt, es eilt nicht.',cond:S=>S.tab>0,opts:[{btn:'Bezahlen',go:S=>{const p=Math.min(S.tab,S.money);S.money-=p;S.tab-=p;S.respect+=1;return 'Du zahlst '+p+' €. Doris schreibt dir dafür „Ehrlicher Kunde“ auf die Tafel neben der Kasse.'}},{btn:'Nächstes Mal',go:S=>{}}]},
  {id:'baum',t:'Jupp hat in der Werkstatt ein Duftbäumchen von 1974 gefunden. Es riecht nach Kirsche und ein bisschen nach Abenteuer.',cond:S=>S.up.duft>0,opts:[{btn:'Aufhängen',go:S=>{S.duftFrisch=100}}]},
  {id:'mutter',t:'Kalles Mutter ruft an und fragt, ob er genug isst. Kalle sagt ja. Das stimmt sogar, dank Doris.',opts:[{btn:'Tschüss, Mama',go:S=>{}}]},
  {id:'brief',t:'Ein Brief von Ottilie: „Mein Vater hat immer gesagt, auf der Straße ist jeder ein Kollege. Auch die, die drängeln.“',opts:[{btn:'Einstecken',go:S=>{}}]},
- {id:'anlasser',t:'Hilde springt heute nicht an. Jupp könnte sofort kommen, das kostet 40 €. Oder du wartest bis morgen, dann macht er es umsonst.',opts:[{btn:'Jupp rufen · 40 €',cond:S=>S.money>=40,go:S=>{S.money-=40;return 'Jupp tauscht das Relais in zehn Minuten. „Das war der Kuss“, sagt er.'},fx:'wrench'},{btn:'Bis morgen warten',go:S=>{S.day++;S.fit=Math.min(100,S.fit+25);return 'Kalle nutzt den freien Tag und schläft sich aus. Ein Tag ist vergangen.'}}]},
+ {id:'anlasser',t:'Hilde springt heute nicht an. Jupp könnte sofort kommen, das kostet 40 €. Oder du wartest bis morgen, dann macht er es umsonst.',opts:[{btn:'Jupp rufen · 40 €',cond:S=>S.money>=40,go:S=>{S.money-=40;return 'Jupp tauscht das Relais in zehn Minuten. „Das war der Kuss“, sagt er.'},fx:'wrench'},{btn:'Bis morgen warten',go:S=>{S.day++;return 'Kalle nutzt den freien Tag und schläft sich aus. Ein Tag ist vergangen.'}}]},
  {id:'zeitung',t:'Die Lokalzeitung möchte einen Artikel über Kalle schreiben.',opts:[{btn:'Interview geben',go:S=>{if(S.respect>=60){S.respect+=5;return 'Der Artikel heißt „Der freundlichste Lastwagen der Stadt“. Sogar Jupp schneidet ihn aus.'}return 'Der Artikel wird sehr kurz: „Mann fährt Lastwagen.“ Immerhin mit Foto.'}}]},
  {id:'geburtstag',t:'Ottilie hat heute Geburtstag. Sie wird 94.',opts:[{btn:'Blumen kaufen · 15 €',cond:S=>S.money>=15,go:S=>{S.money-=15;S.respect+=4;return 'Ottilie stellt die Blumen auf den Schreibtisch, direkt neben das Foto ihres Vaters.'}},{btn:'Eine Karte schreiben',go:S=>{S.respect+=1;return 'Ottilie liest die Karte zweimal und lächelt.'}}]},
  {id:'praktikum',t:'Die Nachbarstochter Jule will Fernfahrerin werden. Sie fragt, ob sie auf der nächsten Tour mitfahren darf.',opts:[{btn:'Klar, steig ein',go:S=>{S.beifahrer='Jule';return 'Jule packt Proviant und einen Atlas ein. Mit ihr an Bord wird Kalle langsamer müde.'}},{btn:'Lieber nicht',go:S=>{}}]},
@@ -1002,7 +1000,7 @@ const rufLv=()=>{let l=0;RUF.forEach((r,i)=>{if(S.respect>=r.min)l=i});return l}
 const price=c=>Math.round(c*DIFF[S.diff].priceMul*(1-RUF_RABATT[rufLv()])*(S.rabatt===S.day?2/3:1));
 const washPrice=()=>Math.round(20*DIFF[S.diff].priceMul);
 // Kalles Erholung: bestimmt, wie wach er eine Tour beginnt
-const startEnergy=()=>Math.round(45+.55*S.fit);
+const startEnergy=()=>100;
 const fitLossFor=t=>Math.round((6+2.6*t.hours)*DIFF[S.diff].fitLoss*(S.up.matratze?.67:1));
 function offer(t){
   // Sonderwünsche je Auftrag und Tag: einmal ausgewürfelt, damit erneutes Öffnen nichts ändert
@@ -1119,7 +1117,6 @@ function nextStep(){
   if(need>daysLeft())return {t:'Bis zum Nordkap bräuchtest du noch '+need+' Tage, es bleiben aber nur '+daysLeft()+'. Die Kiste schafft es diesmal nicht. Jede Tour bringt trotzdem noch Respekt.',b:'Aufträge',go:()=>show('tours')};
   if(daysLeft()-need<=2&&!unlocked(fin))return {t:'Es wird knapp. Bis zum Nordkap brauchst du noch mindestens '+need+' Tage, und du hast '+daysLeft()+'. Fahr jetzt nur Touren, die dich weiterbringen.',b:'Aufträge',go:()=>show('tours'),dot:'tours'};
   if(!S.stats.boughtAny&&cheap&&S.money>=cheap.c)return {t:'Du hast '+eur(S.money)+' in der Kasse. In Jupps Werkstatt kannst du davon etwas für Hilde kaufen.',b:'Werkstatt',go:()=>show('shop'),dot:'shop'};
-  if(S.fit<40&&daysLeft()-need>=1)return {t:'Kalle ist erschöpft. Ein Ruhetag würde ihm guttun.',b:'Ausruhen',go:()=>rest()};
   if(S.glanz<35&&S.money>=washPrice())return {t:'Hilde ist ganz schön schmutzig. Ein sauberer Lastwagen bringt mehr Lohn und Respekt.',b:'Waschen',go:()=>wash()};
   if(duftLv()&&S.duftFrisch<30&&S.money>=3)return {t:'Das Duftbäumchen riecht kaum noch. Ein frisches hält Kalle auf der nächsten Tour länger wach.',b:'Aufhängen',go:()=>newTree()};
   if(S.rabatt===S.day&&cheap&&S.money>=cheap.c)return {t:'Heute gibt Jupp ein Drittel Rabatt auf alles in der Werkstatt.',b:'Werkstatt',go:()=>show('shop'),dot:'shop'};
@@ -1165,16 +1162,12 @@ function renderHof(){
     $('#e-duft').textContent='Gibt es bei Jupp';
   }
   $('#btn-wash').textContent='Hilde waschen · '+washPrice()+' €';$('#btn-wash').disabled=S.money<washPrice()||S.glanz>=100;
-  $('#m-fit').textContent=Math.round(S.fit)+' %';$('#b-fit').style.width=S.fit+'%';$('#b-fit').style.background=S.fit<40?'#C8432F':'';
-  $('#e-fit').textContent='startet mit '+startEnergy()+' % Wachheit';
-  $('#btn-rest').disabled=S.fit>=100||daysLeft()<=1;
   const rl=rufLv(),rn=RUF[rl+1];
   $('#ruf').textContent=rl?'★'.repeat(rl)+' '+RUF[rl].name:'';$('#ruf').title=RUF[rl].perk;
   $('#btn-tree').hidden=!duftLv();$('#btn-tree').disabled=S.money<3||S.duftFrisch>=100;
 }
 function rufCheck(){const l=rufLv();if(l>(S.rufSeen||0)){S.rufSeen=l;save();setTimeout(()=>openCard('<p class="eyebrow">Dein Ruf wächst</p><h2>'+RUF[l].name+'</h2><p class="typed" style="margin:0">'+RUF[l].perk+'</p>',[{label:'Schön',fn:closeCard}]),400)}}
 function rest(){if(S.fit>=100||daysLeft()<=1)return;S.day++;S.fit=Math.min(100,S.fit+40);save();AU.fx('yawn');toast('Kalle schläft sich aus. Ein Tag ist vergangen.');show('hof')}
-$('#btn-rest').addEventListener('click',rest);
 function wash(){
   const wp=washPrice();if(S.money<wp||S.glanz>=100)return;S.money-=wp;S.stats.washed=true;save();
   AU.fx('bubbles');bubbles(18);
@@ -1313,7 +1306,7 @@ function startDrive(t){
      exits,exitIdx:0,exitBlock:false,msgs:[],shake:0,flash:0,paused:false,ended:false,drift:2,scroll:0,off:0,hint:3.6,funkT:0,
      eilig:o.eilig,events:[],wx:weatherAt(0,t),wxA:{rain:0,fog:0,snow:0,storm:0},bolt:0,boltT:rnd(4,8),gust:null,gustT:rnd(3,6),
      speedF:1,helped:0,anhalter:null,kuchen:S.kuchen,tipT:rnd(18,26),cbT:rnd(25,40),puffT:0,blinkT:0,ending:0,rad:0,extraLines:[],extraResp:[],
-     musicRegion:t.region,stauGap:1,bauSign:false,timers:[],minE:100,naps:0,nap:null,hits:0,bonus:0,contest:null,rainbow:0,oldieN:0};
+     hunger:S.kuchen?0:25,musicRegion:t.region,stauGap:1,bauSign:false,timers:[],minE:100,naps:0,nap:null,hits:0,bonus:0,contest:null,rainbow:0,oldieN:0};
   D.minE=D.energy;
   if(S.beifahrer){D.anhalter={n:S.beifahrer,d:'die Nachbarstochter Jule mitgenommen, die jetzt unbedingt Fernfahrerin werden will'};S.beifahrer=null}
   if(S.kuchen){S.kuchen=false}
@@ -1358,7 +1351,6 @@ function startDrive(t){
   AU.init();AU.engineStart();radioTune(true);
   if(D.kuchen)msg('Ottilies Streuselkuchen liegt auf dem Beifahrersitz.','good');
   if(D.anhalter)msg(D.anhalter.n+' sitzt auf dem Beifahrersitz.','good');
-  if(D.energy<70)msg('Kalle ist noch müde.','warn');
   last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
 }
 
@@ -1423,7 +1415,7 @@ function steer(dir){
   if(!D||D.paused||D.ended)return;
   const go=()=>{if(!D||D.paused)return;let nl=clamp(D.lane+dir,0,2);
     if(segIn('bau')&&nl===0){msg('Die linke Spur ist gesperrt.','warn');return}
-    if(nl!==D.lane){D.lane=nl;AU.fx('whoosh')}};
+    if(nl!==D.lane){D.lane=nl;D.energy=Math.max(0,D.energy-1.4*DIFF[S.diff].drain);AU.fx('whoosh')}};
   if(D.nap)return;
   const dl=steerDelay(D.energy);if(dl)setTimeout(go,dl*1000);else go();
 }
@@ -1587,7 +1579,11 @@ function update(dt){
   if(D.wx==='storm'){D.boltT-=dt;if(D.boltT<=0){D.boltT=rnd(4,8);D.bolt=1;setTimeout(()=>AU.fx('thunder'),400)}}
   D.bolt=Math.max(0,D.bolt-dt*2.5);
   // Müdigkeit
-  let drain=20*df.drain*(1-duftEff())*(D.kick>0?.5:1);if(segIn('tunnel'))drain*=1.2;if(D.wx==='sun'&&D.clock%24>12&&D.clock%24<16)drain*=1.1;
+  // Kalle bekommt unterwegs Hunger. Hungrig wird er schneller müde; satt macht nur echtes Essen.
+  D.hunger=Math.min(100,D.hunger+11*df.drain*dh);
+  if(D.hunger>=70&&!D.hungry){D.hungry=true;AU.fx('grunt');msg('Kalles Magen knurrt.','info')}
+  if(D.hunger<70)D.hungry=false;
+  let drain=22*df.drain*(1-duftEff())*(D.kick>0?.5:1)*(D.hunger>=70?1.4:1);if(segIn('tunnel'))drain*=1.2;if(D.wx==='sun'&&D.clock%24>12&&D.clock%24<16)drain*=1.1;
   if(D.anhalter)drain*=.8;if(D.kuchen)drain*=.8;
   D.energy=Math.max(0,D.energy-drain*dh);
   // Lenken: Nässe und Schnee machen Hilde träge, gute Reifen helfen
@@ -1749,7 +1745,7 @@ function askHelp(o){
   D.paused=true;AU.engineSet({paused:true});
   const name=pick(['Ayşe','Rosi','Henning','Mirela','Jens']);
   openCard('<p class="eyebrow">Panne auf der Strecke</p><h2>'+name+' braucht Hilfe</h2><p class="typed" style="margin:0">'+name+' steht mit einem platten Reifen auf der Spur. Allein wird das nichts. Willst du anhalten und beim Radwechsel helfen? Das kostet etwa 20 Minuten.</p>',
-    [{label:'Anhalten und helfen <span>+0:20 h</span>',fn:()=>{closeCard();D.clock+=.33;D.helped++;D.energy=Math.min(100,D.energy+15);o.gone=true;D.objs.forEach(q=>{if(q.type==='dreieck'&&q.lane===o.lane)q.gone=true});
+    [{label:'Anhalten und helfen <span>+0:20 h</span>',fn:()=>{closeCard();D.clock+=.33;D.helped++;D.energy=Math.min(100,D.energy+15);D.hunger=Math.max(0,D.hunger-40);o.gone=true;D.objs.forEach(q=>{if(q.type==='dreieck'&&q.lane===o.lane)q.gone=true});
         S.stats.helped++;AU.fx('wrench');msg(name+' bedankt sich mit einem Stück Börek.','good');floatText('+6 Respekt',laneX(o.lx)+sway(o.y),truckY-TH);resume()}},
      {label:'Weiterfahren',cls:'alt',fn:()=>{closeCard();msg('Kalle fährt weiter. Hoffentlich hält bald jemand an.','info');resume()}}]);
 }
@@ -1796,7 +1792,7 @@ function openFaehre(){
   D.lenk=0;D.clock+=.75;D.pauses++;D.energy=Math.min(100,D.energy+25);
   const ship='<svg viewBox="0 0 200 90"><rect x="0" y="62" width="200" height="28" fill="#BFD8E6"/><path d="M0 66 q10 -5 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" stroke="#FBF1E6" stroke-width="2" fill="none"/><path d="M30 46 h140 l-14 20 h-112 z" fill="#FBF1E6" stroke="#2B2230" stroke-width="2"/><rect x="56" y="30" width="80" height="16" fill="#7B2D3B" stroke="#2B2230" stroke-width="2"/><rect x="118" y="16" width="12" height="14" fill="#D8A23A" stroke="#2B2230" stroke-width="2"/><rect x="64" y="35" width="8" height="6" fill="#BFD8E6"/><rect x="78" y="35" width="8" height="6" fill="#BFD8E6"/><rect x="92" y="35" width="8" height="6" fill="#BFD8E6"/><path d="M150 14 q4 -4 8 0 q4 -4 8 0" stroke="#2B2230" stroke-width="1.5" fill="none"/></svg>';
   const draw=(line)=>openCard('<p class="eyebrow">Fähre Puttgarden – Rødby</p><div class="ev-art">'+ship+'</div><p class="typed" style="margin:0">'+(line||'Hilde steht sicher im Bauch der Fähre. Die Überfahrt dauert 45 Minuten und zählt als Pause. Die Lenkzeit beginnt danach von vorn.')+'</p>',
-    [{label:'Fischbrötchen essen <span>3 €</span>',disabled:D._fisch||S.money<3,fn:()=>{D._fisch=true;S.money-=3;D.energy=100;D.kett++;AU.fx('slurp');draw('Mit Zwiebeln, wie es sich gehört. Kalle ist wieder hellwach.')}},
+    [{label:'Fischbrötchen essen <span>3 €</span>',disabled:D._fisch||S.money<3,fn:()=>{D._fisch=true;S.money-=3;D.energy=100;D.hunger=0;D.kett++;AU.fx('slurp');draw('Mit Zwiebeln, wie es sich gehört. Kalle ist wieder hellwach.')}},
      {label:'An Deck die Möwen ansehen',disabled:D._moewe,fn:()=>{D._moewe=true;AU.fx('gull');D.extraResp.push(['Möwen gezählt',1]);draw('Kalle zählt 37 Möwen. Eine davon klaut einem Urlauber die Pommes. Kalle muss so lachen, dass ein Matrose mitlacht.')}},
      {label:'Weiterfahren',cls:'teal',fn:()=>{closeCard();D._fisch=D._moewe=false;resume()}}]);
   draw();
@@ -1820,7 +1816,7 @@ function openRast(name){
   const hitch=!D.anhalter&&!D._hitchAsked&&Math.random()<.35?pick(ANHALTER):null;D._hitchAsked=true;
   const render=(line)=>{
     const free=rufLv()>=1;const kettLabel=H0.food+(free?' <span>spendiert</span>':S.money>=4?' <span>4 €</span>':' <span>anschreiben</span>');
-    const opts=[{label:kettLabel,disabled:D._kett,fn:()=>{D._kett=true;if(!free){if(S.money>=4)S.money-=4;else S.tab=(S.tab||0)+4}D.energy=100;D.kett++;AU.fx('slurp');render(H0.line.replace('&amp;','&'))}},
+    const opts=[{label:kettLabel,disabled:D._kett,fn:()=>{D._kett=true;if(!free){if(S.money>=4)S.money-=4;else S.tab=(S.tab||0)+4}D.energy=100;D.hunger=0;D.kett++;AU.fx('slurp');render(H0.line.replace('&amp;','&'))}},
        {label:'45 Minuten Pause <span>+0:45 h</span>',disabled:D._pause,fn:()=>{D._pause=true;D.lenk=0;D.clock+=.75;D.energy=S.up.matratze?100:Math.min(100,D.energy+35);D.pauses++;render(S.up.matratze?'Auf der guten Matratze schläft Kalle tief und fest. Er ist wieder ganz wach, und die Lenkzeit beginnt bei null.':'Kalle schläft eine Runde in der Kabine. Die Lenkzeit beginnt wieder bei null.')}},
        {label:'Hilde abspritzen <span>'+Math.round(6*DIFF[S.diff].priceMul)+' €</span>',disabled:D._wash||S.money<Math.round(6*DIFF[S.diff].priceMul),fn:()=>{D._wash=true;S.money-=Math.round(6*DIFF[S.diff].priceMul);S.glanz=Math.min(100,S.glanz+30);AU.fx('bubbles');render('Am Waschplatz ist Hilde gleich wieder sauber.')}}];
     if(duftLv()&&S.duftFrisch<70)opts.push({label:'Neues Duftbäumchen <span>3 €</span>',disabled:D._tree||S.money<3,fn:()=>{D._tree=true;S.money-=3;S.duftFrisch=100;AU.fx('pop');render('Das neue Bäumchen riecht nach '+UP[0].lv[duftLv()-1]+'.')}});
@@ -1842,7 +1838,7 @@ function hud(){
   const l=$('#h-lenk');l.textContent=fmtDur(D.lenk);l.className=D.lenk>3.9?'warn':'';
   const c=$('#h-cargo');c.textContent=Math.round(D.cargo);c.className=D.cargo<40?'warn':'';
   $('#h-energy').style.width=D.energy+'%';$('#h-energy').style.background=D.energy<40?'#C8432F':D.energy<60?'#D8A23A':'';
-  $('#h-elabel').textContent=D.nap?'Augen zu!':D.energy>=60?'Kalle ist wach':D.energy>=40?'Kalle wird müde':D.energy>=25?'Kalle ist sehr müde':'Kalle kämpft mit dem Schlaf';
+  $('#h-elabel').textContent=D.nap?'Augen zu!':D.energy<25?'Kalle kämpft mit dem Schlaf':D.hunger>=70?'Kalle hat Hunger':D.energy>=60?'Kalle ist wach':D.energy>=40?'Kalle wird müde':'Kalle ist sehr müde';
   const cb=$('#btn-coffee');cb.innerHTML='Kaffee<small>'+'●'.repeat(D.coffee)+'○'.repeat(Math.max(0,1+S.up.thermos-D.coffee))+'</small>';cb.disabled=D.coffee<=0;cb.classList.toggle('ready',D.coffee>0&&D.energy<45);
   const fb=$('#btn-flash');const k=greetTarget();fb.disabled=!k;fb.classList.toggle('ready',!!k);fb.innerHTML=k&&k.type==='panne'?'Helfen?':k&&k.type==='overpass'?'Winken':k&&k.type==='korso'?'Gratulieren':'Lichthupe';
 }
@@ -2210,7 +2206,6 @@ function finishDrive(ok,aborted){
   if(D.bonus){lines.push(['Gewinnspiel','+ '+eur(D.bonus)])}
   const net=pay+tip+D.bonus-fine-costs;
   S.money=Math.max(0,S.money+net);
-  S.fit=Math.max(0,S.fit-fitLossFor(t));
   S.respect=Math.max(0,S.respect+resp);
   S.day+=t.days;
   // Hilde wird schmutzig, das Bäumchen verliert Duft
