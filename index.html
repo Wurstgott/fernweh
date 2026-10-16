@@ -2449,7 +2449,7 @@ function finishDrive(ok,aborted){
   setTimeout(()=>AU.fx('stamp'),180);
   let html='<p class="eyebrow">Tag '+(S.day-t.days)+' · '+t.to+'</p>';
   html+='<div class="bigstamp'+(ok?'':' bad')+'">'+(ok?'Zugestellt':'Nicht zugestellt')+'</div>';
-  if(ok)html+=deliveryPic(t);
+  if(ok&&t.final)html+=deliveryPic(t);
   html+='<p class="typed" style="margin:0" id="r-note"></p>';
   if(!t.final||lines.length>4){html+='<div class="ledger">';lines.forEach(l=>html+='<span>'+l[0]+'</span><b>'+l[1]+'</b>');html+='<span class="sum">Unterm Strich</span><b class="sum countup" id="r-pay">0 €</b></div>'}
   html+='<div class="ledger">';rl.forEach(l=>html+='<span>'+l[0]+'</span><b>'+(l[1]>0?'+':'')+l[1]+'</b>');html+='<span class="sum">Respekt</span><b class="sum">'+(resp>=0?'+':'')+resp+'</b></div>';
