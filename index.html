@@ -698,7 +698,7 @@ const AU=(function(){
       case 'hochzeit':{[[523,0],[659,.12],[784,.24],[659,.42],[784,.54],[1047,.66]].forEach(([f,d])=>{const g=gain(0,D);const lp=filt('lowpass',1800,1,g);const o=_osc('sawtooth',f,t+d,lp);envASR(g,t+d,.035,.01,.08,.04);o.start(t+d);o.stop(t+d+.2)});break}
       case 'arrival':{
         // Paukenwirbel, Auftakt der Bläser, dann ein lang gehaltener Schlussakkord mit Becken und Glockenspiel
-        const big=!!(opt&&opt.big),rl=big?.8:.6;
+        const big=!!(opt&&opt.big),rl=big?.6:.45;
         const g=gain(0,D);const lp=filt('lowpass',170,1,g);noise(t,rl+.12,lp);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.38,t+rl);g.gain.linearRampToValueAtTime(0,t+rl+.12);
         const s0=t+rl;
         const up=big?[[67,0,.14],[72,.15,.14],[76,.3,.14],[79,.45,.32],[77,.8,.12],[76,.93,.12],[74,1.06,.12]]:[[67,0,.12],[72,.12,.12],[76,.24,.12],[79,.36,.28]];
@@ -1634,7 +1634,7 @@ function update(dt){
   if(segIn('stau'))target=.45;
   D.speedF+=(target-D.speedF)*Math.min(1,dt*1.5);
   // Am Ziel bremst Hilde gleichmäßig und hält genau vor der Rampe
-  const stopOff=(1+D.endPad)*D.K,rem=stopOff-D.off,BL=560*SC;
+  const stopOff=(1+D.endPad)*D.K,rem=stopOff-D.off,BL=400*SC;
   if(rem<BL){D.speedF=Math.min(D.speedF,Math.sqrt(Math.max(0,rem)/BL));
     if(!D.braked&&rem<BL*.55){D.braked=true;AU.fx('brake');AU.stop()}}
   D.scroll=TUNE.scroll*SC*df.speed*(1+TUNE.chScroll*(D.ch-1))*D.speedF;
@@ -1813,11 +1813,11 @@ function burst(x,y,type){
 function startArrival(){
   D.ending=1;D.arrive=0.001;D.inv=0;D.speedF=0;D.nap=null;$('#hint').style.opacity=0;
   D.objs=D.objs.filter(o=>o.deco||o.y>truckY+TH);
-  const big=!!D.tour.final,hit=big?3:2.26,card=big?7.2:5.6;D.skipAt=hit+.3;
+  const big=!!D.tour.final,st=big?.7:.5,hit=st+(big?1.8:1.11),card=hit+(big?3.9:3);D.skipAt=hit+.3;
   AU.engineSet({speed:.2});AU.fx('pssh');
   const tx=D.x+sway(truckY);for(let i=0;i<14;i++){const sd=i%2?1:-1;D.parts.push({k:'puff',x:tx+sd*TW*.55,y:truckY+TH*.3,vx:sd*(40+Math.random()*60),vy:(Math.random()-.5)*30,life:1.1,max:1.1,r:6*SC})}
-  later(.55,()=>AU.fx('horn'));later(.9,()=>AU.fx(S.up.fanfare?'fanfare':'horn'));
-  later(1,()=>AU.fx('arrival',{big}));
+  later(.12,()=>AU.fx('horn'));later(.38,()=>AU.fx(S.up.fanfare?'fanfare':'horn'));
+  later(st,()=>AU.fx('arrival',{big}));
   later(hit-.62,()=>{D.banner=0.001});
   later(hit,()=>{confetti();D.hop=1;D.rays=0.001;D.flashA=1;later(.12,()=>AU.fx('cheer'))});
   if(big)later(hit+1.6,()=>{confetti(true);AU.fx('cheer')});
