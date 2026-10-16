@@ -537,6 +537,12 @@ const AU=(function(){
       case 'brass':{const end=t+dur+.2;const g=gain(0,dest);const lp=filt('lowpass',600,2,g);lp.frequency.setValueAtTime(600,t);lp.frequency.linearRampToValueAtTime(2200,t+.06);O('sawtooth',f,t,lp,end);envASR(g,t,v,.03,Math.max(.03,dur-.06),.1);break}
     }
   }
+  // Ein Druckluft-Horn, aber weich: Sägezahn und Dreieck gemischt, Tiefpass, kleines Vibrato, sanfter Ein- und Ausklang
+  function hornVoice(f,t,len,v,dest){const g=gain(0,dest);const lp=filt('lowpass',1500,.8,g);lp.frequency.setValueAtTime(900,t);lp.frequency.linearRampToValueAtTime(1500,t+.06);
+    const a=_osc('sawtooth',f,t,gain(.55,lp)),b=_osc('triangle',f,t,lp),vib=_osc('sine',5.5,t,gain(f*.004,a.frequency));
+    a.frequency.setValueAtTime(f*.97,t);a.frequency.exponentialRampToValueAtTime(f,t+.06);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.035);g.gain.setValueAtTime(v,t+len);g.gain.exponentialRampToValueAtTime(.0005,t+len+.18);
+    [a,b,vib].forEach(o=>{o.start(t);o.stop(t+len+.25)})}
   const _osc=(type,f,t,dest)=>{const o=ctx.createOscillator();o.type=type;o.frequency.setValueAtTime(f,t);o.connect(dest);return o};
   function drum(k,t,v,dest){
     switch(k){
@@ -659,15 +665,13 @@ const AU=(function(){
       case 'thud':{const g=gain(0,D);const o=_osc('sine',110,t,g);o.frequency.exponentialRampToValueAtTime(40,t+.2);envAD(g,t,.5,.002,.3);o.start(t);o.stop(t+.4);
         const g2=gain(0,D);const bp=filt('bandpass',900,1.5,g2);noise(t,.3,bp);envAD(g2,t,.18,.002,.22);
         for(let i=0;i<4;i++){const gg=gain(0,D);const bb=filt('bandpass',1400+Math.random()*1600,4,gg);noise(t+.05+i*.05,.06,bb);envAD(gg,t+.05+i*.05,.08,.001,.05)}break}
-      case 'horn':{[311,392].forEach(f=>{const g=gain(0,D);const lp=filt('lowpass',1600,1,g);const o=_osc('sawtooth',f,t,lp);envASR(g,t,.05,.02,.38,.08);o.start(t);o.stop(t+.55)});break}
-      case 'hornBack':{const t2=t+.35;[233,294].forEach(f=>{const g=gain(0,D);const lp=filt('lowpass',1200,1,g);const o=_osc('sawtooth',f,t2,lp);envASR(g,t2,.045,.02,.45,.1);o.start(t2);o.stop(t2+.6)});break}
+      case 'horn':{
+        // Zweiklang E und G, passt zur Tonart der Fanfare (C-Dur)
+        [330,392].forEach(f=>hornVoice(f,t,.32,.045,D));break}
+      case 'hornBack':{const t2=t+.35;[262,330].forEach(f=>hornVoice(f,t2,.38,.035,D));break}
       case 'fanfare':{
-        // Dreiklanghorn: drei Druckluft-Hörner blasen gleichzeitig einen Dur-Akkord, kurz und dann lang
-        [[0,.16],[.24,.62]].forEach(([d,l])=>{const st=t+d;
-          [370,466,554].forEach((f,i)=>{const g=gain(0,D);const bp=filt('bandpass',f*2.2,.9,g);const lp=filt('lowpass',2600,.7,bp);
-            const o=_osc('sawtooth',f*(1+(i-1)*.002),st,lp);const q=_osc('square',f,st,gain(.35,lp));
-            o.frequency.setValueAtTime(f*.94,st);o.frequency.exponentialRampToValueAtTime(f,st+.05);
-            envASR(g,st,.06,.025,l,.09);o.start(st);o.stop(st+l+.2);q.start(st);q.stop(st+l+.2)})});break}
+        // Dreiklanghorn als kleine Kadenz: kurz G-Dur, dann lang C-Dur. Klingt nach Ankommen statt nach Lärm.
+        [[392,494,587],[392,523,659]].forEach((ch,k)=>{const st=t+k*.22,len=k?.55:.13;ch.forEach(f=>hornVoice(f,st,len,.038,D))});break}
       case 'ding':{inst('bell',88,t,.2,.12,D);inst('bell',93,t+.08,.3,.1,D);break}
       case 'dingdong':{inst('bell',76,t,.4,.14,D);inst('bell',72,t+.32,.6,.14,D);break}
       case 'coins':{for(let i=0;i<(opt||5);i++){const s=t+i*.07;inst('bell',96+(i%3)*2,s,.1,.06,D)}break}
@@ -687,14 +691,18 @@ const AU=(function(){
       case 'thunder':{const g=gain(0,D);const lp=filt('lowpass',180,.7,g);noise(t,2.8,lp);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.5,t+.08);g.gain.exponentialRampToValueAtTime(.001,t+2.6);break}
       case 'wind':{const g=gain(0,D);const bp=filt('bandpass',500,1.5,g);bp.frequency.setValueAtTime(400,t);bp.frequency.linearRampToValueAtTime(1100,t+.8);bp.frequency.linearRampToValueAtTime(500,t+1.8);noise(t,2,bp);envASR(g,t,.14,.5,.6,.8);break}
       case 'static':{const g=gain(0,D);const bp=filt('bandpass',2400,.4,g);noise(t,.3,bp);envASR(g,t,.06,.01,.18,.08);break}
-      case 'brake':{const g=gain(0,D);const bp=filt('bandpass',2600,8,g);noise(t,.6,bp);envASR(g,t,.04,.05,.35,.2);const g2=gain(0,D);const o=_osc('sawtooth',90,t,filt('lowpass',300,1,g2));o.frequency.linearRampToValueAtTime(45,t+.8);envASR(g2,t,.08,.02,.6,.2);o.start(t);o.stop(t+.9);break}
+      case 'brake':{const g=gain(0,D);const bp=filt('bandpass',1400,1.2,g);noise(t,.8,bp);envASR(g,t,.05,.15,.35,.3);
+        const g2=gain(0,D);const o=_osc('sine',70,t,filt('lowpass',200,1,g2));o.frequency.linearRampToValueAtTime(42,t+.9);envASR(g2,t,.1,.05,.6,.25);o.start(t);o.stop(t+1);break}
       case 'arrive':{[[65,0],[69,.12],[72,.24],[77,.36]].forEach(([m,d])=>inst('brass',m,t+d,d===.36?.6:.14,.09,D));inst('bell',89,t+.4,.4,.08,D);break}
       case 'sad':{[[67,0],[66,.25],[65,.5],[64,.75]].forEach(([m,d])=>inst('tuba',m-12,t+d,.3,.2,D));break}
       case 'yawn':{const g=gain(0,D);const lp=filt('lowpass',900,4,g);const o=_osc('sawtooth',230,t,lp);o.frequency.linearRampToValueAtTime(320,t+.4);o.frequency.linearRampToValueAtTime(150,t+1.2);lp.frequency.linearRampToValueAtTime(400,t+1.2);envASR(g,t,.07,.15,.7,.4);o.start(t);o.stop(t+1.4);break}
       case 'heart':{[0,.28].forEach(d=>{const g=gain(0,D);const o=_osc('sine',62,t+d,g);envAD(g,t+d,.5,.005,.18);o.start(t+d);o.stop(t+d+.25)});break}
       case 'wake':{const g=gain(0,D);const o=_osc('triangle',300,t,g);o.frequency.exponentialRampToValueAtTime(900,t+.15);envAD(g,t,.06,.005,.15);o.start(t);o.stop(t+.2);break}
       case 'quack':{for(let i=0;i<3;i++){const s=t+i*.13+Math.random()*.04;const g=gain(0,D);const bp=filt('bandpass',1300,3,g);const o=_osc('square',700,s,bp);o.frequency.exponentialRampToValueAtTime(480,s+.08);envAD(g,s,.07,.004,.08);o.start(s);o.stop(s+.12)}break}
-      case 'cheer':{const g=gain(0,D);const bp=filt('bandpass',1500,.6,g);noise(t,1.3,bp);envASR(g,t,.09,.15,.7,.4);for(let i=0;i<5;i++){const s=t+.1+i*.18;const g2=gain(0,D);const o=_osc('triangle',800+Math.random()*500,s,g2);o.frequency.linearRampToValueAtTime(1200+Math.random()*400,s+.12);envAD(g2,s,.025,.01,.12);o.start(s);o.stop(s+.15)}break}
+      case 'cheer':{
+        // Leiser Jubel: weiches Stimmengewirr und ein paar Pfiffe auf den Tönen des Schlussakkords
+        const g=gain(0,D);const bp=filt('bandpass',1100,.5,g);noise(t,1.4,bp);envASR(g,t,.05,.2,.6,.6);
+        [1047,1319,1568,1319].forEach((f,i)=>{const s0=t+.15+i*.21;const g2=gain(0,D);const o=_osc('sine',f*.94,s0,g2);o.frequency.exponentialRampToValueAtTime(f,s0+.08);envAD(g2,s0,.018,.02,.18);o.start(s0);o.stop(s0+.25)});break}
       case 'hochzeit':{[[523,0],[659,.12],[784,.24],[659,.42],[784,.54],[1047,.66]].forEach(([f,d])=>{const g=gain(0,D);const lp=filt('lowpass',1800,1,g);const o=_osc('sawtooth',f,t+d,lp);envASR(g,t+d,.035,.01,.08,.04);o.start(t+d);o.stop(t+d+.2)});break}
       case 'arrival':{
         // Paukenwirbel, Auftakt der Bläser, dann ein lang gehaltener Schlussakkord mit Becken und Glockenspiel
@@ -702,22 +710,22 @@ const AU=(function(){
         const g=gain(0,D);const lp=filt('lowpass',170,1,g);noise(t,rl+.12,lp);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.38,t+rl);g.gain.linearRampToValueAtTime(0,t+rl+.12);
         const s0=t+rl;
         const up=big?[[67,0,.14],[72,.15,.14],[76,.3,.14],[79,.45,.32],[77,.8,.12],[76,.93,.12],[74,1.06,.12]]:[[67,0,.12],[72,.12,.12],[76,.24,.12],[79,.36,.28]];
-        up.forEach(([m,d,l])=>inst('brass',m,s0+d,l,.11,D));
+        up.forEach(([m,d,l])=>inst('brass',m,s0+d,l,.085,D));
         const hit=s0+(big?1.2:.66),L=big?3.6:2.8;
         if(big)[60,62,64,65,67,69,71,72,74,76,77,79].forEach((m,i)=>inst('harp',m+12,s0+.82+i*.03,.2,.05,D));
         const sus=(m,v,cut)=>{const f=mtof(m);const g2=gain(0,D);const l2=filt('lowpass',600,1.2,g2);l2.frequency.setValueAtTime(600,hit);l2.frequency.linearRampToValueAtTime(cut,hit+.07);l2.frequency.exponentialRampToValueAtTime(Math.min(cut,900),hit+L);
           [1,1.0045].forEach(k=>{const o=_osc('sawtooth',f*k,hit,l2);o.start(hit);o.stop(hit+L+.05)});
           g2.gain.setValueAtTime(0,hit);g2.gain.linearRampToValueAtTime(v,hit+.04);g2.gain.linearRampToValueAtTime(v*.72,hit+.4);g2.gain.setValueAtTime(v*.72,hit+L*.42);g2.gain.exponentialRampToValueAtTime(.0004,hit+L)};
-        (big?[67,72,76,79,84]:[72,76,79,84]).forEach(m=>sus(m,.032,2400));[36,48,55].forEach(m=>sus(m,m===36?.05:.06,700));
+        (big?[67,72,76,79]:[72,76,79]).forEach(m=>sus(m,.03,1500));sus(84,.012,1300);[36,48,55].forEach(m=>sus(m,m===36?.045:.05,600));
         const gr=gain(0,D);const lr=filt('lowpass',150,1,gr);noise(hit,L*.7,lr);gr.gain.setValueAtTime(.22,hit);gr.gain.exponentialRampToValueAtTime(.001,hit+L*.65);
-        const gc=gain(0,D);const hp=filt('highpass',5000,.7,gc);noise(hit,2.6,hp);envAD(gc,hit,.22,.005,2.4);
+        const gc=gain(0,D);const hp=filt('bandpass',6500,.6,gc);noise(hit,1.8,hp);envAD(gc,hit,.08,.01,1.5);
         const gk=gain(0,D);const ok=_osc('sine',120,hit,gk);ok.frequency.exponentialRampToValueAtTime(48,hit+.3);envAD(gk,hit,.65,.003,.5);ok.start(hit);ok.stop(hit+.8);
         [84,88,91,96,100,103,108].forEach((m,i)=>inst('celesta',m,hit+.12+i*.08,.3,.06,D));
         inst('bell',96,hit+1.3,.6,.05,D);if(big)inst('bell',103,hit+2.1,.8,.045,D);
         break}
       case 'ring':{for(let r=0;r<2;r++){const st=t+r*.55;const g=gain(0,D);const bp=filt('bandpass',1300,3,g);const o=_osc('square',1250,st,bp);const lf=_osc('square',22,st,gain(80,o.frequency));envASR(g,st,.045,.01,.32,.05);o.start(st);o.stop(st+.42);lf.start(st);lf.stop(st+.42)}break}
       case 'rumble':{const g=gain(0,D);const lp=filt('lowpass',220,1,g);noise(t,1.2,lp);const am=_osc('square',26,t,gain(.18,g.gain));am.start(t);am.stop(t+1.2);envASR(g,t,.3,.03,.85,.25);break}
-      case 'pssh':{const g=gain(0,D);const hp=filt('highpass',3000,.5,g);noise(t,.75,hp);envAD(g,t,.2,.01,.65);break}
+      case 'pssh':{const g=gain(0,D);const bp=filt('bandpass',2200,.7,g);bp.frequency.setValueAtTime(2600,t);bp.frequency.exponentialRampToValueAtTime(1200,t+.6);noise(t,.7,bp);envAD(g,t,.09,.02,.6);break}
       case 'pop':{const g=gain(0,D);const o=_osc('sine',300,t,g);o.frequency.exponentialRampToValueAtTime(900,t+.08);envAD(g,t,.1,.002,.08);o.start(t);o.stop(t+.12);break}
     }
   }
@@ -1816,7 +1824,7 @@ function startArrival(){
   const big=!!D.tour.final,st=big?.7:.5,hit=st+(big?1.8:1.11),card=hit+(big?3.9:3);D.skipAt=hit+.3;
   AU.engineSet({speed:.2});AU.fx('pssh');
   const tx=D.x+sway(truckY);for(let i=0;i<14;i++){const sd=i%2?1:-1;D.parts.push({k:'puff',x:tx+sd*TW*.55,y:truckY+TH*.3,vx:sd*(40+Math.random()*60),vy:(Math.random()-.5)*30,life:1.1,max:1.1,r:6*SC})}
-  later(.12,()=>AU.fx('horn'));later(.38,()=>AU.fx(S.up.fanfare?'fanfare':'horn'));
+  later(.12,()=>AU.fx(S.up.fanfare?'fanfare':'horn'));
   later(st,()=>AU.fx('arrival',{big}));
   later(hit-.62,()=>{D.banner=0.001});
   later(hit,()=>{confetti();D.hop=1;D.rays=0.001;D.flashA=1;later(.12,()=>AU.fx('cheer'))});
