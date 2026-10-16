@@ -646,8 +646,9 @@ const AU=(function(){
   }
 
   /* ---------- Effekte ---------- */
-  function fx(name,opt){
-    const c=init();if(!c||!set.sfx)return;const t=c.currentTime+.005;const D=sfxG;
+  function fx(name,opt){const c=init();if(!c||!set.sfx)return;fxRaw(name,opt)}
+  function fxRaw(name,opt){
+    const c=ctx;const t=c.currentTime+.005;const D=sfxG;
     switch(name){
       case 'click':{const g=gain(0,D);const hp=filt('highpass',1800,.7,g);noise(t,.03,hp);envAD(g,t,.12,.001,.02);break}
       case 'whoosh':{const g=gain(0,D);const bp=filt('bandpass',700,1.2,g);bp.frequency.setValueAtTime(600,t);bp.frequency.exponentialRampToValueAtTime(1900,t+.16);noise(t,.22,bp);envAD(g,t,.07,.03,.16);break}
@@ -656,7 +657,13 @@ const AU=(function(){
         for(let i=0;i<4;i++){const gg=gain(0,D);const bb=filt('bandpass',1400+Math.random()*1600,4,gg);noise(t+.05+i*.05,.06,bb);envAD(gg,t+.05+i*.05,.08,.001,.05)}break}
       case 'horn':{[311,392].forEach(f=>{const g=gain(0,D);const lp=filt('lowpass',1600,1,g);const o=_osc('sawtooth',f,t,lp);envASR(g,t,.05,.02,.38,.08);o.start(t);o.stop(t+.55)});break}
       case 'hornBack':{const t2=t+.35;[233,294].forEach(f=>{const g=gain(0,D);const lp=filt('lowpass',1200,1,g);const o=_osc('sawtooth',f,t2,lp);envASR(g,t2,.045,.02,.45,.1);o.start(t2);o.stop(t2+.6)});break}
-      case 'fanfare':{[392,494,587,784].forEach((f,i)=>{const s=t+i*.11;const g=gain(0,D);const lp=filt('lowpass',2000,1,g);const o=_osc('sawtooth',f,s,lp);envASR(g,s,.045,.01,i===3?.3:.08,.06);o.start(s);o.stop(s+.5)});break}
+      case 'fanfare':{
+        // Dreiklanghorn: drei Druckluft-Hörner blasen gleichzeitig einen Dur-Akkord, kurz und dann lang
+        [[0,.16],[.24,.62]].forEach(([d,l])=>{const st=t+d;
+          [370,466,554].forEach((f,i)=>{const g=gain(0,D);const bp=filt('bandpass',f*2.2,.9,g);const lp=filt('lowpass',2600,.7,bp);
+            const o=_osc('sawtooth',f*(1+(i-1)*.002),st,lp);const q=_osc('square',f,st,gain(.35,lp));
+            o.frequency.setValueAtTime(f*.94,st);o.frequency.exponentialRampToValueAtTime(f,st+.05);
+            envASR(g,st,.06,.025,l,.09);o.start(st);o.stop(st+l+.2);q.start(st);q.stop(st+l+.2)})});break}
       case 'ding':{inst('bell',88,t,.2,.12,D);inst('bell',93,t+.08,.3,.1,D);break}
       case 'dingdong':{inst('bell',76,t,.4,.14,D);inst('bell',72,t+.32,.6,.14,D);break}
       case 'coins':{for(let i=0;i<(opt||5);i++){const s=t+i*.07;inst('bell',96+(i%3)*2,s,.1,.06,D)}break}
@@ -726,7 +733,14 @@ const AU=(function(){
     let bin='';const u8=new Uint8Array(pcm.buffer);for(let i=0;i<u8.length;i+=8192)bin+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));
     return {sr,peak,b64:btoa(bin)};
   }
-  return {_render,jingle,set,init,apply,setDuck,fx,play,stop,engineStart,engineSet,engineStop,
+  // Nur für Tests: einen Effekt offline aufnehmen und Spitzen- und Effektivpegel melden
+  async function _renderFx(name,opt,sec){const keep={ctx,sfxG,noiseBuf,set:set.sfx};const sr=22050;const off=new OfflineAudioContext(1,Math.ceil(sr*sec),sr);ctx=off;
+    sfxG=off.createGain();sfxG.connect(off.destination);noiseBuf=off.createBuffer(1,sr*2,sr);const nd=noiseBuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+    set.sfx=true;const ci=init;fx.__off=true;
+    try{fxRaw(name,opt)}finally{}
+    const buf=await off.startRendering();ctx=keep.ctx;sfxG=keep.sfxG;noiseBuf=keep.noiseBuf;set.sfx=keep.set;
+    const d=buf.getChannelData(0);let pk=0,ss=0;for(const v of d){pk=Math.max(pk,Math.abs(v));ss+=v*v}return {peak:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4)}}
+  return {_render,_renderFx,jingle,set,init,apply,setDuck,fx,play,stop,engineStart,engineSet,engineStop,
     toggleSfx(){set.sfx=!set.sfx;store.set('fw-sfx',set.sfx);apply();return set.sfx},
     toggleMusic(){set.music=!set.music;store.set('fw-music',set.music);apply();return set.music},
     setStation(i){set.station=i;store.set('fw-station',i)},
@@ -904,14 +918,14 @@ const TOURS=[
   note:'Am Ende der Straße wartet eine alte Frau mit einem Zettel von 1926. Erst hat ihre Mutter auf die Kiste gewartet, dann sie selbst. Sie weint ein bisschen. Dann lacht sie und kocht Kalle einen Kaffee.'}
 ];
 const UP=[
- {id:'duft',name:'Duftbäumchen',max:3,cost:[15,40,70],lv:['Tanne','Vanille','Black Ice'],eff:[0,.12,.2,.3],fade:[0,40,30,20],
+ {id:'duft',name:'Duftbäumchen',max:3,cost:[20,45,80],lv:['Tanne','Vanille','Black Ice'],eff:[0,.12,.2,.3],fade:[0,40,30,20],
   desc:'Mit frischer Luft in der Kabine wird Kalle langsamer müde. Bessere Sorten wirken stärker und duften länger.'},
  {id:'thermos',name:'Große Thermoskanne',max:3,cost:[30,70,120],desc:'Kalle hat auf jeder Tour einen Becher Kaffee dabei. Jede Stufe füllt einen Becher mehr ein.'},
- {id:'reifen',name:'Neue Reifen',max:3,cost:[120,260,420],desc:'Jede Stufe senkt den Schaden bei Zusammenstößen um 15 %. Außerdem lenkt Hilde bei Regen und Schnee sicherer.'},
- {id:'spiegel',name:'Weitwinkelspiegel',max:2,cost:[140,280],desc:'Ein gelbes Dreieck am oberen Rand zeigt dir, was gleich auf deiner Spur auftaucht. Mit der zweiten Stufe siehst du es noch früher.'},
+ {id:'reifen',name:'Neue Reifen',max:3,cost:[100,200,320],desc:'Jede Stufe senkt den Schaden bei Zusammenstößen und die Reparaturkosten um 15 %. Außerdem lenkt Hilde bei Regen und Schnee sicherer.'},
+ {id:'spiegel',name:'Weitwinkelspiegel',max:2,cost:[120,240],desc:'Ein gelbes Dreieck am oberen Rand zeigt dir, was gleich auf deiner Spur auftaucht. Mit der zweiten Stufe siehst du es noch früher.'},
  {id:'funk',name:'CB-Funk',max:1,cost:[180],desc:'Kollegen melden dir Hindernisse, bevor du sie siehst. Jeder Gruß bringt einen Respektpunkt mehr.'},
- {id:'fanfare',name:'Dreiklang-Hupe',max:1,cost:[90],desc:'Eine Hupe mit drei Tönen. Kollegen hören dich schon von Weitem und grüßen früher zurück.'},
- {id:'licht',name:'Lichterkette',max:1,cost:[60],desc:'Bunte Lämpchen in der Kabine. Jeder Gruß bringt einen Respektpunkt mehr, und nachts leuchten deine Scheinwerfer weiter.'},
+ {id:'fanfare',name:'Dreiklang-Hupe',max:1,cost:[70],desc:'Drei Hörner, die zusammen einen Dur-Akkord blasen. Kollegen hören dich schon von Weitem, und du kannst sie früher grüßen.'},
+ {id:'licht',name:'Lichterkette',max:1,cost:[90],desc:'Bunte Lämpchen in der Kabine. Jeder Gruß bringt einen Respektpunkt mehr, und nachts leuchten deine Scheinwerfer weiter.'},
  {id:'matratze',name:'Gute Matratze',max:1,cost:[160],desc:'Eine richtige Matratze in der Schlafkabine. Pausen am Rasthof machen Kalle ganz wach.'}
 ];
 /* Hindernisse. w: Breite in Spuren. rel: eigene Geschwindigkeit relativ zur Straße (1 = steht still). */
@@ -2443,7 +2457,7 @@ function finishDrive(ok,aborted){
     costs+=Math.round(DIESEL_PRO_STUNDE*t.hours*(ok?1:Math.max(.2,D.prog)));
     if(ok&&t.maut)costs+=t.maut;
   }
-  const repair=Math.round(D.hits*6*DIFF[S.diff].dmg);costs+=repair;
+  const repair=Math.round(D.hits*6*DIFF[S.diff].dmg*(1-.15*S.up.reifen));costs+=repair;
   if(costs)lines.push(['Diesel'+(ok&&t.maut?(t.id==='kop'?', Fähre':', Maut'):'')+(repair?', Reparatur':''),'− '+eur(costs)]);
   if(D.bonus){lines.push(['Gewinnspiel','+ '+eur(D.bonus)])}
   const net=pay+tip+D.bonus-fine-costs;
@@ -2470,7 +2484,6 @@ function finishDrive(ok,aborted){
   setTimeout(()=>AU.fx('stamp'),180);
   let html='<p class="eyebrow">Tag '+(S.day-t.days)+' · '+t.to+'</p>';
   html+='<div class="bigstamp'+(ok?'':' bad')+'">'+(ok?'Zugestellt':'Nicht zugestellt')+'</div>';
-  if(ok&&t.final)html+=deliveryPic(t);
   html+='<p class="typed" style="margin:0" id="r-note"></p>';
   if(!t.final||lines.length>4){html+='<div class="ledger">';lines.forEach(l=>html+='<span>'+l[0]+'</span><b>'+l[1]+'</b>');html+='<span class="sum">Unterm Strich</span><b class="sum countup" id="r-pay">0 €</b></div>'}
   html+='<div class="ledger">';rl.forEach(l=>html+='<span>'+l[0]+'</span><b>'+(l[1]>0?'+':'')+l[1]+'</b>');html+='<span class="sum">Respekt</span><b class="sum">'+(resp>=0?'+':'')+resp+'</b></div>';
