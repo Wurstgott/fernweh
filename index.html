@@ -309,6 +309,9 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
 @keyframes develop{from{filter:sepia(1) brightness(1.7) contrast(.45)}to{filter:none}}
 .lcd.ott .lcd-tx span,.lcd.ott .lcd-st{color:#F6C9CF}
 .topbar>div:last-child{cursor:pointer}
+.kiste-btn,.tour.final .kiste-btn,.next.final .kiste-btn{background:var(--mustard)!important;color:var(--ink)!important;opacity:1!important;-webkit-text-fill-color:var(--ink);animation:kiste 2.4s ease-in-out infinite}
+@keyframes kiste{0%,100%{background:#D8A23A}50%{background:#F0C566}}
+@media (prefers-reduced-motion: reduce){.kiste-btn{animation:none}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -1200,7 +1203,7 @@ function renderHof(){
   $('#next').className='next'+(n.final?' final':'');
   $('#next').innerHTML=n.final?'<div class="crate" aria-hidden="true"><span>1926</span></div><div><p class="eyebrow">Die Jubiläumsfahrt</p><p></p></div>':'<div><p class="eyebrow">Als Nächstes</p><p></p></div>';
   $('#next p:last-child').textContent=n.t;
-  const b=document.createElement('button');b.className='btn alt small';b.textContent=n.b;b.addEventListener('click',()=>{AU.fx('click');n.go()});$('#next').appendChild(b);
+  const b=document.createElement('button');b.className='btn small'+(n.final?' kiste-btn':' alt');b.textContent=n.b;b.addEventListener('click',()=>{AU.fx('click');n.go()});$('#next').appendChild(b);
   $('#hilde-svg').innerHTML=hildeSVG(hildeOpts());
   $('#m-glanz').textContent=Math.round(S.glanz)+' %';$('#b-glanz').style.width=S.glanz+'%';
   const gf=Math.round(S.glanz/5);
@@ -1279,7 +1282,7 @@ function renderTours(){
       if(!un){const p=document.createElement('div');p.className='meta';p.textContent='Fahr zuerst zwei Touren aus '+CHAP[ch-1].split(' · ')[0]+'.';c.appendChild(p)}
       else if(!t.final&&fits(t)&&!S.finale&&needDays()<=daysLeft()&&needDays(t.id)>daysLeft()-t.days){const p=document.createElement('div');p.className='meta';p.style.color='#C8432F';p.textContent='Achtung: Nach dieser Tour reicht die Zeit nicht mehr bis zum Nordkap.';c.appendChild(p);addBtn()}
       else if(fits(t)&&!(t.final&&S.finale))addBtn();
-      function addBtn(){const b=document.createElement('button');b.className='btn small '+(t.final?'alt kiste-btn':'');b.style.gridColumn='1/-1';b.textContent=t.final?'Die Kiste laden':'Auftrag ansehen';b.addEventListener('click',()=>{AU.fx('click');brief(t)});c.appendChild(b)}
+      function addBtn(){const b=document.createElement('button');b.className='btn small'+(t.final?' kiste-btn':'');b.style.gridColumn='1/-1';b.textContent=t.final?'Die Kiste laden':'Auftrag ansehen';b.addEventListener('click',()=>{AU.fx('click');brief(t)});c.appendChild(b)}
       L.appendChild(c);
     });
   });
