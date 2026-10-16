@@ -974,7 +974,7 @@ const HOFEV=[
  {id:'radio',t:'Radio Kilometerstein sucht den freundlichsten Fahrer des Landes. Jemand hat dich vorgeschlagen.',opts:[{btn:'Mal sehen',go:S=>{const win=S.respect>=12*Object.keys(S.done).length;if(win){S.money+=60;S.respect+=3}return win?'Du hast gewonnen! Es gibt 60 € und drei Respektpunkte.':'Du wirst Zweiter. Es gibt eine Tasse mit dem Logo des Senders.'}}]},
  {id:'doris',t:'Doris ruft an. Du hast bei ihr noch etwas offen. Sie sagt, es eilt nicht.',cond:S=>S.tab>0,opts:[{btn:'Bezahlen',go:S=>{const p=Math.min(S.tab,S.money);S.money-=p;S.tab-=p;S.respect+=1;return 'Du zahlst '+p+' €. Doris schreibt dir dafür „Ehrlicher Kunde“ auf die Tafel neben der Kasse.'}},{btn:'Nächstes Mal',go:S=>{}}]},
  {id:'baum',t:'Jupp hat in der Werkstatt ein Duftbäumchen von 1974 gefunden. Es riecht nach Kirsche und ein bisschen nach Abenteuer.',cond:S=>S.up.duft>0,opts:[{btn:'Aufhängen',go:S=>{S.duftFrisch=100}}]},
- {id:'mutter',t:'Kalles Mutter ruft an und fragt, ob er genug isst. Kalle sagt ja. Das stimmt sogar, dank Doris.',opts:[{btn:'Tschüss, Mama',go:S=>{}}]},
+ {id:'mutter',t:'Kalles Mutter ruft an und fragt, ob er genug isst. Kalle sagt ja. Das stimmt sogar.',opts:[{btn:'Tschüss, Mama',go:S=>{}}]},
  {id:'brief',t:'Ein Brief von Ottilie: „Mein Vater hat immer gesagt, auf der Straße ist jeder ein Kollege. Auch die, die drängeln.“',opts:[{btn:'Einstecken',go:S=>{}}]},
  {id:'anlasser',t:'Hilde springt heute nicht an. Jupp könnte sofort kommen, das kostet 40 €. Oder du wartest bis morgen, dann macht er es umsonst.',opts:[{btn:'Jupp rufen · 40 €',cond:S=>S.money>=40,go:S=>{S.money-=40;return 'Jupp tauscht das Relais in zehn Minuten. „Das war der Kuss“, sagt er.'},fx:'wrench'},{btn:'Bis morgen warten',go:S=>{S.day++;return 'Kalle nutzt den freien Tag und schläft sich aus. Ein Tag ist vergangen.'}}]},
  {id:'zeitung',t:'Die Lokalzeitung möchte einen Artikel über Kalle schreiben.',opts:[{btn:'Interview geben',go:S=>{if(S.respect>=60){S.respect+=5;return 'Der Artikel heißt „Der freundlichste Lastwagen der Stadt“. Sogar Jupp schneidet ihn aus.'}return 'Der Artikel wird sehr kurz: „Mann fährt Lastwagen.“ Immerhin mit Foto.'}}]},
@@ -2186,9 +2186,9 @@ function drawSpalier(){
       cx.fillStyle=Math.floor(D.t*3+i+side)%2?'#F0A830':'rgba(240,168,48,.25)';cx.beginPath();cx.arc(side?W-5*s:5*s,y+10*s,4.5*s,0,7);cx.fill();
       personTop(x,y,vests[(i+side)%4],hairs[(i*3+side)%4],true,i*1.7+side,s*.95)})}
 }
-/* Das Ziel: ein Vorplatz vor der Rampe. Am Nordkap stattdessen der Globus über dem Meer. */
+/* Am Nordkap endet die Straße am Globus über dem Meer */
 function drawDest(){
-  if(D.prog<.95)return;
+  if(D.prog<.95||!D.tour.final)return;
   const s=SC,edge=truckY-TH/2-16*s-((1+D.endPad)*D.K-D.off);
   if(edge<-10)return;
   const nk=!!D.tour.final,tx=D.x+sway(truckY),wave=D.arrive>.4;
@@ -2213,19 +2213,6 @@ function drawDest(){
     personTop(ox,oy,'#C8432F','#DAD5CD',wave,0,s*1.55);
     cx.fillStyle='#FBF1E6';cx.strokeStyle='#2B2230';cx.lineWidth=1;cx.beginPath();cx.arc(ox-16*s,oy+9*s,4*s,0,7);cx.fill();cx.stroke();
     if(D.arrive&&Math.random()<.12)D.parts.push({k:'steam',x:ox-16*s,y:oy+5*s,vx:0,vy:-16,life:1,max:1,r:2.4*s});
-  }else{
-    const bw=Math.min(W*.9,340*s),bh=110*s,by=edge-176*s;
-    const col=['#7B2D3B','#2F6F73','#2B5C9A','#8C6248'][Math.floor(hash(D.tour.km)*4)];
-    cx.fillStyle='rgba(43,34,48,.2)';cx.fillRect(W/2-bw/2+6,by+6,bw,bh);
-    cx.fillStyle=col;cx.strokeStyle='#2B2230';cx.lineWidth=2;cx.fillRect(W/2-bw/2,by,bw,bh);cx.strokeRect(W/2-bw/2,by,bw,bh);
-    cx.strokeStyle='rgba(255,255,255,.16)';for(let i=1;i<7;i++){cx.beginPath();cx.moveTo(W/2-bw/2,by+i*bh/7);cx.lineTo(W/2+bw/2,by+i*bh/7);cx.stroke()}
-    cx.fillStyle='#9C98A0';cx.strokeStyle='#2B2230';cx.fillRect(tx-TW*.8,by+bh,TW*1.6,18*s);cx.strokeRect(tx-TW*.8,by+bh,TW*1.6,18*s);
-    cx.fillStyle='#F0C566';for(let i=0;i<5;i++)cx.fillRect(tx-TW*.8+i*TW*.34,by+bh+13*s,TW*.17,4*s);
-    cx.fillStyle='#FBF1E6';rr(W/2-72*s,by+bh*.25,144*s,30*s,4*s);cx.fill();cx.stroke();
-    cx.fillStyle='#2B2230';cx.textAlign='center';cx.font='700 '+Math.round(12*s)+'px Jost, Futura, sans-serif';cx.fillText('WARENANNAHME',W/2,by+bh*.25+20*s,134*s);
-    drawBunting(edge-74*s);
-    const cl=['#2F6F73','#D8A23A','#7B2D3B'],hr=['#5E4A2E','#C9B79C','#2B2230'];
-    [-62,62,118].forEach((dx,i)=>{const px=clamp(tx+(tx>W*.6&&i===2?-118:dx)*s,24*s,W-24*s);personTop(px,edge-30*s-(i%2)*8*s,cl[i],hr[i],wave,i*2.1,s*1.45)});
   }
   cx.restore();
 }
