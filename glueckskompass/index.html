@@ -40,10 +40,20 @@ button{font:inherit;color:inherit;cursor:pointer}
 a{color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 .app{max-width:580px;margin:0 auto;min-height:100%;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px calc(96px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:22px}
-header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-.mark{font-family:var(--f-display);font-weight:800;font-size:26px;letter-spacing:-.02em;line-height:1}
+header.top{display:grid;grid-template-columns:auto 1fr auto;align-items:center;column-gap:12px;row-gap:12px}
+.logo{width:40px;height:40px;border-radius:50%;background:conic-gradient(from -90deg,var(--c-ich) 0 20%,var(--c-wir) 0 40%,var(--c-welt) 0 60%,var(--c-sein) 0 80%,var(--c-zeit) 0 100%);display:grid;place-items:center}
+.logo span{width:28px;height:28px;border-radius:50%;background:var(--paper);display:grid;place-items:center}
+.logo span::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.titles{min-width:0;display:flex;flex-direction:column;gap:3px}
+.mark{font-family:var(--f-display);font-weight:800;font-size:27px;letter-spacing:-.025em;line-height:1}
 .mark i{font-style:normal;color:var(--accent)}
-.sub{text-align:right;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tagline{font-family:var(--f-body);font-style:italic;font-size:15.5px;line-height:1.25;color:var(--muted);text-wrap:balance}
+.pill{align-self:start;font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 9px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pill:empty{display:none}
+.rose{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.rose b{height:3px;border-radius:3px;background:var(--soft);overflow:hidden;display:block}
+.rose b i{display:block;height:100%;min-width:8px;background:var(--c);border-radius:3px;transition:width .5s}
+@media (max-width:360px){.mark{font-size:23px}.tagline{font-size:14px}}
 h2{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:-.01em;margin:0;text-wrap:balance;line-height:1.2}
 h3{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.02em;margin:0}
 .label{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
@@ -174,8 +184,13 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:1
 
 </head><body><div class="app" id="app">
   <header class="top">
-    <div class="mark">Glücks<i>kompass</i></div>
-    <div class="sub" id="topline">Forschung in Häppchen</div>
+    <span class="logo" aria-hidden="true"><span></span></span>
+    <div class="titles">
+      <div class="mark">Glücks<i>kompass</i></div>
+      <p class="tagline">Was die Forschung über ein gutes Leben weiß</p>
+    </div>
+    <div class="pill" id="topline" aria-live="polite"></div>
+    <div class="rose" id="rose" aria-hidden="true"></div>
   </header>
   <main id="main"></main>
 </div>
@@ -777,7 +792,8 @@ function shareApp(){
 function render(){
   const v={bites:viewBites,terms:viewTerms,exps:viewExps,way:viewWay}[tab]();
   $("#main").innerHTML=v;renderTabs();
-  const n=Object.keys(S.read).length;$("#topline").textContent=n?`${n} von ${BITES.length} Häppchen`:"Forschung in Häppchen";
+  const n=Object.keys(S.read).length;$("#topline").textContent=n?`${n} / ${BITES.length}`:"";
+  $("#rose").innerHTML=Object.keys(CATS).map(k=>{const all=BITES.filter(b=>b.cat===k),r=all.filter(b=>S.read[b.id]).length;return `<b style="--c:var(--c-${k})" title="${CATS[k].n}: ${r} von ${all.length}"><i style="width:${Math.round(r/all.length*100)}%"></i></b>`}).join("");
 }
 document.addEventListener("click",e=>{
   const t=e.target.closest("button,a");if(!t)return;
