@@ -1,0 +1,17 @@
+{
+ "name": "Glückskompass",
+ "short_name": "Glückskompass",
+ "description": "Glücksforschung in Häppchen: Erkenntnisse mit Quellen, Begriffe zum Üben und Experimente für ein gutes Leben.",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#EEF0E9",
+ "theme_color": "#EEF0E9",
+ "orientation": "portrait",
+ "lang": "de",
+ "icons": [
+  {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+  {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+  {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+ ]
+}
