@@ -1449,7 +1449,7 @@ function trophyCard(){const tr=trophies(),life=LIFE();
     big.innerHTML=medalSVG(t,got)+'<b>'+(secret?'Geheim':t.n)+'</b><span>'+(secret?(t.sec===3?'Diese Plakette versteckt sich irgendwo im Spiel. Mehr wird nicht verraten.':'Diese Plakette findest du nur unterwegs. Mehr wird nicht verraten.'):t.d)+'</span>'+
       (got?'<small>Erhalten'+(when?' am '+when:'')+'</small>':p!==null?'<i class="mprog big"><span style="width:'+Math.round(p/t.prog[1]*100)+'%"></span></i><small class="todo">'+p.toLocaleString('de-DE')+' von '+t.prog[1].toLocaleString('de-DE')+'</small>':'');big.hidden=false;
     // Vorschau immer auf der anderen Bildschirmhälfte als der Finger, damit man sie lesen kann
-    {const vh=window.innerHeight,bh=big.offsetHeight,m=16;big.style.top=(y>vh/2?Math.max(m,Math.min(y-bh-70,vh*.12)):Math.min(vh-bh-m,Math.max(y+70,vh*.88-bh)))+'px'}
+    {const vh=window.innerHeight,bh=big.offsetHeight,m=16;big.style.top=(y>vh/2?Math.max(m,y-bh-56):Math.min(vh-bh-m,y+56))+'px'}
     $('#ovcard').querySelectorAll('.mcell').forEach(m=>m.classList.toggle('on',m===c));AU.fx('click')};
   const hide=()=>{clearTimeout(tm);down=false;last=-1;big.hidden=true;$('#ovcard').querySelectorAll('.mcell.on').forEach(m=>m.classList.remove('on'))};
   $('#ovcard').querySelectorAll('.medals').forEach(grid=>{
