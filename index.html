@@ -349,11 +349,8 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
 .perf{color:#D8A23A}
 i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .stamprow{display:flex;align-items:center;justify-content:center;gap:14px}
-.goldseal{width:86px;height:82px;background:#F0C566;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--burgundy);transform:rotate(10deg);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);filter:drop-shadow(0 0 0 var(--ink));animation:sealIn .55s .55s cubic-bezier(.2,1.6,.4,1) backwards;position:relative;overflow:hidden;padding-top:12px}
-.goldseal b{font-size:14px;line-height:1;white-space:nowrap}
-.goldseal sup{font-size:8px;margin-left:1px;vertical-align:5px}
-.goldseal small{display:none}
-.goldseal::after{content:'';position:absolute;top:-20%;left:-60%;width:30%;height:140%;background:rgba(255,252,235,.75);transform:rotate(20deg);animation:shine 2.8s 1.3s ease-in-out infinite}
+.goldseal{width:92px;height:92px;transform:rotate(10deg);filter:drop-shadow(2px 3px 0 rgba(43,34,48,.18));animation:sealIn .55s .55s cubic-bezier(.2,1.6,.4,1) backwards}
+.goldseal svg{width:100%;height:100%;display:block;overflow:visible}
 @keyframes sealIn{from{opacity:0;transform:scale(2.4) rotate(40deg)}to{opacity:1;transform:scale(1) rotate(10deg)}}
 .stampwrap{filter:drop-shadow(1.5px 0 0 #2B2230) drop-shadow(-1.5px 0 0 #2B2230) drop-shadow(0 1.5px 0 #2B2230) drop-shadow(0 -1.5px 0 #2B2230)}
 @keyframes shine{0%{left:-60%}35%,100%{left:140%}}
@@ -2271,10 +2268,10 @@ function host(name){
   return {who:'Doris',food:S&&S.q&&S.q.resi===3?'Kettwurst, Käsekrainer &amp; Kaffee':'Kettwurst &amp; Kaffee',line:'„Mit extra Senf, wie immer.“ Kalle ist wieder hellwach.'};
 }
 const ANHALTER=[
- {n:'Mats',d:'einen Studenten aus Göttingen, der die ganze Fahrt über Witze erzählt hat'},
- {n:'Frau Kowalski',d:'eine Rentnerin, die ihre Enkelin besuchen wollte und Kalle ein Glas Pflaumenmus geschenkt hat'},
- {n:'Jonas',d:'einen Straßenmusiker mit Akkordeon, der zum Radio mitgespielt hat'},
- {n:'Lene',d:'eine Wandergesellin in Kluft, die von ihrer Walz durch halb Europa erzählt hat'}
+ {n:'Mats',d:'einen Studenten aus Göttingen mitgenommen. Mats hat die ganze Fahrt über Witze erzählt'},
+ {n:'Frau Kowalski',d:'eine Rentnerin mitgenommen, die ihre Enkelin besuchen wollte. Zum Abschied hat sie ihm ein Glas Pflaumenmus geschenkt'},
+ {n:'Jonas',d:'einen Straßenmusiker mitgenommen. Jonas hat auf dem Akkordeon zum Radio mitgespielt'},
+ {n:'Lene',d:'eine Wandergesellin in Kluft mitgenommen. Lene hat von ihrer Walz durch halb Europa erzählt'}
 ];
 function openRast(name){
   D.paused=true;AU.engineSet({paused:true});AU.fx('dingdong');const H0=host(name);
@@ -2657,7 +2654,7 @@ function drawArrivalFx(){
       cx.fillStyle='rgba(43,34,48,.25)';star(3*s,4*s);cx.fill();
       cx.fillStyle='#F0C566';cx.strokeStyle='#2B2230';cx.lineWidth=2.4;cx.lineJoin='round';star(0,0);cx.fill();cx.stroke();
       cx.save();star(0,0);cx.clip();if(t>.45&&t<1.3){const sx=-R1*1.4+(t-.45)/.85*R1*2.8;cx.fillStyle='rgba(255,252,235,.75)';cx.beginPath();cx.moveTo(sx-5*s,-R1);cx.lineTo(sx+5*s,-R1);cx.lineTo(sx-9*s,R1);cx.lineTo(sx-19*s,R1);cx.closePath();cx.fill()}cx.restore();
-      {cx.fillStyle='#7B2D3B';const fA='700 '+Math.round(12*s)+'px Jost, Futura, sans-serif',fB='700 '+Math.round(7*s)+'px Jost, Futura, sans-serif';cx.font=fA;const w=cx.measureText('100').width;cx.font=fB;const w2=cx.measureText('%').width,x0=-(w+w2+s)/2;cx.textAlign='left';cx.font=fA;cx.fillText('100',x0,5*s);cx.font=fB;cx.fillText('%',x0+w+s,0);cx.textAlign='center'}
+      {cx.fillStyle='#7B2D3B';const fA='700 '+Math.round(12*s)+'px Jost, Futura, sans-serif',fB='700 '+Math.round(7*s)+'px Jost, Futura, sans-serif';cx.font=fA;const w=cx.measureText('100').width;cx.font=fB;const w2=cx.measureText('%').width,k=Math.min(1,24*s/(w+w2+s));cx.save();cx.scale(k,k);const x0=-(w+w2+s)/2;cx.textAlign='left';cx.font=fA;cx.fillText('100',x0,5*s);cx.font=fB;cx.fillText('%',x0+w+s,0);cx.restore();cx.textAlign='center'}
       cx.fillStyle='#7B2D3B';rr(-24*s,20*s,48*s,12*s,2*s);cx.fill();cx.strokeStyle='#2B2230';cx.lineWidth=1.5;cx.stroke();cx.fillStyle='#FBF1E6';cx.font='600 '+Math.round(7*s)+'px Jost, Futura, sans-serif';cx.fillText('MAKELLOS',0,28.5*s);
       cx.restore()}
     cx.restore()}
@@ -2889,7 +2886,7 @@ function finishDrive(ok,aborted){
   let note=ok?t.note:aborted==='schlaf'?'Auf dem Weg nach '+t.to+' ist Kalle am Steuer eingeschlafen. Zum Glück ist nichts passiert. Ottilie hat einen Ersatzfahrer geschickt. Sie hat nicht geschimpft, sondern Kalle eine Decke mitgebracht.':(aborted?'Kalle hat die Tour nach '+t.to+' abgebrochen. Jupp sagt: „Besser umkehren als liegen bleiben.“':'Die Ladung nach '+t.to+' war nicht mehr zu retten. Kalle hat sich beim Empfänger entschuldigt. Der hat ihm trotzdem einen Kaffee gegeben.');
   if(D.anhalter)note+=' Unterwegs hat Kalle '+D.anhalter.d+'.';
   if(D.helped)note+=' Außerdem hat er einer Kollegin bei einer Reifenpanne geholfen.';
-  if(D.korsoDone)note+=' Unterwegs hat ihm ein Brautpaar aus dem Hochzeitskorso zugewinkt.';
+  if(D.korsoDone)note+=' Ein Brautpaar aus dem Hochzeitskorso hat ihm zugewinkt.';
   if(D.naps&&aborted!=='schlaf')note+=D.naps===1?' Einmal ist er am Steuer kurz eingenickt. Das soll nicht wieder passieren.':' Er ist '+D.naps+'-mal am Steuer eingenickt. Ottilie macht sich Sorgen.';
   note+=questProgress(t,ok);
   S.log.push({day:S.day-t.days,to:t.to,ok,note});
@@ -2898,7 +2895,7 @@ function finishDrive(ok,aborted){
   if(!ok)AU.fx('sad');
   setTimeout(()=>AU.fx('stamp'),180);
   let html='<p class="eyebrow">Tag '+(S.day-t.days)+' · '+t.to+'</p>';
-  html+=(ok&&D.cargo>=99.5?'<div class="stamprow">':'')+'<div class="bigstamp'+(ok?'':' bad')+'">'+(ok?'Zugestellt':'Nicht zugestellt')+'</div>'+(ok&&D.cargo>=99.5?'<div class="stampwrap"><div class="goldseal"><b>100<sup>%</sup></b><small>makellos</small></div></div></div>':'');
+  html+=(ok&&D.cargo>=99.5?'<div class="stamprow">':'')+'<div class="bigstamp'+(ok?'':' bad')+'">'+(ok?'Zugestellt':'Nicht zugestellt')+'</div>'+(ok&&D.cargo>=99.5?'<div class="stampwrap"><div class="goldseal"><svg viewBox="0 0 100 100" aria-label="100 Prozent, makellos"><path d="M50 4 L62.3 33 L93.7 35.8 L69.9 56.5 L77 87.2 L50 71 L23 87.2 L30.1 56.5 L6.3 35.8 L37.7 33 Z" fill="#F0C566" stroke="#2B2230" stroke-width="2.6" stroke-linejoin="round"/><clipPath id="gsclip"><path d="M50 4 L62.3 33 L93.7 35.8 L69.9 56.5 L77 87.2 L50 71 L23 87.2 L30.1 56.5 L6.3 35.8 L37.7 33 Z"/></clipPath><g clip-path="url(#gsclip)"><g transform="rotate(20 50 50)"><rect x="-40" y="-20" width="14" height="140" fill="rgba(255,252,235,.75)"><animate attributeName="x" values="-40;130;130" keyTimes="0;.35;1" dur="2.8s" begin="1.3s" repeatCount="indefinite"/></rect></g></g><text x="50" y="60" text-anchor="middle" font-family="Jost,Futura,sans-serif" font-weight="700" fill="#7B2D3B" textLength="31" lengthAdjust="spacingAndGlyphs"><tspan font-size="19">100</tspan><tspan font-size="10" dy="-7">%</tspan></text></svg></div></div></div>':'');
   html+='<p class="typed" style="margin:0" id="r-note"></p>';
   if(!t.final||lines.length>4){html+='<div class="ledger">';lines.forEach(l=>html+='<span>'+l[0]+'</span><b>'+l[1]+'</b>');html+='<span class="sum">Unterm Strich</span><b class="sum countup" id="r-pay">0 €</b></div>'}
   html+='<div class="ledger">';rl.forEach(l=>html+='<span>'+l[0]+'</span><b>'+(l[1]>0?'+':'')+l[1]+'</b>');html+='<span class="sum">Respekt</span><b class="sum">'+(resp>=0?'+':'')+resp+'</b></div>';
