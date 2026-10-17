@@ -423,6 +423,10 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 @keyframes tipIn{from{opacity:0;transform:translateY(4px)}to{opacity:.85;transform:none}}
 .beans{display:flex;justify-content:center;gap:3px;margin-top:3px}
 .beans svg{width:10px;height:13px}
+#ovcard{position:relative}
+.lsstamp{position:absolute;top:14px;right:16px;width:30px;transform:rotate(7deg);opacity:.9;animation:lsIn .5s 1.1s ease-out backwards;pointer-events:none}
+.lsstamp svg{display:block;width:100%;height:auto;filter:drop-shadow(0 1px 0 rgba(43,34,48,.15))}
+@keyframes lsIn{from{opacity:0;transform:rotate(-8deg) scale(1.25)}to{opacity:.9;transform:rotate(7deg) scale(1)}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -815,6 +819,10 @@ const AU=(function(){
       case 'sad':{[[67,0],[66,.25],[65,.5],[64,.75]].forEach(([m,d])=>inst('tuba',m-12,t+d,.3,.2,D));break}
       case 'yawn':{const g=gain(0,D);const lp=filt('lowpass',900,4,g);const o=_osc('sawtooth',230,t,lp);o.frequency.linearRampToValueAtTime(320,t+.4);o.frequency.linearRampToValueAtTime(150,t+1.2);lp.frequency.linearRampToValueAtTime(400,t+1.2);envASR(g,t,.07,.15,.7,.4);o.start(t);o.stop(t+1.4);break}
       case 'heart':{[0,.28].forEach(d=>{const g=gain(0,D);const o=_osc('sine',62,t+d,g);envAD(g,t+d,.5,.005,.18);o.start(t+d);o.stop(t+d+.25)});break}
+      case 'sip':{
+        // Kaffee: zwei weiche Tropfen und ein warmes, kurzes Aufatmen. Alles in G-Dur, damit es zu jeder Musik passt.
+        [[784,0],[1175,.11]].forEach(([f,d])=>{const s=t+d,g=gain(0,D);const o=_osc('sine',f*.72,s,g);o.frequency.exponentialRampToValueAtTime(f,s+.035);envAD(g,s,.07,.003,.16);o.start(s);o.stop(s+.22)});
+        const s2=t+.24;[392,587,988].forEach((f,i)=>{const g=gain(0,D);const lp=filt('lowpass',1400,.7,g);const o=_osc(i<2?'triangle':'sine',f,s2,lp);envASR(g,s2,i<2?.022:.012,.12,.18,.35);o.start(s2);o.stop(s2+.75)});break}
       case 'wake':{const g=gain(0,D);const o=_osc('triangle',300,t,g);o.frequency.exponentialRampToValueAtTime(900,t+.15);envAD(g,t,.06,.005,.15);o.start(t);o.stop(t+.2);break}
       case 'quack':{for(let i=0;i<3;i++){const s=t+i*.13+Math.random()*.04;const g=gain(0,D);const bp=filt('bandpass',1300,3,g);const o=_osc('square',700,s,bp);o.frequency.exponentialRampToValueAtTime(480,s+.08);envAD(g,s,.07,.004,.08);o.start(s);o.stop(s+.12)}break}
       case 'cheer':{const g=gain(0,D);const bp=filt('bandpass',1500,.6,g);noise(t,1.3,bp);envASR(g,t,.09,.15,.7,.4);for(let i=0;i<5;i++){const s=t+.1+i*.18;const g2=gain(0,D);const o=_osc('triangle',800+Math.random()*500,s,g2);o.frequency.linearRampToValueAtTime(1200+Math.random()*400,s+.12);envAD(g2,s,.025,.01,.12);o.start(s);o.stop(s+.15)}break}
@@ -980,11 +988,11 @@ const REGION_SONG={de:'shanty',alpen:'laendler',italia:'tarantella',nord:'nordis
 /* Schwierigkeit wirkt auf viele Stellschrauben:
    Zeit, Verkehr, Schaden, Müdigkeit, Lieferfenster, Preise, Lohn, Bußgelder, Kontrollen, Pech unterwegs. */
 const DIFF={
-  lehrling:{name:'Lehrling',days:40,dmg:.75,speed:.88,drain:.8,dblMul:.6,money:120,window:1.0,priceMul:1,payMul:1,fine:80,evBad:.5,coffee:2,sleepAt:15,napMax:4,fitLoss:.7,kontrolle:.1,
+  lehrling:{name:'Lehrling',days:40,dmg:.82,speed:.91,drain:.86,dblMul:.68,money:120,window:1.0,priceMul:1,payMul:1,fine:80,evBad:.5,coffee:2,sleepAt:15,napMax:4,fitLoss:.7,kontrolle:.1,
     blurb:'Du hast 40 Tage Zeit, und auf den Straßen ist wenig los.'},
-  geselle:{name:'Geselle',days:30,dmg:1,speed:1,drain:1.05,dblMul:1.05,money:60,window:.5,priceMul:1,payMul:1,fine:120,evBad:1,coffee:1,sleepAt:25,napMax:3,fitLoss:1,kontrolle:.25,
+  geselle:{name:'Geselle',days:30,dmg:1.08,speed:1.03,drain:1.11,dblMul:1.12,money:60,window:.5,priceMul:1,payMul:1,fine:120,evBad:1,coffee:1,sleepAt:25,napMax:3,fitLoss:1,kontrolle:.25,
     blurb:'Du hast 30 Tage Zeit. Der Verkehr ist dicht, und Pausen wollen geplant sein.'},
-  meister:{name:'Meister',days:25,dmg:1.25,speed:1.12,drain:1.27,dblMul:1.3,money:30,window:.25,priceMul:1.2,payMul:1,fine:180,evBad:1.6,coffee:1,sleepAt:32,napMax:3,fitLoss:1.15,kontrolle:.45,
+  meister:{name:'Meister',days:25,dmg:1.3,speed:1.14,drain:1.29,dblMul:1.34,money:30,window:.25,priceMul:1.2,payMul:1,fine:180,evBad:1.6,coffee:1,sleepAt:32,napMax:3,fitLoss:1.15,kontrolle:.45,
     blurb:'Du hast nur 25 Tage Zeit. Alles ist härter, teurer und strenger.'}
 };
 /* Ruf: Respekt öffnet Türen */
@@ -2280,7 +2288,7 @@ function resume(){if(!D)return;D.paused=false;last=performance.now();AU.engineSe
 $('#btn-flash').addEventListener('click',e=>{e.stopPropagation();AU.init();flash()});
 // Kaffeebohnen statt Punkten: volle Bohne braun, getrunkene nur als Umriss
 const BEAN=f=>'<svg viewBox="0 0 12 16" aria-hidden="true"><ellipse cx="6" cy="8" rx="4.3" ry="6.3" transform="rotate(18 6 8)" fill="'+(f?'#2B2230':'none')+'" stroke="'+(f?'#2B2230':'currentColor')+'" stroke-width="1.3" opacity="'+(f?1:.45)+'"/><path d="M7.6 2.6C4.6 5.5 7.6 10 4.4 13.4" fill="none" stroke="'+(f?'#FBF1E6':'currentColor')+'" stroke-width="1.1" stroke-linecap="round" opacity="'+(f?1:.45)+'"/></svg>';
-$('#btn-coffee').addEventListener('click',e=>{e.stopPropagation();AU.init();if(!D||D.paused||D.coffee<=0)return;D.coffee--;D.energy=Math.min(100,D.energy+28);D.kick=8;D.kickFx=1;AU.fx('slurp');setTimeout(()=>AU.fx('wake'),350);msg('Kaffee! Kalle ist hellwach.','good');
+$('#btn-coffee').addEventListener('click',e=>{e.stopPropagation();AU.init();if(!D||D.paused||D.coffee<=0)return;D.coffee--;D.energy=Math.min(100,D.energy+28);D.kick=8;D.kickFx=1;AU.fx('sip');msg('Kaffee! Kalle ist hellwach.','good');
   const tx=D.x+sway(truckY);for(let i=0;i<10;i++)D.parts.push({k:'steam',x:tx+(Math.random()-.5)*TW*.6,y:truckY-TH/2,vx:(Math.random()-.5)*30,vy:-40-Math.random()*50,life:1.2,max:1.2,r:6*SC})});
 $('#btn-pause').addEventListener('click',e=>{e.stopPropagation();pauseMenu()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&D&&!D.ended&&!D.paused)pauseMenu()});
@@ -2963,7 +2971,7 @@ function finishDrive(ok,aborted){
   $('#drive').hidden=true;$('#app').style.visibility='';
   if(!ok)AU.fx('sad');
   setTimeout(()=>AU.fx('stamp'),180);
-  let html='<p class="eyebrow">Tag '+(S.day-t.days)+' · '+t.to+'</p>';
+  let html=(ok?'<span class="lsstamp">'+stampSVG(t.id)+'</span>':'')+'<p class="eyebrow">Tag '+(S.day-t.days)+' · '+t.to+'</p>';
   html+=(ok&&D.cargo>=99.5?'<div class="stamprow">':'')+'<div class="bigstamp'+(ok?'':' bad')+'">'+(ok?'Zugestellt':'Nicht zugestellt')+'</div>'+(ok&&D.cargo>=99.5?'<div class="stampwrap"><div class="goldseal"><svg viewBox="0 0 100 100" aria-label="100 Prozent, makellos"><path d="M50 6 L61.8 33.8 L91.9 36.5 L69.1 56.3 L75.9 85.8 L50 70.3 L24.1 85.8 L30.9 56.3 L8.1 36.5 L38.2 33.8 Z" fill="rgba(123,45,59,.13)" stroke="rgba(123,45,59,.13)" stroke-width="5" stroke-linejoin="round" transform="translate(2.5 3.5)"/><path d="M50 6 L61.8 33.8 L91.9 36.5 L69.1 56.3 L75.9 85.8 L50 70.3 L24.1 85.8 L30.9 56.3 L8.1 36.5 L38.2 33.8 Z" fill="#F0C566" stroke="#F0C566" stroke-width="5" stroke-linejoin="round"/><clipPath id="gsclip"><path d="M50 6 L61.8 33.8 L91.9 36.5 L69.1 56.3 L75.9 85.8 L50 70.3 L24.1 85.8 L30.9 56.3 L8.1 36.5 L38.2 33.8 Z"/></clipPath><g clip-path="url(#gsclip)"><g transform="rotate(20 50 50)"><rect x="-40" y="-20" width="7" height="140" fill="rgba(255,252,235,.7)"><animate attributeName="x" values="-40;130;130" keyTimes="0;.3;1" dur="3.2s" begin="1.3s" repeatCount="indefinite"/></rect></g></g><path d="M50 6 L61.8 33.8 L91.9 36.5 L69.1 56.3 L75.9 85.8 L50 70.3 L24.1 85.8 L30.9 56.3 L8.1 36.5 L38.2 33.8 Z" fill="none" stroke="#B8862B" stroke-width="1.6" stroke-linejoin="round" transform="translate(50 50) scale(.9) translate(-50 -50)" opacity=".55"/><text x="50" y="59" text-anchor="middle" font-family="Jost,Futura,sans-serif" font-weight="700" fill="#7B2D3B" textLength="29" lengthAdjust="spacingAndGlyphs"><tspan font-size="18">100</tspan><tspan font-size="9.5" dy="-7">%</tspan></text></svg></div></div></div>':'');
   html+='<p class="typed" style="margin:0" id="r-note"></p>';
   if(!t.final||lines.length>4){html+='<div class="ledger">';lines.forEach(l=>html+='<span>'+l[0]+'</span><b>'+l[1]+'</b>');html+='<span class="sum">Unterm Strich</span><b class="sum countup" id="r-pay">0 €</b></div>'}
