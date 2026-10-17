@@ -2155,6 +2155,9 @@ function draw(dt){
   for(const p of D.parts)if(p.k!=='puff'&&p.k!=='spray'&&!(p.front&&!p.landed))drawPart(p);
   for(const o of D.objs)if(o.type==='gantry')drawGantry(o);else if(o.type==='overpass')drawOverpass(o);
   if(D.balloon&&!inTunnel)drawBalloon(D.balloon);
+  // Wolkenschatten ziehen langsam über Land und Straße
+  if(D.wx==='sun'&&!inTunnel&&night<.3){cx.fillStyle='rgba(43,34,48,.055)';for(let k=0;k<3;k++){const per=H*2.6,yy=((hash(k*7)*per+D.off*.92+D.t*9)%per)-H*.6,xx=W*(.15+.35*k)+Math.sin(D.t*.05+k)*40*SC;
+    [[0,0,70,38],[45,12,52,30],[-40,14,48,26]].forEach(([dx,dy,rx,ry])=>{cx.beginPath();cx.ellipse(xx+dx*SC,yy+dy*SC,rx*SC,ry*SC,0,0,7);cx.fill()})}}
   // Tunnel: Decke, Lampen, Portale
   if(rTun)drawTunnel(rTun);
   // Nacht und Licht
@@ -2215,10 +2218,11 @@ function drawScenery(scen){
     const st=curvy?14:blk-8;
     for(let yy=y-blk+4;yy<y-4;yy+=st){const hh=Math.min(st,y-4-yy)+(curvy?1:0),s=sway(yy+hh/2);
       const x0=side?roadX+roadW+14+s:-20,x1=side?W+20:roadX-14+s;cx.fillRect(x0,yy,x1-x0,hh)}
+    {const g0=side?roadX+roadW+14:roadX-14,gr=cx.createLinearGradient(g0,0,g0+(side?16:-16),0);gr.addColorStop(0,'rgba(43,34,48,.08)');gr.addColorStop(1,'rgba(43,34,48,0)');cx.fillStyle=gr;const s1=sway(y-blk/2);cx.fillRect(Math.min(g0,g0+(side?16:-16))+s1,y-blk,16,blk)}
     if(!scen.vines&&hash(i*3+side*5)<.45){const hy=y-blk+3,s0=sway(hy);cx.fillStyle='rgba(78,120,82,.85)';
       const xa=side?roadX+roadW+20+s0:-10,xb=side?W+10:roadX-20+s0;for(let xx=xa;xx<xb;xx+=7*SC){cx.beginPath();cx.arc(xx,hy+Math.sin(xx*.7)*1.5,4.2*SC,0,7);cx.fill()}}
     else if(!scen.vines&&hash(i*9+side)>.8){cx.fillStyle='rgba(43,34,48,.09)';for(let yy=y-blk+10;yy<y-6;yy+=9*SC)for(let k=0;k<6;k++){const xx=side?roadX+roadW+22+k*9*SC:roadX-22-k*9*SC;cx.fillRect(xx+sway(yy),yy,3,3)}}
-    if(scen.vines||hash(i*7+side)<.4){cx.strokeStyle='rgba(43,34,48,.12)';cx.lineWidth=2;for(let yy=y-blk+12;yy<y-6;yy+=10*SC){const s=sway(yy);cx.beginPath();cx.moveTo(side?roadX+roadW+18+s:4,yy);cx.lineTo(side?W-4:roadX-18+s,yy);cx.stroke()}}})}
+    if(scen.vines||hash(i*7+side)<.4){cx.strokeStyle=scen.vines?'rgba(43,34,48,.12)':'rgba(43,34,48,.06)';cx.lineWidth=2;for(let yy=y-blk+12;yy<y-6;yy+=10*SC){const s=sway(yy);cx.beginPath();cx.moveTo(side?roadX+roadW+18+s:4,yy);cx.lineTo(side?W-4:roadX-18+s,yy);cx.stroke()}}})}
   const items=scen.items;
   for(let i=first;i<=lastI;i++){
     const y=D.off-i*sp;
@@ -2234,7 +2238,7 @@ function drawScenery(scen){
 function drawItem(kind,x,y,side,i){
   const s=SC,ink='#2B2230';
   switch(kind){
-    case 'tree':{const r=(9+hash(i)*7)*s;cx.fillStyle='rgba(43,34,48,.15)';cx.beginPath();cx.arc(x+4,y+4,r,0,7);cx.fill();cx.fillStyle=hash(i*3)<.5?'#6E9E73':'#88B07A';cx.beginPath();cx.arc(x,y,r,0,7);cx.fill();cx.fillStyle='rgba(255,255,255,.18)';cx.beginPath();cx.arc(x-r*.3,y-r*.3,r*.45,0,7);cx.fill();break}
+    case 'tree':{const r=(9+hash(i)*7)*s;cx.fillStyle='rgba(43,34,48,.15)';cx.beginPath();cx.arc(x+4,y+4,r,0,7);cx.fill();cx.fillStyle=hash(i*3)<.5?'#6E9E73':'#88B07A';cx.beginPath();cx.arc(x,y,r,0,7);cx.fill();cx.fillStyle='rgba(43,60,46,.18)';cx.beginPath();cx.arc(x,y,r,-.3,2.2);cx.arc(x-r*.25,y-r*.25,r*.85,2.2,-.3,true);cx.fill();cx.fillStyle='rgba(255,255,255,.18)';cx.beginPath();cx.arc(x-r*.3,y-r*.3,r*.45,0,7);cx.fill();if(hash(i*19)<.25){cx.fillStyle='#C8432F';[[.3,-.2],[-.35,.3],[.1,.4],[-.1,-.45]].forEach(([a,b])=>{cx.beginPath();cx.arc(x+a*r,y+b*r,1.6*s,0,7);cx.fill()})}break}
     case 'bush':cx.fillStyle='#7FA67A';[[-5,0],[4,-3],[2,5]].forEach(([dx,dy])=>{cx.beginPath();cx.arc(x+dx*s,y+dy*s,6*s,0,7);cx.fill()});break;
     case 'pine':{const r=(10+hash(i)*6)*s;cx.fillStyle='#4F7F63';cx.beginPath();for(let k=0;k<8;k++){const a=k/8*Math.PI*2,rr2=k%2?r*.55:r;cx.lineTo(x+Math.cos(a)*rr2,y+Math.sin(a)*rr2)}cx.closePath();cx.fill();cx.fillStyle='#3E6A52';cx.beginPath();cx.arc(x,y,r*.3,0,7);cx.fill();if(D.wxA.snow>.3||D.tour.region==='nord'){cx.fillStyle='rgba(255,255,255,.75)';cx.beginPath();cx.arc(x-r*.2,y-r*.2,r*.35,0,7);cx.fill()}break}
     case 'birch':cx.fillStyle='#E9E4D8';cx.fillRect(x-1.5*s,y-8*s,3*s,16*s);cx.fillStyle='#C9D79A';cx.beginPath();cx.arc(x,y-8*s,7*s,0,7);cx.fill();break;
@@ -2291,6 +2295,9 @@ function drawRoad(rBau){
   const pts=edgePts(-20,H+20);
   // Bankette: ein schmaler, dunklerer Grasstreifen am Rand
   cx.strokeStyle=(SCEN[D.tour.scen]||SCEN.feld).verge||'#93B585';cx.lineWidth=14;polyline(pts,-5);polyline(pts,roadW+5);
+  cx.strokeStyle='rgba(43,34,48,.1)';cx.lineWidth=1;polyline(pts,-12.5);polyline(pts,roadW+12.5);
+  if(!['stadt','tundra'].includes(D.tour.scen)||D.tour.scen==='tundra'){const fs=13*SC,f0=Math.floor((D.off-H-30)/fs),f1=Math.ceil((D.off+30)/fs),fc=D.tour.scen==='tundra'?['#FBF8F0','#C9D79A','#E3AFB4']:['#FBF8F0','#F0C566','#E3AFB4','#BFD8E6'];
+    for(let i=f0;i<=f1;i++){const h=hash(i*31+3);if(h<.55)continue;const y=D.off-i*fs,sw=sway(y),side=h<.78?0:1,xx=side?roadX+roadW+4+hash(i*7)*6:roadX-4-hash(i*7)*6;cx.fillStyle=fc[Math.floor(hash(i*11)*fc.length)];cx.beginPath();cx.arc(xx+sw,y,1.4*SC,0,7);cx.fill()}}
   cx.fillStyle=wet>.3?'#857D8A':'#9C93A0';
   cx.beginPath();pts.forEach(([y,s],i)=>i?cx.lineTo(roadX+s,y):cx.moveTo(roadX+s,y));for(let i=pts.length-1;i>=0;i--)cx.lineTo(roadX+roadW+pts[i][1],pts[i][0]);cx.closePath();cx.fill();
   // Leitpfosten im festen Abstand, rechts mit orangem Rückstrahler
