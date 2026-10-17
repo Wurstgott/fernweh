@@ -406,12 +406,16 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .mbig small.todo{color:var(--muted)}
 .mcell .locked{opacity:1}
 .mcell:not(.got) svg{filter:saturate(.6)}
-.best.hs{display:flex;flex-direction:column;gap:3px;width:min(300px,100%);margin:6px auto 0;font-size:12px;letter-spacing:.04em}
-.best.hs .hs-h{font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:2px}
-.best.hs .hs-r{display:flex;align-items:baseline;gap:6px;font-variant-numeric:tabular-nums;color:var(--ink);opacity:.72}
-.best.hs .hs-r i{flex:1;border-bottom:1px dotted currentColor;opacity:.45;transform:translateY(-3px)}
-.best.hs .hs-r b{font-weight:600}
-.best.hs .hs-r em{font-style:normal;font-size:10px;letter-spacing:.1em;width:46px;text-align:right;color:var(--muted)}
+.best-btn{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;display:flex;align-items:center;gap:4px;background:none;border:0;padding:3px 2px;font:600 10px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.best-btn svg{width:13px;height:13px}
+.hsl{display:flex;flex-direction:column;gap:2px;margin:4px 0}
+.hsrow{display:flex;align-items:baseline;gap:8px;font-size:15px;font-variant-numeric:tabular-nums;padding-top:8px}
+.hsrow .hsn{font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+.hsrow i{flex:1;border-bottom:1px dotted rgba(43,34,48,.4);transform:translateY(-3px)}
+.hsrow b{font-weight:700}
+.hsrow em{font-style:normal;font-size:11px;letter-spacing:.1em;color:var(--burgundy);width:52px;text-align:right}
+.hsrow.none{opacity:.45}
+.hsd{display:block;text-align:right;font-size:11px;color:var(--muted);margin-right:60px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -990,7 +994,7 @@ const CHAP={1:'Kapitel I · Heimatstrecken',2:'Kapitel II · Quer durchs Land',3
 /* Eigenheiten der Strecken. label erscheint auf dem Lieferschein. */
 const TRAITS={
   traktor:{label:'Traktoren',info:'Traktoren mit Anhänger fahren hier sehr langsam.'},
-  gaense:{label:'Gänse',info:'Gänse laufen über die Fahrbahn. Sie gehen quer, also achte darauf, wo sie gleich sind.'},
+  gaense:{label:'Gänse',info:'Gänse watscheln quer über die Fahrbahn. Achte darauf, wohin sie gerade laufen.'},
   nebel:{label:'Nebel',info:'Im Nebel siehst du Hindernisse erst spät.'},
   regen:{label:'Regen',info:'Bei Nässe lenkt Hilde träger. Neue Reifen helfen.'},
   baustelle:{label:'Baustelle',info:'Eine lange Baustelle sperrt eine Spur.'},
@@ -1278,6 +1282,7 @@ window.addEventListener('pointerdown',()=>{AU.init()},{once:false,passive:true})
    setTimeout(()=>{sub.textContent=old;sub.classList.remove('fade');if(curScreen==='title')AU.fx('fernweh');delete tw.dataset.busy;setTimeout(()=>{if(curScreen==='title')AU.play(SONGS.hof)},900)},7000+620)});}
 function renderTitle(){
   if(!$('#btn-trophy')){const b=document.createElement('button');b.id='btn-trophy';b.className='trophy-btn';b.setAttribute('aria-label','Plaketten');b.addEventListener('click',()=>{AU.init();AU.fx('click');trophyCard()});$('#s-title').appendChild(b)}renderTrophyBtn();
+  if(!$('#btn-best')){const b=document.createElement('button');b.id='btn-best';b.className='best-btn';b.innerHTML='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16V9M10 16V4M16 16v-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Bestwerte</span>';b.addEventListener('click',()=>{AU.init();AU.fx('click');bestCard()});$('#s-title').appendChild(b)}
   $('#title-emblem').innerHTML='<div class="emblem">'+hildeSVG({duft:1,glanz:80})+'</div>';
   const d=$('#diff');d.innerHTML='';
   const best=store.get('fernweh-best')||{};
@@ -1295,10 +1300,7 @@ function renderTitle(){
   const live=sv&&!sv.ended;
   $('#continue-wrap').hidden=!live;$('#newconfirm').hidden=true;
   if(live)$('#btn-continue').textContent='Fahrt fortsetzen · '+DIFF[sv.diff].name+', Tag '+Math.min(sv.day,DIFF[sv.diff].days);
-  {const el=$('#best'),ks=Object.keys(DIFF).filter(k=>best[k]);
-   el.innerHTML=ks.length?'<span class="hs-h">Bestwerte</span>'+ks.map(k=>{const b=best[k],pt=Math.max(b.hi||0,b.score||0);
-     return '<span class="hs-r"><span>'+DIFF[k].name+'</span><i></i><b>'+pt.toLocaleString('de-DE')+' Punkte</b><em>Rang '+b.r+'</em></span>'}).join(''):'Du hast noch keinen Rang erreicht.';
-   el.classList.toggle('hs',!!ks.length)}
+  $('#best').textContent=Object.keys(best).length?'':'Du hast noch keinen Rang erreicht.';
 }
 /* ================= Plaketten =================
    Sammelstücke über alle Spielstände hinweg. Die Zahlen für Kilometer, Grüße usw. zählen über alle Fahrten. */
@@ -1321,7 +1323,7 @@ const TROPHIES=[
  {id:'gruss25',sec:0,n:'Grüß Gott',d:'25 Kollegen gegrüßt.',g:'hand',c:TIER.s,prog:['greets',25]},
  {id:'kett',sec:0,n:'Kettwurst-Kenner',d:'25 Kettwürste und Co. gegessen.',g:'wurst',c:TIER.s,prog:['kett',25]},
  {id:'ruhe',sec:0,n:'Ausgeschlafen',d:'5 Touren ausgeruht gefahren.',g:'moon',c:TIER.s,prog:['rested',5]},
- {id:'helfer',sec:0,n:'Helfende Hand',d:'5 Kolleginnen bei Pannen geholfen.',g:'wrench',c:TIER.s,prog:['helped',5]},
+ {id:'helfer',sec:0,n:'Helfende Hand',d:'Fünfmal bei einer Panne geholfen.',g:'wrench',c:TIER.s,prog:['helped',5]},
  {id:'gewinn',sec:0,n:'Glückspilz',d:'Im Radio ein Gewinnspiel gewonnen.',g:'radio',c:TIER.s},
  {id:'gruss100',sec:0,n:'Hundertmal Hallo',d:'100 Kollegen gegrüßt.',g:'hand',c:TIER.g,prog:['greets',100]},
  {id:'makellos10',sec:0,n:'Feine Hand',d:'10 Touren makellos zugestellt.',g:'star',c:TIER.g,prog:['perfect',10]},
@@ -1347,6 +1349,13 @@ const trophies=()=>store.get('fernweh-trophies')||{};
 function award(id){const tr=trophies();if(tr[id])return;const t=TROPHIES.find(x=>x.id===id);if(!t)return;tr[id]=Date.now();store.set('fernweh-trophies',tr);
   setTimeout(()=>{AU.fx('ding');toast('Neue Plakette: '+t.n)},D?900:500);renderTrophyBtn()}
 function renderTrophyBtn(){const b=$('#btn-trophy');if(!b)return;const n=Object.keys(trophies()).length;b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0z" fill="#D8A23A" stroke="#2B2230" stroke-width="1.5"/><path d="M7 6H4.5a2.5 2.5 0 0 0 3 3M17 6h2.5a2.5 2.5 0 0 1-3 3" fill="none" stroke="#2B2230" stroke-width="1.5"/><path d="M12 13v3M8.5 20h7l-1-4h-5z" fill="#D8A23A" stroke="#2B2230" stroke-width="1.5" stroke-linejoin="round"/></svg><span>'+n+'/'+TROPHIES.length+'</span>'}
+function bestCard(){const best=store.get('fernweh-best')||{};
+  let h='<p class="eyebrow">Bestwerte</p><div class="hsl">';
+  Object.keys(DIFF).forEach(k=>{const b=best[k],pt=b?Math.max(b.hi||0,b.score||0):0;
+    h+='<div class="hsrow'+(b?'':' none')+'"><span class="hsn">'+DIFF[k].name+'</span><i></i>'+(b?'<b>'+pt.toLocaleString('de-DE')+' Punkte</b><em>Rang '+b.r+'</em>':'<b>–</b><em></em>')+'</div>'+
+      (b&&b.at?'<small class="hsd">am '+new Date(b.at).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'})+'</small>':'')});
+  h+='</div><p class="mhint">'+(Object.keys(best).length?'Gezählt wird die höchste Punktzahl je Stufe.':'Noch keine Fahrt beendet. Die Kiste wartet.')+'</p>';
+  openCard(h,[{label:'Schließen',cls:'alt',fn:closeCard}]);$('#ov').dataset.dismiss=1}
 function trophyCard(){const tr=trophies(),life=LIFE();
   const progOf=t=>t.prog?Math.min(t.prog[1],life[t.prog[0]]||0):null;
   const cell=(t,i)=>{const got=!!tr[t.id],secret=t.secret&&!got,p=progOf(t);
@@ -1377,8 +1386,8 @@ $('#btn-newno').addEventListener('click',()=>{$('#newconfirm').hidden=true});
 function resumeGame(k){S=loadSave(k);
   if(S.driving){const t=TOURS.find(x=>x.id===S.driving);delete S.driving;
     if(t){S.day+=t.days;S.respect=Math.max(0,S.respect-2);S.stats.fails++;S.glanz=Math.max(0,S.glanz-25);
-      S.log.push({day:S.day-t.days,to:t.to,ok:false,note:'Die Fahrt nach '+t.to+' wurde unterwegs unterbrochen. Die Tage sind trotzdem vergangen.'});save();
-      setTimeout(()=>toast('Die letzte Tour wurde unterbrochen. '+t.days+' Tag'+(t.days>1?'e':'')+' sind trotzdem vergangen.'),300)}}
+      S.log.push({day:S.day-t.days,to:t.to,ok:false,note:'Die Fahrt nach '+t.to+' wurde unterwegs unterbrochen. Die Zeit ist trotzdem vergangen.'});save();
+      setTimeout(()=>toast('Die letzte Tour wurde unterbrochen. '+t.days+' Tag'+(t.days>1?'e':'')+(t.days>1?' sind':' ist')+' trotzdem vergangen.'),300)}}
   if(!S.finale&&!available().length){ending();return}
   show('hof')}
 $('#btn-continue').addEventListener('click',()=>{AU.fx('click');resumeGame(store.get('fernweh-last'))});
@@ -1495,7 +1504,7 @@ function questProgress(t,ok){const q=Q();let add='';if(q.kissen===1&&D&&D.naps)q
   if(q.jupp===2&&D&&D.gotAnlasser)add+=' Am Rasthof Holledau hat Kalle bei Bernd den Anlasser für Jupp abgeholt.';
   if(q.jule===1&&D&&D.anhalter&&D.anhalter.n==='Jule'){if(D.cargo>=99.5){q.jule=3;S.respect+=4;add+=' Jule hat die ganze Fahrt mitgeschrieben. Kein einziger Kratzer. „Jetzt weiß ich, wie das geht“, sagt sie.'}else{S.beifahrer='Jule';add+=' Ein paar Kratzer gab es. Jule fährt beim nächsten Mal noch einmal mit.'}}
   if(q.stamm===1&&D&&D.greets>=4){q.stamm=2;add+=' Vier Kollegen hat Kalle heute gegrüßt. Der Stammtisch hat es über Funk mitgehört.'}
-  if(q.kissen===1&&D){if(D.naps){q.kStreak=0}else{q.kStreak=(q.kStreak||0)+1;if(q.kStreak>=2){q.kissen=2;add+=' Zweimal hintereinander ausgeschlafen gefahren. Ottilie wird sich freuen.'}}}
+  if(q.kissen===1&&D){if(D.naps){q.kStreak=0}else{q.kStreak=(q.kStreak||0)+1;if(q.kStreak>=2){q.kissen=2;add+=' Kalle ist zweimal hintereinander ausgeschlafen gefahren. Ottilie wird sich freuen.'}}}
   if(q.ott===1&&!t.final&&!q.cards.includes(t.to)){q.cards.push(t.to);add+=' Kalle hat Ottilie eine Ansichtskarte aus '+t.to+' geschickt'+(q.cards.length>=3?'. Das war die dritte.':'.');if(q.cards.length>=3)q.ott=2}
   return add}
 function questFinish(){const q=Q();
@@ -1676,7 +1685,7 @@ function startDrive(t){
      hunger:S.kuchen?0:25,musicRegion:t.region,stauGap:1,bauSign:false,timers:[],minE:100,naps:0,nap:null,hits:0,bonus:0,contest:null,rainbow:0,oldieN:0,napStreak:0,ottT:0,ottN:0,endPad:0};
   D.endPad=150*SC/(TUNE.scroll*SC*DIFF[S.diff].speed*(1+TUNE.chScroll*(t.ch-1))*D.dur);
   D.minE=D.energy;
-  if(S.beifahrer){D.anhalter={n:S.beifahrer,d:'die Nachbarstochter Jule mitgenommen, die jetzt unbedingt Fernfahrerin werden will'};S.beifahrer=null}
+  if(S.beifahrer){D.anhalter={n:S.beifahrer,full:'Die Nachbarstochter Jule ist mitgefahren. Sie will jetzt unbedingt Fernfahrerin werden.'};S.beifahrer=null}
   if(S.kuchen){S.kuchen=false}
   D.due=dueFor(t,o);
   // Ereignisse dieser Fahrt festlegen
@@ -1916,10 +1925,11 @@ function spawnPanne(){
   const lane=Math.random()<.5?0:2;
   if(segIn('bau')&&lane===0)return;
   const y=spawnY()-200*SC;
-  if(!addObj('panne',lane,y,{col:'#BFDCC8'}))return;
+  const who=pick(['Ayşe','Rosi','Henning','Mirela','Jens']);
+  if(!addObj('panne',lane,y,{col:'#BFDCC8',who}))return;
   const dy=y+180*SC;D.objs.forEach(q=>{if(q.type!=='panne'&&covers(q,lane)&&Math.abs(q.y-dy)<q.h/2+40*SC&&q.y<0)q.gone=true});
   D.objs.push({type:'dreieck',lane,lx:lane,y:dy,h:24*SC,w:laneW*.3,rel:1});
-  if(S.up.funk)ticker('„Hier Ayşe, ich steh mit einem Platten auf der '+(lane?'rechten':'linken')+' Spur. Hilft mir einer? Over.“','cb');
+  if(S.up.funk)ticker('„Hier '+who+', ich steh mit einem Platten auf der '+(lane?'rechten':'linken')+' Spur. Hilft mir einer? Over.“','cb');
 }
 function interval(){
   const df=DIFF[S.diff];
@@ -2205,9 +2215,9 @@ function flash(){
 }
 function askHelp(o){
   D.paused=true;AU.engineSet({paused:true});
-  const name=pick(['Ayşe','Rosi','Henning','Mirela','Jens']);
+  const name=o.who||pick(['Ayşe','Rosi','Henning','Mirela','Jens']);
   openCard('<p class="eyebrow">Panne auf der Strecke</p><h2>'+name+' braucht Hilfe</h2><p class="typed" style="margin:0">'+name+' steht mit einem platten Reifen auf der Spur. Allein wird das nichts. Willst du anhalten und beim Radwechsel helfen? Das kostet etwa 20 Minuten.</p>',
-    [{label:'Anhalten und helfen <span>+0:20 h</span>',fn:()=>{closeCard();D.clock+=.33;D.helped++;D.energy=Math.min(100,D.energy+15);D.hunger=Math.max(0,D.hunger-40);o.gone=true;D.objs.forEach(q=>{if(q.type==='dreieck'&&q.lane===o.lane)q.gone=true});
+    [{label:'Anhalten und helfen <span>+0:20 h</span>',fn:()=>{closeCard();D.clock+=.33;D.helped++;(D.helpedNames=D.helpedNames||[]).push(name);D.energy=Math.min(100,D.energy+15);D.hunger=Math.max(0,D.hunger-40);o.gone=true;D.objs.forEach(q=>{if(q.type==='dreieck'&&q.lane===o.lane)q.gone=true});
         S.stats.helped++;if(lifeAdd('helped',1)>=5)award('helfer');AU.fx('wrench');msg(name+' bedankt sich mit einem Stück Börek.','good');floatText('+6 Respekt',laneX(o.lx)+sway(o.y),truckY-TH);resume()}},
      {label:'Weiterfahren',cls:'alt',fn:()=>{closeCard();msg('Kalle fährt weiter. Hoffentlich hält bald jemand an.','info');resume()}}]);
 }
@@ -2847,7 +2857,7 @@ function finishDrive(ok,aborted){
     R(aborted==='schlaf'?'Am Steuer eingeschlafen':aborted?'Tour abgebrochen':'Ladung verloren',aborted==='schlaf'?-6:-2);S.stats.fails++;
   }
   R('Grüße unterwegs ('+D.greets+')',D.greets*(1+S.up.funk+S.up.licht));
-  if(D.helped)R('Einer Kollegin geholfen',6*D.helped);
+  if(D.helped)R(D.helped>1?'Bei Pannen geholfen ('+D.helped+')':'Bei einer Panne geholfen',6*D.helped);
   if(D.naps&&aborted!=='schlaf')R('Sekundenschlaf am Steuer ('+D.naps+')',-Math.min(8,2*D.naps));
   if(ok&&D.minE>=40&&t.hours>=2)R('Ausgeruht gefahren',2);
   D.extraResp.forEach(([l,v])=>R(l,v));
@@ -2884,8 +2894,8 @@ function finishDrive(ok,aborted){
   if(ok&&D.anhalter&&D.anhalter.n!=='Jule')S.stats.anhalter=(S.stats.anhalter||0)+1;
   delete S.driving;delete S.offers[t.id];
   let note=ok?t.note:aborted==='schlaf'?'Auf dem Weg nach '+t.to+' ist Kalle am Steuer eingeschlafen. Zum Glück ist nichts passiert. Ottilie hat einen Ersatzfahrer geschickt. Sie hat nicht geschimpft, sondern Kalle eine Decke mitgebracht.':(aborted?'Kalle hat die Tour nach '+t.to+' abgebrochen. Jupp sagt: „Besser umkehren als liegen bleiben.“':'Die Ladung nach '+t.to+' war nicht mehr zu retten. Kalle hat sich beim Empfänger entschuldigt. Der hat ihm trotzdem einen Kaffee gegeben.');
-  if(D.anhalter)note+=' Unterwegs hat Kalle '+D.anhalter.d+'.';
-  if(D.helped)note+=' Außerdem hat er einer Kollegin bei einer Reifenpanne geholfen.';
+  if(D.anhalter)note+=D.anhalter.full?' '+D.anhalter.full:' Unterwegs hat Kalle '+D.anhalter.d+'.';
+  if(D.helped){const hn=D.helpedNames||[];note+=hn.length>1?' Außerdem hat Kalle '+hn.slice(0,-1).join(', ')+' und '+hn[hn.length-1]+' beim Reifenwechsel geholfen.':' Außerdem hat Kalle '+(hn[0]||'einem Kollegen')+' beim Reifenwechsel geholfen.'}
   if(D.korsoDone)note+=' Ein Brautpaar aus dem Hochzeitskorso hat ihm zugewinkt.';
   if(D.naps&&aborted!=='schlaf')note+=D.naps===1?' Einmal ist er am Steuer kurz eingenickt. Das soll nicht wieder passieren.':' Er ist '+D.naps+'-mal am Steuer eingenickt. Ottilie macht sich Sorgen.';
   note+=questProgress(t,ok);
@@ -2954,7 +2964,8 @@ function ending(){
   if(S.finale&&rank.r==='S')award('rangS');
   const isNew=!prev||order.indexOf(rank.r)>order.indexOf(prev.r)||(prev.r===rank.r&&sc.total>prev.score);
   const hi=Math.max(sc.total,(prev&&(prev.hi||prev.score))||0);
-  if(isNew)best[S.diff]={r:rank.r,score:sc.total,hi};else best[S.diff].hi=hi;store.set('fernweh-best',best);
+  const at=sc.total>=hi?Date.now():(prev&&prev.at)||0;
+  if(isNew)best[S.diff]={r:rank.r,score:sc.total,hi,at};else{best[S.diff].hi=hi;best[S.diff].at=at}store.set('fernweh-best',best);
   const E=$('#s-end');
   let h='<p class="eyebrow" style="margin-top:14px">Hundert Jahre Spedition Brandt &amp; Töchter</p>';
   h+='<p class="eyebrow">Schwierigkeit: '+DIFF[S.diff].name+'</p>';
@@ -2988,7 +2999,7 @@ function ending(){
     '<span>Gefahrene Kilometer</span><b>'+S.stats.km.toLocaleString('de-DE')+'</b>'+
     '<span>Kollegen gegrüßt</span><b>'+S.stats.greets+'</b>'+
     '<span>Makellose Fahrten</span><b>'+(S.stats.perfekt||0)+'</b>'+
-    '<span>Kolleginnen bei Pannen geholfen</span><b>'+(S.stats.helped||0)+'</b>'+
+    '<span>Bei Pannen geholfen</span><b>'+(S.stats.helped||0)+'</b>'+
     '<span>Kettwürste und Co.'+(S.senf?' · Goldene Senftube':'')+'</span><b>'+S.stats.kett+'</b>'+(S.stats.hildegard?'<span>Hildegard getroffen</span><b>'+S.stats.hildegard+'</b>':'')+
     '<span>Pausen gemacht</span><b>'+S.stats.pauses+'</b>'+
     '<span>Bußgelder</span><b>'+S.stats.fines+'</b></div></div>';
