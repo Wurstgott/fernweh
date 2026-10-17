@@ -2517,24 +2517,24 @@ function finishDrive(ok,aborted){
 /* Kleine Briefmarken für die Postkarten: gezackter Rand, ein schlichtes Motiv, ein blasser Stempel */
 function stampSVG(id){
   const M={
-    wue:['#BFCBA8','<circle cx="10" cy="9" r="2"/><circle cx="14" cy="9" r="2"/><circle cx="12" cy="12.5" r="2"/><circle cx="8" cy="12.5" r="2"/><circle cx="16" cy="12.5" r="2"/><circle cx="10" cy="16" r="2"/><circle cx="14" cy="16" r="2"/><circle cx="12" cy="19.5" r="2"/><path d="M12 7 V4 M12 5 q3 -2 5 0" fill="none"/>'],
-    kas:['#D9C9A3','<path d="M6 21 L12 6 L18 21 Z" fill="none"/><path d="M12 6 V3" /><circle cx="12" cy="3" r="1"/>'],
-    kol:['#C9C3CF','<path d="M7 21 V10 L9 4 L11 10 V21 M13 21 V10 L15 4 L17 10 V21 M6 21 H18" fill="none"/>'],
-    muc:['#BFD3DC','<path d="M4 20 L10 9 L13 14 L16 8 L21 20 Z" fill="none"/><path d="M8.5 12 L10 9 L11.5 12" fill="none"/>'],
-    ham:['#C4D6D0','<path d="M10 20 V8 H14 V20 M9 8 H15 L12 4 Z M5 21 H19" fill="none"/><path d="M15 6 L20 4 M15 7 L20 9" opacity=".6"/>'],
-    ber:['#D8C4A8','<path d="M5 9 H19 M6 7 H18 M7 9 V20 M10 9 V20 M14 9 V20 M17 9 V20 M5 20 H19" fill="none"/>'],
-    wien:['#E0C4C4','<circle cx="12" cy="11" r="6.5" fill="none"/><path d="M12 4.5 V17.5 M5.5 11 H18.5 M7.4 6.4 L16.6 15.6 M16.6 6.4 L7.4 15.6 M9 21 L12 11 L15 21" fill="none"/>'],
-    mil:['#D6CDB8','<path d="M5 20 V12 L7 9 L9 12 V20 M10 20 V9 L12 4 L14 9 V20 M15 20 V12 L17 9 L19 12 V20 M4 20 H20" fill="none"/>'],
-    kop:['#BCCDDA','<path d="M4 17 q2 -2 4 0 t4 0 t4 0 t4 0 M7 14 H17 L15 17 H9 Z M12 14 V7 L16 12 H12" fill="none"/>'],
-    nord:['#C9D6DE','<circle cx="12" cy="12" r="7" fill="none"/><ellipse cx="12" cy="12" rx="3" ry="7" fill="none"/><path d="M5 12 H19 M6 8.5 H18 M6 15.5 H18" fill="none"/>'],
-    hof:['#E3D2B4','<path d="M5 20 V11 L12 6 L19 11 V20 Z M10 20 V15 H14 V20" fill="none"/>']
+    wue:['#D9E3C3','#A9BE86','#5E3A5A','<circle cx="10" cy="9" r="2"/><circle cx="14" cy="9" r="2"/><circle cx="12" cy="12.5" r="2"/><circle cx="8" cy="12.5" r="2"/><circle cx="16" cy="12.5" r="2"/><circle cx="10" cy="16" r="2"/><circle cx="14" cy="16" r="2"/><circle cx="12" cy="19.5" r="2"/><path d="M12 7 V4 M12 5 q3 -2 5 0" fill="none"/>'],
+    kas:['#EADFBF','#C9B27E','#5A4A2E','<path d="M6 21 L12 6 L18 21 Z" fill="none"/><path d="M12 6 V3" /><circle cx="12" cy="3" r="1"/>'],
+    kol:['#DCD6E4','#B3A8C4','#3E3354','<path d="M7 21 V10 L9 4 L11 10 V21 M13 21 V10 L15 4 L17 10 V21 M6 21 H18" fill="none"/>'],
+    muc:['#D3E4EC','#9DBBC9','#2F5470','<path d="M4 20 L10 9 L13 14 L16 8 L21 20 Z" fill="none"/><path d="M8.5 12 L10 9 L11.5 12" fill="none"/>'],
+    ham:['#D3E6E0','#8FB6B8','#7B2D3B','<path d="M10 20 V8 H14 V20 M9 8 H15 L12 4 Z M5 21 H19" fill="none"/><path d="M15 6 L20 4 M15 7 L20 9" opacity=".6"/>'],
+    ber:['#EBDCC4','#CDB48C','#5A3E28','<path d="M5 9 H19 M6 7 H18 M7 9 V20 M10 9 V20 M14 9 V20 M17 9 V20 M5 20 H19" fill="none"/>'],
+    wien:['#F0D9D6','#D7A8A6','#7B2D3B','<circle cx="12" cy="11" r="6.5" fill="none"/><path d="M12 4.5 V17.5 M5.5 11 H18.5 M7.4 6.4 L16.6 15.6 M16.6 6.4 L7.4 15.6 M9 21 L12 11 L15 21" fill="none"/>'],
+    mil:['#EDE3CB','#D3BE8F','#6B4A2A','<path d="M5 20 V12 L7 9 L9 12 V20 M10 20 V9 L12 4 L14 9 V20 M15 20 V12 L17 9 L19 12 V20 M4 20 H20" fill="none"/>'],
+    kop:['#D4E1EC','#8EAFC8','#2B4C6E','<path d="M4 17 q2 -2 4 0 t4 0 t4 0 t4 0 M7 14 H17 L15 17 H9 Z M12 14 V7 L16 12 H12" fill="none"/>'],
+    nord:['#DCE6EE','#A8BDD0','#2F4A66','<circle cx="12" cy="12" r="7" fill="none"/><ellipse cx="12" cy="12" rx="3" ry="7" fill="none"/><path d="M5 12 H19 M6 8.5 H18 M6 15.5 H18" fill="none"/>'],
+    hof:['#F0E2C4','#D8B97E','#6B4A2A','<path d="M5 20 V11 L12 6 L19 11 V20 Z M10 20 V15 H14 V20" fill="none"/>']
   };
-  const [bg,motif]=M[id]||M.hof,val=[40,60,80,100][Math.floor(hash((id||'x').length*13+(id||'x').charCodeAt(0))*4)];
+  const [bg,gr,ink,motif]=M[id]||M.hof,val=[40,60,80,100][Math.floor(hash((id||'x').length*13+(id||'x').charCodeAt(0))*4)];
   return '<svg class="stamp-svg" viewBox="0 0 34 40" aria-hidden="true">'+
     '<rect x="2" y="2" width="30" height="36" fill="#FFFDF7" stroke="#FFFDF7" stroke-width="3" stroke-dasharray="1.6 1.6"/>'+
-    '<rect x="5" y="5" width="24" height="25" fill="'+bg+'"/>'+
-    '<g transform="translate(5 5)" stroke="#2B2230" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".6">'+motif+'</g>'+
-    '<text x="17" y="36" text-anchor="middle" font-family="Courier Prime,monospace" font-size="5.5" fill="#2B2230" opacity=".7">'+val+'</text>'+
+    '<rect x="5" y="5" width="24" height="25" fill="'+bg+'"/><rect x="5" y="22" width="24" height="8" fill="'+gr+'" opacity=".7"/>'+'<rect x="6.5" y="6.5" width="21" height="22" fill="none" stroke="#FFFDF7" stroke-width=".6" opacity=".8"/>'+
+    '<g transform="translate(5 5)" stroke="'+ink+'" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".85">'+motif+'</g>'+
+    '<text x="17" y="36" text-anchor="middle" font-family="Courier Prime,monospace" font-size="5.5" font-weight="700" fill="'+ink+'" opacity=".75">'+val+'</text>'+
     '<g fill="none" stroke="#5E4A5A" stroke-width=".9" opacity=".38" transform="rotate(-12 6 20)"><circle cx="4" cy="20" r="8"/><path d="M12 15 q3 -2 6 0 t6 0 t6 0 M12 19 q3 -2 6 0 t6 0 t6 0 M12 23 q3 -2 6 0 t6 0 t6 0"/></g>'+
     '</svg>';
 }
