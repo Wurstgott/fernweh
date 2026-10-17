@@ -344,6 +344,18 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
 .senf svg{display:block;width:100%;height:auto}
 @media (prefers-reduced-motion: reduce){.zzz span{animation:none;opacity:1}}
 .tour h3 .perf{color:var(--mustard);font-size:.8em;vertical-align:.1em;text-shadow:0 0 1px var(--ink)}
+/* Makellos */
+#h-cargo.perf{color:#B5832A}
+#h-cargo.perf::after{content:' ★';color:#D8A23A;font-size:.9em}
+.perf{color:#D8A23A}
+i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
+.stamprow{display:flex;align-items:center;justify-content:center;gap:14px}
+.goldseal{width:64px;height:64px;border-radius:50%;background:radial-gradient(circle,#F6D27E 0 58%,#E3B451 60% 100%);border:2px solid var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--burgundy);transform:rotate(12deg);box-shadow:0 0 0 3px #F0C566,0 0 0 4.5px var(--ink);animation:sealIn .55s .55s cubic-bezier(.2,1.6,.4,1) backwards;position:relative;overflow:hidden}
+.goldseal b{font-size:15px;line-height:1}
+.goldseal small{font-size:8px;letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+.goldseal::after{content:'';position:absolute;top:-20%;left:-60%;width:30%;height:140%;background:rgba(255,252,235,.75);transform:rotate(20deg);animation:shine 2.8s 1.3s ease-in-out infinite}
+@keyframes sealIn{from{opacity:0;transform:scale(2.4) rotate(40deg)}to{opacity:1;transform:scale(1) rotate(12deg)}}
+@keyframes shine{0%{left:-60%}35%,100%{left:140%}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -1338,7 +1350,7 @@ function chipsHTML(t,o){
   return h+'</div>';
 }
 function renderTours(){
-  const L=$('#tourlist');L.innerHTML='';
+  const L=$('#tourlist');L.innerHTML='';{const n=Object.keys(S.perfect||{}).length;$('#s-tours .eyebrow').innerHTML='Auftragsbuch'+(n?' · <span class="perf">★</span> '+n+' makellos':'')}
   [1,2,3,4].forEach(ch=>{
     const h=document.createElement('div');h.className='chap';h.innerHTML='<span>'+CHAP[ch]+'</span>';L.appendChild(h);
     TOURS.filter(t=>t.ch===ch).forEach(t=>{
@@ -1898,7 +1910,7 @@ function startArrival(){
   later(hit-.62,()=>{D.banner=0.001});
   later(hit,()=>{confetti();D.hop=1;D.rays=0.001;D.flashA=1;later(.12,()=>AU.fx('cheer'))});
   if(big)later(hit+1.6,()=>{confetti(true);AU.fx('cheer')});
-  if(D.cargo>=99.5){D.perfect=true;later(hit+.7,()=>{D.seal=0.001;AU.fx('perfect');for(let i=0;i<18;i++)D.parts.push({k:'star',x:W/2+(Math.random()-.5)*W*.7,y:H*.37+(Math.random()-.5)*H*.22,vx:(Math.random()-.5)*60,vy:-20-Math.random()*40,life:.8+Math.random()*1.2,max:2,r:(4+Math.random()*5)*SC})})}
+  if(D.cargo>=99.5){D.perfect=true;later(hit+.95,()=>{AU.fx('stamp');D.shake=.35});later(hit+.7,()=>{D.seal=0.001;later(.3,()=>AU.fx('perfect'));for(let i=0;i<18;i++)D.parts.push({k:'star',x:W/2+(Math.random()-.5)*W*.7,y:H*.37+(Math.random()-.5)*H*.22,vx:(Math.random()-.5)*60,vy:-20-Math.random()*40,life:.8+Math.random()*1.2,max:2,r:(4+Math.random()*5)*SC})})}
   later(card-.5,()=>{D.fade=0.001});
   later(card,()=>finishDrive(true));
 }
@@ -2051,7 +2063,7 @@ function hud(){
   $('#h-clock').textContent=fmtClock(D.clock);
   const du=$('#h-due');du.textContent='bis '+fmtClock(D.due);du.className=D.clock>D.due?'warn':'';
   const l=$('#h-lenk');l.textContent=fmtDur(D.lenk);l.className=D.lenk>3.9?'warn':'';
-  const c=$('#h-cargo');c.textContent=Math.round(D.cargo);c.className=D.cargo<40?'warn':'';
+  const c=$('#h-cargo');c.textContent=Math.round(D.cargo);c.className=D.cargo<40?'warn':D.cargo>=99.5?'perf':'';
   $('#h-energy').style.width=D.energy+'%';$('#h-energy').style.background=D.energy<40?'#C8432F':D.energy<60?'#D8A23A':'';
   $('#h-elabel').textContent=D.nap?'Augen zu!':D.energy<25?'Kalle kämpft mit dem Schlaf':D.hunger>=70?'Kalle hat Hunger':D.energy>=60?'Kalle ist wach':D.energy>=40?'Kalle wird müde':'Kalle ist sehr müde';
   const cb=$('#btn-coffee');cb.innerHTML='Kaffee<small>'+'●'.repeat(D.coffee)+'○'.repeat(Math.max(0,1+S.up.thermos-D.coffee))+'</small>';cb.disabled=D.coffee<=0;cb.classList.toggle('ready',D.coffee>0&&D.energy<45);
@@ -2363,12 +2375,17 @@ function drawArrivalFx(){
     cx.font='700 '+Math.round(27*s)+'px Jost, Futura, sans-serif';cx.fillText(D.tour.to.toUpperCase(),0,-bh/2+52*s,bw-30*s);
     if(big){cx.font='600 '+Math.round(11*s)+'px "Courier Prime", monospace';cx.fillStyle='#7B2D3B';cx.fillText('1926 · 2026',0,-bh/2+74*s)}
     // Siegel für eine Fahrt ohne Kratzer
-    if(D.seal){const k=Math.min(1,D.seal/.35),pop=k<1?1+Math.sin(k*Math.PI)*.35:1,r=27*s;cx.save();cx.translate(bw/2-8*s,-bh/2-4*s);cx.rotate(.18+Math.sin(D.t*1.6)*.03);cx.scale(k*pop,k*pop);
-      cx.fillStyle='#7B2D3B';[-1,1].forEach(d=>{cx.beginPath();cx.moveTo(d*8*s,r*.6);cx.lineTo(d*14*s,r*1.55);cx.lineTo(d*4*s,r*1.3);cx.lineTo(d*1*s,r*.7);cx.closePath();cx.fill()});
-      cx.fillStyle='#F0C566';cx.strokeStyle='#2B2230';cx.lineWidth=2;cx.beginPath();for(let i=0;i<24;i++){const a=i/24*Math.PI*2,rr2=i%2?r*.88:r;cx.lineTo(Math.cos(a)*rr2,Math.sin(a)*rr2)}cx.closePath();cx.fill();cx.stroke();
-      cx.strokeStyle='#B5832A';cx.lineWidth=1.2;cx.beginPath();cx.arc(0,0,r*.68,0,7);cx.stroke();
-      cx.fillStyle='#7B2D3B';cx.textAlign='center';cx.font='700 '+Math.round(11*s)+'px Jost, Futura, sans-serif';cx.fillText('100 %',0,1*s);
-      cx.font='600 '+Math.round(6.5*s)+'px Jost, Futura, sans-serif';cx.fillText('MAKELLOS',0,10*s);cx.restore()}
+    if(D.seal){const t=D.seal,k=Math.min(1,t/.25),e=1-Math.pow(1-k,3),sc=2.4-1.4*e,r=36*s;cx.save();cx.translate(bw/2-26*s,bh/2+4*s);cx.rotate(.16+(1-e)*.5);cx.scale(sc,sc);cx.globalAlpha=Math.min(1,k*1.4);
+      cx.fillStyle='rgba(43,34,48,.25)';cx.beginPath();cx.arc(3*s,4*s,r,0,7);cx.fill();
+      cx.fillStyle='#7B2D3B';[-1,1].forEach(d=>{cx.beginPath();cx.moveTo(d*10*s,r*.55);cx.lineTo(d*19*s,r*1.6);cx.lineTo(d*7*s,r*1.35);cx.lineTo(d*1*s,r*.7);cx.closePath();cx.fill()});
+      cx.fillStyle='#F0C566';cx.strokeStyle='#2B2230';cx.lineWidth=2.4;cx.beginPath();for(let i=0;i<28;i++){const a=i/28*Math.PI*2,rr2=i%2?r*.9:r;cx.lineTo(Math.cos(a)*rr2,Math.sin(a)*rr2)}cx.closePath();cx.fill();cx.stroke();
+      cx.save();cx.beginPath();cx.arc(0,0,r*.9,0,7);cx.clip();
+      if(t>.45&&t<1.3){const sx=-r*1.6+(t-.45)/.85*r*3.2;cx.fillStyle='rgba(255,252,235,.7)';cx.beginPath();cx.moveTo(sx-6*s,-r);cx.lineTo(sx+6*s,-r);cx.lineTo(sx-8*s,r);cx.lineTo(sx-20*s,r);cx.closePath();cx.fill()}
+      cx.restore();
+      cx.strokeStyle='#B5832A';cx.lineWidth=1.4;cx.beginPath();cx.arc(0,0,r*.7,0,7);cx.stroke();
+      cx.fillStyle='#7B2D3B';cx.textAlign='center';cx.font='700 '+Math.round(15*s)+'px Jost, Futura, sans-serif';cx.fillText('100 %',0,3*s);
+      cx.font='600 '+Math.round(7.5*s)+'px Jost, Futura, sans-serif';cx.fillText('MAKELLOS',0,14*s);
+      cx.font='700 '+Math.round(8*s)+'px Jost, Futura, sans-serif';cx.fillText('★',0,-12*s);cx.restore()}
     cx.restore()}
   if(D.fade){cx.fillStyle='rgba(251,241,230,'+Math.min(1,D.fade/.5)+')';cx.fillRect(0,0,W,H)}
 }
@@ -2525,10 +2542,10 @@ function finishDrive(ok,aborted){
     const rl2=rufLv();const base=Math.round(t.pay*TUNE.payMul*DIFF[S.diff].payMul*eilF*(1+rufPerks().lohn));
     pay=Math.round(base*cargoF*glanzF*timeF);
     if(!t.final)lines.push(['Lohn <small>('+Math.round(D.cargo)+' % heil, '+(onTime?'pünktlich':'verspätet')+')</small>','+ '+eur(pay)]);
-    if(!t.final&&D.cargo>=99.5){perfB=Math.max(5,Math.round(pay*.12));lines.push(['Makellos-Bonus <small>(kein Kratzer)</small>','+ '+eur(perfB)])}
+    if(!t.final&&D.cargo>=99.5){perfB=Math.max(5,Math.round(pay*.12));lines.push(['<i class="gold">★ Makellos-Bonus</i> <small>(kein Kratzer)</small>','+ '+eur(perfB)])}
     if(!t.final&&D.cargo>=80&&Math.random()<.3){tip=Math.round(rnd(10,30));lines.push(['Trinkgeld','+ '+eur(tip)])}
     R(first?'Neues Ziel':'Zugestellt',first?6:2);
-    if(D.cargo>=99.5)R('Makellos, kein Kratzer',9);else R('Ladung '+Math.round(D.cargo)+' %',Math.max(0,Math.round((D.cargo-40)/10)));
+    if(D.cargo>=99.5)R('<i class="gold">★ Makellos, kein Kratzer</i>',9);else R('Ladung '+Math.round(D.cargo)+' %',Math.max(0,Math.round((D.cargo-40)/10)));
     if(t.fragile&&D.cargo>=95)R('Zerbrechliches heil geliefert',3);
     if(onTime)R('Pünktlich',3);
     if(!D.violated&&t.hours>4.5)R('Lenkzeit eingehalten',2);
@@ -2579,7 +2596,7 @@ function finishDrive(ok,aborted){
   if(!ok)AU.fx('sad');
   setTimeout(()=>AU.fx('stamp'),180);
   let html='<p class="eyebrow">Tag '+(S.day-t.days)+' · '+t.to+'</p>';
-  html+='<div class="bigstamp'+(ok?'':' bad')+'">'+(ok?'Zugestellt':'Nicht zugestellt')+'</div>';
+  html+=(ok&&D.cargo>=99.5?'<div class="stamprow">':'')+'<div class="bigstamp'+(ok?'':' bad')+'">'+(ok?'Zugestellt':'Nicht zugestellt')+'</div>'+(ok&&D.cargo>=99.5?'<div class="goldseal"><b>100 %</b><small>makellos</small></div></div>':'');
   html+='<p class="typed" style="margin:0" id="r-note"></p>';
   if(!t.final||lines.length>4){html+='<div class="ledger">';lines.forEach(l=>html+='<span>'+l[0]+'</span><b>'+l[1]+'</b>');html+='<span class="sum">Unterm Strich</span><b class="sum countup" id="r-pay">0 €</b></div>'}
   html+='<div class="ledger">';rl.forEach(l=>html+='<span>'+l[0]+'</span><b>'+(l[1]>0?'+':'')+l[1]+'</b>');html+='<span class="sum">Respekt</span><b class="sum">'+(resp>=0?'+':'')+resp+'</b></div>';
