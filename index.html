@@ -385,6 +385,10 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .mcell.got svg{animation:none}
 #s-title>.eyebrow:first-child{margin-top:40px!important}
 .linkbtn{align-self:center;background:none;border:0;font:500 12px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:underline;text-underline-offset:3px;padding:6px 10px}
+.tour{position:relative}
+.tourstamp{position:absolute;top:10px;right:12px;display:block;width:28px;transform:rotate(6deg);opacity:.92}
+.tourstamp svg{display:block;width:100%;height:auto;filter:drop-shadow(0 1px 0 rgba(43,34,48,.15))}
+.tour:nth-child(even) .tourstamp{transform:rotate(-4deg)}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -1524,6 +1528,7 @@ function renderTours(){
       if(!un)right='<span class="stamp">Gesperrt</span>';
       else if(t.final&&S.finale)right='<span class="stamp">Zugestellt</span>';
       else if(!fits(t))right='<span class="stamp">Zu wenig Zeit</span>';
+      if(!right&&S.done[t.id])right='<span class="tourstamp" title="Schon gefahren">'+stampSVG(t.id)+'</span>';
       const pay=t.final?'Ehrenfahrt':eur(Math.round(t.pay*TUNE.payMul*(o&&o.eilig?1.35:1)));
       c.innerHTML='<div><h3>'+t.to+((S.perfect||{})[t.id]?' <span class="perf" title="Schon einmal makellos zugestellt">★</span>':'')+'</h3></div><div>'+right+'</div>'+
         '<div class="meta num"><span>'+t.km.toLocaleString('de-DE')+' km</span><span>'+t.days+' Tag'+(t.days>1?'e':'')+'</span><span>'+pay+'</span>'+(S.done[t.id]?'<span>'+S.done[t.id]+'× gefahren</span>':'')+'</div>'+
