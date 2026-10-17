@@ -284,7 +284,7 @@ nav.tabs button[aria-current="page"] svg{transform:translateY(-1px) scale(1.08)}
 }
 @keyframes biteIn{from{opacity:0;transform:translateY(16px) scale(.985)}}
 @keyframes revealIn{from{opacity:0;transform:translateY(9px);filter:blur(5px)}}
-@keyframes bglowIn{0%{opacity:0;transform:translateX(-50%) scale(.3)}35%{opacity:.95}100%{opacity:.45;transform:translateX(-50%) scale(1)}}
+@keyframes bglowIn{0%{opacity:0;transform:translateX(-50%) scale(.3)}35%{opacity:.95}100%{opacity:.32;transform:translateX(-50%) scale(1)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}}
 @keyframes grow{from{transform:scaleX(0)}}
@@ -524,6 +524,24 @@ input[type="time"]{font:inherit;font-family:var(--f-mono);font-size:15px;border:
 @keyframes mIn{from{opacity:0;transform:scale(.85) translateY(14px)}}
 @keyframes mspin{to{transform:rotate(360deg)}}
 @keyframes sdpulse{50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 18%,transparent),0 0 18px var(--c)}}
+
+/* ---------- Ruhe: Dauerbewegung nur noch beim Kompass und in der Richtungswolke. Alles andere leuchtet still und bewegt sich nur als Antwort auf eine Berührung. ---------- */
+.take.tap::after{animation:none;box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 18%,transparent),0 0 16px -8px color-mix(in srgb,var(--c) 50%,transparent)}
+.bite .links .chip{animation:none;box-shadow:0 0 14px -9px color-mix(in srgb,var(--c) 70%,transparent)}
+.tap .more{color:var(--muted);opacity:1}
+.tap:hover .more,.tap:active .more{color:var(--c)}
+.thalo,.tdue i,.tgo,.mok,.daily::before,.dglow,.smist,.rose2 .glowp,.rhalo,.sd.on,.hring,.dgo .dd,.deep .dorb,.mring,.mring span{animation:none}
+.tdue i{box-shadow:0 0 6px -1px color-mix(in srgb,var(--c) 60%,transparent)}
+.tgo{box-shadow:0 0 18px -8px color-mix(in srgb,var(--accent) 70%,transparent)}
+.thalo{opacity:.75}
+.daily::before{--ang:200deg}
+.dglow{opacity:.38}
+.daily.seen .dglow{opacity:.18}
+.smist{opacity:.35}
+.tmist{opacity:.4}
+.rose2 .glowp{opacity:.5}
+.dgo .dd{box-shadow:0 0 12px -3px color-mix(in srgb,var(--c) 60%,transparent)}
+.bglow{opacity:.32}
 </style>
 
 </head><body><div class="app" id="app">
@@ -1573,7 +1591,7 @@ function viewWay(){
       <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:20 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:24 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -1956,7 +1974,7 @@ if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
 /* Selbst-Aktualisierung: Wenn auf GitHub eine neuere Version liegt, lädt die App sie still nach (wichtig für die Version auf dem Home-Bildschirm). */
-const BUILD="17.10.2026, 19:20";
+const BUILD="17.10.2026, 19:24";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;try{sessionStorage.setItem("gk-upd",m[1])}catch(e){}
