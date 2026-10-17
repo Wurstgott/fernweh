@@ -326,6 +326,15 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
 .hilde-stage.night .sun circle{fill:#F3EAD0;transition:fill 1.2s}
 .hilde-stage.night::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(1.5px 1.5px at 12% 18%,#FBF1E6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 30% 9%,#FBF1E6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 52% 22%,#FBF1E6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 68% 12%,#FBF1E6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 44% 6%,#FBF1E6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 22% 30%,#FBF1E6 50%,transparent 51%);animation:fadein 1.2s}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
+.hilde-stage.night .cloud{opacity:.35;transition:opacity 1.2s}
+.zzz{position:absolute;left:70%;top:34%;z-index:3;pointer-events:none;font-weight:700;color:#FBF1E6;font-size:16px}
+.zzz span{position:absolute;opacity:0;animation:zz 2.4s ease-out infinite}
+.zzz span:nth-child(2){animation-delay:.8s;font-size:19px}.zzz span:nth-child(3){animation-delay:1.6s;font-size:23px}
+@keyframes zz{0%{opacity:0;transform:translate(0,0)}20%{opacity:1}100%{opacity:0;transform:translate(26px,-46px)}}
+.notiz{font-family:var(--type);font-size:16px;line-height:1.6;background:#FFFBEA;border:1px solid #E6D9A8;padding:14px 16px;transform:rotate(-1.5deg);box-shadow:2px 3px 0 rgba(43,34,48,.12);background-image:repeating-linear-gradient(transparent 0 24px,rgba(43,90,154,.15) 24px 25px);color:#2B3A6E}
+.senf{position:absolute;left:10px;bottom:8px;width:18px;height:38px;padding:0;border:0;background:none;z-index:2;transform:rotate(-8deg);filter:drop-shadow(0 0 4px rgba(240,197,102,.8))}
+.senf svg{display:block;width:100%;height:auto}
+@media (prefers-reduced-motion: reduce){.zzz span{animation:none;opacity:1}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -1151,7 +1160,7 @@ window.addEventListener('pointerdown',()=>{AU.init()},{once:false,passive:true})
 /* ================= Titel ================= */
 $('.title-word').addEventListener('click',()=>{AU.init();const tw=$('.title-word');
   if(tw.dataset.busy||!egg('title',7,4000))return;tw.dataset.busy=1;tw.classList.add('swap');AU.fx('sad');
-  setTimeout(()=>{tw.textContent='HEIMWEH'},250);setTimeout(()=>{tw.textContent='FERNWEH';tw.classList.remove('swap');delete tw.dataset.busy},2600)});
+  const sub=$('.title-sub'),old=sub.textContent;setTimeout(()=>{tw.textContent='HEIMWEH';sub.textContent='Ein Spiel über Kalle, der manchmal lieber zu Hause auf dem Sofa säße.'},250);setTimeout(()=>{tw.textContent='FERNWEH';sub.textContent=old;tw.classList.remove('swap');delete tw.dataset.busy},2800)});
 function renderTitle(){
   $('#title-emblem').innerHTML='<div class="emblem">'+hildeSVG({duft:1,glanz:80})+'</div>';
   const d=$('#diff');d.innerHTML='';
@@ -1220,6 +1229,9 @@ function updateDots(){
 }
 function hildeOpts(){return {duft:duftLv(),licht:S.up.licht,glanz:S.glanz,funk:S.up.funk,spiegel:S.up.spiegel,reifen:S.up.reifen,fanfare:S.up.fanfare}}
 function renderHof(){
+  {let t=$('#senf');if(S.senf&&!t){t=document.createElement('button');t.id='senf';t.className='senf';t.setAttribute('aria-label','Die Goldene Senftube');
+    t.innerHTML='<svg viewBox="0 0 16 34"><path d="M5 2 h6 v4 h-6 Z" fill="#7B2D3B" stroke="#2B2230" stroke-width="1.2"/><path d="M4 6 h8 l2 22 q-6 4 -12 0 Z" fill="#F0C566" stroke="#2B2230" stroke-width="1.2"/><path d="M5 14 h6" stroke="#B5832A" stroke-width="1.5"/><path d="M2 29 h12" stroke="#2B2230" stroke-width="1.2"/></svg>';
+    t.addEventListener('click',e=>{e.stopPropagation();AU.fx('ding');toast('Die Goldene Senftube. Die höchste Auszeichnung, die Doris vergibt.')});$('#stage').appendChild(t)}}
   $('#t-day').textContent=Math.min(S.day,limit())+' / '+limit();
   $('#t-money').textContent=eur(S.money);
   $('#t-resp').textContent=S.respect;
@@ -1268,12 +1280,17 @@ setInterval(()=>{if(curScreen==='hof'&&!document.hidden)puffs(1)},3200);
 $('#btn-wash').addEventListener('click',wash);
 $('#btn-tree').addEventListener('click',newTree);
 $('#stage .sun').addEventListener('click',e=>{e.stopPropagation();const st=$('#stage');if(st.classList.contains('night')||!egg('sun',3,2500))return;
-  st.classList.add('night');AU.fx('yawn');toast('Feierabend. Hilde schläft schon.');setTimeout(()=>st.classList.remove('night'),7000)});
-$('#s-log .eyebrow').addEventListener('click',()=>{if(egg('log',5,3000)){AU.fx('click');toast('Ganz hinten im Fahrtenbuch steht in Kalles Schrift: „Mama anrufen. Öl für Hilde. Blumen für Doris?“')}});
+  st.classList.add('night');AU.fx('yawn');toast('Feierabend. Hilde schläft schon.');const z=document.createElement('div');z.className='zzz';z.innerHTML='<span>z</span><span>z</span><span>Z</span>';st.appendChild(z);setTimeout(()=>{st.classList.remove('night');z.remove()},7000)});
+const NOTIZEN=['Mama anrufen.\nÖl für Hilde.\nBlumen für Doris?','Jupp schuldet mir 5 €.\nOder ich ihm. Nachfragen.','Wörter, die sich auf Hilde reimen:\nmilde, Gilde, Schilde.\nWeiter überlegen.','Neues Bäumchen ausprobieren.\nVanille war zu süß.\nTanne ist ehrlich.','Ottilie zum Geburtstag:\nnicht wieder Pralinen.'];
+$('#s-log .eyebrow').addEventListener('click',()=>{if(!egg('log',5,3000))return;const i=EGG.notiz=((EGG.notiz===undefined?-1:EGG.notiz)+1)%NOTIZEN.length;AU.fx('click');
+  openCard('<p class="eyebrow">Ganz hinten im Fahrtenbuch</p><div class="notiz">'+NOTIZEN[i].replace(/\n/g,'<br>')+'</div>',[{label:'Zurücklegen',cls:'alt',fn:closeCard}])});
 $('#t-resp').parentElement.addEventListener('click',()=>{if(S){AU.fx('click');rufCard()}});
 $('#hilde-btn').addEventListener('click',()=>{const hb=$('#hilde-btn');hb.classList.remove('honk');void hb.offsetWidth;hb.classList.add('honk');AU.fx(S&&S.up.fanfare?'fanfare':'horn');puffs(2);
   // Versteckt: Wer zu oft hupt, weckt den Nachbarn
-  if(egg('honk',10,5000))setTimeout(()=>{AU.fx('click');toast(pick(['Herr Lindemann von nebenan ruft: „Es ist Sonntag!“','Herr Lindemann klopft ans Fenster. Er hält ein Schild hoch: „RUHE“.','Ein Pantoffel fliegt über den Zaun. Er gehört Herrn Lindemann.']))},400)});
+  if(egg('honk',10,5000)){const n=EGG.nachbar=(EGG.nachbar||0)+1;
+    setTimeout(()=>{if(n===1){AU.fx('click');toast('Herr Pfefferkorn von nebenan ruft: „Es ist Sonntag!“')}
+      else if(n===2){AU.fx('stamp');toast('Herr Pfefferkorn hält ein Schild aus dem Fenster: „RUHE“. Es ist laminiert.')}
+      else{AU.fx('thud');hb.classList.remove('honk');void hb.offsetWidth;hb.classList.add('honk');toast('Ein Pantoffel fliegt über den Zaun und trifft Hilde. Er gehört Herrn Pfefferkorn.')}},400)}});
 
 /* Hof-Ereignisse zwischen zwei Touren */
 function maybeHofEvent(){
@@ -1494,7 +1511,7 @@ function ticker(text,kind,dur){
 $('#btn-radio').addEventListener('click',e=>{e.stopPropagation();AU.init();
   if(D&&D.contest)return resolveContest();
   AU.fx('static');AU.setStation((AU.set.station+1)%STATIONS.length);radioTune(false);
-  if(D&&!D.zapped&&egg('zap',9,6000)){D.zapped=true;setTimeout(()=>ticker('„Kalle, wir hören dich bis ins Studio umschalten. Entscheid dich mal, mein Lieber.“',''),1700)}});
+  if(D&&!D.zapped&&egg('zap',9,6000)){D.zapped=true;setTimeout(()=>{AU.fx('static');AU.fx('static')},1500);setTimeout(()=>ticker('„Kalle, wir hören dich bis ins Studio umschalten. Entscheid dich mal, mein Lieber.“',''),1700)}});
 /* Ottilie ruft an. Sie meldet sich höchstens dreimal pro Tour, außer nach einem Sekundenschlaf. */
 function ottilie(key,force){if(!D||D.ended||(!force&&(D.ottT>0||D.ottN>=3)))return false;D.ottT=40;D.ottN++;
   AU.fx('ring');AU.setDuck(true);setTimeout(()=>AU.setDuck(false),7000);setTimeout(()=>{if(D&&!D.ended)ticker(pick(OTT[key]),'ott',13000)},700);return true}
@@ -1607,7 +1624,7 @@ function spawnKollege(){
   if(!lanes.length){D.kollT=1;return}
   const l=lanes[Math.floor(Math.random()*lanes.length)];
   // Ganz selten kommt Hildegard vorbei, Hildes Schwester aus Bremen
-  if(S.log.length>=4&&!D.hgSeen&&Math.random()<.07){D.hgSeen=true;addObj('kollege',l,spawnY()-70*SC,{col:'#D8A23A',hildegard:true});return}
+  if(S.log.length>=4&&!D.hgSeen&&Math.random()<.07){D.hgSeen=true;if(addObj('kollege',l,spawnY()-70*SC,{col:'#D8A23A',hildegard:true}))ticker('„Hier Hildegard aus Bremen. Ich seh dich schon, Schwesterherz. Over.“','cb');return}
   addObj('kollege',l,spawnY()-70*SC,{col:['#2F6F73','#BFD8E6','#BFDCC8','#7B2D3B'][Math.floor(Math.random()*4)]});
 }
 function spawnHerd(kind){
@@ -1900,7 +1917,7 @@ function flash(){
   const k=greetTarget();D.flash=1;
   if(!k){AU.fx('click');return}
   if(k.type==='panne'){k.asked=true;return askHelp(k)}
-  if(k.type==='ente'){D.duckGreet=true;AU.fx('quack');setTimeout(()=>AU.fx('quack'),260);D.extraResp.push(['Der Entenmama zugenickt',1]);floatText('+1 Respekt',roadX+k.fx*roadW,k.y-14*SC);msg('Die Entenmama nickt dir zu.','good');return}
+  if(k.type==='ente'){D.duckGreet=true;AU.fx('quack');[260,420,560].forEach(t=>setTimeout(()=>AU.fx('quack'),t));for(let i=0;i<5;i++)D.parts.push({k:'heart',x:roadX+k.fx*roadW,y:k.y-6*SC,vx:(Math.random()-.5)*60,vy:-50-Math.random()*40,g:40,life:1.2,max:1.2,r:4*SC});D.extraResp.push(['Der Entenmama zugenickt',1]);floatText('+1 Respekt',roadX+k.fx*roadW,k.y-14*SC);msg('Die Entenmama nickt dir zu.','good');return}
   if(k.type==='korso'){D.korsoDone=true;D.objs.forEach(o=>{if(o.type==='korso')o.wave=1.6});AU.fx('hochzeit');D.extraResp.push(['Dem Brautpaar gratuliert',3]);
     const kx=laneX(k.lx)+sway(k.y);floatText('+3 Respekt',kx,k.y-k.h/2,'#7B2D3B');for(let i=0;i<14;i++)D.parts.push({k:'heart',x:kx,y:k.y,vx:(Math.random()-.5)*160,vy:-Math.random()*140-30,g:90,life:1.3,max:1.3,r:5*SC});msg('Das Brautpaar winkt.','good');return}
   if(k.type==='overpass'){k.greeted=true;k.cheer=2;AU.fx(S.up.fanfare?'fanfare':'horn');AU.fx('cheer');D.extraResp.push(['Kinder auf der Brücke gegrüßt',1]);floatText('+1 Respekt',W/2,k.y-20*SC);msg('Die Kinder jubeln.','good');return}
