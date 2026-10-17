@@ -1,10 +1,10 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Glückskompass"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta property="og:image" content="https://wurstgott.github.io/fernweh/glueckskompass/icon-512.png"><meta property="og:image:width" content="512"><meta property="og:image:height" content="512"><meta property="og:url" content="https://wurstgott.github.io/fernweh/glueckskompass/"><meta property="og:type" content="website"><meta property="og:site_name" content="Glückskompass"><meta name="twitter:card" content="summary"><link rel="manifest" href="manifest.json"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#EEF0E9">
+<meta name="apple-mobile-web-app-title" content="Glückskompass"><link rel="apple-touch-icon" sizes="180x180" href="https://wurstgott.github.io/fernweh/glueckskompass/apple-touch-icon.png"><meta property="og:image" content="https://wurstgott.github.io/fernweh/glueckskompass/icon-512.png"><meta property="og:image:width" content="512"><meta property="og:image:height" content="512"><meta property="og:url" content="https://wurstgott.github.io/fernweh/glueckskompass/"><meta property="og:type" content="website"><meta property="og:site_name" content="Glückskompass"><meta name="twitter:card" content="summary"><link rel="manifest" href="manifest.json"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#EEF0E9">
 <meta name="description" content="Glücksforschung in Häppchen: Erkenntnisse mit Quellen, Begriffe zum Üben und Experimente für ein gutes Leben.">
 <meta property="og:title" content="Glückskompass"><meta property="og:description" content="Glücksforschung in Häppchen: Erkenntnisse mit Quellen, Begriffe zum Üben und Experimente für ein gutes Leben.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23D98E22'/%3E%3Ccircle cx='32' cy='32' r='22' fill='%23FBFBF7'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23D98E22'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="192x192" href="https://wurstgott.github.io/fernweh/glueckskompass/icon-192.png"><link rel="icon" type="image/png" sizes="512x512" href="https://wurstgott.github.io/fernweh/glueckskompass/icon-512.png"><link rel="shortcut icon" href="https://wurstgott.github.io/fernweh/glueckskompass/icon-192.png">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Glückskompass</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1622,7 +1622,7 @@ function viewWay(){
       <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:49 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:51 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -2010,7 +2010,7 @@ if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
 /* Selbst-Aktualisierung: Wenn auf GitHub eine neuere Version liegt, lädt die App sie still nach (wichtig für die Version auf dem Home-Bildschirm). */
-const BUILD="17.10.2026, 19:49";
+const BUILD="17.10.2026, 19:51";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;
