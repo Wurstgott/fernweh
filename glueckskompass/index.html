@@ -458,7 +458,8 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .rose2 .glowp{opacity:.6}
 .rose2 .pt{opacity:.92}
 .rose2 .pg{cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
-.rose2 .rl{cursor:pointer}
+.rose2 .rl,.rose2 .rcenter{cursor:pointer}
+.rose2 .rcenter{outline:none;-webkit-tap-highlight-color:transparent}
 .rose2 .glowp g{transition:opacity .6s}
 .rose2 .pg .pt{transition:opacity .5s,filter .5s}
 .rose2.sel .pg:not(.on) .pt{opacity:.45}
@@ -1376,7 +1377,7 @@ $("#tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-ta
     if(to==="bites"&&S.cur){goHome();return}
     if(to==="terms"&&(Q||openTerm)){Q=null;openTerm=null;anim=true;render()}
     window.scrollTo({top:0,behavior:calm()?"auto":"smooth"});return}
-  if(to==="bites"&&S.cur&&tab!=="bites"){/* zurück zum offenen Häppchen */}
+  if(to==="bites"&&tab!=="bites"){S.filter="alle";S.cur=null;shared=null;save()} // zurück zum Kompass in der Grundeinstellung „Alle“
   anim=true;tab=to;fromBite=null;render();window.scrollTo(0,0)});
 
 /* ---------- Häppchen ---------- */
@@ -1591,7 +1592,7 @@ function viewWay(){
       <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:24 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:26 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -1818,7 +1819,7 @@ function roseSVG(score){const mx=Math.max(1,...Object.values(score));const ks=Ob
   return `<svg class="rose2" viewBox="-160 -150 320 300" role="img" aria-label="Deine Kompassrose">
    <circle r="100" fill="none" stroke="var(--line)" stroke-dasharray="2 5"/><circle r="50" fill="none" stroke="var(--line)" stroke-dasharray="2 5"/>
    <g class="petals glowp" filter="url(#rblur)">${ks.map(k=>petal(k,false)).join("")}</g><g class="petals top">${ks.map(k=>petal(k,true)).join("")}</g>
-   <circle r="7" fill="var(--card)" stroke="var(--accent)" stroke-width="3"/>
+   <g class="rcenter" data-rose-reset="1" role="button" tabindex="0" aria-label="Rose zurücksetzen"><circle r="22" fill="transparent"/><circle class="rcdot" r="7" fill="var(--card)" stroke="var(--accent)" stroke-width="3"/></g>
    ${labels}
    <defs><filter id="rblur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter></defs></svg>`}
 
@@ -1830,8 +1831,12 @@ function petalTap(k){const svg=document.querySelector(".rose2");if(!svg)return;c
   const p=svg.querySelector(`.pg[data-petal="${k}"] .pt`);if(p){glow(p,col,.6);auraRings(p,col,2)}buzz([6,30,8]);
   const all=BITES.filter(b=>b.cat===k),r=all.filter(b=>S.read[b.id]).length,ex=EXPS.filter(e=>e.cat===k),d=ex.filter(e=>S.exps[e.id]&&S.exps[e.id].status==="done").length;
   $("#pinfo").innerHTML=`<div class="pinfo" style="--c:var(--c-${k})"><span class="pdot"></span><div><b>${CATS[k].n}</b><p>Du hast ${r} von ${all.length} Häppchen gelesen und ${d} von ${ex.length} Experimenten geschafft.</p><div class="row"><button class="btn ghost" data-rose-go="${k}">Häppchen aus ${CATS[k].n}</button><button class="linkbtn" data-rose-exp="${k}">Experimente ansehen</button></div></div></div>`}
-document.addEventListener("click",e=>{const g=e.target.closest&&e.target.closest("[data-petal]");if(g)petalTap(g.dataset.petal)});
-document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.petal){e.preventDefault();petalTap(e.target.dataset.petal)}});
+function roseReset(){const svg=document.querySelector(".rose2");if(!svg||!svg.classList.contains("sel"))return;svg.classList.remove("sel");
+  svg.querySelectorAll(".pg").forEach(g=>{g.classList.remove("on");const p=g.querySelector(".pt");if(!calm())p.animate([{transform:"scale(1)"}],{duration:450,easing:"cubic-bezier(.2,.9,.3,1)",fill:"forwards"})});
+  svg.querySelectorAll(".glowp [data-g]").forEach(g=>g.style.opacity="");const c=svg.querySelector(".rcdot");if(c){glow(c,"var(--accent)",.7);auraSoft(c,"var(--accent)")}buzz(6);
+  const pi=$("#pinfo");if(pi&&pi.firstChild&&!calm()){pi.firstChild.animate([{opacity:1},{opacity:0,transform:"translateY(6px)"}],{duration:250,fill:"forwards"}).onfinish=()=>pi.innerHTML=""}else if(pi)pi.innerHTML=""}
+document.addEventListener("click",e=>{if(!e.target.closest)return;if(e.target.closest("[data-rose-reset]")){roseReset();return}const g=e.target.closest("[data-petal]");if(g)petalTap(g.dataset.petal)});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.roseReset){e.preventDefault();roseReset();return}if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.petal){e.preventDefault();petalTap(e.target.dataset.petal)}});
 
 /* ---------- Momente: selten und bedeutungsvoll ---------- */
 const MOMENTS=[
@@ -1974,7 +1979,7 @@ if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
 /* Selbst-Aktualisierung: Wenn auf GitHub eine neuere Version liegt, lädt die App sie still nach (wichtig für die Version auf dem Home-Bildschirm). */
-const BUILD="17.10.2026, 19:24";
+const BUILD="17.10.2026, 19:26";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;try{sessionStorage.setItem("gk-upd",m[1])}catch(e){}
