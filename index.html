@@ -428,6 +428,8 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .lsstamp svg{display:block;width:100%;height:auto;filter:drop-shadow(0 1px 0 rgba(43,34,48,.15))}
 @keyframes lsIn{from{opacity:0;transform:rotate(-8deg) scale(1.25)}to{opacity:.9;transform:rotate(7deg) scale(1)}}
 .linkbtn{background:none;border:0;padding:0;font:inherit;text-transform:none;letter-spacing:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.slipper{position:absolute;left:0;top:0;width:34px;margin:-9px 0 0 -17px;z-index:4;pointer-events:none}
+.slipper svg{display:block;width:100%;height:auto}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -1623,7 +1625,19 @@ $('#hilde-btn').addEventListener('click',e=>{if(treeTap(e))return;const hb=$('#h
   if(egg('honk',10,5000)){const n=EGG.nachbar=(EGG.nachbar||0)+1;
     setTimeout(()=>{if(n===1){AU.fx('click');toast('Herr Pfefferkorn von nebenan ruft: „Es ist Sonntag!“')}
       else if(n===2){AU.fx('stamp');toast('Herr Pfefferkorn hält ein Schild aus dem Fenster: „RUHE“. Es ist laminiert.')}
-      else{AU.fx('thud');award('sonntag');hb.classList.remove('honk');void hb.offsetWidth;hb.classList.add('honk');toast('Ein Pantoffel fliegt über den Zaun und trifft Hilde. Er gehört Herrn Pfefferkorn.')}},400)}});
+      else throwSlipper()},400)}});
+/* Herr Pfefferkorns Pantoffel: fliegt von rechts über den Zaun, trifft Hilde, prallt ab und bleibt liegen. Hilde bekommt einen Abdruck. */
+function throwSlipper(){const st=$('#stage'),hb=$('#hilde-btn');if(!st||st.querySelector('.slipper'))return;
+  const el=document.createElement('div');el.className='slipper';
+  el.innerHTML='<svg viewBox="0 0 40 20" aria-hidden="true"><path d="M3 15c0-4 3-7 8-7h6c4 0 6 2 9 4l8 2c3 .8 3 4 0 4H5c-1.2 0-2-1-2-3z" fill="#8C3A3A" stroke="#2B2230" stroke-width="1.6" stroke-linejoin="round"/><path d="M13 8c1 4 5 6 11 5" fill="none" stroke="#2B2230" stroke-width="1.4"/><path d="M15 9.5l2 3M19 10l1.5 3M23 11l1 2.4" stroke="#E3AFB4" stroke-width="1.2" stroke-linecap="round"/><path d="M3 17.5h32" stroke="#E8C78A" stroke-width="2.2" stroke-linecap="round"/></svg>';
+  st.appendChild(el);const W2=st.clientWidth,H2=st.clientHeight,hr=hb.getBoundingClientRect(),sr=st.getBoundingClientRect();
+  const hx=hr.left-sr.left+hr.width*.6,hy=hr.top-sr.top+hr.height*.5;
+  const fly=el.animate([{transform:`translate(${W2+20}px,${H2*.15}px) rotate(0deg)`},{transform:`translate(${(W2+hx)/2}px,${-10}px) rotate(-260deg)`,offset:.5},{transform:`translate(${hx}px,${hy}px) rotate(-540deg)`}],{duration:750,easing:'cubic-bezier(.3,.1,.6,1)',fill:'forwards'});
+  fly.onfinish=()=>{AU.fx('thud');hb.classList.remove('honk');void hb.offsetWidth;hb.classList.add('honk');
+    if(S){S.glanz=Math.max(0,S.glanz-6);save();$('#hilde-svg').innerHTML=hildeSVG(hildeOpts());renderHof()}
+    award('sonntag');toast('Ein Pantoffel fliegt über den Zaun und trifft Hilde. Er gehört Herrn Pfefferkorn. Hilde ist jetzt etwas schmutziger.');
+    const gy=H2-24;el.animate([{transform:`translate(${hx}px,${hy}px) rotate(-540deg)`},{transform:`translate(${hx+30}px,${hy-40}px) rotate(-610deg)`,offset:.35},{transform:`translate(${hx+52}px,${gy}px) rotate(-700deg)`}],{duration:650,easing:'ease-in',fill:'forwards'})
+      .onfinish=()=>{el.animate([{opacity:1},{opacity:1,offset:.7},{opacity:0}],{duration:2600,fill:'forwards'}).onfinish=()=>el.remove()}}}
 
 /* Hof-Ereignisse zwischen zwei Touren */
 function maybeHofEvent(){
