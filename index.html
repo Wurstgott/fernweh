@@ -366,6 +366,11 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .todo ul{margin:0;padding-left:18px;font-family:var(--type);font-size:13px;line-height:1.6}
 .todo li.done{text-decoration:line-through;color:var(--muted)}
 .fest p{margin:0 0 6px;font-family:var(--type);font-size:13px;line-height:1.55}
+.diffwrap{position:relative}
+.diffwrap>.btn{width:100%}
+.diff .rank{font-style:normal;font-size:10px;letter-spacing:.12em;font-weight:600;opacity:.75;margin-left:10px;vertical-align:.15em}
+.diffwrap .neu{position:absolute;right:8px;top:8px;background:none;border:1px solid currentColor;border-radius:2px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:2px 6px;opacity:.6;color:var(--ink)}
+.diffwrap .btn.burg+.neu{color:var(--cream)}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -380,7 +385,7 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
     <div class="row" style="justify-content:center" id="continue-wrap" hidden>
       <button class="btn teal" id="btn-continue">Fahrt fortsetzen</button>
     </div>
-    <p class="eyebrow" style="margin-top:6px">Neue Fahrt · Schwierigkeit wählen</p>
+    <p class="eyebrow" style="margin-top:6px">Deine Fahrten · Schwierigkeit wählen</p>
     <div class="diff" id="diff"></div>
     <div class="panel" id="newconfirm" hidden style="display:flex;flex-direction:column;gap:10px">
       <p style="margin:0;font-size:14px" id="newconfirm-text"></p>
@@ -629,7 +634,7 @@ const AU=(function(){
     if(!song){stop();return}
     if(!ctx){pendingSong=song;return}
     if(cur&&cur.song.id===song.id&&!(opt&&opt.force))return;
-    stop();
+    stop();cutMel();
     cur={song:compile(song),step:0,loop:0,next:ctx.currentTime+.15,g:gain(song.vol||1,musG),loops:opt&&opt.loops,onEnd:opt&&opt.onEnd};
     timer=setInterval(tick,50);tick();
     if(song.crackle)startCrackle();
@@ -714,9 +719,13 @@ const AU=(function(){
   }
 
   /* ---------- Effekte ---------- */
+  // Melodische Effekte laufen über einen eigenen Kanal. Beginnt neue Musik, wird er sanft ausgeblendet, damit nie zwei Melodien gleichzeitig klingen.
+  const MEL=new Set(['heimweh','fernweh','arrive','arrival','perfect']);let melG=null;
+  function mel(){if(!melG){melG=ctx.createGain();melG.connect(sfxG)}return melG}
+  function cutMel(){if(melG&&ctx){const g=melG;g.gain.setTargetAtTime(0,ctx.currentTime,.08);setTimeout(()=>{try{g.disconnect()}catch(e){}},700);melG=null}}
   function fx(name,opt){const c=init();if(!c||!set.sfx)return;fxRaw(name,opt)}
   function fxRaw(name,opt){
-    const c=ctx;const t=c.currentTime+.005;const D=sfxG;
+    const c=ctx;const t=c.currentTime+.005;const D=MEL.has(name)?mel():sfxG;
     switch(name){
       case 'click':{const g=gain(0,D);const hp=filt('highpass',1800,.7,g);noise(t,.03,hp);envAD(g,t,.12,.001,.02);break}
       case 'whoosh':{const g=gain(0,D);const bp=filt('bandpass',700,1.2,g);bp.frequency.setValueAtTime(600,t);bp.frequency.exponentialRampToValueAtTime(1900,t+.16);noise(t,.22,bp);envAD(g,t,.07,.03,.16);break}
@@ -817,9 +826,9 @@ const AU=(function(){
   // Nur für Tests: einen Effekt offline aufnehmen und Spitzen- und Effektivpegel melden
   async function _renderFx(name,opt,sec){const keep={ctx,sfxG,noiseBuf,set:set.sfx};const sr=22050;const off=new OfflineAudioContext(1,Math.ceil(sr*sec),sr);ctx=off;
     sfxG=off.createGain();sfxG.connect(off.destination);noiseBuf=off.createBuffer(1,sr*2,sr);const nd=noiseBuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
-    set.sfx=true;const ci=init;fx.__off=true;
+    set.sfx=true;const keepMel=melG;melG=null;
     try{fxRaw(name,opt)}finally{}
-    const buf=await off.startRendering();ctx=keep.ctx;sfxG=keep.sfxG;noiseBuf=keep.noiseBuf;set.sfx=keep.set;
+    const buf=await off.startRendering();melG=keepMel;ctx=keep.ctx;sfxG=keep.sfxG;noiseBuf=keep.noiseBuf;set.sfx=keep.set;
     const d=buf.getChannelData(0);let pk=0,ss=0;for(const v of d){pk=Math.max(pk,Math.abs(v));ss+=v*v}return {peak:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4)}}
   return {_render,_renderFx,jingle,set,init,apply,setDuck,fx,play,stop,engineStart,engineSet,engineStop,
     toggleSfx(){set.sfx=!set.sfx;store.set('fw-sfx',set.sfx);apply();return set.sfx},
@@ -1109,7 +1118,11 @@ function migrate(s){
   if(s.v===2){if(s.fit===undefined)s.fit=100;if(s.up.matratze===undefined)s.up.matratze=0}
   return s.v===2?s:null;
 }
-const save=()=>{if(S)store.set('fernweh-save',S)};
+/* Jede Schwierigkeit hat ihren eigenen Spielstand. Ein alter Einzelspielstand wird einmalig übernommen. */
+const saveKey=d=>'fernweh-save-'+d;
+{const old=store.get('fernweh-save');if(old&&old.diff&&!store.get(saveKey(old.diff))){store.set(saveKey(old.diff),old);store.set('fernweh-last',old.diff)}if(old)store.del('fernweh-save')}
+const loadSave=d=>migrate(store.get(saveKey(d)));
+const save=()=>{if(S){store.set(saveKey(S.diff),S);store.set('fernweh-last',S.diff)}};
 const limit=()=>DIFF[S.diff].days;
 const daysLeft=()=>limit()-(S.day-1);
 const doneCount=ch=>TOURS.filter(t=>t.ch===ch&&S.done[t.id]).length;
@@ -1220,38 +1233,39 @@ window.addEventListener('pointerdown',()=>{AU.init()},{once:false,passive:true})
    setTimeout(()=>{sub.classList.add('fade');em.classList.add('sad')},300);
    setTimeout(()=>{sub.textContent='Ein Spiel über Kalle, der manchmal lieber zu Hause auf dem Sofa säße.';sub.classList.remove('fade')},700);
    setTimeout(()=>{flipTo('FERN',false);sub.classList.add('fade');em.classList.remove('sad')},7000);
-   setTimeout(()=>{sub.textContent=old;sub.classList.remove('fade');AU.fx('fernweh');delete tw.dataset.busy;setTimeout(()=>{if(curScreen==='title')AU.play(SONGS.hof)},900)},7000+620)});}
+   setTimeout(()=>{sub.textContent=old;sub.classList.remove('fade');if(curScreen==='title')AU.fx('fernweh');delete tw.dataset.busy;setTimeout(()=>{if(curScreen==='title')AU.play(SONGS.hof)},900)},7000+620)});}
 function renderTitle(){
   $('#title-emblem').innerHTML='<div class="emblem">'+hildeSVG({duft:1,glanz:80})+'</div>';
   const d=$('#diff');d.innerHTML='';
+  const best=store.get('fernweh-best')||{};
   Object.keys(DIFF).forEach(k=>{
+    const sv=loadSave(k),live=sv&&!sv.ended;
     const b=document.createElement('button');b.className='btn '+(k==='lehrling'?'alt':k==='geselle'?'':'burg');
-    b.innerHTML='<b>'+DIFF[k].name+'</b><span>'+DIFF[k].blurb+'</span>';
-    b.addEventListener('click',()=>{AU.fx('click');
-      const sv=migrate(store.get('fernweh-save'));
-      if(sv&&!sv.ended){pendingDiff=k;$('#newconfirm-text').textContent='Deine laufende Fahrt ('+DIFF[sv.diff].name+', Tag '+Math.min(sv.day,DIFF[sv.diff].days)+') wird dabei gelöscht.';$('#newconfirm').hidden=false;$('#newconfirm').scrollIntoView({block:'center',behavior:'smooth'});return}
-      newGame(k)});
-    d.appendChild(b);
+    b.innerHTML='<b>'+DIFF[k].name+(best[k]?'<i class="rank">Bester Rang '+best[k].r+'</i>':'')+'</b><span>'+(live?'Deine Fahrt läuft: Tag '+Math.min(sv.day,DIFF[k].days)+' von '+DIFF[k].days+'. Antippen zum Weiterfahren.':DIFF[k].blurb)+'</span>';
+    b.addEventListener('click',()=>{AU.fx('click');if(live)resumeGame(k);else newGame(k)});
+    const wrap=document.createElement('div');wrap.className='diffwrap';wrap.appendChild(b);
+    if(live){const n=document.createElement('button');n.className='neu';n.textContent='neu';n.setAttribute('aria-label','Neu anfangen als '+DIFF[k].name);
+      n.addEventListener('click',e=>{e.stopPropagation();AU.fx('click');pendingDiff=k;$('#newconfirm-text').textContent='Deine Fahrt als '+DIFF[k].name+' (Tag '+Math.min(sv.day,DIFF[k].days)+') wird gelöscht, und du fängst von vorn an.';$('#newconfirm').hidden=false;$('#newconfirm').scrollIntoView({block:'center',behavior:'smooth'})});wrap.appendChild(n)}
+    d.appendChild(wrap);
   });
-  const sv=migrate(store.get('fernweh-save'));
+  const last=store.get('fernweh-last'),sv=last&&loadSave(last);
   const live=sv&&!sv.ended;
   $('#continue-wrap').hidden=!live;$('#newconfirm').hidden=true;
   if(live)$('#btn-continue').textContent='Fahrt fortsetzen · '+DIFF[sv.diff].name+', Tag '+Math.min(sv.day,DIFF[sv.diff].days);
-  const best=store.get('fernweh-best')||{};
-  const parts=Object.keys(DIFF).filter(k=>best[k]).map(k=>DIFF[k].name+': Rang '+best[k].r);
-  $('#best').textContent=parts.length?'Deine besten Ränge · '+parts.join(' · '):'Du hast noch keinen Rang erreicht.';
+  $('#best').textContent=Object.keys(best).length?'':'Du hast noch keinen Rang erreicht.';
 }
 let pendingDiff=null;
 function newGame(k){S=fresh(k);save();renderLetter();show('letter')}
 $('#btn-newyes').addEventListener('click',()=>{if(pendingDiff)newGame(pendingDiff)});
 $('#btn-newno').addEventListener('click',()=>{$('#newconfirm').hidden=true});
-$('#btn-continue').addEventListener('click',()=>{AU.fx('click');S=migrate(store.get('fernweh-save'));
+function resumeGame(k){S=loadSave(k);
   if(S.driving){const t=TOURS.find(x=>x.id===S.driving);delete S.driving;
     if(t){S.day+=t.days;S.respect=Math.max(0,S.respect-2);S.stats.fails++;S.glanz=Math.max(0,S.glanz-25);
       S.log.push({day:S.day-t.days,to:t.to,ok:false,note:'Die Fahrt nach '+t.to+' wurde unterwegs unterbrochen. Die Tage sind trotzdem vergangen.'});save();
       setTimeout(()=>toast('Die letzte Tour wurde unterbrochen. '+t.days+' Tag'+(t.days>1?'e':'')+' sind trotzdem vergangen.'),300)}}
   if(!S.finale&&!available().length){ending();return}
-  show('hof')});
+  show('hof')}
+$('#btn-continue').addEventListener('click',()=>{AU.fx('click');resumeGame(store.get('fernweh-last'))});
 function renderLetter(){
   $('#letter').innerHTML='Lieber Kalle,<br><br>in '+limit()+' Tagen wird unsere Spedition hundert Jahre alt. Im Lager steht noch eine Kiste aus dem Gründungsjahr, adressiert ans Nordkap. Mein Vater hat sie nie zustellen können.<br><br>Ich möchte, dass du sie mit Hilde hinbringst. Bis dahin lernst du die Straße kennen: zuerst die Strecken hier in der Gegend, dann quer durchs Land und dann Europa.<br><br>Fahr ordentlich und grüß die Kollegen. Mach deine Pausen. Nach viereinhalb Stunden am Steuer ist Schluss, darin sind das Gesetz und ich uns einig.<br><br>Herzlich,<br>Ottilie Brandt<br><small>(93 Jahre, Chefin)</small>';
 }
@@ -2851,7 +2865,7 @@ function ending(){
   const seen=[];
   S.log.filter(e=>e.ok).forEach(e=>{if(seen.includes(e.to))return;seen.push(e.to);const d=document.createElement('div');d.className='post';d.innerHTML=stampSVG((TOURS.find(t=>t.to===e.to)||{}).id)+'<b></b><span></span>';d.querySelector('b').textContent=e.to;d.querySelector('span:last-child').textContent='Tag '+e.day+': '+(TOURS.find(t=>t.to===e.to)||{}).cargo;P.appendChild(d)});
   if(!seen.length)P.innerHTML='<div class="post">'+stampSVG('hof')+'<b>Frankfurt</b><span>Hilde stand die ganze Zeit auf dem Hof.</span></div>';
-  $('#btn-again').addEventListener('click',()=>{store.del('fernweh-save');S=null;renderTitle();show('title')});
+  $('#btn-again').addEventListener('click',()=>{store.del(saveKey(S.diff));S=null;renderTitle();show('title')});
   show('end');
   setTimeout(()=>AU.fx(S&&S.finale?'arrive':'sad'),300);
 }
