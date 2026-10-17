@@ -1109,7 +1109,7 @@ const DAY=864e5,now=()=>Date.now();
 const KEY="mehrsein-v1";
 let S={read:{},saved:{},terms:{},exps:{},filter:"alle",history:[],cur:null};
 try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw))}catch(e){}
-S.cur=null;
+S.cur=null;S.filter="alle";
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const B=Object.fromEntries(BITES.map(b=>[b.id,b])),T=Object.fromEntries(TERMS.map(t=>[t.id,t])),X=Object.fromEntries(EXPS.map(e=>[e.id,e]));
 const cc=c=>`style="--c:var(--c-${c})"`;
