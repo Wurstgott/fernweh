@@ -427,6 +427,7 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .lsstamp{position:absolute;top:14px;right:16px;width:30px;transform:rotate(7deg);opacity:.9;animation:lsIn .5s 1.1s ease-out backwards;pointer-events:none}
 .lsstamp svg{display:block;width:100%;height:auto;filter:drop-shadow(0 1px 0 rgba(43,34,48,.15))}
 @keyframes lsIn{from{opacity:0;transform:rotate(-8deg) scale(1.25)}to{opacity:.9;transform:rotate(7deg) scale(1)}}
+.linkbtn{background:none;border:0;padding:0;font:inherit;text-transform:none;letter-spacing:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -458,7 +459,7 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 <li>Am Ende zählen Respekt, verschiedene Ziele, übrige Tage und dein Erspartes.</li>
 </ol></details>
     <a class="tip" id="tip" href="https://www.paypal.com/donate/?business=c.m.engelaender%40gmail.com&amp;currency_code=EUR" target="_blank" rel="noopener"></a>
-    <p class="best">Fernweh · Version 2.6 · Oktober 2026</p>
+    <p class="best">Fernweh · Version 2.6 · Oktober 2026 · <button class="linkbtn" id="btn-imp">Impressum</button></p>
   </section>
 
   <!-- BRIEF -->
@@ -1592,6 +1593,8 @@ function puffs(n){const P=$('#puffs');if(!P)return;for(let i=0;i<(n||1);i++){con
 setInterval(()=>{if(curScreen==='hof'&&!document.hidden)puffs(1)},3200);
 $('#btn-wash').addEventListener('click',wash);
 $('#btn-tree').addEventListener('click',newTree);
+$('#btn-imp').addEventListener('click',()=>{AU.init();AU.fx('click');
+  openCard('<p class="eyebrow">Impressum</p><p style="margin:0;font-size:14px;line-height:1.55">Fernweh ist ein privates Spiel von<br><b>Carlo Maximilian Engeländer</b>.</p><p style="margin:0;font-size:12px;color:var(--muted);line-height:1.5">Alle Figuren, Firmen und Orte sind erfunden oder liebevoll ausgeliehen. Ähnlichkeiten mit echten Speditionen sind Zufall.</p>',[{label:'Schließen',cls:'alt',fn:closeCard}]);$('#ov').dataset.dismiss=1});
 $('#btn-home').addEventListener('click',()=>{AU.fx('click');save();renderTitle();show('title')});
 $('#stage .sun').addEventListener('click',e=>{e.stopPropagation();const st=$('#stage');if(st.classList.contains('night')||!egg('sun',3,2500))return;
   st.classList.add('night');AU.fx('yawn');award('sonne');toast('Feierabend. Hilde schläft schon.');const z=document.createElement('div');z.className='zzz';z.innerHTML='<span>z</span><span>z</span><span>Z</span>';st.appendChild(z);setTimeout(()=>{st.classList.remove('night');z.remove()},7000)});
