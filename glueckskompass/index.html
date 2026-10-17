@@ -1622,7 +1622,7 @@ function viewWay(){
       <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:57 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 20:01 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -1635,9 +1635,14 @@ function balanceHint(s){const e=Object.entries(s).sort((a,b)=>a[1]-b[1]);const l
 const APP_URL="https://wurstgott.github.io/fernweh/glueckskompass/";
 let shared=null;
 function firstSentence(s){const m=s.match(/^.*?[.!?](\s|$)/);return (m?m[0]:s).trim()}
+let shareIcon=null;
+if(/github\.io$/.test(location.hostname))fetch("icon-512.png").then(r=>r.ok?r.blob():null).then(b=>{if(b)shareIcon=new File([b],"Glückskompass.png",{type:"image/png"})}).catch(()=>{});
 async function shareOut(title,text,url){
   const full=text+"\n\n"+url;
-  if(navigator.share){try{await navigator.share({title,text,url});return}catch(e){if(e&&e.name==="AbortError")return}}
+  if(navigator.share){
+    // Mit dem App-Logo als Bild: So zeigt das Teilen-Menü sicher das Symbol, der Text mit Link kommt als Bildunterschrift mit.
+    if(shareIcon&&navigator.canShare&&navigator.canShare({files:[shareIcon],text:full})){try{await navigator.share({files:[shareIcon],text:full,title});return}catch(e){if(e&&e.name==="AbortError")return}}
+    try{await navigator.share({title,text,url});return}catch(e){if(e&&e.name==="AbortError")return}}
   try{await navigator.clipboard.writeText(full);toast("Text und Link kopiert. Jetzt einfügen und verschicken.");return}catch(e){}
   sheet(`<div class="label">Zum Verschicken</div><h2>Text kopieren</h2><p class="muted" style="font-size:15px">Markiere den Text und kopiere ihn in eine Nachricht.</p><textarea id="sharetext" readonly style="min-height:200px">${esc(full)}</textarea>`);
   const ta=$("#sharetext");ta.focus();ta.select();
@@ -2010,7 +2015,7 @@ if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
 /* Selbst-Aktualisierung: Wenn auf GitHub eine neuere Version liegt, lädt die App sie still nach (wichtig für die Version auf dem Home-Bildschirm). */
-const BUILD="17.10.2026, 19:57";
+const BUILD="17.10.2026, 20:01";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;
