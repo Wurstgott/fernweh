@@ -399,6 +399,12 @@ input[type="time"]{font:inherit;font-family:var(--f-mono);font-size:15px;border:
 .mcard{position:relative;max-width:360px;width:100%;background:var(--card);border-radius:24px;padding:30px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;box-shadow:0 30px 80px -30px rgba(0,0,0,.45)}
 .mcard h2{font-size:26px}
 .mring{width:96px;height:96px;border-radius:50%;position:relative;display:grid;place-items:center;background:conic-gradient(from -90deg,var(--c-ich) 0 20%,var(--c-wir) 0 40%,var(--c-welt) 0 60%,var(--c-sein) 0 80%,var(--c-zeit) 0 100%);box-shadow:0 0 50px color-mix(in srgb,var(--accent) 55%,transparent)}
+.mok{margin-top:8px;width:44px;height:44px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;cursor:pointer;background:conic-gradient(from -90deg,var(--c-ich) 0 20%,var(--c-wir) 0 40%,var(--c-welt) 0 60%,var(--c-sein) 0 80%,var(--c-zeit) 0 100%);box-shadow:0 0 18px -2px color-mix(in srgb,var(--accent) 50%,transparent);transition:transform .2s cubic-bezier(.2,.7,.2,1)}
+.mok span{width:32px;height:32px;border-radius:50%;background:var(--card);display:grid;place-items:center}
+.mok span::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.mok:active{transform:scale(.9)}
+@media (prefers-reduced-motion:no-preference){.mok{animation:mokp 3s ease-in-out infinite}}
+@keyframes mokp{50%{box-shadow:0 0 26px 2px color-mix(in srgb,var(--accent) 45%,transparent)}}
 .mring span{width:72px;height:72px;border-radius:50%;background:var(--card);display:grid;place-items:center}
 .mring span::after{content:"";width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 16px var(--accent)}
 @media (prefers-reduced-motion:no-preference){
@@ -1671,9 +1677,9 @@ const MOMENTS=[
 let momentOpen=false;
 function checkMoments(){if(momentOpen||$("#layer").innerHTML)return;const s=currentSeries();if(s&&s.items.every(itemDone)){S.series[s.key]={complete:now()};save()}
   const m=MOMENTS.find(m=>!S.moments[m.id]&&m.ok());if(!m)return;S.moments[m.id]=now();save();setTimeout(()=>showMoment(m),700)}
-function showMoment(m){momentOpen=true;const d=document.createElement("div");d.className="moment";d.innerHTML=`<div class="mcard" role="dialog" aria-modal="true"><span class="mring" aria-hidden="true"><span></span></span><p class="label">Ein Moment</p><h2>${m.t}</h2><p>${m.x}</p><button class="btn primary" id="mok">Schön</button></div>`;
+function showMoment(m){momentOpen=true;const d=document.createElement("div");d.className="moment";d.innerHTML=`<div class="mcard" role="dialog" aria-modal="true"><span class="mring" aria-hidden="true"><span></span></span><p class="label">Ein Moment</p><h2>${m.t}</h2><p>${m.x}</p><button class="mok" id="mok" aria-label="Weiter"><span></span></button></div>`;
   document.body.appendChild(d);buzz([10,70,10,70,24]);const r=d.querySelector(".mring");setTimeout(()=>{auraRings(r,null,3);glow(d.querySelector(".mcard"),"var(--accent)")},120);
-  const close=()=>{d.classList.add("out");momentOpen=false;setTimeout(()=>d.remove(),350)};d.addEventListener("click",e=>{if(e.target.id==="mok"||e.target===d)close()})}
+  const close=()=>{d.classList.add("out");momentOpen=false;setTimeout(()=>d.remove(),350)};d.addEventListener("click",e=>{if(e.target.closest("#mok")||e.target===d)close()})}
 
 /* ---------- Gegen endloses Lesen ---------- */
 let sessionReads=0,scrollHinted=false;
