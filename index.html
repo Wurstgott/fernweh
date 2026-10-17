@@ -316,6 +316,16 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
 .post .stamp-svg{position:absolute;right:8px;top:7px;width:30px;height:auto;transform:rotate(3deg);filter:drop-shadow(0 1px 0 rgba(43,34,48,.18))}
 .post:nth-child(even) .stamp-svg{transform:rotate(-2deg)}
 .post b,.post>span{display:block;padding-right:36px}
+/* Versteckte Kleinigkeiten */
+.title-word{cursor:default;transition:opacity .25s,letter-spacing .4s}
+.title-word.swap{animation:sigh 2.6s ease-in-out}
+@keyframes sigh{0%{opacity:1}9%{opacity:0}12%{opacity:1;color:var(--teal);letter-spacing:.24em}85%{opacity:1;color:var(--teal)}92%{opacity:0}100%{opacity:1}}
+.hilde-stage{transition:background 1.2s}
+.hilde-stage .sun{cursor:default}
+.hilde-stage.night{background:#3A3A5C}
+.hilde-stage.night .sun circle{fill:#F3EAD0;transition:fill 1.2s}
+.hilde-stage.night::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(1.5px 1.5px at 12% 18%,#FBF1E6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 30% 9%,#FBF1E6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 52% 22%,#FBF1E6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 68% 12%,#FBF1E6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 44% 6%,#FBF1E6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 22% 30%,#FBF1E6 50%,transparent 51%);animation:fadein 1.2s}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -1129,6 +1139,9 @@ function show(id){
   AU.play(id==='end'?SONGS.ende:SONGS.hof);
 }
 document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',()=>{AU.init();AU.fx('click');show(b.dataset.tab)}));
+/* Versteckte Kleinigkeiten: egg(name, n, ms) meldet true, wenn etwas n-mal innerhalb von ms passiert ist */
+const EGG={};
+function egg(name,n,ms){const now=performance.now(),e=EGG[name]=(EGG[name]||[]).filter(t=>now-t<ms);e.push(now);if(e.length>=n){EGG[name]=[];return true}return false}
 function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>{t.hidden=true},2600)}
 function renderToggles(){document.querySelectorAll('.tgl').forEach(b=>{const k=b.dataset.tgl;b.textContent=(k==='music'?'Musik: ':'Geräusche: ')+(AU.set[k]?'an':'aus')})}
 document.querySelectorAll('.tgl').forEach(b=>b.addEventListener('click',()=>{AU.init();const k=b.dataset.tgl;k==='music'?AU.toggleMusic():AU.toggleSfx();AU.fx('click');renderToggles()}));
@@ -1136,6 +1149,9 @@ document.querySelectorAll('.tgl').forEach(b=>b.addEventListener('click',()=>{AU.
 window.addEventListener('pointerdown',()=>{AU.init()},{once:false,passive:true});
 
 /* ================= Titel ================= */
+$('.title-word').addEventListener('click',()=>{AU.init();const tw=$('.title-word');
+  if(tw.dataset.busy||!egg('title',7,4000))return;tw.dataset.busy=1;tw.classList.add('swap');AU.fx('sad');
+  setTimeout(()=>{tw.textContent='HEIMWEH'},250);setTimeout(()=>{tw.textContent='FERNWEH';tw.classList.remove('swap');delete tw.dataset.busy},2600)});
 function renderTitle(){
   $('#title-emblem').innerHTML='<div class="emblem">'+hildeSVG({duft:1,glanz:80})+'</div>';
   const d=$('#diff');d.innerHTML='';
@@ -1251,8 +1267,13 @@ function puffs(n){const P=$('#puffs');if(!P)return;for(let i=0;i<(n||1);i++){con
 setInterval(()=>{if(curScreen==='hof'&&!document.hidden)puffs(1)},3200);
 $('#btn-wash').addEventListener('click',wash);
 $('#btn-tree').addEventListener('click',newTree);
+$('#stage .sun').addEventListener('click',e=>{e.stopPropagation();const st=$('#stage');if(st.classList.contains('night')||!egg('sun',3,2500))return;
+  st.classList.add('night');AU.fx('yawn');toast('Feierabend. Hilde schläft schon.');setTimeout(()=>st.classList.remove('night'),7000)});
+$('#s-log .eyebrow').addEventListener('click',()=>{if(egg('log',5,3000)){AU.fx('click');toast('Ganz hinten im Fahrtenbuch steht in Kalles Schrift: „Mama anrufen. Öl für Hilde. Blumen für Doris?“')}});
 $('#t-resp').parentElement.addEventListener('click',()=>{if(S){AU.fx('click');rufCard()}});
-$('#hilde-btn').addEventListener('click',()=>{const hb=$('#hilde-btn');hb.classList.remove('honk');void hb.offsetWidth;hb.classList.add('honk');AU.fx(S&&S.up.fanfare?'fanfare':'horn');puffs(2)});
+$('#hilde-btn').addEventListener('click',()=>{const hb=$('#hilde-btn');hb.classList.remove('honk');void hb.offsetWidth;hb.classList.add('honk');AU.fx(S&&S.up.fanfare?'fanfare':'horn');puffs(2);
+  // Versteckt: Wer zu oft hupt, weckt den Nachbarn
+  if(egg('honk',10,5000))setTimeout(()=>{AU.fx('click');toast(pick(['Herr Lindemann von nebenan ruft: „Es ist Sonntag!“','Herr Lindemann klopft ans Fenster. Er hält ein Schild hoch: „RUHE“.','Ein Pantoffel fliegt über den Zaun. Er gehört Herrn Lindemann.']))},400)});
 
 /* Hof-Ereignisse zwischen zwei Touren */
 function maybeHofEvent(){
@@ -1472,7 +1493,8 @@ function ticker(text,kind,dur){
 }
 $('#btn-radio').addEventListener('click',e=>{e.stopPropagation();AU.init();
   if(D&&D.contest)return resolveContest();
-  AU.fx('static');AU.setStation((AU.set.station+1)%STATIONS.length);radioTune(false)});
+  AU.fx('static');AU.setStation((AU.set.station+1)%STATIONS.length);radioTune(false);
+  if(D&&!D.zapped&&egg('zap',9,6000)){D.zapped=true;setTimeout(()=>ticker('„Kalle, wir hören dich bis ins Studio umschalten. Entscheid dich mal, mein Lieber.“',''),1700)}});
 /* Ottilie ruft an. Sie meldet sich höchstens dreimal pro Tour, außer nach einem Sekundenschlaf. */
 function ottilie(key,force){if(!D||D.ended||(!force&&(D.ottT>0||D.ottN>=3)))return false;D.ottT=40;D.ottN++;
   AU.fx('ring');AU.setDuck(true);setTimeout(()=>AU.setDuck(false),7000);setTimeout(()=>{if(D&&!D.ended)ticker(pick(OTT[key]),'ott',13000)},700);return true}
@@ -1584,6 +1606,8 @@ function spawnKollege(){
   const lanes=[0,1,2].filter(l=>!(D.exitBlock&&l===2)&&!(bau&&l===0)&&!D.objs.some(o=>Math.round(o.lx)===l&&o.y<80*SC)&&!slow.size&&!(l===1&&busy(1)));
   if(!lanes.length){D.kollT=1;return}
   const l=lanes[Math.floor(Math.random()*lanes.length)];
+  // Ganz selten kommt Hildegard vorbei, Hildes Schwester aus Bremen
+  if(S.log.length>=4&&!D.hgSeen&&Math.random()<.07){D.hgSeen=true;addObj('kollege',l,spawnY()-70*SC,{col:'#D8A23A',hildegard:true});return}
   addObj('kollege',l,spawnY()-70*SC,{col:['#2F6F73','#BFD8E6','#BFDCC8','#7B2D3B'][Math.floor(Math.random()*4)]});
 }
 function spawnHerd(kind){
@@ -1870,15 +1894,20 @@ function confetti(second){
 }
 
 /* ---------- Grüßen und Helfen ---------- */
-function greetTarget(){const win=S.up.fanfare?-160*SC:20*SC;return D.objs.find(o=>(((o.type==='kollege'&&!o.greeted)||(o.type==='panne'&&!o.asked)||(o.type==='korso'&&!D.korsoDone))&&o.y>win&&o.y<truckY-TH*.5)||(o.type==='overpass'&&!o.greeted&&o.y>truckY-TH*2.4&&o.y<truckY-TH*.1))}
+function greetTarget(){const win=S.up.fanfare?-160*SC:20*SC;return D.objs.find(o=>(o.type==='ente'&&o.mama&&!D.duckGreet&&o.y>truckY-TH*2.6&&o.y<truckY-TH*.4)||(((o.type==='kollege'&&!o.greeted)||(o.type==='panne'&&!o.asked)||(o.type==='korso'&&!D.korsoDone))&&o.y>win&&o.y<truckY-TH*.5)||(o.type==='overpass'&&!o.greeted&&o.y>truckY-TH*2.4&&o.y<truckY-TH*.1))}
 function flash(){
   if(!D||D.paused||D.ended)return;
   const k=greetTarget();D.flash=1;
   if(!k){AU.fx('click');return}
   if(k.type==='panne'){k.asked=true;return askHelp(k)}
+  if(k.type==='ente'){D.duckGreet=true;AU.fx('quack');setTimeout(()=>AU.fx('quack'),260);D.extraResp.push(['Der Entenmama zugenickt',1]);floatText('+1 Respekt',roadX+k.fx*roadW,k.y-14*SC);msg('Die Entenmama nickt dir zu.','good');return}
   if(k.type==='korso'){D.korsoDone=true;D.objs.forEach(o=>{if(o.type==='korso')o.wave=1.6});AU.fx('hochzeit');D.extraResp.push(['Dem Brautpaar gratuliert',3]);
     const kx=laneX(k.lx)+sway(k.y);floatText('+3 Respekt',kx,k.y-k.h/2,'#7B2D3B');for(let i=0;i<14;i++)D.parts.push({k:'heart',x:kx,y:k.y,vx:(Math.random()-.5)*160,vy:-Math.random()*140-30,g:90,life:1.3,max:1.3,r:5*SC});msg('Das Brautpaar winkt.','good');return}
   if(k.type==='overpass'){k.greeted=true;k.cheer=2;AU.fx(S.up.fanfare?'fanfare':'horn');AU.fx('cheer');D.extraResp.push(['Kinder auf der Brücke gegrüßt',1]);floatText('+1 Respekt',W/2,k.y-20*SC);msg('Die Kinder jubeln.','good');return}
+  if(k.hildegard){k.greeted=true;k.wave=1.5;D.greets++;AU.fx(S.up.fanfare?'fanfare':'horn');setTimeout(()=>AU.fx('fanfare'),450);
+    D.extraResp.push(['Hildegard aus Bremen gegrüßt',4]);S.stats.hildegard=(S.stats.hildegard||0)+1;const kx=laneX(k.lx)+sway(k.y);floatText('+4 Respekt',kx,k.y-k.h/2,'#7B2D3B');
+    for(let i=0;i<12;i++)D.parts.push({k:'heart',x:kx,y:k.y,vx:(Math.random()-.5)*150,vy:-Math.random()*130-30,g:90,life:1.3,max:1.3,r:5*SC});
+    msg('Das war Hildegard, Hildes Schwester aus Bremen!','good');return}
   k.greeted=true;k.wave=1.5;D.greets++;AU.fx(S.up.fanfare?'fanfare':'horn');AU.fx('hornBack');
   const pts=1+S.up.funk+S.up.licht;const kx=laneX(k.lx)+sway(k.y);floatText('+'+pts+' Respekt',kx,k.y-k.h/2);
   for(let i=0;i<8;i++)D.parts.push({k:'star',x:kx,y:k.y-k.h/2,vx:(Math.random()-.5)*140,vy:-Math.random()*120,g:120,life:.9,max:.9,r:5*SC});
@@ -1960,7 +1989,7 @@ function openRast(name){
   // Je bekannter Kalle ist, desto öfter geht der Imbiss aufs Haus
   const free=Math.random()<rufPerks().free;
   const render=(line)=>{const kettLabel=H0.food+(free?' <span>spendiert</span>':S.money>=4?' <span>4 €</span>':' <span>anschreiben</span>');
-    const opts=[{label:kettLabel,disabled:D._kett,fn:()=>{D._kett=true;if(free)S.stats.kettFrei=(S.stats.kettFrei||0)+1;if(!free){if(S.money>=4)S.money-=4;else S.tab=(S.tab||0)+4}D.energy=100;D.hunger=0;D.kett++;AU.fx('slurp');render(H0.line.replace('&amp;','&'))}},
+    const opts=[{label:kettLabel,disabled:D._kett,fn:()=>{D._kett=true;if(free)S.stats.kettFrei=(S.stats.kettFrei||0)+1;if(!free){if(S.money>=4)S.money-=4;else S.tab=(S.tab||0)+4}D.energy=100;D.hunger=0;D.kett++;AU.fx('slurp');if(!S.senf&&S.stats.kett+D.kett>=12){S.senf=true;save();AU.fx('fanfare');return render('Doris holt etwas unter dem Tresen hervor und überreicht es feierlich: die Goldene Senftube. „Für meine treuesten Gäste. Du bist der Dritte seit 1987.“')}render(H0.line.replace('&amp;','&'))}},
        {label:'45 Minuten Pause <span>+0:45 h</span>',disabled:D._pause,fn:()=>{D._pause=true;D.lenk=0;D.clock+=.75;D.napStreak=0;D.energy=S.up.matratze?100:Math.min(100,D.energy+35);D.pauses++;render(S.up.matratze?'Auf der guten Matratze schläft Kalle tief und fest. Er ist wieder ganz wach, und die Lenkzeit beginnt bei null.':'Kalle schläft eine Runde in der Kabine. Die Lenkzeit beginnt wieder bei null.')}},
        {label:'Hilde abspritzen <span>'+Math.round(6*DIFF[S.diff].priceMul)+' €</span>',disabled:D._wash||S.money<Math.round(6*DIFF[S.diff].priceMul),fn:()=>{D._wash=true;S.money-=Math.round(6*DIFF[S.diff].priceMul);S.glanz=Math.min(100,S.glanz+30);AU.fx('bubbles');render('Am Waschplatz ist Hilde gleich wieder sauber.')}}];
     if(duftLv()&&S.duftFrisch<70)opts.push({label:'Neues Duftbäumchen <span>3 €</span>',disabled:D._tree||S.money<3,fn:()=>{D._tree=true;S.money-=3;S.duftFrisch=100;AU.fx('pop');render('Das neue Bäumchen riecht nach '+UP[0].lv[duftLv()-1]+'.')}});
@@ -2365,7 +2394,7 @@ function drawObj(o){
     case 'kuh':cx.fillStyle='#FBF1E6';cx.beginPath();cx.ellipse(x,y+4*s,13*s,20*s,0,0,7);cx.fill();cx.stroke();cx.fillStyle='#2B2230';cx.beginPath();cx.arc(x-5*s,y,4*s,0,7);cx.arc(x+6*s,y+10*s,5*s,0,7);cx.fill();cx.fillStyle='#E3AFB4';cx.beginPath();cx.ellipse(x,y-18*s,7*s,5*s,0,0,7);cx.fill();cx.stroke();cx.fillStyle='#D8A23A';cx.beginPath();cx.arc(x,y-11*s,3*s,0,7);cx.fill();cx.stroke();break;
     case 'elch':cx.fillStyle='#5C4030';cx.beginPath();cx.ellipse(x,y+6*s,13*s,22*s,0,0,7);cx.fill();cx.stroke();cx.beginPath();cx.arc(x,y-18*s,7*s,0,7);cx.fill();cx.stroke();cx.strokeStyle='#C9A77C';cx.lineWidth=3*s;cx.beginPath();cx.moveTo(x-4*s,y-22*s);cx.lineTo(x-16*s,y-30*s);cx.moveTo(x+4*s,y-22*s);cx.lineTo(x+16*s,y-30*s);cx.moveTo(x-11*s,y-26*s);cx.lineTo(x-12*s,y-34*s);cx.moveTo(x+11*s,y-26*s);cx.lineTo(x+12*s,y-34*s);cx.stroke();break;
     case 'schnee':cx.fillStyle='#FFFFFF';cx.beginPath();cx.ellipse(x,y,laneW*.34,14*s,0,0,7);cx.fill();cx.stroke();cx.fillStyle='#BFD8E6';cx.beginPath();cx.ellipse(x+laneW*.08,y+5*s,laneW*.18,5*s,0,0,7);cx.fill();break;
-    case 'kollege':drawTruck(x,y,false,o.col,o.wave>0);if(o.wave>0){o.wave-=.016;cx.fillStyle='#2F6F73';cx.font='700 '+Math.round(12*s)+'px Jost, sans-serif';cx.textAlign='center';cx.fillText('Gruß!',x,y-o.h/2-8*s)}break;
+    case 'kollege':drawTruck(x,y,false,o.col,o.wave>0);if(o.hildegard){cx.save();cx.translate(x,y-o.h/2+o.h*.27+o.h*.36);cx.rotate(-Math.PI/2);cx.fillStyle='#7B2D3B';cx.font='700 '+Math.round(9*s)+'px Jost, Futura, sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText('HILDEGARD',0,0);cx.restore()}if(o.wave>0){o.wave-=.016;cx.fillStyle='#2F6F73';cx.font='700 '+Math.round(12*s)+'px Jost, sans-serif';cx.textAlign='center';cx.fillText('Gruß!',x,y-o.h/2-8*s)}break;
     case 'panne':drawTruck(x,y,false,o.col,false,true);break;
     case 'kiste':cx.fillStyle='#B5832A';cx.fillRect(x-11*s,y-11*s,22*s,22*s);cx.strokeRect(x-11*s,y-11*s,22*s,22*s);cx.beginPath();cx.moveTo(x-11*s,y-11*s);cx.lineTo(x+11*s,y+11*s);cx.moveTo(x+11*s,y-11*s);cx.lineTo(x-11*s,y+11*s);cx.stroke();break;
     case 'schwer':{const w=o.w,h=o.h;cx.fillStyle='#7D6670';rr(x-w/2,y-h/2+h*.2,w,h*.8,4*s);cx.fill();cx.stroke();
@@ -2575,7 +2604,7 @@ function ending(){
     '<span>Gefahrene Kilometer</span><b>'+S.stats.km.toLocaleString('de-DE')+'</b>'+
     '<span>Kollegen gegrüßt</span><b>'+S.stats.greets+'</b>'+
     '<span>Kolleginnen bei Pannen geholfen</span><b>'+(S.stats.helped||0)+'</b>'+
-    '<span>Kettwürste und Co.</span><b>'+S.stats.kett+'</b>'+
+    '<span>Kettwürste und Co.'+(S.senf?' · Goldene Senftube':'')+'</span><b>'+S.stats.kett+'</b>'+(S.stats.hildegard?'<span>Hildegard getroffen</span><b>'+S.stats.hildegard+'</b>':'')+
     '<span>Pausen gemacht</span><b>'+S.stats.pauses+'</b>'+
     '<span>Bußgelder</span><b>'+S.stats.fines+'</b></div></div>';
   h+='<p class="eyebrow">Postkarten von unterwegs</p><div class="cards" id="posts"></div>';
