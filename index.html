@@ -1827,7 +1827,6 @@ function startArrival(){
   const big=!!D.tour.final,st=big?.7:.5,hit=st+(big?1.8:1.11),card=hit+(big?3.9:3);D.skipAt=hit+.3;
   AU.engineSet({speed:.2});AU.fx('pssh');
   const tx=D.x+sway(truckY);for(let i=0;i<14;i++){const sd=i%2?1:-1;D.parts.push({k:'puff',x:tx+sd*TW*.55,y:truckY+TH*.3,vx:sd*(40+Math.random()*60),vy:(Math.random()-.5)*30,life:1.1,max:1.1,r:6*SC})}
-  later(.12,()=>AU.fx('horn'));later(.38,()=>AU.fx(S.up.fanfare?'fanfare':'horn'));
   later(st,()=>AU.fx('arrival',{big}));
   later(hit-.62,()=>{D.banner=0.001});
   later(hit,()=>{confetti();D.hop=1;D.rays=0.001;D.flashA=1;later(.12,()=>AU.fx('cheer'))});
