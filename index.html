@@ -567,7 +567,8 @@ const AU=(function(){
   }
   function compile(song){
     const lead=song.lead?song.lead.replace(/\|/g,' ').trim().split(/\s+/):[];
-    return Object.assign({},song,{leadT:lead,chordsC:song.chords.map(chord),total:song.chords.length*song.bar});
+    const harm=song.harm?song.harm.replace(/\|/g,' ').trim().split(/\s+/):[];
+    return Object.assign({},song,{harmT:harm,leadT:lead,chordsC:song.chords.map(chord),total:song.chords.length*song.bar});
   }
   let cur=null,timer=null,pendingSong=null;
   // opt.loops: nach so vielen Durchläufen endet das Stück, dann wird opt.onEnd aufgerufen (für Radio-Playlists)
@@ -618,6 +619,8 @@ const AU=(function(){
         if(s.double)inst(s.double,m-12,t,dur,s.leadV*.4,musG);
       }}
     }
+    // Zweite Stimme unter der Melodie, Ton für Ton passend gesetzt
+    if(s.harmT&&s.harmT.length){const tok=s.harmT[step%s.harmT.length];if(tok&&tok!=='.'&&tok!=='-'){const m=pm(tok);if(m!==null)inst(s.harmI,m,t,sd*.95,s.harmV,musG)}}
   }
   function startCrackle(){
     if(!ctx||crackle)return;
@@ -766,9 +769,10 @@ const SONGS={
     lead:'a4 - d5 - f#5 - | a5 - f#5 - d5 - | b4 - d5 - g5 - | f#5 - - - e5 d5 | d5 - f#5 - b5 - | g5 - e5 - b4 - | c#5 - e5 - a5 - | g5 - - - f#5 e5 | a4 - d5 - f#5 - | a5 - - - f#5 . | g5 - b5 - d6 - | a#5 - g5 - d5 - | f#5 - - - a5 - | g5 - - - b5 - | a5 - g5 - e5 - | d5 - - - . .'},
   ende:{id:'ende',name:'Abspann',bpm:76,spb:2,bar:6,
     chords:['D','D','G','D','Bm','Em','A','A7','D','D','G','Gm','D','G','A7','D'],
-    parts:[{i:'pizz',p:'1 . . . . .',o:-12,v:.3},{i:'padS',p:'x - - - - -',o:0,v:.16},{i:'harp',p:'. . 5 . 8 .',o:12,v:.1}],
+    parts:[{i:'pizz',p:'1 . . . . .',o:-12,v:.3},{i:'padS',p:'x - - - - -',o:0,v:.16}],
     leadI:'celestaS',leadV:.15,
-    lead:'a4 - d5 - f#5 - | a5 - f#5 - d5 - | b4 - d5 - g5 a5 | f#5 - - - e5 d5 | d5 - f#5 - b5 - | g5 - e5 - b4 - | c#5 - e5 - a5 - | g5 - - - e5 - | a4 - d5 - f#5 - | a5 - - - f#5 . | g5 - b5 - d6 - | a#5 - g5 - d5 - | f#5 - - - a5 - | g5 - - - b5 - | a5 - g5 - e5 - | d5 - - - . .'},
+    harmI:'harp',harmV:.08,harm:'. . f#4 . d5 . | . . d5 . f#4 . | . . b4 . b4 . | . . d5 . a4 . | . . d5 . d5 . | . . g4 . g4 . | . . c#5 . c#5 . | . . e5 . a4 . | . . f#4 . d5 . | . . d5 . d5 . | . . d5 . d5 . | . . a#4 . a#4 . | . . d5 . d5 . | . . b4 . d5 . | . . e5 . c#5 . | . . f#4 . f#4 .',
+    lead:'a4 - d5 - f#5 - | a5 - f#5 - d5 - | b4 - d5 - g5 - | f#5 - - - e5 d5 | d5 - f#5 - b5 - | g5 - e5 - b4 - | c#5 - e5 - a5 - | g5 - - - f#5 e5 | a4 - d5 - f#5 - | a5 - - - f#5 . | g5 - b5 - d6 - | a#5 - g5 - d5 - | f#5 - - - a5 - | g5 - - - b5 - | a5 - g5 - e5 - | d5 - - - . .'},
   polka:{id:'polka',name:'Polka',vol:.6,bpm:126,spb:2,bar:4,
     chords:['F','F','C7','C7','C7','C7','F','F','F','F','Bb','Bb','F','C7','F','F'],
     parts:[{i:'tuba',p:'1 . 5 .',o:-12,v:.42},{i:'accordion',p:'. x . x',o:0,v:.2},{d:'k t k t',v:.3,fill:1}],
