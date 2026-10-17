@@ -64,12 +64,16 @@ p{margin:0}
 
 /* Kompass-Knopf */
 .hero{display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:6px}
-.compass{position:relative;width:min(66vw,250px);aspect-ratio:1;max-width:100%;border:0;border-radius:50%;padding:0;background:conic-gradient(from -90deg,var(--c-ich) 0 20%,var(--c-wir) 0 40%,var(--c-welt) 0 60%,var(--c-sein) 0 80%,var(--c-zeit) 0 100%);box-shadow:0 1px 0 var(--line),0 18px 40px -22px rgba(0,0,0,.45);transition:transform .25s}
+.compass{position:relative;width:min(66vw,250px);aspect-ratio:1;max-width:100%;border:0;border-radius:50%;padding:0;background:conic-gradient(from -90deg,var(--s1) 0 20%,var(--s2) 0 40%,var(--s3) 0 60%,var(--s4) 0 80%,var(--s5) 0 100%);box-shadow:0 1px 0 var(--line),0 18px 40px -22px rgba(0,0,0,.45);transition:transform .25s}
 .compass::after{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
 .compass .core{position:absolute;inset:14px;z-index:1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
 .compass .core b{font-family:var(--f-display);font-weight:700;font-variation-settings:"SOFT" 100;font-size:clamp(24px,7vw,30px);letter-spacing:-.02em;line-height:1}
 .compass .core span{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.compass .needle{width:10px;height:10px;border-radius:50%;background:var(--accent);margin-bottom:4px}
+.compass .orbit{position:absolute;inset:22px;z-index:1;border-radius:50%;transform:rotate(var(--na,0deg));transition:transform .9s cubic-bezier(.34,1.45,.45,1);pointer-events:none}
+.compass .orbit i{position:absolute;left:50%;top:0;width:11px;height:11px;margin-left:-5.5px;border-radius:50%;background:var(--nc,var(--accent));box-shadow:0 0 0 4px color-mix(in srgb,var(--nc,var(--accent)) 22%,transparent);transition:background .5s,box-shadow .5s}
+.ccat{font-style:normal;font-family:var(--f-ui);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--nc,var(--accent));min-height:15px;transition:color .5s}
+.ccat.pop{animation:ccatIn .5s cubic-bezier(.2,.7,.2,1)}
+@keyframes ccatIn{from{opacity:0;transform:translateY(5px)}}
 .compass:active{transform:scale(.97)}
 @media (prefers-reduced-motion:no-preference){.compass.breath{animation:breath 5.5s ease-in-out infinite}.compass.spin{animation:spin .7s cubic-bezier(.3,.7,.3,1)}}
 @keyframes breath{50%{transform:scale(1.025)}}
@@ -221,9 +225,9 @@ nav.tabs button[aria-current="page"] svg{transform:translateY(-1px) scale(1.08)}
 
 /* Aura: Licht, das sich nach außen verliert */
 .cwrap{position:relative;display:grid;place-items:center;isolation:isolate}
-.halo{position:absolute;inset:-9%;border-radius:50%;z-index:-1;background:conic-gradient(from -90deg,var(--c-ich) 0 20%,var(--c-wir) 0 40%,var(--c-welt) 0 60%,var(--c-sein) 0 80%,var(--c-zeit) 0 100%);filter:blur(22px);opacity:.28}
+.halo{position:absolute;inset:-9%;border-radius:50%;z-index:-1;background:conic-gradient(from -90deg,var(--s1) 0 20%,var(--s2) 0 40%,var(--s3) 0 60%,var(--s4) 0 80%,var(--s5) 0 100%);filter:blur(22px);opacity:.28}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:25;overflow:hidden}
-#fx .ring{position:fixed;border-radius:50%;background:conic-gradient(from -90deg,var(--c-ich) 0 20%,var(--c-wir) 0 40%,var(--c-welt) 0 60%,var(--c-sein) 0 80%,var(--c-zeit) 0 100%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));filter:blur(3px)}
+#fx .ring{position:fixed;border-radius:50%;background:conic-gradient(from -90deg,var(--s1) 0 20%,var(--s2) 0 40%,var(--s3) 0 60%,var(--s4) 0 80%,var(--s5) 0 100%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));filter:blur(3px)}
 #fx .glow{position:fixed}
 .btn,.chip,.opt,nav.tabs button,.li{position:relative;overflow:hidden}
 .ripple{position:absolute;border-radius:50%;background:currentColor;pointer-events:none}
@@ -239,6 +243,13 @@ nav.tabs button[aria-current="page"] svg{transform:translateY(-1px) scale(1.08)}
 .backlink:hover{color:var(--ink)}
 .bite{touch-action:pan-y}
 .swipehint{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--muted);text-align:center;opacity:.75}
+
+@property --s1{syntax:"<color>";inherits:true;initial-value:#D98E22}
+@property --s2{syntax:"<color>";inherits:true;initial-value:#CF6352}
+@property --s3{syntax:"<color>";inherits:true;initial-value:#4A8659}
+@property --s4{syntax:"<color>";inherits:true;initial-value:#4A73A0}
+@property --s5{syntax:"<color>";inherits:true;initial-value:#8667AE}
+:root{--s1:var(--c-ich);--s2:var(--c-wir);--s3:var(--c-welt);--s4:var(--c-sein);--s5:var(--c-zeit);transition:--s1 .7s,--s2 .7s,--s3 .7s,--s4 .7s,--s5 .7s}
 </style>
 
 </head><body><div class="app" id="app">
@@ -1107,7 +1118,7 @@ function viewBites(){
   const recent=S.history.filter(id=>B[id]).slice(0,4);
   return `<section class="view">
     <div class="hero">
-      <div class="cwrap"><span class="halo" aria-hidden="true"></span><button class="compass breath" id="go" aria-label="Neues Häppchen aufdecken"><span class="core"><span class="needle"></span><b>Häppchen</b><span>${unread?`${unread} noch neu`:"alle gelesen · Wiederholung"}</span></span></button></div>
+      <div class="cwrap"><span class="halo" aria-hidden="true"></span><button class="compass breath" id="go" aria-label="Neues Häppchen aufdecken"><span class="orbit" aria-hidden="true"><i></i></span><span class="core"><em class="ccat" id="ccat"></em><b>Häppchen</b><span id="cnew">${unread?`${unread} noch neu`:"alle gelesen · Wiederholung"}</span></span></button></div>
       <p>${nRead?"Drück auf den Kompass für die nächste Erkenntnis.":"Drück auf den Kompass. Du bekommst eine Erkenntnis aus der Glücksforschung, mit Quelle und ehrlicher Einschätzung, wie sicher sie ist."}</p>
     </div>
     <div class="sec"><div class="label">Richtung</div>${filt}</div>
@@ -1274,8 +1285,8 @@ function buzz(p){if(calm())return;
   const pulses=Array.isArray(p)?p.filter((_,k)=>k%2===0).length:1,gaps=Array.isArray(p)?p.filter((_,k)=>k%2===1):[];
   haptic();let t=0;for(let k=1;k<pulses;k++){t+=(gaps[k-1]||60)+(Array.isArray(p)?p[k*2-2]:0);setTimeout(haptic,t)}}
 function fx(){let l=document.getElementById("fx");if(!l){l=document.createElement("div");l.id="fx";document.body.appendChild(l)}return l}
-function auraRings(el){if(calm())return;const r=el.getBoundingClientRect();
-  for(let k=0;k<3;k++){const d=document.createElement("span");d.className="ring";Object.assign(d.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});fx().appendChild(d);
+function auraRings(el,col,count){if(calm())return;const r=el.getBoundingClientRect();
+  for(let k=0;k<(count||3);k++){const d=document.createElement("span");d.className="ring";if(col)d.style.background=col;Object.assign(d.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});fx().appendChild(d);
     d.animate([{transform:"scale(1)",opacity:.75},{transform:`scale(${1.55+k*.2})`,opacity:0}],{duration:1100+k*200,delay:k*140,easing:"cubic-bezier(.15,.6,.3,1)",fill:"both"}).onfinish=()=>d.remove()}}
 function glow(el,col,str){if(calm())return;const r=el.getBoundingClientRect(),cs=getComputedStyle(el);const d=document.createElement("span");d.className="glow";
   Object.assign(d.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px",borderRadius:cs.borderRadius,boxShadow:`0 0 0 2px ${col}, 0 0 28px 6px ${col}`});fx().appendChild(d);
@@ -1284,6 +1295,19 @@ function ripple(e,el){if(calm())return;const r=el.getBoundingClientRect(),s=Math
   Object.assign(d.style,{left:(e.clientX-r.left-s/2)+"px",top:(e.clientY-r.top-s/2)+"px",width:s+"px",height:s+"px"});el.appendChild(d);
   d.animate([{transform:"scale(0)",opacity:.32},{transform:"scale(1)",opacity:0}],{duration:650,easing:"cubic-bezier(.2,.7,.2,1)"}).onfinish=()=>d.remove()}
 document.addEventListener("pointerdown",e=>{const el=e.target.closest(".btn,.chip,.opt,nav.tabs button,.li");if(el&&!el.disabled)ripple(e,el)},{passive:true});
+
+/* ---------- Kompass richtet sich nach der gewählten Richtung ---------- */
+const CANG={ich:-54,wir:18,welt:90,sein:162,zeit:234};
+let needleDeg=0;
+function setCompass(changed){const f=S.filter,root=document.documentElement,keys=Object.keys(CATS);
+  keys.forEach((k,i)=>root.style.setProperty("--s"+(i+1),f==="alle"||f===k?`var(--c-${k})`:`color-mix(in srgb,var(--c-${k}) 20%,var(--paper))`));
+  const go=$("#go");if(!go)return;
+  // Nadel auf dem kürzesten Weg drehen
+  const target=f==="alle"?0:CANG[f];let d=((target-needleDeg)%360+540)%360-180;needleDeg+=d;
+  go.style.setProperty("--na",needleDeg+"deg");go.style.setProperty("--nc",f==="alle"?"var(--accent)":`var(--c-${f})`);
+  const cc=$("#ccat");if(cc){cc.textContent=f==="alle"?"":CATS[f].n;if(changed){cc.classList.remove("pop");void cc.offsetWidth;cc.classList.add("pop")}}
+  const n=$("#cnew");if(n){const p=pool(),u=p.filter(b=>!S.read[b.id]).length;n.textContent=u?`${u} noch neu`:"alle gelesen · Wiederholung"}
+  if(changed){buzz(6);if(f!=="alle")auraRings(go,`var(--c-${f})`,1)}}
 
 /* ---------- Navigation ---------- */
 let fromBite=null;
@@ -1308,6 +1332,7 @@ function render(){
   const v={bites:viewBites,terms:viewTerms,exps:viewExps,way:viewWay}[tab]();
   const M=$("#main");M.classList.remove("anim","animq");M.innerHTML=v;void M.offsetWidth;if(anim)M.classList.add("anim");if(animQ)M.classList.add("animq");const wasAnim=anim;anim=false;animQ=false;renderTabs();
   if(wasAnim&&tab==="way")countUp();
+  if(tab==="bites"&&!S.cur){const go=$("#go");if(go)go.style.transition="none";setCompass(false);if(go){void go.offsetWidth;go.style.transition=""}}else setCompass(false);
   if(pendingGlow){pendingGlow=false;const c=document.querySelector('.bite');if(c&&S.cur&&B[S.cur])setTimeout(()=>glow(c,`var(--c-${B[S.cur].cat})`),260)}
   const n=Object.keys(S.read).length;$("#topline").textContent=n?`${n} / ${BITES.length}`:"";
   {const html=Object.keys(CATS).map(k=>{const all=BITES.filter(b=>b.cat===k),r=all.filter(b=>S.read[b.id]).length;return `<b style="--c:var(--c-${k})" title="${CATS[k].n}: ${r} von ${all.length}"><i style="width:${Math.round(r/all.length*100)}%"></i></b>`}).join("");const R=$("#rose");if(html!==roseKey){const first=!roseKey;roseKey=html;R.innerHTML=html;R.classList.toggle("grow",first)}}
@@ -1324,7 +1349,8 @@ document.addEventListener("click",e=>{
   if(t.id==="shareapp"){shareApp();return}
   if(t.id==="explore"){shared=null;S.cur=null;try{history.replaceState(null,"",location.pathname)}catch(x){}render();window.scrollTo(0,0);return}
   if(t.id==="save"&&S.cur){if(S.saved[S.cur])delete S.saved[S.cur];else{S.saved[S.cur]=now();toast("Gemerkt. Du findest es unter „Dein Weg“.")}save();render();return}
-  if(d.filter){S.filter=d.filter;save();render();return}
+  if(d.filter){if(S.filter===d.filter)return;S.filter=d.filter;save();
+    if(tab==="bites"&&!S.cur&&$("#go")){document.querySelectorAll("[data-filter]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.filter===S.filter));setCompass(true)}else render();return}
   if(d.open){closeSheet();openBite(d.open);return}
   if(d.term){fromBite=S.cur;openTerm=d.term;anim=true;tab="terms";render();const el=document.querySelector(`[data-tt="${d.term}"]`);if(el)el.scrollIntoView({block:"center"});return}
   if(d.exp){expSheet(d.exp);return}
