@@ -766,7 +766,10 @@ const AU=(function(){
         inst('bell',96,hit+1.3,.6,.05,D);if(big)inst('bell',103,hit+2.1,.8,.045,D);
         break}
       case 'flap':{const g=gain(0,D);const bp=filt('bandpass',2400,2,g);noise(t,.04,bp);envAD(g,t,.05,.001,.035);break}
-      case 'heimweh':{[[69,0,.5],[74,.5,.5],[77,1,.7],[76,1.75,.45],[74,2.2,1.1]].forEach(([m,d,l])=>inst('celesta',m,t+d,l,.07,D));[[50,0,2],[46,1,1.2],[45,2.2,1.1]].forEach(([m,d,l])=>inst('pad',m,t+d,l,.035,D));break}
+      case 'heimweh':{
+        // d-Moll, Kadenz Dm – B – A – Dm. Jeder Melodieton liegt auf einem passenden Akkord.
+        [[69,0,.5],[74,.5,.5],[77,1,.7],[76,1.75,.45],[74,2.2,1.1]].forEach(([m,d,l])=>inst('celesta',m,t+d,l,.07,D));
+        [[[50,57],0,.95],[[46,53],1,.7],[[45,52],1.75,.42],[[50,57,53],2.2,1.3]].forEach(([ms,d,l])=>ms.forEach(m=>inst('padS',m,t+d,l,.03,D)));break}
       case 'fernweh':{[74,78,81,86].forEach((m,i)=>inst('celesta',m,t+i*.09,.3,.07,D));inst('bell',90,t+.36,.5,.04,D);break}
       case 'perfect':{[84,88,91,96].forEach((m,i)=>inst('celesta',m,t+i*.07,.4,.07,D));inst('bell',100,t+.32,.8,.05,D);break}
       case 'ring':{for(let r=0;r<2;r++){const st=t+r*.55;const g=gain(0,D);const bp=filt('bandpass',1300,3,g);const o=_osc('square',1250,st,bp);const lf=_osc('square',22,st,gain(80,o.frequency));envASR(g,st,.045,.01,.32,.05);o.start(st);o.stop(st+.42);lf.start(st);lf.stop(st+.42)}break}
@@ -1192,11 +1195,11 @@ window.addEventListener('pointerdown',()=>{AU.init()},{once:false,passive:true})
    const n=(EGG.title||[]).length+1;if(n>=3){tw.classList.remove('nudge');void tw.offsetWidth;tw.classList.add('nudge')}
    if(!egg('title',7,4000))return;tw.dataset.busy=1;tw.classList.remove('nudge');
    const sub=$('.title-sub'),old=sub.textContent,em=$('#title-emblem');
-   flipTo('HEIM',true);setTimeout(()=>AU.fx('heimweh'),520);
+   AU.stop();flipTo('HEIM',true);setTimeout(()=>AU.fx('heimweh'),520);
    setTimeout(()=>{sub.classList.add('fade');em.classList.add('sad')},300);
    setTimeout(()=>{sub.textContent='Ein Spiel über Kalle, der manchmal lieber zu Hause auf dem Sofa säße.';sub.classList.remove('fade')},700);
    setTimeout(()=>{flipTo('FERN',false);sub.classList.add('fade');em.classList.remove('sad')},4300);
-   setTimeout(()=>{sub.textContent=old;sub.classList.remove('fade');AU.fx('fernweh');delete tw.dataset.busy},4300+620)});}
+   setTimeout(()=>{sub.textContent=old;sub.classList.remove('fade');AU.fx('fernweh');delete tw.dataset.busy;setTimeout(()=>{if(curScreen==='title')AU.play(SONGS.hof)},900)},4300+620)});}
 function renderTitle(){
   $('#title-emblem').innerHTML='<div class="emblem">'+hildeSVG({duft:1,glanz:80})+'</div>';
   const d=$('#diff');d.innerHTML='';
