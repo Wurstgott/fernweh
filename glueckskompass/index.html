@@ -400,14 +400,15 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .dircloud .dial{transition:width .9s cubic-bezier(.3,.75,.2,1),height .9s cubic-bezier(.3,.75,.2,1),transform .4s cubic-bezier(.34,1.45,.45,1),box-shadow .5s,background .35s}
 .dircloud .dn{transition:font-size .8s cubic-bezier(.3,.75,.2,1),color .4s}
 .dircloud .dir.lead{z-index:2}
-.dircloud .dir.lead .dial{width:50px;height:50px;box-shadow:inset 0 0 0 3px var(--c),0 0 0 6px color-mix(in srgb,var(--c) 18%,transparent),0 0 30px 4px color-mix(in srgb,var(--c) 45%,transparent)}
+.dircloud .dir.lead .dial{width:58px;height:58px;box-shadow:inset 0 0 0 3px var(--c),0 0 0 6px color-mix(in srgb,var(--c) 18%,transparent),0 0 30px 4px color-mix(in srgb,var(--c) 45%,transparent)}
 .dircloud .dir.lead .dial::after{width:12px;height:12px}
 .dircloud .dir.lead .dn{font-size:13.5px;font-weight:700;color:var(--ink)}
 .dircloud .dir.lead .fl::before{content:"";position:absolute;left:50%;top:25px;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;z-index:-1;pointer-events:none;background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 32%,transparent),transparent);filter:blur(6px)}
 .dircloud .dir.lead .fl{position:relative}
 .dircloud .dir.recede .dial{width:34px;height:34px}
 .dircloud .dir.recede .dn{font-size:12px;font-weight:600;color:var(--muted)}
-.dircloud[data-sel]:not([data-sel="alle"]) .dir:not(.lead):not(.recede){opacity:.8}
+.dircloud[data-sel]:not([data-sel="alle"]) .dir:not(.lead):not(.recede){opacity:.55}
+.dircloud[data-sel]:not([data-sel="alle"]) .dir:not(.lead):not(.recede) .dial{width:25px;height:25px}
 @media (prefers-reduced-motion:no-preference){.dircloud .dir.lead .fl::before{animation:leadhalo 4.5s ease-in-out infinite}}
 @keyframes leadhalo{50%{transform:scale(1.18);opacity:.7}}
 .dircloud .dn{min-height:0;white-space:nowrap;font-size:12px}
@@ -1395,7 +1396,7 @@ function biteCard(b){
 const CPOS={ich:[18.4,28.3],wir:[62.1,14.8],welt:[89.0,50.0],sein:[62.1,85.2],zeit:[18.4,71.7],alle:[50,50]};
 /* Wolke formiert sich um die gewählte Richtung: sie rückt fast ins Zentrum, „Alle“ weicht auf die Gegenseite, die anderen machen etwas Platz */
 function cloudPos(sel){const P={};Object.keys(CPOS).forEach(k=>P[k]=CPOS[k].slice());if(sel==="alle"||!CPOS[sel])return P;
-  const b=CPOS[sel],sp=[b[0]+(50-b[0])*.55,b[1]+(50-b[1])*.55];P[sel]=sp;
+  const b=CPOS[sel],sp=[b[0]+(50-b[0])*.74,b[1]+(50-b[1])*.74];P[sel]=sp;
   const px=q=>[q[0]*3.4,q[1]*2],dist=(p1,p2)=>{const A=px(p1),B=px(p2);return Math.hypot(A[0]-B[0],(A[1]-B[1])*1.25)};
   Object.keys(CATS).forEach(k=>{if(k===sel)return;const q=CPOS[k],A=px(q),S0=px(sp);let dx=A[0]-S0[0],dy=A[1]-S0[1];const d=Math.hypot(dx,dy)||1;P[k]=[Math.min(91,Math.max(9,q[0]+dx/d*14/3.4)),Math.min(88,Math.max(12,q[1]+dy/d*10/2))]});
   // „Alle“ sucht sich den freiesten Platz in der Wolke, nicht zu weit vom Zentrum
@@ -1404,7 +1405,9 @@ function cloudPos(sel){const P={};Object.keys(CPOS).forEach(k=>P[k]=CPOS[k].slic
 function lineFocus(sel){const R=$("#rose");if(R&&R.dataset.sel!==sel){R.dataset.sel=sel;if(sel!=="alle"&&!calm()){const b=R.querySelector(`[data-k="${sel}"]`);if(b){b.classList.remove("ping");void b.offsetWidth;b.classList.add("ping")}}}}
 function applyCloud(sel,fresh){lineFocus(sel);const P=cloudPos(sel);document.querySelectorAll(".dircloud .dir").forEach(el=>{const k=el.dataset.filter,q=P[k];el.style.left=q[0]+"%";el.style.top=q[1]+"%";el.classList.toggle("lead",k===sel&&k!=="alle");el.classList.toggle("recede",k==="alle"&&sel!=="alle")});
   const c=document.querySelector(".dircloud");if(c)c.dataset.sel=sel;
-  if(fresh){const el=document.querySelector(`.dircloud .dir[data-filter="${sel}"] .dial`);if(el){const col=sel==="alle"?"var(--accent)":`var(--c-${sel})`;setTimeout(()=>{glow(el,col,.9);auraRings(el,col,2)},60)}}}
+  if(fresh){const el=document.querySelector(`.dircloud .dir[data-filter="${sel}"] .dial`);if(el){const col=sel==="alle"?"var(--accent)":`var(--c-${sel})`;
+    if(!calm())el.animate([{transform:"scale(1)"},{transform:"scale(1.45)",offset:.3},{transform:"scale(.92)",offset:.65},{transform:"scale(1)"}],{duration:900,easing:"cubic-bezier(.3,.7,.2,1)"});
+    auraBurst(null,el,col)}}}
 function viewBites(){
   const nRead=Object.keys(S.read).length,p=pool(),unread=p.filter(b=>!S.read[b.id]).length;
   const filt=`<div class="dircloud" data-sel="${S.filter}" role="group" aria-label="Richtung wählen"><span class="mist" aria-hidden="true"></span>${[["alle","Alle"],...Object.entries(CATS).map(([k,v])=>[k,v.n])].map(([k,n],i)=>`<button class="dir ${k==="alle"?"center":""} ${k===S.filter&&k!=="alle"?"lead":""} ${k==="alle"&&S.filter!=="alle"?"recede":""}" data-filter="${k}" aria-pressed="${S.filter===k}" style="${k!=="alle"?`--c:var(--c-${k});`:""}left:${cloudPos(S.filter)[k][0]}%;top:${cloudPos(S.filter)[k][1]}%;--d:${i*.9}s"><span class="fl"><span class="dial ${k==="alle"?"all":""}"></span><span class="dn">${n}</span></span></button>`).join("")}</div>`;
@@ -1595,7 +1598,7 @@ function viewWay(){
       <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
-      <p>Stand der Recherche: Oktober 2026. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:09 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
