@@ -377,7 +377,7 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 #s-title{position:relative}
 .medals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 6px}
 .mcell{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
-.mcell svg{width:52px;height:52px}
+.mcell svg{width:48px;height:48px;transition:transform .15s}
 .mcell .locked{opacity:.55}
 .mcell b{font-size:10.5px;line-height:1.2;letter-spacing:.02em}
 .mcell small{font-size:9px;line-height:1.25;color:var(--muted)}
@@ -389,6 +389,16 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .tourstamp{position:absolute;top:10px;right:12px;display:block;width:28px;transform:rotate(6deg);opacity:.92}
 .tourstamp svg{display:block;width:100%;height:auto;filter:drop-shadow(0 1px 0 rgba(43,34,48,.15))}
 .tour:nth-child(even) .tourstamp{transform:rotate(-4deg)}
+.medals{touch-action:none;user-select:none;-webkit-user-select:none}
+.mcell small{display:none}
+.mcell.on svg{transform:scale(1.15)}
+.mhint{margin:-6px 0 0;font-size:11px;color:var(--muted);text-align:center}
+.mbig{position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:60;width:min(260px,76vw);background:var(--cream);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:16px 14px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;pointer-events:none;animation:bigIn .15s ease-out}
+.mbig svg{width:130px;height:130px}
+.mbig b{font-size:16px;letter-spacing:.06em;text-transform:uppercase}
+.mbig span{font-family:var(--type);font-size:13px;line-height:1.45}
+.mbig small{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600}
+@keyframes bigIn{from{opacity:0;transform:translateX(-50%) scale(.9)}to{opacity:1;transform:translateX(-50%) scale(1)}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -1318,9 +1328,18 @@ function award(id){const tr=trophies();if(tr[id])return;const t=TROPHIES.find(x=
   setTimeout(()=>{AU.fx('ding');toast('Neue Plakette: '+t[1])},D?900:500);renderTrophyBtn()}
 function renderTrophyBtn(){const b=$('#btn-trophy');if(!b)return;const n=Object.keys(trophies()).length;b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0z" fill="#D8A23A" stroke="#2B2230" stroke-width="1.5"/><path d="M7 6H4.5a2.5 2.5 0 0 0 3 3M17 6h2.5a2.5 2.5 0 0 1-3 3" fill="none" stroke="#2B2230" stroke-width="1.5"/><path d="M12 13v3M8.5 20h7l-1-4h-5z" fill="#D8A23A" stroke="#2B2230" stroke-width="1.5" stroke-linejoin="round"/></svg><span>'+n+'/'+TROPHIES.length+'</span>'}
 function trophyCard(){const tr=trophies();
-  const h='<p class="eyebrow">Plaketten · '+Object.keys(tr).length+' von '+TROPHIES.length+'</p><div class="medals">'+TROPHIES.map(t=>{const got=!!tr[t[0]],secret=t[5]&&!got;
-    return '<div class="mcell'+(got?' got':'')+'">'+medalSVG(t,got)+'<b>'+(secret?'Geheim':t[1])+'</b><small>'+(secret?'Wird verraten, wenn du sie findest.':t[2])+'</small></div>'}).join('')+'</div>';
-  openCard(h,[{label:'Schließen',cls:'alt',fn:closeCard}])}
+  const h='<p class="eyebrow">Plaketten · '+Object.keys(tr).length+' von '+TROPHIES.length+'</p><p class="mhint">Tippen oder darüberwischen, um eine Plakette groß zu sehen.</p><div class="medals">'+TROPHIES.map((t,i)=>{const got=!!tr[t[0]],secret=t[5]&&!got;
+    return '<div class="mcell'+(got?' got':'')+'" data-i="'+i+'">'+medalSVG(t,got)+'<b>'+(secret?'Geheim':t[1])+'</b></div>'}).join('')+'</div><div class="mbig" hidden></div>';
+  openCard(h,[{label:'Schließen',cls:'alt',fn:closeCard}]);$('#ov').dataset.dismiss=1;
+  // Vergrößern: beim Antippen, Darüberwischen oder mit der Maus darüberfahren
+  const grid=$('#ovcard .medals'),big=$('#ovcard .mbig');let down=false,last=-1;
+  const showAt=(x,y)=>{const el=document.elementFromPoint(x,y),c=el&&el.closest&&el.closest('.mcell');if(!c){return}const i=+c.dataset.i;if(i===last)return;last=i;const t=TROPHIES[i],got=!!tr[t[0]],secret=t[5]&&!got;
+    big.innerHTML=medalSVG(t,got)+'<b>'+(secret?'Geheim':t[1])+'</b><span>'+(secret?'Wird verraten, wenn du sie findest.':t[2])+'</span>'+(got?'<small>Erhalten</small>':'');big.hidden=false;
+    grid.querySelectorAll('.mcell').forEach(m=>m.classList.toggle('on',m===c));AU.fx('click')};
+  const hide=()=>{down=false;last=-1;big.hidden=true;grid.querySelectorAll('.mcell.on').forEach(m=>m.classList.remove('on'))};
+  grid.addEventListener('pointerdown',e=>{down=true;try{grid.setPointerCapture(e.pointerId)}catch(x){}showAt(e.clientX,e.clientY)});
+  grid.addEventListener('pointermove',e=>{if(down||e.pointerType==='mouse')showAt(e.clientX,e.clientY)});
+  grid.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse')hide();down=false});grid.addEventListener('pointercancel',hide);grid.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hide()})}
 let pendingDiff=null;
 function newGame(k){S=fresh(k);save();renderLetter();show('letter')}
 $('#btn-newyes').addEventListener('click',()=>{if(pendingDiff)newGame(pendingDiff)});
@@ -1587,11 +1606,12 @@ $('#btn-endyes').addEventListener('click',()=>ending());
 
 /* ================= Karten ================= */
 function openCard(html,buttons){
-  const c=$('#ovcard');c.innerHTML=html;
+  const c=$('#ovcard');c.innerHTML=html;delete $('#ov').dataset.dismiss;
   if(buttons&&buttons.length){const w=document.createElement('div');w.className='opts';buttons.forEach(b=>{const e=document.createElement('button');e.className='btn '+(b.cls||'');e.innerHTML=b.label;if(b.disabled)e.disabled=true;e.addEventListener('click',()=>{AU.init();AU.fx('click');b.fn(e)});w.appendChild(e)});c.appendChild(w)}
   $('#ov').hidden=false;c.scrollTop=0;
 }
-function closeCard(){$('#ov').hidden=true}
+function closeCard(){$('#ov').hidden=true;delete $('#ov').dataset.dismiss}
+$('#ov').addEventListener('click',e=>{if(e.target===$('#ov')&&$('#ov').dataset.dismiss){AU.fx('click');closeCard()}});
 
 /* =====================================================================
    FAHRT
