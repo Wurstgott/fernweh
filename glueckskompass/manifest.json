@@ -1,7 +1,7 @@
 {
  "name": "Glückskompass",
  "short_name": "Glückskompass",
- "description": "Glücksforschung in Häppchen: Erkenntnisse mit Quellen, Begriffe zum Üben und Experimente für ein gutes Leben.",
+ "description": "Jeden Tag ein Häppchen Glücksforschung.",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",

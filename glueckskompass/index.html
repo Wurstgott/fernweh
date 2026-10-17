@@ -2,8 +2,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Glückskompass"><link rel="apple-touch-icon" sizes="180x180" href="https://wurstgott.github.io/fernweh/glueckskompass/apple-touch-icon.png"><meta property="og:image" content="https://wurstgott.github.io/fernweh/glueckskompass/icon-512.png"><meta property="og:image:width" content="512"><meta property="og:image:height" content="512"><meta property="og:url" content="https://wurstgott.github.io/fernweh/glueckskompass/"><meta property="og:type" content="website"><meta property="og:site_name" content="Glückskompass"><meta name="twitter:card" content="summary"><link rel="manifest" href="manifest.json"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#EEF0E9">
-<meta name="description" content="Glücksforschung in Häppchen: Erkenntnisse mit Quellen, Begriffe zum Üben und Experimente für ein gutes Leben.">
-<meta property="og:title" content="Glückskompass"><meta property="og:description" content="Glücksforschung in Häppchen: Erkenntnisse mit Quellen, Begriffe zum Üben und Experimente für ein gutes Leben.">
+<meta name="description" content="Jeden Tag ein Häppchen Glücksforschung.">
+<meta property="og:title" content="Glückskompass"><meta property="og:description" content="Jeden Tag ein Häppchen Glücksforschung.">
 <link rel="icon" type="image/png" sizes="192x192" href="https://wurstgott.github.io/fernweh/glueckskompass/icon-192.png"><link rel="icon" type="image/png" sizes="512x512" href="https://wurstgott.github.io/fernweh/glueckskompass/icon-512.png"><link rel="shortcut icon" href="https://wurstgott.github.io/fernweh/glueckskompass/icon-192.png">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Glückskompass</title>
@@ -1622,7 +1622,7 @@ function viewWay(){
       <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:54 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:57 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -1643,7 +1643,7 @@ async function shareOut(title,text,url){
   const ta=$("#sharetext");ta.focus();ta.select();
 }
 function shareBite(b){
-  const text=`„${b.t}“\n\n${firstSentence(b.x)}\n\nDas stammt aus dem „Glückskompass“, einer kostenlosen App mit Erkenntnissen aus der Glücksforschung. Man braucht keine Anmeldung. Das ganze Häppchen mit Quelle (${b.src}) findest du hier:`;
+  const text=`Das hier fand ich spannend: „${b.t}“. ${firstSentence(b.x)}\n\nEs stammt aus dem Glückskompass, einer kleinen, kostenlosen App mit Erkenntnissen aus der Glücksforschung. Das ganze Häppchen mit Quelle findest du hier:`;
   shareOut(b.t,text,APP_URL+"#h-"+b.id);
 }
 function shareApp(){
@@ -1838,7 +1838,7 @@ function checkRow(id){const e=X[id],v=S.exps[id];if(!(e.d>=3))return "";const di
 
 /* ---------- Mit jemandem machen ---------- */
 function shareExp(id){const e=X[id],v=S.exps[id],st=v&&v.status==="active"?new Date(v.start):new Date();
-  shareOut(e.t,`Hast du Lust, gemeinsam mit mir ein kleines Experiment auszuprobieren? „${e.t}“: ${firstSentence(e.x)}\n\n${v&&v.status==="active"?"Ich habe am":"Ich fange am"} ${st.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})} ${v&&v.status==="active"?"angefangen":"an"}. ${e.d===1?"Es dauert nur einen Tag.":`Es dauert ${e.d} Tage.`} Die Anleitung steht im „Glückskompass“, einer kostenlosen App ohne Anmeldung:`,APP_URL+"#x-"+id)}
+  shareOut(e.t,`Hast du Lust, mit mir ein kleines Experiment zu machen? Es heißt „${e.t}“: ${firstSentence(e.x)}\n\n${v&&v.status==="active"?"Ich habe am":"Ich fange am"} ${st.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})} ${v&&v.status==="active"?"angefangen":"an"}. ${e.d===1?"Es dauert nur einen Tag.":`Es dauert ${e.d} Tage.`} Zu zweit fällt es leichter, und wir können uns erzählen, wie es läuft. Die Anleitung steht im Glückskompass, einer kostenlosen App ohne Anmeldung:`,APP_URL+"#x-"+id)}
 let invited=null;
 
 /* ---------- Kompassrose ---------- */
@@ -2010,7 +2010,7 @@ if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
 /* Selbst-Aktualisierung: Wenn auf GitHub eine neuere Version liegt, lädt die App sie still nach (wichtig für die Version auf dem Home-Bildschirm). */
-const BUILD="17.10.2026, 19:54";
+const BUILD="17.10.2026, 19:57";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;
