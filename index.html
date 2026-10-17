@@ -1336,16 +1336,24 @@ const QUESTS={
   ott:{start:'Ottilie bleibt an Hilde stehen. „Mein Vater hat mir früher von jeder Fahrt eine Ansichtskarte geschickt. Würdest du das auch tun? Drei verschiedene Städte würden mich sehr freuen.“',btn:'Gern, Ottilie',
     todo:'Ottilie Ansichtskarten aus drei Städten schicken'},
   doris:{start:'Doris ruft an. „Kalle, mein Senf aus Bautzen ist alle. Der aus dem Großmarkt schmeckt nach nichts. Wenn du mal nach Berlin fährst, bring mir doch ein Glas vom Markt mit?“',btn:'Wird gemacht, Doris',
-    todo:'Doris ein Glas Bautzner Senf aus Berlin mitbringen',ok:'ber',got:' Auf dem Markt in Berlin hat Kalle ein Glas Bautzner Senf für Doris gekauft.'}
+    todo:'Doris ein Glas Bautzner Senf aus Berlin mitbringen',ok:'ber',got:' Auf dem Markt in Berlin hat Kalle ein Glas Bautzner Senf für Doris gekauft.'},
+  // Nur für Leute, die viel grüßen
+  stamm:{cond:S=>S.stats.greets>=8,start:'Über Funk meldet sich Brummi-Bär. „Kalle, wir haben gehört, du grüßt jeden. Der Stammtisch vom Rasthof Kirchheim will dich kennenlernen. Grüß auf einer einzigen Tour vier Kollegen, dann gehörst du dazu. Over.“',btn:'Over und aus',
+    todo:'Auf einer Tour vier Kollegen grüßen'},
+  // Nur für Leute, die schon eingenickt sind
+  kissen:{cond:S=>(S.stats.naps||0)>=2,start:'Ottilie hat gehört, dass Kalle am Steuer eingenickt ist. Sie sagt nichts dazu. Sie sagt nur: „Fahr mir zweimal hintereinander ausgeschlafen. Dann bekommst du etwas von mir.“',btn:'Versprochen',
+    todo:'Zwei Touren hintereinander ohne Sekundenschlaf fahren'}
 };
 function questStart(){const q=Q();if(S.finale||S.day<3)return false;
-  const open=['jupp','ott','doris'].filter(k=>!q[k]);if(!open.length||Object.values(q).some(v=>v===1)&&Math.random()<.6)return false;
+  const open=Object.keys(QUESTS).filter(k=>!q[k]&&(!QUESTS[k].cond||QUESTS[k].cond(S)));if(!open.length||Object.values(q).some(v=>v===1)&&Math.random()<.6)return false;
   if(Math.random()>.35)return false;
-  const k=open.find(k=>k!=='jupp'||!S.done.muc)||open[0];const Qd=QUESTS[k];
+  const k=open.find(k=>QUESTS[k].cond)||open.find(k=>k!=='jupp'||!S.done.muc)||open[0];const Qd=QUESTS[k];
   q[k]=1;if(k==='ott')q.cards=[];save();AU.fx('ding');
   openCard('<p class="eyebrow">Eine kleine Bitte</p><p class="typed" style="margin:0">'+Qd.start+'</p>',[{label:Qd.btn,fn:closeCard}]);return true}
-function questProgress(t,ok){const q=Q();let add='';if(!ok)return add;
+function questProgress(t,ok){const q=Q();let add='';if(q.kissen===1&&D&&D.naps)q.kStreak=0;if(!ok)return add;
   ['jupp','doris'].forEach(k=>{if(q[k]===1&&t.id===QUESTS[k].ok){q[k]=2;add+=QUESTS[k].got}});
+  if(q.stamm===1&&D&&D.greets>=4){q.stamm=2;add+=' Vier Kollegen hat Kalle heute gegrüßt. Der Stammtisch hat es über Funk mitgehört.'}
+  if(q.kissen===1&&D){if(D.naps){q.kStreak=0}else{q.kStreak=(q.kStreak||0)+1;if(q.kStreak>=2){q.kissen=2;add+=' Zweimal hintereinander ausgeschlafen gefahren. Ottilie wird sich freuen.'}}}
   if(q.ott===1&&!t.final&&!q.cards.includes(t.to)){q.cards.push(t.to);add+=' Kalle hat Ottilie eine Ansichtskarte aus '+t.to+' geschickt'+(q.cards.length>=3?'. Das war die dritte.':'.');if(q.cards.length>=3)q.ott=2}
   return add}
 function questFinish(){const q=Q();
@@ -1353,6 +1361,10 @@ function questFinish(){const q=Q();
     openCard('<p class="eyebrow">Jupps Werkstatt</p><p class="typed" style="margin:0">Jupp hält den Anlasser ins Licht. „Der passt. Den hätte ich nirgends mehr bekommen.“ '+gift+'</p>',[{label:'Gern geschehen',fn:closeCard}]);return true}
   if(q.ott===2){q.ott=3;S.respect+=4;if(S.up.thermos<3)S.up.thermos++;save();AU.fx('ding');
     openCard('<p class="eyebrow">Im Büro</p><p class="typed" style="margin:0">Ottilie hat die drei Karten neben das Foto ihres Vaters gestellt. Sie gibt Kalle seine alte Thermoskanne, aus Blech und mit einer Beule. „Er hätte gewollt, dass sie wieder fährt.“ In die Kanne passt ein Becher mehr.</p>',[{label:'Danke, Ottilie',fn:closeCard}]);return true}
+  if(q.stamm===2){q.stamm=3;S.respect+=6;save();AU.fx('hornBack');
+    openCard('<p class="eyebrow">Über Funk</p><p class="typed" style="margin:0">„Hier Brummi-Bär. Der Stammtisch hat abgestimmt, einstimmig. Ab heute hast du in Kirchheim einen festen Platz, gleich am Fenster. Over.“</p>',[{label:'Danke, Kollegen',fn:closeCard}]);return true}
+  if(q.kissen===2){q.kissen=3;S.kissen=true;S.respect+=3;save();AU.fx('ding');
+    openCard('<p class="eyebrow">Im Büro</p><p class="typed" style="margin:0">Ottilie gibt Kalle ein gestricktes Nackenkissen, dunkelrot, mit einem kleinen gelben Laster darauf. „Für die Pausen.“ Ab jetzt erholt sich Kalle bei jeder Pause am Rasthof ein Stück mehr.</p>',[{label:'Danke, Ottilie',fn:closeCard}]);return true}
   return false}
 function rufCheck(){const l=rufLv();if(l>(S.rufSeen||0)){S.rufSeen=l;save();setTimeout(()=>openCard('<p class="eyebrow">Dein Ruf wächst</p><h2>'+RUF[l].name+'</h2><p class="typed" style="margin:0">'+RUF[l].perk+'</p>'+rufText(),[{label:'Schön',fn:closeCard}]),400)}}
 function rest(){if(S.fit>=100||daysLeft()<=1)return;S.day++;S.fit=Math.min(100,S.fit+40);save();AU.fx('yawn');toast('Kalle schläft sich aus. Ein Tag ist vergangen.');show('hof')}
@@ -1468,7 +1480,7 @@ function renderShop(){
 /* ================= Fahrtenbuch ================= */
 function renderLog(){
   const L=$('#loglist');L.innerHTML='';
-  {const q=Q(),rows=['jupp','ott','doris'].filter(k=>q[k]).map(k=>{const d=q[k]===3,lbl=QUESTS[k].todo+(k==='ott'&&q[k]<3?' ('+(q.cards||[]).length+' von 3)':'')+(q[k]===2&&k!=='ott'?' · erledigt, noch abgeben':'');return '<li class="'+(d?'done':'')+'">'+lbl+'</li>'});
+  {const q=Q(),rows=Object.keys(QUESTS).filter(k=>q[k]).map(k=>{const d=q[k]===3,lbl=QUESTS[k].todo+(k==='ott'&&q[k]<3?' ('+(q.cards||[]).length+' von 3)':'')+(q[k]===2&&['jupp','doris'].includes(k)?' · erledigt, noch abgeben':'')+(k==='kissen'&&q[k]===1?' ('+(q.kStreak||0)+' von 2)':'');return '<li class="'+(d?'done':'')+'">'+lbl+'</li>'});
    if(rows.length){const d=document.createElement('div');d.className='panel todo';d.innerHTML='<p class="eyebrow" style="margin:0 0 6px">Nicht vergessen</p><ul>'+rows.join('')+'</ul>';L.appendChild(d)}}
   if(!S.log.length){L.innerHTML='<div class="log typed">Nach jeder Tour schreibt Kalle hier auf, was er unterwegs erlebt hat.</div>'}
   S.log.slice().reverse().forEach(e=>{const d=document.createElement('div');d.className='log';d.innerHTML='<div class="d">Tag '+e.day+' · '+e.to+(e.ok?'':' · nicht zugestellt')+'</div><div class="typed"></div>';d.querySelector('.typed').textContent=e.note;L.appendChild(d)});
@@ -2123,7 +2135,7 @@ function openRast(name){
   const free=Math.random()<Math.min(.8,rufPerks().free+(S.dorisFreund&&H0.who==='Doris'?.25:0));
   const render=(line)=>{const kettLabel=H0.food+(free?' <span>spendiert</span>':S.money>=4?' <span>4 €</span>':' <span>anschreiben</span>');
     const opts=[{label:kettLabel,disabled:D._kett,fn:()=>{D._kett=true;if(free)S.stats.kettFrei=(S.stats.kettFrei||0)+1;if(!free){if(S.money>=4)S.money-=4;else S.tab=(S.tab||0)+4}D.energy=100;D.hunger=0;D.kett++;AU.fx('slurp');if(!S.senf&&H0.who==='Doris'&&S.stats.kett+D.kett>=12){S.senf=true;save();AU.fx('fanfare');return render('Doris holt etwas unter dem Tresen hervor und überreicht es feierlich: die Goldene Senftube. „Für meine treuesten Gäste. Du bist der Dritte seit 1987.“')}render(H0.line.replace('&amp;','&'))}},
-       {label:'45 Minuten Pause <span>+0:45 h</span>',disabled:D._pause,fn:()=>{D._pause=true;D.lenk=0;D.clock+=.75;D.napStreak=0;D.energy=S.up.matratze?100:Math.min(100,D.energy+35);D.pauses++;render(S.up.matratze?'Auf der guten Matratze schläft Kalle tief und fest. Er ist wieder ganz wach, und die Lenkzeit beginnt bei null.':'Kalle schläft eine Runde in der Kabine. Die Lenkzeit beginnt wieder bei null.')}},
+       {label:'45 Minuten Pause <span>+0:45 h</span>',disabled:D._pause,fn:()=>{D._pause=true;D.lenk=0;D.clock+=.75;D.napStreak=0;D.energy=S.up.matratze?100:Math.min(100,D.energy+35+(S.kissen?15:0));D.pauses++;render(S.up.matratze?'Auf der guten Matratze schläft Kalle tief und fest. Er ist wieder ganz wach, und die Lenkzeit beginnt bei null.':'Kalle schläft eine Runde in der Kabine. Die Lenkzeit beginnt wieder bei null.')}},
        {label:'Hilde abspritzen <span>'+Math.round(6*DIFF[S.diff].priceMul)+' €</span>',disabled:D._wash||S.money<Math.round(6*DIFF[S.diff].priceMul),fn:()=>{D._wash=true;S.money-=Math.round(6*DIFF[S.diff].priceMul);S.glanz=Math.min(100,S.glanz+30);AU.fx('bubbles');render('Am Waschplatz ist Hilde gleich wieder sauber.')}}];
     if(duftLv()&&S.duftFrisch<70)opts.push({label:'Neues Duftbäumchen <span>3 €</span>',disabled:D._tree||S.money<3,fn:()=>{D._tree=true;S.money-=3;S.duftFrisch=100;AU.fx('pop');render('Das neue Bäumchen riecht nach '+UP[0].lv[duftLv()-1]+'.')}});
     const cap=DIFF[S.diff].coffee+S.up.thermos;if(cap>0&&D.coffee<cap)opts.push({label:'Thermoskanne auffüllen <span>2 €</span>',disabled:D._fill||S.money<2,fn:()=>{D._fill=true;S.money-=2;D.coffee=cap;AU.fx('slurp');render('Die Kanne ist wieder voll. '+cap+' Becher für unterwegs.')}});
@@ -2702,7 +2714,7 @@ function finishDrive(ok,aborted){
   const dirt=25+(has('regen')||has('gewitter')?10:0)+(has('schnee')?15:0);
   S.glanz=Math.max(0,S.glanz-dirt);
   if(duftLv())S.duftFrisch=Math.max(0,S.duftFrisch-UP[0].fade[duftLv()]);
-  S.stats.km+=ok?t.km:Math.round(t.km*D.prog);S.stats.greets+=D.greets;S.stats.kett+=D.kett;S.stats.pauses+=D.pauses;
+  S.stats.km+=ok?t.km:Math.round(t.km*D.prog);S.stats.greets+=D.greets;S.stats.kett+=D.kett;S.stats.pauses+=D.pauses;S.stats.naps=(S.stats.naps||0)+D.naps;
   if(ok){S.done[t.id]=(S.done[t.id]||0)+1;if(t.final)S.finale=true}
   if(ok&&D.cargo>=99.5){S.perfect=S.perfect||{};S.perfect[t.id]=true;S.stats.perfekt=(S.stats.perfekt||0)+1}
   if(ok&&D.anhalter&&D.anhalter.n!=='Jule')S.stats.anhalter=(S.stats.anhalter||0)+1;
@@ -2789,6 +2801,8 @@ function ending(){
    if(q.doris===3)f.push('Doris hat zum ersten Mal seit dreißig Jahren ihren Imbiss zugemacht. Sie kam mit einem Blech Kettwurst und dem Glas aus Bautzen. Jupp hat drei genommen.');
    else f.push('Doris hat ein Paket Kettwürste geschickt, mit einem Zettel: „Mit extra Senf, wie immer.“');
    if(q.ott===3)f.push('Ottilie hat die drei Ansichtskarten aufgestellt, gleich neben das Foto ihres Vaters.');
+   if(q.stamm===3)f.push('Der Stammtisch vom Rasthof Kirchheim kam geschlossen, mit Funkgeräten und zwei Blechen Bienenstich.');
+   if(q.kissen===3)f.push('Als die Reden zu lang wurden, hat Kalle auf Ottilies Nackenkissen ein kleines Nickerchen gemacht. Diesmal durfte er.');
    if(S.stats.hildegard)f.push('Aus Bremen kam Hildegard angefahren und hat zur Begrüßung dreistimmig gehupt.');
    if(S.senf)f.push('An Kalles Jacke steckte die Goldene Senftube. Er hat sie den ganzen Abend nicht abgenommen.');
    h+='<div class="panel fest"><p class="eyebrow" style="margin:0 0 8px">Beim Jubiläumsfest</p>'+f.map(x=>'<p>'+x+'</p>').join('')+'</div>'}
