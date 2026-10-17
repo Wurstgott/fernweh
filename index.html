@@ -1152,7 +1152,7 @@ const HOFEV=[
  {id:'kuchen',t:'Ottilie bringt dir Streuselkuchen. Auf der nächsten Tour hat Kalle erst mal keinen Hunger und wird langsamer müde.',opts:[{btn:'Danke, Ottilie',go:S=>{S.kuchen=true}}]},
  {id:'radio',t:'Radio Kilometerstein sucht den freundlichsten Fahrer des Landes. Jemand hat dich vorgeschlagen.',opts:[{btn:'Mal sehen',go:S=>{const win=S.respect>=12*Object.keys(S.done).length;if(win){S.money+=60;S.respect+=3}return win?'Du hast gewonnen! Es gibt 60 € und drei Respektpunkte.':'Du wirst Zweiter. Es gibt eine Tasse mit dem Logo des Senders.'}}]},
  {id:'doris',t:'Doris ruft an. Du hast bei ihr noch etwas offen. Sie sagt, es eilt nicht.',cond:S=>S.tab>0,opts:[{btn:'Bezahlen',go:S=>{const p=Math.min(S.tab,S.money);S.money-=p;S.tab-=p;S.respect+=1;return 'Du zahlst '+p+' €. Doris schreibt dir dafür „Ehrlicher Kunde“ auf die Tafel neben der Kasse.'}},{btn:'Nächstes Mal',go:S=>{}}]},
- {id:'baum',t:'Jupp hat in der Werkstatt ein Duftbäumchen von 1974 gefunden. Es riecht nach Kirsche und ein bisschen nach Abenteuer.',cond:S=>S.up.duft>0,opts:[{btn:'Aufhängen',go:S=>{S.duftFrisch=100}}]},
+ {id:'baum',t:'Jupp hat in der Werkstatt ein Duftbäumchen von 1974 gefunden. Es riecht nach Kirsche und ein bisschen nach Abenteuer.',cond:S=>S.up.duft>0,opts:[{btn:'Aufhängen',go:S=>{S.duftFrisch=100;S.kirsche=true}}]},
  {id:'mutter',t:'Kalles Mutter ruft an und fragt, ob er genug isst. Kalle sagt ja. Das stimmt sogar.',opts:[{btn:'Tschüss, Mama',go:S=>{}}]},
  {id:'brief',t:'Ein Brief von Ottilie: „Mein Vater hat immer gesagt, auf der Straße ist jeder ein Kollege. Auch die, die drängeln.“',opts:[{btn:'Einstecken',go:S=>{}}]},
  {id:'anlasser',t:'Hilde springt heute nicht an. Jupp könnte sofort kommen, das kostet 40 €. Oder du wartest bis morgen, dann macht er es umsonst.',opts:[{btn:'Jupp rufen · 40 €',cond:S=>S.money>=40,go:S=>{S.money-=40;return 'Jupp tauscht das Relais in zehn Minuten. „Das war der Kuss“, sagt er.'},fx:'wrench'},{btn:'Bis morgen warten',go:S=>{S.day++;return 'Kalle nutzt den freien Tag und schläft sich aus. Ein Tag ist vergangen.'}}]},
@@ -1236,7 +1236,7 @@ function treeSVG(lv,fresh){
 }
 function hildeSVG(o){
   o=o||{};
-  const duftCol=DUFTCOL[(o.duft||1)-1];
+  const duftCol=o.kirsche?'#E79A9E':DUFTCOL[(o.duft||1)-1];
   let s='<svg viewBox="0 0 200 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hilde, der Lastwagen">';
   s+='<rect x="22" y="76" width="9" height="28" rx="3" fill="#2B2230"/><rect x="29" y="80" width="14" height="3" fill="#2B2230"/>';
   s+='<rect x="169" y="76" width="9" height="28" rx="3" fill="#2B2230"/><rect x="157" y="80" width="14" height="3" fill="#2B2230"/>';
@@ -1498,7 +1498,7 @@ function updateDots(){
   const n=nextStep();
   if(n.dot){const b=document.querySelector('#tabs button[data-tab="'+n.dot+'"]');if(b&&!b.classList.contains('on')){const i=document.createElement('i');i.className='dot';b.appendChild(i)}}
 }
-function hildeOpts(){return {duft:duftLv(),licht:S.up.licht,glanz:S.glanz,funk:S.up.funk,spiegel:S.up.spiegel,reifen:S.up.reifen,fanfare:S.up.fanfare}}
+function hildeOpts(){return {kirsche:S.kirsche,duft:duftLv(),licht:S.up.licht,glanz:S.glanz,funk:S.up.funk,spiegel:S.up.spiegel,reifen:S.up.reifen,fanfare:S.up.fanfare}}
 function renderHof(){
   {let t=$('#senf');if(S.senf&&!t){t=document.createElement('button');t.id='senf';t.className='senf';t.setAttribute('aria-label','Die Goldene Senftube');
     t.innerHTML='<svg viewBox="0 0 16 34"><path d="M5 2 h6 v4 h-6 Z" fill="#7B2D3B" stroke="#2B2230" stroke-width="1.2"/><path d="M4 6 h8 l2 22 q-6 4 -12 0 Z" fill="#F0C566" stroke="#2B2230" stroke-width="1.2"/><path d="M5 14 h6" stroke="#B5832A" stroke-width="1.5"/><path d="M2 29 h12" stroke="#2B2230" stroke-width="1.2"/></svg>';
@@ -1522,7 +1522,7 @@ function renderHof(){
   if(duftLv()){
     $('#m-duft').textContent=Math.round(S.duftFrisch)+' %';
     $('#b-duft').style.width=S.duftFrisch+'%';
-    $('#e-duft').textContent=UP[0].lv[duftLv()-1]+', '+Math.round(duftEff()*100)+' % weniger müde';
+    $('#e-duft').textContent=(S.kirsche?'Kirsche':UP[0].lv[duftLv()-1])+', '+Math.round(duftEff()*100)+' % weniger müde';
   }else{
     $('#m-duft').textContent='keins';$('#b-duft').style.width='0%';
     $('#e-duft').textContent='Gibt es bei Jupp';
@@ -1596,7 +1596,7 @@ function wash(){
   AU.fx('bubbles');bubbles(18);
   setTimeout(()=>{S.glanz=100;save();renderHof();const hb=$('#hilde-btn');hb.classList.remove('wow');void hb.offsetWidth;hb.classList.add('wow');AU.fx('ding');toast('Hilde glänzt wie am ersten Tag.')},900);
 }
-function newTree(){if(S.money<3||!duftLv())return;S.money-=3;S.duftFrisch=100;save();AU.fx('pop');toast('Ein frisches Bäumchen hängt am Spiegel. Es riecht nach '+UP[0].lv[duftLv()-1]+'.');renderHof()}
+function newTree(){if(S.money<3||!duftLv())return;S.money-=3;S.duftFrisch=100;S.kirsche=false;save();AU.fx('pop');toast('Ein frisches Bäumchen hängt am Spiegel. Es riecht nach '+UP[0].lv[duftLv()-1]+'.');renderHof()}
 function bubbles(n){const B=$('#bubbles');for(let i=0;i<n;i++){const e=document.createElement('i');e.style.left=(20+Math.random()*60)+'%';e.style.animationDelay=(Math.random()*.8)+'s';e.style.width=e.style.height=(8+Math.random()*14)+'px';B.appendChild(e);setTimeout(()=>e.remove(),2400)}}
 function puffs(n){const P=$('#puffs');if(!P)return;for(let i=0;i<(n||1);i++){const e=document.createElement('i');e.style.left=(i%2?66:30)+'%';e.style.animationDelay=(i*.15)+'s';P.appendChild(e);setTimeout(()=>e.remove(),2000)}}
 setInterval(()=>{if(curScreen==='hof'&&!document.hidden)puffs(1)},3200);
@@ -1711,7 +1711,7 @@ function renderShop(){
     const b=document.createElement('button');b.className='btn small';
     b.textContent=maxed?'Eingebaut':(u.lv?u.lv[lv]+' · ':'Kaufen · ')+eur(cost);
     b.disabled=maxed||S.money<cost;
-    b.addEventListener('click',()=>{if(S.money<cost||maxed)return;S.money-=cost;S.up[u.id]++;S.stats.boughtAny=true;if(UP.every(x=>S.up[x.id]>=x.max))award('werkstatt');if(u.id==='duft')S.duftFrisch=100;save();AU.fx('wrench');toast(u.id==='duft'?'Am Spiegel hängt jetzt ein Bäumchen „'+u.lv[S.up.duft-1]+'“.':u.name+' ist eingebaut.');renderShop();updateDots()});
+    b.addEventListener('click',()=>{if(S.money<cost||maxed)return;S.money-=cost;S.up[u.id]++;S.stats.boughtAny=true;if(UP.every(x=>S.up[x.id]>=x.max))award('werkstatt');if(u.id==='duft'){S.duftFrisch=100;S.kirsche=false}save();AU.fx('wrench');toast(u.id==='duft'?'Am Spiegel hängt jetzt ein Bäumchen „'+u.lv[S.up.duft-1]+'“.':u.name+' ist eingebaut.');renderShop();updateDots()});
     c.appendChild(b);L.appendChild(c);
   });
 }
@@ -2396,7 +2396,7 @@ function openRast(name){
     const opts=[{label:kettLabel,disabled:D._kett,fn:()=>{D._kett=true;if(free)S.stats.kettFrei=(S.stats.kettFrei||0)+1;if(!free){if(S.money>=4)S.money-=4;else S.tab=(S.tab||0)+4}D.energy=100;D.hunger=0;D.kett++;AU.fx('slurp');if(!S.senf&&H0.who==='Doris'&&S.stats.kett+D.kett>=12){S.senf=true;award('senf');save();AU.fx('fanfare');return render('Doris holt etwas unter dem Tresen hervor und überreicht es feierlich: die Goldene Senftube. „Für meine treuesten Gäste. Du bist der Dritte seit 1987.“')}render(H0.line.replace('&amp;','&'))}},
        {label:'45 Minuten Pause <span>+0:45 h</span>',disabled:D._pause,fn:()=>{D._pause=true;D.lenk=0;D.clock+=.75;D.napStreak=0;D.energy=S.up.matratze?100:Math.min(100,D.energy+35+(S.kissen?15:0));D.pauses++;render(S.up.matratze?'Auf der guten Matratze schläft Kalle tief und fest. Er ist wieder ganz wach, und die Lenkzeit beginnt bei null.':'Kalle schläft eine Runde in der Kabine. Die Lenkzeit beginnt wieder bei null.')}},
        {label:'Hilde abspritzen <span>'+Math.round(6*DIFF[S.diff].priceMul)+' €</span>',disabled:D._wash||S.money<Math.round(6*DIFF[S.diff].priceMul),fn:()=>{D._wash=true;S.money-=Math.round(6*DIFF[S.diff].priceMul);S.glanz=Math.min(100,S.glanz+30);AU.fx('bubbles');render('Am Waschplatz ist Hilde gleich wieder sauber.')}}];
-    if(duftLv()&&S.duftFrisch<70)opts.push({label:'Neues Duftbäumchen <span>3 €</span>',disabled:D._tree||S.money<3,fn:()=>{D._tree=true;S.money-=3;S.duftFrisch=100;AU.fx('pop');render('Das neue Bäumchen riecht nach '+UP[0].lv[duftLv()-1]+'.')}});
+    if(duftLv()&&S.duftFrisch<70)opts.push({label:'Neues Duftbäumchen <span>3 €</span>',disabled:D._tree||S.money<3,fn:()=>{D._tree=true;S.money-=3;S.duftFrisch=100;S.kirsche=false;AU.fx('pop');render('Das neue Bäumchen riecht nach '+UP[0].lv[duftLv()-1]+'.')}});
     const cap=DIFF[S.diff].coffee+S.up.thermos;if(cap>0&&D.coffee<cap)opts.push({label:'Thermoskanne auffüllen <span>2 €</span>',disabled:D._fill||S.money<2,fn:()=>{D._fill=true;S.money-=2;D.coffee=cap;AU.fx('slurp');render('Die Kanne ist wieder voll. '+cap+' Becher für unterwegs.')}});
     if(Q().resi===1&&/Ansfelden/.test(name))opts.push({label:'Frau Resi nach dem Rezept fragen',fn:()=>{Q().resi=2;save();AU.fx('ding');render('Frau Resi schaut lange. Dann schreibt sie etwas auf einen Bierdeckel. „Na gut, weil du’s bist. Aber nur für die Doris, gell?“')}});
     if(H0.who==='Doris'&&Q().resi===2)opts.push({label:'Doris Resis Rezept geben',fn:()=>{Q().resi=3;award('resi');S.respect+=4;save();AU.fx('ding');render('Doris liest den Bierdeckel zweimal. „Die Resi. Na so was.“ Sie klebt ihn an die Kasse. „Ab morgen gibt’s bei mir auch Käsekrainer.“')}});
