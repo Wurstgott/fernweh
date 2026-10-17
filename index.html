@@ -356,6 +356,14 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .goldseal::after{content:'';position:absolute;top:-20%;left:-60%;width:30%;height:140%;background:rgba(255,252,235,.75);transform:rotate(20deg);animation:shine 2.8s 1.3s ease-in-out infinite}
 @keyframes sealIn{from{opacity:0;transform:scale(2.4) rotate(40deg)}to{opacity:1;transform:scale(1) rotate(12deg)}}
 @keyframes shine{0%{left:-60%}35%,100%{left:140%}}
+.tree{transform-box:view-box;transform-origin:100px 54px;cursor:pointer}
+.tree.wiggle{animation:wiggle .5s ease-out}
+.tree.spin{animation:spin 1.1s cubic-bezier(.3,.1,.3,1)}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-28deg)}55%{transform:rotate(20deg)}80%{transform:rotate(-8deg)}}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(720deg)}}
+.scent{position:absolute;z-index:4;pointer-events:none;color:#5E8F5A;font-size:15px;animation:scent 1.9s ease-out forwards;opacity:0}
+@keyframes scent{0%{opacity:0;transform:translate(0,0) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translate(var(--dx),-70px) scale(1.2)}}
+#title-emblem{position:relative}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -765,6 +773,7 @@ const AU=(function(){
         [84,88,91,96,100,103,108].forEach((m,i)=>inst('celesta',m,hit+.12+i*.08,.3,.06,D));
         inst('bell',96,hit+1.3,.6,.05,D);if(big)inst('bell',103,hit+2.1,.8,.045,D);
         break}
+      case 'sniff':{[0,.17].forEach(d=>{const g=gain(0,D);const bp=filt('bandpass',1800+d*2000,1.4,g);noise(t+d,.12,bp);envASR(g,t+d,.06,.04,.05,.04)});break}
       case 'flap':{const g=gain(0,D);const bp=filt('bandpass',2400,2,g);noise(t,.04,bp);envAD(g,t,.05,.001,.035);break}
       case 'heimweh':{
         // Das Titelthema aus dem Hof-Walzer, nur in Moll und etwas langsamer. Gleiche Instrumente, gleiche Begleitung.
@@ -1147,7 +1156,7 @@ function hildeSVG(o){
   s+='<rect x="42" y="44" width="116" height="114" rx="12" fill="#D8A23A" stroke="#2B2230" stroke-width="2.5"/>';
   s+='<rect x="52" y="54" width="96" height="46" rx="6" fill="#BFD8E6" stroke="#2B2230" stroke-width="2"/><rect x="99" y="54" width="2" height="46" fill="#2B2230" opacity=".45"/>';
   s+='<path d="M60 60 L72 60 L62 76 Z" fill="#FBF1E6" opacity=".55"/>';
-  if(o.duft){s+='<g><animateTransform attributeName="transform" type="rotate" values="-10 100 54;10 100 54;-10 100 54" dur="2.4s" repeatCount="indefinite"/><line x1="100" y1="54" x2="100" y2="67" stroke="#2B2230" stroke-width="1.2"/><path d="M100 64 L107 74 L104 74 L109 81 L91 81 L96 74 L93 74 Z" fill="'+duftCol+'" stroke="#2B2230" stroke-width="1"/></g>'}
+  if(o.duft){s+='<g class="tree"><g><animateTransform attributeName="transform" type="rotate" values="-10 100 54;10 100 54;-10 100 54" dur="2.4s" repeatCount="indefinite"/><line x1="100" y1="54" x2="100" y2="67" stroke="#2B2230" stroke-width="1.2"/><path d="M100 64 L107 74 L104 74 L109 81 L91 81 L96 74 L93 74 Z" fill="'+duftCol+'" stroke="#2B2230" stroke-width="1"/></g><rect x="88" y="52" width="24" height="32" fill="transparent"/></g>'}
   if(o.licht){const c=['#C8432F','#2F6F73','#D8A23A','#E3AFB4','#BFDCC8'];for(let i=0;i<9;i++){s+='<circle cx="'+(56+i*11)+'" cy="'+(50+(i%2)*2)+'" r="3" fill="'+c[i%5]+'" stroke="#2B2230" stroke-width=".8"><animate attributeName="opacity" values="1;.35;1" dur="'+(1+i%3*.4)+'s" repeatCount="indefinite"/></circle>'}}
   if(o.funk)s+='<line x1="150" y1="44" x2="162" y2="6" stroke="#2B2230" stroke-width="2"/><circle cx="162" cy="6" r="3" fill="#C8432F"/>';
   if(o.spiegel)s+='<rect x="14" y="70" width="12" height="38" rx="3" fill="#BFD8E6" stroke="#2B2230" stroke-width="2"/><rect x="174" y="70" width="12" height="38" rx="3" fill="#BFD8E6" stroke="#2B2230" stroke-width="2"/>';
@@ -1331,7 +1340,16 @@ const NOTIZEN=['Mama anrufen.\nÖl für Hilde.\nBlumen für Doris?','Jupp schuld
 $('#s-log .eyebrow').addEventListener('click',()=>{if(!egg('log',5,3000))return;const i=EGG.notiz=((EGG.notiz===undefined?-1:EGG.notiz)+1)%NOTIZEN.length;AU.fx('click');
   openCard('<p class="eyebrow">Ganz hinten im Fahrtenbuch</p><div class="notiz">'+NOTIZEN[i].replace(/\n/g,'<br>')+'</div>',[{label:'Zurücklegen',cls:'alt',fn:closeCard}])});
 $('#t-resp').parentElement.addEventListener('click',()=>{if(S){AU.fx('click');rufCard()}});
-$('#hilde-btn').addEventListener('click',()=>{const hb=$('#hilde-btn');hb.classList.remove('honk');void hb.offsetWidth;hb.classList.add('honk');AU.fx(S&&S.up.fanfare?'fanfare':'horn');puffs(2);
+/* Versteckt: Wer am Duftbäumchen dreht, bekommt etwas zu riechen */
+const DUFTE=['Kalle schnuppert. Tanne. Dann Vanille. Dann, ganz leise, Kettwurst.','Das Bäumchen duftet nach „Black Ice“. Niemand weiß, wonach Black Ice riecht. Auch der Hersteller nicht.','Jupp ruft aus der Werkstatt: „Nicht so wild! Das ist ein Bäumchen, kein Propeller.“','Hilde riecht jetzt so frisch, dass eine Biene vorbeischaut. Sie bleibt nicht lange.','Auf der Rückseite des Bäumchens steht: „Hält 30 Tage“. Darunter, mit Kuli: „Ha!“ – Jupp'];
+function treeTap(e){const tr=e.target.closest&&e.target.closest('.tree');if(!tr)return false;e.stopPropagation();AU.init();
+  tr.classList.remove('wiggle','spin');void tr.getBoundingClientRect();AU.fx('sniff');
+  if(egg('tree',5,5000)){tr.classList.add('spin');const i=EGG.duft=((EGG.duft===undefined?-1:EGG.duft)+1)%DUFTE.length;
+    const host=tr.closest('#stage,#title-emblem');if(host){for(let k=0;k<9;k++){const p=document.createElement('span');p.className='scent';p.textContent=['✿','·','❀','·','✿'][k%5];p.style.left=(42+Math.random()*16)+'%';p.style.top=(28+Math.random()*10)+'%';p.style.setProperty('--dx',(Math.random()*120-60)+'px');p.style.animationDelay=(k*.06)+'s';host.appendChild(p);setTimeout(()=>p.remove(),2200)}}
+    setTimeout(()=>{AU.fx('ding');toast(DUFTE[i])},700)}
+  else tr.classList.add('wiggle');return true}
+$('#title-emblem').addEventListener('click',treeTap);
+$('#hilde-btn').addEventListener('click',e=>{if(treeTap(e))return;const hb=$('#hilde-btn');hb.classList.remove('honk');void hb.offsetWidth;hb.classList.add('honk');AU.fx(S&&S.up.fanfare?'fanfare':'horn');puffs(2);
   // Versteckt: Wer zu oft hupt, weckt den Nachbarn
   if(egg('honk',10,5000)){const n=EGG.nachbar=(EGG.nachbar||0)+1;
     setTimeout(()=>{if(n===1){AU.fx('click');toast('Herr Pfefferkorn von nebenan ruft: „Es ist Sonntag!“')}
