@@ -384,6 +384,7 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .mcell:not(.got) b{color:var(--muted)}
 .mcell.got svg{animation:none}
 #s-title>.eyebrow:first-child{margin-top:40px!important}
+.linkbtn{align-self:center;background:none;border:0;font:500 12px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:underline;text-underline-offset:3px;padding:6px 10px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -456,6 +457,7 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
       <button class="btn alt small tgl" data-tgl="music">Musik: an</button>
       <button class="btn alt small tgl" data-tgl="sfx">Geräusche: an</button>
     </div>
+    <button class="linkbtn" id="btn-home">Zum Titelbild</button>
   </section>
 
   <!-- AUFTRÄGE -->
@@ -1466,6 +1468,7 @@ function puffs(n){const P=$('#puffs');if(!P)return;for(let i=0;i<(n||1);i++){con
 setInterval(()=>{if(curScreen==='hof'&&!document.hidden)puffs(1)},3200);
 $('#btn-wash').addEventListener('click',wash);
 $('#btn-tree').addEventListener('click',newTree);
+$('#btn-home').addEventListener('click',()=>{AU.fx('click');save();renderTitle();show('title')});
 $('#stage .sun').addEventListener('click',e=>{e.stopPropagation();const st=$('#stage');if(st.classList.contains('night')||!egg('sun',3,2500))return;
   st.classList.add('night');AU.fx('yawn');toast('Feierabend. Hilde schläft schon.');const z=document.createElement('div');z.className='zzz';z.innerHTML='<span>z</span><span>z</span><span>Z</span>';st.appendChild(z);setTimeout(()=>{st.classList.remove('night');z.remove()},7000)});
 const NOTIZEN=['Mama anrufen.\nÖl für Hilde.\nBlumen für Doris?','Jupp schuldet mir 5 €.\nOder ich ihm. Nachfragen.','Wörter, die sich auf Hilde reimen:\nmilde, Gilde, Schilde.\nWeiter überlegen.','Neues Bäumchen ausprobieren.\nVanille war zu süß.\nTanne ist ehrlich.','Ottilie zum Geburtstag:\nnicht wieder Pralinen.'];
