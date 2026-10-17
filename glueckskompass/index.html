@@ -129,6 +129,12 @@ button.caveat.tap.lit{border-left-color:var(--c);background:color-mix(in srgb,va
 .src{font-family:var(--f-mono);font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
 .src a{color:var(--ink);text-underline-offset:3px}
 .links{display:flex;flex-wrap:wrap;gap:8px}
+.bite .links .chip{position:relative;border-color:color-mix(in srgb,var(--c) 35%,var(--line));box-shadow:0 0 16px -8px color-mix(in srgb,var(--c) 80%,transparent);animation:chipbreath 4.5s ease-in-out infinite}
+.bite .links .chip:nth-child(2){animation-delay:-2.2s}
+@keyframes chipbreath{50%{box-shadow:0 0 22px -6px color-mix(in srgb,var(--c) 80%,transparent)}}
+.bite .links .chip.lit{transform:scale(.97);background:color-mix(in srgb,var(--c) 12%,var(--card));box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 55%,transparent),0 0 30px 2px color-mix(in srgb,var(--c) 45%,transparent)}
+.bite .src a{border-radius:6px;padding:1px 3px;margin:-1px -3px;transition:background-color .3s,box-shadow .3s}
+.bite .src a:active{background:color-mix(in srgb,var(--c) 12%,transparent);box-shadow:0 0 18px -4px color-mix(in srgb,var(--c) 60%,transparent)}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .btn{border:1px solid var(--ink);background:transparent;border-radius:999px;padding:10px 18px;font-family:var(--f-ui);font-weight:700;font-size:15px;line-height:1.2}
 .btn.primary{background:var(--ink);color:var(--paper)}
@@ -1279,7 +1285,7 @@ function biteCard(b){
     <button class="caveat tap" data-deep="ev" aria-label="Wie sicher? Mehr zur Beweislage"><b>Wie sicher?</b> ${b.c}<span class="more">Beweislage verstehen →</span></button>
     <button class="take tap" data-deep="tip" aria-label="Was heißt das für dich? Vertiefen"><b>Was heißt das für dich?</b>${b.tip}<span class="more">Vertiefen und ausprobieren →</span></button>
     <p class="src">Quelle: <a href="${esc(b.u)}" target="_blank" rel="noopener">${b.src} ↗</a></p>
-    ${t||x?`<div class="links">${t?`<button class="chip" data-term="${t.id}">${dot(t.cat)}Begriff: ${t.n}</button>`:""}${x?`<button class="chip" data-exp="${x.id}">${dot(x.cat)}Experiment: ${x.t}</button>`:""}</div>`:""}
+    ${t||x?`<div class="links">${t?`<button class="chip" ${cc(t.cat)} data-term="${t.id}">${dot(t.cat)}Begriff: ${t.n}</button>`:""}${x?`<button class="chip" ${cc(x.cat)} data-exp="${x.id}">${dot(x.cat)}Experiment: ${x.t}</button>`:""}</div>`:""}
     <div class="row"><button class="btn primary" id="next">Nächstes Häppchen</button><button class="btn ghost" id="save" aria-pressed="${!!S.saved[b.id]}">${S.saved[b.id]?"Gemerkt ✓":"Merken"}</button><button class="btn ghost" id="share">Teilen</button><button class="linkbtn" id="back">Zum Kompass</button></div>
   </article>`;
 }
@@ -1713,6 +1719,9 @@ function render(){
 document.addEventListener("click",e=>{
   const t=e.target.closest("button,a");if(!t)return;
   const d=t.dataset;
+  if(t.closest(".bite .links")&&!t.dataset.lit){const col=getComputedStyle(t).getPropertyValue("--c").trim()||"var(--accent)";t.dataset.lit=1;t.classList.add("lit");buzz([6,30,10]);glow(t,col,.9);auraRings(t,col,2);
+    setTimeout(()=>{t.click();delete t.dataset.lit;t.classList.remove("lit")},calm()?0:400);return}
+  if(t.closest(".bite .src")){const col=`var(--c-${B[S.cur]?B[S.cur].cat:"ich"})`;buzz(8);glow(t,col,.8);auraRings(t,col,2)}
   if(t.id==="go"){sessionReads++;if(maybeScrollHint())return;const b=pickBite();if(!b)return;t.classList.remove("breath");t.classList.add("spin");buzz(12);auraRings(t);setTimeout(()=>openBite(b.id),matchMedia("(prefers-reduced-motion:reduce)").matches?0:520);return}
   if(t.id==="next"){sessionReads++;if(maybeScrollHint())return;const b=pickBite();if(b)openBite(b.id);return}
   if(d.sitem){const [k,id]=d.sitem.split(":");if(k==="b")openBite(id);else expSheet(id);return}
