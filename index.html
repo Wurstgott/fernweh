@@ -1065,7 +1065,7 @@ const TOURS=[
 const UP=[
  {id:'duft',name:'Duftbäumchen',max:3,cost:[20,45,80],lv:['Tanne','Vanille','Black Ice'],eff:[0,.12,.2,.3],fade:[0,40,30,20],
   desc:'Mit frischer Luft in der Kabine wird Kalle langsamer müde. Bessere Sorten wirken stärker und duften länger.'},
- {id:'thermos',name:'Große Thermoskanne',max:3,cost:[30,70,120],desc:'Kalle hat auf jeder Tour einen Becher Kaffee dabei. Jede Stufe füllt einen Becher mehr ein.'},
+ {id:'thermos',name:'Große Thermoskanne',max:3,cost:[30,70,120],desc:'Kalle hat auf jeder Tour Kaffee dabei. Jede Stufe füllt einen Becher mehr ein.'},
  {id:'reifen',name:'Neue Reifen',max:3,cost:[100,200,320],desc:'Jede Stufe senkt den Schaden bei Zusammenstößen und die Reparaturkosten um 15 %. Außerdem lenkt Hilde bei Regen und Schnee sicherer.'},
  {id:'spiegel',name:'Weitwinkelspiegel',max:2,cost:[120,240],desc:'Ein gelbes Dreieck am oberen Rand zeigt dir, was gleich auf deiner Spur auftaucht. Mit der zweiten Stufe siehst du es noch früher.'},
  {id:'funk',name:'CB-Funk',max:1,cost:[180],desc:'Kollegen melden dir Hindernisse, bevor du sie siehst. Jeder Gruß bringt einen Respektpunkt mehr.'},
@@ -2374,7 +2374,7 @@ function hud(){
   const c=$('#h-cargo');c.textContent=Math.round(D.cargo);c.className=D.cargo<40?'warn':D.cargo>=99.5?'perf':'';
   $('#h-energy').style.width=D.energy+'%';$('#h-energy').style.background=D.energy<40?'#C8432F':D.energy<60?'#D8A23A':'';
   $('#h-elabel').textContent=D.nap?'Augen zu!':D.energy<25?'Kalle kämpft mit dem Schlaf':D.hunger>=70?'Kalle hat Hunger':D.energy>=60?'Kalle ist wach':D.energy>=40?'Kalle wird müde':'Kalle ist sehr müde';
-  const cb=$('#btn-coffee');{const full=D.coffee,empty=Math.max(0,1+S.up.thermos-D.coffee),key=full+'/'+empty;if(cb.dataset.k!==key){cb.dataset.k=key;cb.innerHTML='Kaffee<small class="beans">'+BEAN(1).repeat(full)+BEAN(0).repeat(empty)+'</small>'}}cb.disabled=D.coffee<=0;cb.classList.toggle('ready',D.coffee>0&&D.energy<45);
+  const cb=$('#btn-coffee');{const full=D.coffee,empty=Math.max(0,DIFF[S.diff].coffee+S.up.thermos-D.coffee),key=full+'/'+empty;if(cb.dataset.k!==key){cb.dataset.k=key;cb.innerHTML='Kaffee<small class="beans">'+BEAN(1).repeat(full)+BEAN(0).repeat(empty)+'</small>'}}cb.disabled=D.coffee<=0;cb.classList.toggle('ready',D.coffee>0&&D.energy<45);
   const fb=$('#btn-flash');const k=greetTarget();fb.disabled=!k;fb.classList.toggle('ready',!!k);fb.innerHTML=k&&k.type==='panne'?'Helfen?':k&&k.type==='overpass'?'Winken':k&&k.type==='korso'?'Gratulieren':'Lichthupe';
 }
 
