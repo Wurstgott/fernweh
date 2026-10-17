@@ -2179,11 +2179,13 @@ function update(dt){
     if(o.weaveT!==undefined&&!o.done){o.weaveT-=dt;
       if(o.weaveT<.7&&o.blinkDir===undefined){const opts=[-1,1].filter(d=>{const nl=Math.round(o.lx)+d;return nl>=0&&nl<=2&&!(segIn('bau')&&nl===0)&&!D.objs.some(q=>q!==o&&Math.round(q.lx)===nl&&Math.abs(q.y-o.y)<160*SC)});o.blinkDir=opts.length?pick(opts):0}
       if(o.weaveT<=0){if(o.blinkDir){o.lane=Math.round(o.lx)+o.blinkDir;AU.fx('vespa')}o.blinkDir=undefined;o.weaveT=rnd(1.4,2.2)}}
-    if(o.raser&&!o.done){const blocked=l=>D.objs.some(q=>q!==o&&!q.deco&&!q.cross&&q.type!=='exit'&&covers(q,l)&&q.y<o.y&&o.y-q.y<(q.h+o.h)/2+150*SC);
-      if(blocked(o.lane)){const alt=[0,1,2].filter(l=>l!==o.lane&&Math.abs(l-o.lane)===1&&l!==D.lane&&!(segIn('bau')&&l===0)&&!blocked(l));
-        if(alt.length){o.lane=alt[0];AU.fx('whoosh')}else{const q=D.objs.filter(q=>q!==o&&covers(q,o.lane)&&q.y<o.y).sort((a,b)=>b.y-a.y)[0];if(q&&o.y-q.y<(q.h+o.h)/2+20*SC){o.rel=q.rel;o.y=Math.max(o.y,q.y+(q.h+o.h)/2+12*SC)}}}else o.rel=-1.6}
+    // Raser: bremst nie, weicht Hindernissen vor sich aus wie die Polizei. In Hildes Spur zieht er nur, wenn sie weit genug weg ist.
+    if(o.raser&&!o.done){o.rel=-1.6;const ahead=l=>D.objs.some(q=>q!==o&&!q.deco&&!q.cross&&!q.raser&&q.type!=='exit'&&covers(q,l)&&q.y<o.y+o.h&&o.y-q.y<(q.h+o.h)/2+170*SC);
+      const nearTruck=Math.abs(o.y-truckY)<TH*2.2;
+      if(ahead(o.lane)){const alt=[0,1,2].filter(l=>l!==o.lane&&!(segIn('bau')&&l===0)&&!(l===D.lane&&nearTruck)&&!ahead(l)).sort((a,b)=>Math.abs(a-o.lane)-Math.abs(b-o.lane));
+        if(alt.length&&alt[0]!==o.lane){o.lane=alt[0];if(o.y<H&&o.y>0)AU.fx('whoosh')}}}
     if(o.type==='polizei'&&Math.round(o.lane)===D.lane&&Math.abs(o.y-truckY)<TH*1.6){o.lane=[0,1,2].filter(l=>l!==D.lane).sort((a,b)=>Math.abs(a-o.lx)-Math.abs(b-o.lx))[0]}
-    if(o.lane!==undefined&&!o.cross)o.lx+=(o.lane-o.lx)*Math.min(1,dt*(o.type==='polizei'?6:4));
+    if(o.lane!==undefined&&!o.cross)o.lx+=(o.lane-o.lx)*Math.min(1,dt*(o.type==='polizei'||o.raser?7:4));
     if(o.knockT){o.knockT+=dt;const k=Math.min(1,o.knockT/.45),e=1-(1-k)*(1-k);o.knockX=o.kdir*e*28*SC;o.knockR=o.kdir*e*(o.type==='kiste'?2.6:1.5);o.knockA=Math.max(0,1-Math.max(0,o.knockT-.55)/.45)}
     if(o.bump>0)o.bump=Math.max(0,o.bump-dt*3);
     if(o.done||o.deco)continue;
