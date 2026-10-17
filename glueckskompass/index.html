@@ -1573,7 +1573,7 @@ function viewWay(){
       <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:15 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:20 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -1954,7 +1954,14 @@ document.addEventListener("keydown",e=>{if(e.target.closest&&e.target.closest("t
 function fromHash(){const h=location.hash.slice(1);if(["bites","terms","exps","way"].includes(h)){tab=h;return}if(h.startsWith("h-")&&B[h.slice(2)]){shared=h.slice(2);openBite(shared)}if(h.startsWith("x-")&&X[h.slice(2)]){invited=h.slice(2);tab="exps";setTimeout(()=>expSheet(invited),400)}}
 if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
-shownDay=todayKey();render();setTimeout(welcome,600);
+shownDay=todayKey();render();
+/* Selbst-Aktualisierung: Wenn auf GitHub eine neuere Version liegt, lädt die App sie still nach (wichtig für die Version auf dem Home-Bildschirm). */
+const BUILD="17.10.2026, 19:20";
+function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
+  fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
+    let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;try{sessionStorage.setItem("gk-upd",m[1])}catch(e){}
+    if($("#layer").innerHTML||Q){toast("Eine neue Version ist da. Sie lädt beim nächsten Öffnen.");return}location.reload()}).catch(()=>{})}
+setTimeout(checkUpdate,1500);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate()});setTimeout(welcome,600);
 })();
 </script>
 </body></html>
