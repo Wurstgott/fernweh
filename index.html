@@ -430,13 +430,12 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .linkbtn{background:none;border:0;padding:0;font:inherit;text-transform:none;letter-spacing:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .slipper{position:absolute;left:0;top:0;width:34px;margin:-9px 0 0 -17px;z-index:4;pointer-events:none}
 .slipper svg{display:block;width:100%;height:auto}
-.hlglow{opacity:0;transition:opacity .15s;pointer-events:none}
 .hlhit{cursor:pointer}
-.lights-on .hlglow{opacity:.55}.lights-on .hl{fill:#FFF3C4}
-.lights-wild .hlglow{animation:hlBlink .22s steps(1) infinite}.lights-wild .hl{animation:hlBlinkF .22s steps(1) infinite}
+.hl{transition:fill .12s}
+.on-l .hl-l,.on-r .hl-r{fill:#F7D35A}
+.lights-wild .hl{animation:hlBlinkF .22s steps(1) infinite}
 .lights-wild .hl-r{animation-delay:-.11s}
-@keyframes hlBlink{0%{opacity:.7}50%{opacity:0}}
-@keyframes hlBlinkF{0%{fill:#FFF3C4}50%{fill:#FBF1E6}}
+@keyframes hlBlinkF{0%{fill:#F7D35A}50%{fill:#FBF1E6}}
 @media (max-height:700px){.mbig svg{width:96px;height:96px}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
@@ -1261,7 +1260,7 @@ function hildeSVG(o){
   s+='<rect x="43.5" y="106" width="113" height="7" fill="#E3AFB4"/>';
   s+='<rect x="70" y="118" width="60" height="28" rx="3" fill="#2B2230"/>';
   for(let i=0;i<4;i++)s+='<rect x="74" y="'+(122+i*6)+'" width="52" height="2" fill="#FBF1E6" opacity=".7"/>';
-  s+='<circle class="hlglow hl-l" cx="57" cy="132" r="17" fill="#FFE7A0"/><circle class="hlglow hl-r" cx="143" cy="132" r="17" fill="#FFE7A0"/><circle class="hl hl-l" cx="57" cy="132" r="9" fill="#FBF1E6" stroke="#2B2230" stroke-width="2"/><circle class="hl hl-r" cx="143" cy="132" r="9" fill="#FBF1E6" stroke="#2B2230" stroke-width="2"/><circle class="hlhit" cx="57" cy="132" r="17" fill="transparent"/><circle class="hlhit" cx="143" cy="132" r="17" fill="transparent"/>';
+  s+='<circle class="hl hl-l" cx="57" cy="132" r="9" fill="#FBF1E6" stroke="#2B2230" stroke-width="2"/><circle class="hl hl-r" cx="143" cy="132" r="9" fill="#FBF1E6" stroke="#2B2230" stroke-width="2"/><circle class="hlhit" data-side="l" cx="57" cy="132" r="17" fill="transparent"/><circle class="hlhit" data-side="r" cx="143" cy="132" r="17" fill="transparent"/>';
   if(o.fanfare)s+='<g fill="#D8A23A" stroke="#2B2230" stroke-width="1.5"><path d="M64 146 l-10 6 v-12 z"/><path d="M136 146 l10 6 v-12 z"/></g>';
   s+='<rect x="36" y="150" width="128" height="11" rx="3" fill="#7B2D3B" stroke="#2B2230" stroke-width="2"/>';
   const tyre=o.reifen?'#1A1520':'#2B2230';
@@ -1631,14 +1630,14 @@ function treeTap(e){const tr=e.target.closest&&e.target.closest('.tree');if(!tr)
   else tr.classList.add('wiggle');return true}
 $('#title-emblem').addEventListener('click',treeTap);
 // Versteckt: Hildes Scheinwerfer im Titelbild an- und ausknipsen. Wer schnell hintereinander tippt, bringt sie zum wilden Blinken.
-{let lt={on:false,taps:[],off:0,wild:0};
- $('#title-emblem').addEventListener('click',e=>{if(!e.target.closest||!e.target.closest('.hlhit,.hl'))return;e.stopPropagation();AU.init();
-   const em=$('#title-emblem'),now=performance.now();lt.taps=lt.taps.filter(t=>now-t<1600);lt.taps.push(now);clearTimeout(lt.off);
-   if(lt.taps.length>=5){lt.taps=[];clearTimeout(lt.wild);em.classList.remove('lights-on');em.classList.add('lights-wild');[0,110,220,330,440].forEach(d=>setTimeout(()=>AU.fx('click'),d));
-     lt.wild=setTimeout(()=>{em.classList.remove('lights-wild');lt.on=false},3200);return}
+{const lt={taps:[],off:{},wild:0};
+ $('#title-emblem').addEventListener('click',e=>{const h=e.target.closest&&e.target.closest('.hlhit');if(!h)return;e.stopPropagation();AU.init();
+   const em=$('#title-emblem'),side=h.dataset.side,now=performance.now();lt.taps=lt.taps.filter(t=>now-t<1600);lt.taps.push(now);
+   if(lt.taps.length>=5){lt.taps=[];clearTimeout(lt.wild);em.classList.remove('on-l','on-r');em.classList.add('lights-wild');[0,110,220,330,440].forEach(d=>setTimeout(()=>AU.fx('click'),d));
+     lt.wild=setTimeout(()=>em.classList.remove('lights-wild'),3200);return}
    if(em.classList.contains('lights-wild'))return;
-   lt.on=!lt.on;em.classList.toggle('lights-on',lt.on);AU.fx('click');
-   if(lt.on)lt.off=setTimeout(()=>{lt.on=false;em.classList.remove('lights-on')},4000)})}
+   const on=em.classList.toggle('on-'+side);AU.fx('click');clearTimeout(lt.off[side]);
+   if(on)lt.off[side]=setTimeout(()=>em.classList.remove('on-'+side),6000)})}
 $('#hilde-btn').addEventListener('click',e=>{if(treeTap(e))return;const hb=$('#hilde-btn');hb.classList.remove('honk');void hb.offsetWidth;hb.classList.add('honk');AU.fx(S&&S.up.fanfare?'fanfare':'horn');puffs(2);
   // Versteckt: Wer zu oft hupt, weckt den Nachbarn
   if(egg('honk',10,5000)){const n=EGG.nachbar=(EGG.nachbar||0)+1;
