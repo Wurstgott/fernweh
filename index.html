@@ -1645,9 +1645,11 @@ function update(dt){
   if(segIn('stau'))target=.45;
   D.speedF+=(target-D.speedF)*Math.min(1,dt*1.5);
   // Am Ziel bremst Hilde gleichmäßig und hält genau vor der Rampe
-  const stopOff=(1+D.endPad)*D.K,rem=stopOff-D.off,BL=400*SC;
+  // Bremsweg so gewählt, dass Hilde bei jeder Geschwindigkeit in gut einer Sekunde steht
+  const vMax=TUNE.scroll*SC*df.speed*(1+TUNE.chScroll*(D.ch-1)),stopOff=(1+D.endPad)*D.K,rem=stopOff-D.off,BL=vMax*1.1/2;
   if(rem<BL){D.speedF=Math.min(D.speedF,Math.sqrt(Math.max(0,rem)/BL));
-    if(!D.braked&&rem<BL*.55){D.braked=true;AU.fx('brake');AU.stop()}}
+    if(!D.braked){D.braked=true;AU.fx('brake');AU.stop()}
+    if(!D.hissed&&D.speedF<.28){D.hissed=true;AU.fx('pssh')}}
   D.scroll=TUNE.scroll*SC*df.speed*(1+TUNE.chScroll*(D.ch-1))*D.speedF;
   D.off+=D.scroll*dt;
   let dprog=dt/D.dur*D.speedF;
@@ -1824,8 +1826,8 @@ function burst(x,y,type){
 function startArrival(){
   D.ending=1;D.arrive=0.001;D.inv=0;D.speedF=0;D.nap=null;$('#hint').style.opacity=0;
   D.objs=D.objs.filter(o=>o.deco||o.y>truckY+TH);
-  const big=!!D.tour.final,st=big?.7:.5,hit=st+(big?1.8:1.11),card=hit+(big?3.9:3);D.skipAt=hit+.3;
-  AU.engineSet({speed:.2});AU.fx('pssh');
+  const big=!!D.tour.final,st=big?.5:.3,hit=st+(big?1.8:1.11),card=hit+(big?3.9:3);D.skipAt=hit+.3;
+  AU.engineSet({speed:.2});if(!D.hissed){D.hissed=true;AU.fx('pssh')}
   const tx=D.x+sway(truckY);for(let i=0;i<14;i++){const sd=i%2?1:-1;D.parts.push({k:'puff',x:tx+sd*TW*.55,y:truckY+TH*.3,vx:sd*(40+Math.random()*60),vy:(Math.random()-.5)*30,life:1.1,max:1.1,r:6*SC})}
   later(st,()=>AU.fx('arrival',{big}));
   later(hit-.62,()=>{D.banner=0.001});
