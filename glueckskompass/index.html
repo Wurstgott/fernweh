@@ -218,6 +218,22 @@ nav.tabs button[aria-current="page"] svg{transform:translateY(-1px) scale(1.08)}
 @keyframes tabIn{from{transform:scaleX(0)}}
 @keyframes logoIn{from{transform:rotate(-200deg) scale(.6);opacity:0}}
 @keyframes coreSpin{to{transform:rotate(-360deg)}}
+
+/* Aura: Licht, das sich nach außen verliert */
+.cwrap{position:relative;display:grid;place-items:center;isolation:isolate}
+.halo{position:absolute;inset:-9%;border-radius:50%;z-index:-1;background:conic-gradient(from -90deg,var(--c-ich) 0 20%,var(--c-wir) 0 40%,var(--c-welt) 0 60%,var(--c-sein) 0 80%,var(--c-zeit) 0 100%);filter:blur(22px);opacity:.28}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:25;overflow:hidden}
+#fx .ring{position:fixed;border-radius:50%;background:conic-gradient(from -90deg,var(--c-ich) 0 20%,var(--c-wir) 0 40%,var(--c-welt) 0 60%,var(--c-sein) 0 80%,var(--c-zeit) 0 100%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));filter:blur(3px)}
+#fx .glow{position:fixed}
+.btn,.chip,.opt,nav.tabs button,.li{position:relative;overflow:hidden}
+.ripple{position:absolute;border-radius:50%;background:currentColor;pointer-events:none}
+@media (prefers-reduced-motion:no-preference){
+ .halo{animation:halo 6s ease-in-out infinite}
+ .cwrap:has(.compass.spin) .halo{animation:haloBurst 1s cubic-bezier(.2,.7,.2,1) both}
+}
+@keyframes halo{0%,100%{opacity:.22;transform:scale(.98) rotate(0)}50%{opacity:.4;transform:scale(1.05) rotate(25deg)}}
+@keyframes haloBurst{0%{opacity:.35;transform:scale(1)}35%{opacity:.75;transform:scale(1.12)}100%{opacity:.3;transform:scale(1.02)}}
+:root[data-theme="dark"] .halo{opacity:.35}
 </style>
 
 </head><body><div class="app" id="app">
@@ -1033,7 +1049,7 @@ const dot=c=>`<span class="dot" ${cc(c)}></span>`;
 const evHTML=l=>`<span class="ev"><i>${[1,2,3].map(k=>`<b class="${l>=k?"on":""}"></b>`).join("")}</i>${EV[l]}</span>`;
 const fmtDate=t=>new Date(t).toLocaleDateString("de-DE",{day:"numeric",month:"short"});
 function toast(m){document.querySelectorAll(".toast").forEach(x=>x.remove());const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>{t.classList.add("out");setTimeout(()=>t.remove(),320)},2200)}
-let anim=true,animQ=false,roseKey="";
+let anim=true,animQ=false,roseKey="",pendingGlow=false;
 
 /* ---------- Tabs ---------- */
 const TABS=[
@@ -1058,7 +1074,7 @@ function pickBite(){
   if(c&&S.cur===c.id&&list.length>1)c=list.find(b=>b.id!==S.cur);
   return c;
 }
-function openBite(id){anim=true;S.cur=id;if(!S.read[id])S.read[id]=now();S.history=[id,...S.history.filter(x=>x!==id)].slice(0,12);save();tab="bites";render();window.scrollTo(0,0)}
+function openBite(id){anim=true;pendingGlow=true;S.cur=id;if(!S.read[id])S.read[id]=now();S.history=[id,...S.history.filter(x=>x!==id)].slice(0,12);save();tab="bites";render();window.scrollTo(0,0)}
 function biteCard(b){
   const t=b.term&&T[b.term],x=b.exp&&X[b.exp];
   const gift=shared===b.id?`<div class="gift"><b>Jemand möchte dir dieses Häppchen zeigen.</b><span>Es stammt aus dem „Glückskompass“, einer kleinen, kostenlosen App mit Erkenntnissen aus der Glücksforschung, Begriffen zum Üben und Experimenten für den Alltag. Ohne Anmeldung, deine Daten bleiben auf deinem Gerät.</span><button class="btn accent" id="explore">Selbst ausprobieren</button></div>`:"";
@@ -1080,7 +1096,7 @@ function viewBites(){
   const recent=S.history.filter(id=>B[id]).slice(0,4);
   return `<section class="view">
     <div class="hero">
-      <button class="compass breath" id="go" aria-label="Neues Häppchen aufdecken"><span class="core"><span class="needle"></span><b>Häppchen</b><span>${unread?`${unread} noch neu`:"alle gelesen · Wiederholung"}</span></span></button>
+      <div class="cwrap"><span class="halo" aria-hidden="true"></span><button class="compass breath" id="go" aria-label="Neues Häppchen aufdecken"><span class="core"><span class="needle"></span><b>Häppchen</b><span>${unread?`${unread} noch neu`:"alle gelesen · Wiederholung"}</span></span></button></div>
       <p>${nRead?"Drück auf den Kompass für die nächste Erkenntnis.":"Drück auf den Kompass. Du bekommst eine Erkenntnis aus der Glücksforschung, mit Quelle und ehrlicher Einschätzung, wie sicher sie ist."}</p>
     </div>
     <div class="sec"><div class="label">Richtung</div>${filt}</div>
@@ -1120,7 +1136,7 @@ function quizCard(){
 }
 function answer(id){
   const it=Q.items[Q.i],ok=id===it.id,s=S.terms[it.id]||{box:0,next:0};
-  s.box=ok?Math.min(5,s.box+1):1;s.next=now()+IV[s.box]*DAY-(ok?0:DAY)+(ok?0:6e5);S.terms[it.id]=s;if(ok)Q.right++;Q.answered=id;save();render();const fb=document.querySelector('.fb');if(fb)fb.scrollIntoView({block:'center',behavior:'smooth'});
+  s.box=ok?Math.min(5,s.box+1):1;s.next=now()+IV[s.box]*DAY-(ok?0:DAY)+(ok?0:6e5);S.terms[it.id]=s;if(ok)Q.right++;Q.answered=id;save();render();{const r=document.querySelector('.opt.right'),w=document.querySelector('.opt.wrong');if(ok&&r){glow(r,'var(--ok)');buzz([8,50,8])}if(!ok){if(w)glow(w,'var(--warn)',.35);buzz(30)}}const fb=document.querySelector('.fb');if(fb)fb.scrollIntoView({block:'center',behavior:'smooth'});
 }
 let openTerm=null;
 function viewTerms(){
@@ -1235,18 +1251,34 @@ function shareApp(){
 
 function countUp(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;document.querySelectorAll(".tile b").forEach(el=>{const to=+el.textContent;if(!to)return;const t0=performance.now();const step=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e);if(k<1)requestAnimationFrame(step)};el.textContent="0";requestAnimationFrame(step)})}
 
+/* ---------- Aura & Vibration ---------- */
+const calm=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
+function buzz(p){if(calm())return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+function fx(){let l=document.getElementById("fx");if(!l){l=document.createElement("div");l.id="fx";document.body.appendChild(l)}return l}
+function auraRings(el){if(calm())return;const r=el.getBoundingClientRect();
+  for(let k=0;k<3;k++){const d=document.createElement("span");d.className="ring";Object.assign(d.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});fx().appendChild(d);
+    d.animate([{transform:"scale(1)",opacity:.75},{transform:`scale(${1.55+k*.2})`,opacity:0}],{duration:1100+k*200,delay:k*140,easing:"cubic-bezier(.15,.6,.3,1)",fill:"both"}).onfinish=()=>d.remove()}}
+function glow(el,col,str){if(calm())return;const r=el.getBoundingClientRect(),cs=getComputedStyle(el);const d=document.createElement("span");d.className="glow";
+  Object.assign(d.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px",borderRadius:cs.borderRadius,boxShadow:`0 0 0 2px ${col}, 0 0 28px 6px ${col}`});fx().appendChild(d);
+  d.animate([{transform:"scale(1)",opacity:str||.55},{transform:"scale(1.045)",opacity:0}],{duration:1000,easing:"cubic-bezier(.2,.7,.2,1)",fill:"both"}).onfinish=()=>d.remove()}
+function ripple(e,el){if(calm())return;const r=el.getBoundingClientRect(),s=Math.max(r.width,r.height)*2.2;const d=document.createElement("span");d.className="ripple";
+  Object.assign(d.style,{left:(e.clientX-r.left-s/2)+"px",top:(e.clientY-r.top-s/2)+"px",width:s+"px",height:s+"px"});el.appendChild(d);
+  d.animate([{transform:"scale(0)",opacity:.32},{transform:"scale(1)",opacity:0}],{duration:650,easing:"cubic-bezier(.2,.7,.2,1)"}).onfinish=()=>d.remove()}
+document.addEventListener("pointerdown",e=>{const el=e.target.closest(".btn,.chip,.opt,nav.tabs button,.li");if(el&&!el.disabled)ripple(e,el)},{passive:true});
+
 /* ---------- Rendern & Ereignisse ---------- */
 function render(){
   const v={bites:viewBites,terms:viewTerms,exps:viewExps,way:viewWay}[tab]();
   const M=$("#main");M.classList.remove("anim","animq");M.innerHTML=v;void M.offsetWidth;if(anim)M.classList.add("anim");if(animQ)M.classList.add("animq");const wasAnim=anim;anim=false;animQ=false;renderTabs();
   if(wasAnim&&tab==="way")countUp();
+  if(pendingGlow){pendingGlow=false;const c=document.querySelector('.bite');if(c&&S.cur&&B[S.cur])setTimeout(()=>glow(c,`var(--c-${B[S.cur].cat})`),260)}
   const n=Object.keys(S.read).length;$("#topline").textContent=n?`${n} / ${BITES.length}`:"";
   {const html=Object.keys(CATS).map(k=>{const all=BITES.filter(b=>b.cat===k),r=all.filter(b=>S.read[b.id]).length;return `<b style="--c:var(--c-${k})" title="${CATS[k].n}: ${r} von ${all.length}"><i style="width:${Math.round(r/all.length*100)}%"></i></b>`}).join("");const R=$("#rose");if(html!==roseKey){const first=!roseKey;roseKey=html;R.innerHTML=html;R.classList.toggle("grow",first)}}
 }
 document.addEventListener("click",e=>{
   const t=e.target.closest("button,a");if(!t)return;
   const d=t.dataset;
-  if(t.id==="go"){const b=pickBite();if(!b)return;t.classList.remove("breath");t.classList.add("spin");setTimeout(()=>openBite(b.id),matchMedia("(prefers-reduced-motion:reduce)").matches?0:520);return}
+  if(t.id==="go"){const b=pickBite();if(!b)return;t.classList.remove("breath");t.classList.add("spin");buzz(12);auraRings(t);setTimeout(()=>openBite(b.id),matchMedia("(prefers-reduced-motion:reduce)").matches?0:520);return}
   if(t.id==="next"){const b=pickBite();if(b)openBite(b.id);return}
   if(t.id==="back"){anim=true;S.cur=null;shared=null;save();render();return}
   if(t.id==="share"&&S.cur){shareBite(B[S.cur]);return}
@@ -1265,11 +1297,11 @@ document.addEventListener("click",e=>{
   if(d.tt){openTerm=openTerm===d.tt?null:d.tt;render();return}
   if(d.efilter){expFilter=d.efilter;render();return}
   if(d.openExp){expSheet(d.openExp);return}
-  if(d.accept){if(activeExps().length>=MAXACT)return;S.exps[d.accept]={status:"active",start:now()};save();closeSheet();tab="exps";render();toast("Angenommen. Viel Freude beim Ausprobieren.");return}
+  if(d.accept){if(activeExps().length>=MAXACT)return;S.exps[d.accept]={status:"active",start:now()};save();closeSheet();anim=true;tab="exps";render();buzz([10,40,10]);{const c=document.querySelector(`[data-done="${d.accept}"]`);const card=c&&c.closest(".card");if(card)glow(card,`var(--c-${X[d.accept].cat})`)}toast("Angenommen. Viel Freude beim Ausprobieren.");return}
   if(t.id==="other"){S.skip=(S.skip||0)+1;save();render();return}
   if(d.drop){S.exps[d.drop]={status:"dropped",start:S.exps[d.drop].start,end:now()};save();render();return}
   if(d.done){doneSheet(d.done);return}
-  if(t.id==="savedone"){const id=t.dataset.id,m=document.querySelector('#moods [aria-pressed="true"]');S.exps[id]=Object.assign(S.exps[id]||{start:now()},{status:"done",end:now(),mood:m?m.dataset.mood:null,note:$("#note").value.trim()});save();closeSheet();render();toast("Gespeichert. Schön, dass du es ausprobiert hast.");return}
+  if(t.id==="savedone"){const id=t.dataset.id,m=document.querySelector('#moods [aria-pressed="true"]');S.exps[id]=Object.assign(S.exps[id]||{start:now()},{status:"done",end:now(),mood:m?m.dataset.mood:null,note:$("#note").value.trim()});save();closeSheet();render();buzz([12,60,12,60,20]);{const tl=document.querySelector(".tiles")||document.querySelector("#main .card");if(tl)glow(tl,"var(--accent)")}toast("Gespeichert. Schön, dass du es ausprobiert hast.");return}
   if(t.id==="reset"){confirmReset=true;render();return}
   if(t.id==="resetno"){confirmReset=false;render();return}
   if(t.id==="resetyes"){S={read:{},saved:{},terms:{},exps:{},filter:"alle",history:[],cur:null};save();confirmReset=false;Q=null;render();toast("Alles zurückgesetzt.");return}
