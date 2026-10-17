@@ -2591,7 +2591,7 @@ function drawArrivalFx(){
       cx.strokeStyle='#B5832A';cx.lineWidth=1.4;cx.beginPath();cx.arc(0,0,r*.7,0,7);cx.stroke();
       cx.fillStyle='#7B2D3B';cx.textAlign='center';cx.font='700 '+Math.round(15*s)+'px Jost, Futura, sans-serif';cx.fillText('100 %',0,3*s);
       cx.font='600 '+Math.round(7.5*s)+'px Jost, Futura, sans-serif';cx.fillText('MAKELLOS',0,14*s);
-      cx.font='700 '+Math.round(8*s)+'px Jost, Futura, sans-serif';cx.fillText('★',0,-12*s);cx.restore()}
+      cx.font='700 '+Math.round(7*s)+'px Jost, Futura, sans-serif';[-7,0,7].forEach((dx,k)=>cx.fillText('★',dx*s,(k===1?-13:-11.5)*s));cx.restore()}
     cx.restore()}
   if(D.fade){cx.fillStyle='rgba(251,241,230,'+Math.min(1,D.fade/.5)+')';cx.fillRect(0,0,W,H)}
 }
