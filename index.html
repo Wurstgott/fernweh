@@ -1804,6 +1804,8 @@ function startDrive(t){
     const cand=pool.filter(p=>p.ok&&!ev.some(e=>e.type===p.type));let tot=cand.reduce((x,p)=>x+p.w,0),r=Math.random()*tot,k=cand[0];for(const p of cand){r-=p.w;if(r<=0){k=p;break}}
     for(let tries=0;tries<25&&k;tries++){const a=rnd(.12,.88);if(!busy(a)){ev.push({at:a,type:k.type});break}}
   }
+  // Läuft die Bitte der Brückenkinder, stehen sie fast immer auf einer Brücke. Sonst wäre das Plakat kaum zu schaffen.
+  if(Q().bruecke===1&&t.scen!=='tundra'&&!ev.some(e=>e.type==='kinder')&&Math.random()<.85){for(let tries=0;tries<40;tries++){const a=rnd(.12,.85);if(!busy(a)){ev.push({at:a,type:'kinder'});break}}}
   ev.sort((a,b)=>a.at-b.at);
   S.driving=t.id;save();
   resize();D.x=laneX(1);
