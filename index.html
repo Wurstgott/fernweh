@@ -1302,15 +1302,14 @@ const TIPART={cup:'<path d="M5 9h11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z" fill="#FBF
  kanister:'<path d="M7 6h7l4 4v9H7z" fill="#C8432F"/><path d="M9 6V4.5h3V6" fill="none"/><path d="M9.5 10.5l5 6M14.5 10.5l-5 6" fill="none" stroke="#FBF1E6"/>',
  baum:'<path d="M12 5l5 7h-3l4 6H6l4-6H7z" fill="#5C8A3A"/><path d="M12 18v2M12 5V3" fill="none"/>',
  karte:'<rect x="4" y="7" width="16" height="11" rx="1" fill="#FBF1E6"/><rect x="14" y="9" width="4" height="4" fill="#D8A23A"/><path d="M6.5 11h5M6.5 13.5h5" fill="none"/>'};
-let tipI=Math.floor(Math.random()*TIPS.length),tipT=0;
+let tipI=Math.floor(Math.random()*TIPS.length);
 function renderTip(){const el=$('#tip');if(!el)return;const [k,txt]=TIPS[tipI%TIPS.length];
   el.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" stroke="#2B2230" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+TIPART[k]+'</svg><span>'+txt+' <u>Spendieren</u></span>';
   el.classList.remove('in');void el.offsetWidth;el.classList.add('in')}
-function startTips(){clearInterval(tipT);renderTip();tipT=setInterval(()=>{if($('#s-title').hidden||document.hidden)return;tipI++;renderTip()},7000)}
 function renderTitle(){
   if(!$('#btn-trophy')){const b=document.createElement('button');b.id='btn-trophy';b.className='trophy-btn';b.setAttribute('aria-label','Plaketten');b.addEventListener('click',()=>{AU.init();AU.fx('click');trophyCard()});$('#s-title').appendChild(b)}renderTrophyBtn();
   if(!$('#btn-best')){const b=document.createElement('button');b.id='btn-best';b.className='best-btn';b.innerHTML='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16V9M10 16V4M16 16v-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Bestwerte</span>';b.addEventListener('click',()=>{AU.init();AU.fx('click');bestCard()});$('#s-title').appendChild(b)}
-  if(!tipT)startTips();
+  tipI++;renderTip();
   $('#title-emblem').innerHTML='<div class="emblem">'+hildeSVG({duft:1,glanz:80})+'</div>';
   const d=$('#diff');d.innerHTML='';
   const best=store.get('fernweh-best')||{};
@@ -1699,7 +1698,8 @@ function openCard(html,buttons){
   $('#ov').hidden=false;c.scrollTop=0;
 }
 function closeCard(){$('#ov').hidden=true;delete $('#ov').dataset.dismiss}
-$('#ov').addEventListener('click',e=>{if(e.target===$('#ov')&&$('#ov').dataset.dismiss){AU.fx('click');closeCard()}});
+// Plaketten und Bestwerte: Ein Tipp daneben oder auf eine freie Stelle der Karte schließt sie
+$('#ov').addEventListener('click',e=>{if(!$('#ov').dataset.dismiss||e.target.closest('.mcell,.mbig,button,a'))return;AU.fx('click');closeCard()});
 
 /* =====================================================================
    FAHRT
