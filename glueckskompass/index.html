@@ -53,7 +53,16 @@ header.top{display:grid;grid-template-columns:auto 1fr auto;align-items:center;c
 .pill:empty{display:none}
 .rose{grid-column:1/-1;margin-top:10px;display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 .rose b{height:3px;border-radius:3px;background:var(--soft);overflow:hidden;display:block}
-.rose b i{display:block;height:100%;min-width:8px;background:var(--c);border-radius:3px;transition:width .5s}
+.rose b{position:relative;overflow:visible;transition:opacity .6s,box-shadow .6s,transform .6s cubic-bezier(.3,.75,.2,1)}
+.rose b i{display:block;height:100%;min-width:8px;background:var(--c);border-radius:3px;transition:width 1s cubic-bezier(.3,.75,.2,1),box-shadow .6s}
+.rose[data-sel]:not([data-sel="alle"]) b{opacity:.35}
+.rose[data-sel="ich"] b[data-k="ich"],.rose[data-sel="wir"] b[data-k="wir"],.rose[data-sel="welt"] b[data-k="welt"],.rose[data-sel="sein"] b[data-k="sein"],.rose[data-sel="zeit"] b[data-k="zeit"]{opacity:1;transform:scaleY(1.6);background:color-mix(in srgb,var(--c) 22%,var(--soft))}
+.rose[data-sel="ich"] b[data-k="ich"] i,.rose[data-sel="wir"] b[data-k="wir"] i,.rose[data-sel="welt"] b[data-k="welt"] i,.rose[data-sel="sein"] b[data-k="sein"] i,.rose[data-sel="zeit"] b[data-k="zeit"] i{box-shadow:0 0 8px 1px color-mix(in srgb,var(--c) 70%,transparent)}
+.rose b::after{content:"";position:absolute;inset:-3px 0;border-radius:6px;pointer-events:none;opacity:0;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--c) 70%,transparent),transparent);background-size:40% 100%;background-repeat:no-repeat;filter:blur(2px)}
+.rose b.ping::after{animation:lsweep 1.1s cubic-bezier(.3,.7,.2,1)}
+.rose b.up i{animation:lup 1.4s ease-out}
+@keyframes lsweep{0%{opacity:1;background-position:-60% 0}100%{opacity:0;background-position:160% 0}}
+@keyframes lup{30%{box-shadow:0 0 12px 2px color-mix(in srgb,var(--c) 80%,transparent)}}
 @media (max-width:360px){.mark{font-size:26px}.tagline{font-size:14px}}
 h2{font-family:var(--f-display);font-weight:650;font-variation-settings:"SOFT" 100;font-size:22px;letter-spacing:-.01em;margin:0;text-wrap:balance;line-height:1.2}
 h3{font-family:var(--f-ui);font-weight:700;font-size:15px;letter-spacing:.02em;margin:0}
@@ -154,6 +163,39 @@ button.caveat.tap.lit{border-left-color:var(--c);background:color-mix(in srgb,va
 
 /* Begriffe */
 .tcard{position:relative;isolation:isolate;overflow:hidden}
+.orbit{position:relative;width:100%;max-width:300px;margin:-4px auto -6px;aspect-ratio:1}
+.tcard.quizzing .orbit{max-width:190px}
+.tcard.quizzing .tnote{display:none}
+.orbit svg{width:100%;height:100%;overflow:visible}
+.orbit .track{fill:none;stroke:var(--line);stroke-width:1;stroke-dasharray:1.5 5}
+.orbit .track.outer{stroke-dasharray:1 7;opacity:.6}
+.orbit .track.core{stroke:color-mix(in srgb,var(--accent) 40%,var(--line));stroke-dasharray:none;opacity:.6}
+.orbit .corebody{fill:var(--card);stroke:var(--accent);stroke-width:2.5;filter:drop-shadow(0 0 8px color-mix(in srgb,var(--accent) 60%,transparent))}
+.orbit .cn{font-family:var(--f-display);font-weight:800;font-size:17px;fill:var(--ink)}
+.orbit .orb{transform-box:view-box;transform-origin:50% 50%}
+.orbit .od{cursor:pointer}
+.orbit .dc,.orbit .dh{transform-box:fill-box;transform-origin:50% 50%}
+.orbit .od .dc{filter:drop-shadow(0 0 3px color-mix(in srgb,var(--c) 70%,transparent));transition:r .4s}
+.orbit .od.unk .dc{opacity:.28;filter:none}
+.orbit .od.anc .dc{filter:drop-shadow(0 0 5px var(--c))}
+.orbit .od .dh{opacity:.45;filter:url(#oglow)}
+.orbit .od.sel .dc{stroke:var(--ink);stroke-width:1.4}
+.ocap{margin:0;font-size:15.5px;line-height:1.45;color:var(--muted);text-align:center;text-wrap:pretty}
+.ocap b{color:var(--ink);font-family:var(--f-ui);font-weight:700}
+.odot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c);margin-right:7px;vertical-align:1px}
+.tcard .row{justify-content:center}
+@media (prefers-reduced-motion:no-preference){
+ .orbit .orb{animation:orbspin var(--t) linear infinite;animation-direction:normal}
+ .orbit .od .dh{animation:odue 2.6s ease-in-out infinite}
+ .orbit .corehalo{animation:ocore 5s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+ .orbit.enter .oi{animation:oin 1.1s cubic-bezier(.2,.8,.25,1) var(--i) both}
+ .orbit .od.moved .dc{animation:omove 1.2s cubic-bezier(.3,.7,.2,1)}
+}
+@keyframes orbspin{to{transform:rotate(360deg)}}
+@keyframes odue{50%{opacity:.9;transform:scale(1.35)}}
+@keyframes ocore{50%{transform:scale(1.12);opacity:.8}}
+@keyframes oin{from{transform:translate(0,-34px) scale(.2);opacity:0}}
+@keyframes omove{0%{transform:scale(2.2)}100%{transform:scale(1)}}
 .tmist{position:absolute;inset:-40%;z-index:-1;pointer-events:none;background:radial-gradient(30% 30% at 22% 28%,color-mix(in srgb,var(--accent) 34%,transparent),transparent 70%),radial-gradient(30% 34% at 80% 20%,color-mix(in srgb,var(--c-sein) 20%,transparent),transparent 70%),radial-gradient(34% 30% at 70% 85%,color-mix(in srgb,var(--c-zeit) 18%,transparent),transparent 70%);filter:blur(22px);opacity:.6}
 .thead{display:flex;gap:18px;align-items:center}
 .tring{--sz:96px;flex:none;width:var(--sz);height:var(--sz);border-radius:50%;position:relative;display:grid;place-items:center}
@@ -1353,7 +1395,8 @@ function cloudPos(sel){const P={};Object.keys(CPOS).forEach(k=>P[k]=CPOS[k].slic
   // „Alle“ sucht sich den freiesten Platz in der Wolke, nicht zu weit vom Zentrum
   let best=null,bs=-1e9;for(let x=14;x<=86;x+=3)for(let y=14;y<=86;y+=3){const c=[x,y];let m=1e9;Object.keys(CATS).forEach(k=>{m=Math.min(m,dist(c,P[k]))});const sc=Math.min(m,110)-.35*dist(c,[50,50]);if(sc>bs){bs=sc;best=c}}
   P.alle=best;return P}
-function applyCloud(sel,fresh){const P=cloudPos(sel);document.querySelectorAll(".dircloud .dir").forEach(el=>{const k=el.dataset.filter,q=P[k];el.style.left=q[0]+"%";el.style.top=q[1]+"%";el.classList.toggle("lead",k===sel&&k!=="alle");el.classList.toggle("recede",k==="alle"&&sel!=="alle")});
+function lineFocus(sel){const R=$("#rose");if(R&&R.dataset.sel!==sel){R.dataset.sel=sel;if(sel!=="alle"&&!calm()){const b=R.querySelector(`[data-k="${sel}"]`);if(b){b.classList.remove("ping");void b.offsetWidth;b.classList.add("ping")}}}}
+function applyCloud(sel,fresh){lineFocus(sel);const P=cloudPos(sel);document.querySelectorAll(".dircloud .dir").forEach(el=>{const k=el.dataset.filter,q=P[k];el.style.left=q[0]+"%";el.style.top=q[1]+"%";el.classList.toggle("lead",k===sel&&k!=="alle");el.classList.toggle("recede",k==="alle"&&sel!=="alle")});
   const c=document.querySelector(".dircloud");if(c)c.dataset.sel=sel;
   if(fresh){const el=document.querySelector(`.dircloud .dir[data-filter="${sel}"] .dial`);if(el){const col=sel==="alle"?"var(--accent)":`var(--c-${sel})`;setTimeout(()=>{glow(el,col,.9);auraRings(el,col,2)},60)}}}
 function viewBites(){
@@ -1415,18 +1458,40 @@ function answer(id){
   s.box=ok?Math.min(5,s.box+1):1;s.next=now()+IV[s.box]*DAY-(ok?0:DAY)+(ok?0:6e5);S.terms[it.id]=s;if(ok)Q.right++;Q.answered=id;save();render();{const r=document.querySelector('.opt.right'),w=document.querySelector('.opt.wrong');if(ok&&r){glow(r,'var(--ok)');buzz([8,50,8])}if(!ok){if(w)glow(w,'var(--warn)',.35);buzz(30)}}const fb=document.querySelector('.fb');if(fb)fb.scrollIntoView({block:'center',behavior:'smooth'});
 }
 let openTerm=null;
+/* Gedächtnis-Orbit: außen neu, innen verankert. Innere Bahnen kreisen schneller, fällige Begriffe leuchten. */
+const ORB_R=[104,86,68,50,32],ORB_T=[150,120,95,72,50];let orbPrev={};
+function orbLevel(t,dueSet){const b=box(t.id);if(b>=4)return 4;if(S.terms[t.id])return Math.max(0,Math.min(3,b));return dueSet.has(t.id)?0:-1}
+function orbitSVG(){const dl=dueTerms(),dueSet=new Set(dl.map(t=>t.id)),l=learned(),pct=l/TERMS.length;
+  const lv={};TERMS.forEach(t=>{const k=orbLevel(t,dueSet);(lv[k]=lv[k]||[]).push(t)});
+  const moved=[];const ring=k=>{const list=lv[k]||[];if(!list.length)return "";const r=k<0?122:ORB_R[k],off=k*37;
+    return `<g class="orb" style="--t:${k<0?190:ORB_T[k]}s;--dir:${k%2?-1:1}">`+list.map((t,i)=>{const ang=off+i*360/list.length,due=dueSet.has(t.id);if(orbPrev[t.id]!=null&&orbPrev[t.id]!==k)moved.push(t.id);
+      return `<g transform="rotate(${ang.toFixed(1)})"><g class="od ${k<0?"unk":""} ${due?"due":""} ${k===4?"anc":""}" data-orb="${t.id}" style="--c:var(--c-${t.cat})" transform="translate(0 ${-r})"><g class="oi" style="--i:${(i*.03+(4-k)*.06).toFixed(2)}s"><circle class="hit" r="10" fill="transparent"/>${due?`<circle class="dh" r="9" fill="var(--c-${t.cat})"/>`:""}<circle class="dc" r="${k<0?2.6:due?4.8:4}" fill="var(--c-${t.cat})"/></g></g></g>`}).join("")+`</g>`};
+  const html=`<div class="orbit ${anim?"enter":""}"><svg viewBox="-140 -140 280 280" role="img" aria-label="${l} von ${TERMS.length} Begriffen verankert, ${dl.length} fällig">
+   <defs><radialGradient id="ocore"><stop offset="0" stop-color="var(--accent)" stop-opacity="${(.35+.65*pct).toFixed(2)}"/><stop offset=".55" stop-color="var(--accent)" stop-opacity="${(.12+.4*pct).toFixed(2)}"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></radialGradient>
+   <filter id="oglow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3.2"/></filter></defs>
+   ${ORB_R.map((r,k)=>`<circle class="track ${k===4?"core":""}" r="${r}"/>`).join("")}<circle class="track outer" r="122"/>
+   <circle class="corehalo" r="${(30+26*pct).toFixed(1)}" fill="url(#ocore)"/>
+   <circle class="corebody" r="20"/>
+   <text class="cn" y="5" text-anchor="middle">${l}</text>
+   ${[-1,0,1,2,3,4].map(ring).join("")}
+  </svg></div>`;
+  TERMS.forEach(t=>orbPrev[t.id]=orbLevel(t,dueSet));
+  if(moved.length)setTimeout(()=>moved.forEach(id=>{const el=document.querySelector(`[data-orb="${id}"]`);if(el){el.classList.add("moved");const c=el.querySelector(".dc");if(c)glow(c,`var(--c-${T[id].cat})`,.9)}}),80);
+  return html}
+document.addEventListener("click",e=>{const d=e.target.closest&&e.target.closest("[data-orb]");if(!d)return;const t=T[d.dataset.orb],b=box(t.id),due=dueTerms().some(x=>x.id===t.id);
+  document.querySelectorAll(".od.sel").forEach(x=>x.classList.remove("sel"));d.classList.add("sel");buzz(6);const c=d.querySelector(".dc");if(c)auraRings(c,`var(--c-${t.cat})`,2);
+  const where=b>=4?"im Kern verankert":!S.terms[t.id]?"noch neu":`auf Bahn ${b} von 4`;
+  $("#ocap").innerHTML=`<span class="odot" style="--c:var(--c-${t.cat})"></span><b>${t.n}</b> ist ${where}${due?" und heute fällig":""}. <button class="linkbtn" data-tt-go="${t.id}">Ansehen</button>`});
 function viewTerms(){
   const due=dueTerms().length,l=learned();
   let h=`<section class="view">${fromBite&&B[fromBite]?`<button class="backlink" id="tobite">← Zurück zum Häppchen „${B[fromBite].t}“</button>`:""}
-    <div class="card tcard">
+    <div class="card tcard ${Q?"quizzing":""}">
       <span class="tmist" aria-hidden="true"></span>
-      <div class="thead">
-        <div class="tring" style="--p:${(l/TERMS.length*100).toFixed(1)}%" role="img" aria-label="${l} von ${TERMS.length} Begriffen verankert"><span class="thalo"></span><span class="tin"><b>${l}</b><small>von ${TERMS.length}</small></span></div>
-        <div class="ttx"><h3>Im Kopf verankert</h3><p>${due?`Heute ${due===1?"ist ein Begriff":`sind ${due} Begriffe`} zur Wiederholung fällig.${due>8?" Eine Runde hat bis zu acht Fragen.":""}`:"Gerade ist nichts fällig. Du kannst trotzdem üben oder neue Begriffe kennenlernen."}</p></div>
-      </div>
-      ${due?`<div class="tdue" aria-hidden="true">${dueTerms().slice(0,24).map((t,i)=>`<i style="--c:var(--c-${t.cat});--d:${(i*.18).toFixed(2)}s"></i>`).join("")}</div>`:""}
-      <div class="row"><button class="btn accent tgo" id="quiz">${due?`Wiederholen (${Math.min(due,8)})`:"Üben"}</button></div>
-      <p class="tnote">Ein Begriff gilt als verankert, wenn du ihn viermal in wachsenden Abständen richtig hattest.</p>
+      <div class="sec-h"><h3>Im Kopf verankert</h3><span class="label">${l} von ${TERMS.length}</span></div>
+      ${orbitSVG()}
+      <p class="ocap" id="ocap">${due?`Heute ${due===1?"ist ein Begriff":`sind ${due} Begriffe`} zur Wiederholung fällig. Sie leuchten heller als die anderen.${due>8?" Eine Runde hat bis zu acht Fragen.":""}`:"Gerade ist nichts fällig. Du kannst trotzdem üben oder neue Begriffe kennenlernen."}</p>
+      ${Q?"":`<div class="row"><button class="btn accent tgo" id="quiz">${due?`Wiederholen (${Math.min(due,8)})`:"Üben"}</button></div>`}
+      <p class="tnote">Jeder Punkt ist ein Begriff. Mit jeder richtigen Antwort wandert er eine Bahn nach innen. Nach vier richtigen Antworten in wachsenden Abständen ist er im Kern verankert.</p>
     </div>`;
   if(Q)h+=quizCard();
   {const list=TERMS.filter(t=>termFilter==="alle"||t.cat===termFilter),lim=termMore?list.length:8,cnt={alle:TERMS.length};Object.keys(CATS).forEach(k=>cnt[k]=TERMS.filter(t=>t.cat===k).length);
@@ -1627,6 +1692,15 @@ let termFilter="alle",termMore=false,expMore=false;
 
 /* ---------- Navigation ---------- */
 let fromBite=null;
+/* Auffrischen im Ausgangszustand: wie ein sanftes Neuladen. Prüft Datum, Häppchen des Tages, Reihe und fällige Begriffe neu. */
+let shownDay=null;
+function refreshHome(){const logo=$("#home"),mark=$("#home2"),newDay=shownDay&&todayKey()!==shownDay;shownDay=todayKey();
+  window.scrollTo({top:0,behavior:calm()?"auto":"smooth"});buzz([6,40,6]);
+  if(!calm()){logo.animate([{transform:"rotate(0)"},{transform:"rotate(360deg)"}],{duration:900,easing:"cubic-bezier(.5,0,.2,1)"});
+    mark.animate([{filter:"drop-shadow(0 0 0 transparent)"},{filter:"drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 70%,transparent))",offset:.4},{filter:"drop-shadow(0 0 0 transparent)"}],{duration:1100,easing:"ease-out"});
+    auraRings(logo,null,2)}
+  setTimeout(()=>{anim=true;render();const g=$("#go");if(g){auraRings(g,null,3);glow(g,"var(--accent)",.5)}
+    if(newDay){const d=document.querySelector(".daily");toast("Neuer Tag: Das Häppchen des Tages ist frisch.");if(d)setTimeout(()=>glow(d,"var(--accent)",.9),300)}},calm()?0:380)}
 function goHome(){anim=true;S.cur=null;shared=null;tab="bites";save();render();window.scrollTo(0,0)}
 /* Wischen auf einer Häppchen-Karte: nach links = nächstes, nach rechts = zurück zum Kompass */
 (()=>{let x0=null,y0=0,t0=0,card=null;
@@ -1798,7 +1872,10 @@ function render(){
   if(pendingGlow){pendingGlow=false;const c=document.querySelector('.bite');if(c&&S.cur&&B[S.cur])setTimeout(()=>glow(c,`var(--c-${B[S.cur].cat})`),260)}
   checkMoments();
   const n=Object.keys(S.read).length;$("#topline").textContent=n?`${n} / ${BITES.length}`:"";
-  {const html=Object.keys(CATS).map(k=>{const all=BITES.filter(b=>b.cat===k),r=all.filter(b=>S.read[b.id]).length;return `<b style="--c:var(--c-${k})" title="${CATS[k].n}: ${r} von ${all.length}"><i style="width:${Math.round(r/all.length*100)}%"></i></b>`}).join("");const R=$("#rose");if(html!==roseKey){const first=!roseKey;roseKey=html;R.innerHTML=html;R.classList.toggle("grow",first)}}
+  {const W={};Object.keys(CATS).forEach(k=>{const all=BITES.filter(b=>b.cat===k),r=all.filter(b=>S.read[b.id]).length;W[k]=[Math.round(r/all.length*100),r,all.length]});const R=$("#rose");
+   if(!R.children.length){R.innerHTML=Object.keys(CATS).map(k=>`<b data-k="${k}" style="--c:var(--c-${k})" title="${CATS[k].n}: ${W[k][1]} von ${W[k][2]}"><i style="width:${W[k][0]}%"></i></b>`).join("");R.classList.add("grow")}
+   else Object.keys(CATS).forEach(k=>{const b=R.querySelector(`[data-k="${k}"]`),i=b.firstChild,old=parseFloat(i.style.width);b.title=`${CATS[k].n}: ${W[k][1]} von ${W[k][2]}`;if(old!==W[k][0]){i.style.width=W[k][0]+"%";if(W[k][0]>old&&!calm()){b.classList.remove("up");void b.offsetWidth;b.classList.add("up")}}});
+   lineFocus(tab==="bites"?S.filter:"alle")}
 }
 document.addEventListener("click",e=>{
   const t=e.target.closest("button,a");if(!t)return;
@@ -1817,14 +1894,15 @@ document.addEventListener("click",e=>{
   if(d.setting){S.settings[d.setting]=!S.settings[d.setting];save();buzz(6);if(d.setting==="mood"&&!S.settings.mood){mood=null;try{sessionStorage.removeItem("gk-mood")}catch(x){}}if(d.setting==="mood"&&S.settings.mood)moodAsked=true;render();return}
   if(d.roseGo){S.filter=d.roseGo;S.cur=null;save();tab="bites";anim=true;render();window.scrollTo(0,0);return}
   if(d.roseExp){expFilter=d.roseExp;expMore=true;S.expOpen=true;save();tab="exps";anim=true;render();const f=$("#expfold");if(f)f.scrollIntoView({block:"start"});return}
+  if(d.ttGo){openTerm=d.ttGo;termFilter="alle";termMore=true;S.termOpen=true;render();const el=document.querySelector(`[data-tt="${d.ttGo}"]`);if(el)el.scrollIntoView({block:"center",behavior:calm()?"auto":"smooth"});return}
   if(t.id==="dailyics"){dailyIcs();return}
   if(t.id==="shx2"){closeSheet();return}
   if(t.id==="nohint"){S.settings.antiScroll=false;save();closeSheet();toast("Alles klar. Du findest die Einstellung unter „Dein Weg“.");return}
   if(t.id==="home"||t.id==="home2"){
     // Erster Tipp: zum Kompass, Richtung bleibt. Tipp auf dem Kompass: zurück zu „Alle“.
     if(tab!=="bites"||S.cur){tab="bites";goHome();return}
-    if(S.filter!=="alle"){S.filter="alle";save();document.querySelectorAll("[data-filter]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.filter==="alle"));applyCloud("alle",true);setCompass(true)}
-    window.scrollTo({top:0,behavior:"smooth"});return}
+    if(S.filter!=="alle"){S.filter="alle";save();document.querySelectorAll("[data-filter]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.filter==="alle"));applyCloud("alle",true);setCompass(true);window.scrollTo({top:0,behavior:"smooth"});return}
+    refreshHome();return}
   if(t.id==="tobite"){const id=fromBite;fromBite=null;openBite(id);return}
   if(t.id==="back"){anim=true;S.cur=null;shared=null;save();render();return}
   if(t.id==="share"&&S.cur){shareBite(B[S.cur]);return}
@@ -1872,7 +1950,7 @@ document.addEventListener("keydown",e=>{if(e.target.closest&&e.target.closest("t
 function fromHash(){const h=location.hash.slice(1);if(["bites","terms","exps","way"].includes(h)){tab=h;return}if(h.startsWith("h-")&&B[h.slice(2)]){shared=h.slice(2);openBite(shared)}if(h.startsWith("x-")&&X[h.slice(2)]){invited=h.slice(2);tab="exps";setTimeout(()=>expSheet(invited),400)}}
 if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
-render();setTimeout(welcome,600);
+shownDay=todayKey();render();setTimeout(welcome,600);
 })();
 </script>
 </body></html>
