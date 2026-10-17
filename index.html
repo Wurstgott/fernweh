@@ -416,6 +416,11 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .hsrow em{font-style:normal;font-size:11px;letter-spacing:.1em;color:var(--burgundy);width:52px;text-align:right}
 .hsrow.none{opacity:.45}
 .hsd{display:block;text-align:right;font-size:11px;color:var(--muted);margin-right:60px}
+.tip{min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;max-width:330px;margin:4px auto 0;padding:6px 4px;color:var(--muted);text-decoration:none;font-size:12px;line-height:1.35;text-align:left;opacity:.85}
+.tip svg{flex:none;width:26px;height:26px}
+.tip u{text-decoration:none;border-bottom:1px solid currentColor;color:var(--burgundy);white-space:nowrap}
+.tip.in{animation:tipIn .6s ease-out}
+@keyframes tipIn{from{opacity:0;transform:translateY(4px)}to{opacity:.85;transform:none}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -446,6 +451,7 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 <li>Jede Tour kostet Kalendertage. Bring die Kiste vor dem Jubiläum ans Nordkap.</li>
 <li>Am Ende zählen Respekt, verschiedene Ziele, übrige Tage und dein Erspartes.</li>
 </ol></details>
+    <a class="tip" id="tip" href="https://www.paypal.com/donate/?business=c.m.engelaender%40gmail.com&amp;currency_code=EUR" target="_blank" rel="noopener"></a>
     <p class="best">Fernweh · Version 2.6 · Oktober 2026</p>
   </section>
 
@@ -1280,9 +1286,29 @@ window.addEventListener('pointerdown',()=>{AU.init()},{once:false,passive:true})
    setTimeout(()=>{sub.textContent='Ein Spiel über Kalle, der manchmal lieber zu Hause auf dem Sofa säße.';sub.classList.remove('fade')},700);
    setTimeout(()=>{flipTo('FERN',false);sub.classList.add('fade');em.classList.remove('sad')},7000);
    setTimeout(()=>{sub.textContent=old;sub.classList.remove('fade');if(curScreen==='title')AU.fx('fernweh');delete tw.dataset.busy;setTimeout(()=>{if(curScreen==='title')AU.play(SONGS.hof)},900)},7000+620)});}
+/* Kleine Spendenzeile unten auf dem Titelbild: wechselt alle paar Sekunden das Mitbringsel */
+const TIPS=[
+ ['cup','Gefällt dir die Fahrt? Gib Kalle einen Kaffee aus.'],
+ ['wurst','Eine Kettwurst für unterwegs? Doris nimmt auch PayPal.'],
+ ['poelse','Am Nordkap kostet eine Pølse ein kleines Vermögen. Ein Zuschuss hilft.'],
+ ['kanister','Hilde trinkt 30 Liter auf hundert Kilometer. Jeder Tropfen zählt.'],
+ ['baum','Für ein frisches Duftbäumchen. Black Ice, natürlich.'],
+ ['karte','Ottilie sagt immer: Trinkgeld ist keine Schande.']];
+const TIPART={cup:'<path d="M5 9h11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z" fill="#FBF1E6"/><path d="M16 10.5h1.5a2 2 0 0 1 0 4H16" fill="none"/><path d="M8.5 6.5c0-1 1-1 1-2M12 6.5c0-1 1-1 1-2" fill="none"/>',
+ wurst:'<rect x="3" y="10" width="18" height="5.5" rx="2.75" fill="#B5583A"/><path d="M7 12.5c2 1 4-1 6 0s3 0 4 0" stroke="#E8B830" fill="none"/>',
+ poelse:'<path d="M3 13.5c0 2.5 2 4 4 4h10c2 0 4-1.5 4-4z" fill="#E8C78A"/><rect x="4" y="10.5" width="16" height="4" rx="2" fill="#C8432F"/><path d="M6.5 11.5l2 2M10 11.5l2 2M13.5 11.5l2 2" stroke="#F3E3B0" fill="none"/>',
+ kanister:'<path d="M7 6h7l4 4v9H7z" fill="#C8432F"/><path d="M9 6V4.5h3V6" fill="none"/><path d="M9.5 10.5l5 6M14.5 10.5l-5 6" fill="none" stroke="#FBF1E6"/>',
+ baum:'<path d="M12 5l5 7h-3l4 6H6l4-6H7z" fill="#5C8A3A"/><path d="M12 18v2M12 5V3" fill="none"/>',
+ karte:'<rect x="4" y="7" width="16" height="11" rx="1" fill="#FBF1E6"/><rect x="14" y="9" width="4" height="4" fill="#D8A23A"/><path d="M6.5 11h5M6.5 13.5h5" fill="none"/>'};
+let tipI=Math.floor(Math.random()*TIPS.length),tipT=0;
+function renderTip(){const el=$('#tip');if(!el)return;const [k,txt]=TIPS[tipI%TIPS.length];
+  el.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" stroke="#2B2230" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+TIPART[k]+'</svg><span>'+txt+' <u>Spendieren</u></span>';
+  el.classList.remove('in');void el.offsetWidth;el.classList.add('in')}
+function startTips(){clearInterval(tipT);renderTip();tipT=setInterval(()=>{if($('#s-title').hidden||document.hidden)return;tipI++;renderTip()},7000)}
 function renderTitle(){
   if(!$('#btn-trophy')){const b=document.createElement('button');b.id='btn-trophy';b.className='trophy-btn';b.setAttribute('aria-label','Plaketten');b.addEventListener('click',()=>{AU.init();AU.fx('click');trophyCard()});$('#s-title').appendChild(b)}renderTrophyBtn();
   if(!$('#btn-best')){const b=document.createElement('button');b.id='btn-best';b.className='best-btn';b.innerHTML='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16V9M10 16V4M16 16v-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Bestwerte</span>';b.addEventListener('click',()=>{AU.init();AU.fx('click');bestCard()});$('#s-title').appendChild(b)}
+  if(!tipT)startTips();
   $('#title-emblem').innerHTML='<div class="emblem">'+hildeSVG({duft:1,glanz:80})+'</div>';
   const d=$('#diff');d.innerHTML='';
   const best=store.get('fernweh-best')||{};
@@ -3040,7 +3066,7 @@ function ending(){
 }
 
 /* Testzugang, nur aktiv wenn window.__FW_TEST vor dem Laden gesetzt wird */
-if(window.__FW_TEST){window.__FW={price,rufLv,rufPerks,steerDelay,startEnergy,fitLossFor,needDays,SONGS,AU,TUNE,get S(){return S},set S(v){S=v},get D(){return D},update,startDrive,finishDrive,flash,fresh,greetTarget,score,closeCard,TOURS,UP,OB,DIFF,breaksNeeded,unlocked,fits,available,daysLeft,offer,openRast,resume,geo:()=>({truckY,TH,laneW,SC,H,roadX,roadW,TW}),laneX}}
+if(window.__FW_TEST){window.__FW={tip:i=>{tipI=i;renderTip()},price,rufLv,rufPerks,steerDelay,startEnergy,fitLossFor,needDays,SONGS,AU,TUNE,get S(){return S},set S(v){S=v},get D(){return D},update,startDrive,finishDrive,flash,fresh,greetTarget,score,closeCard,TOURS,UP,OB,DIFF,breaksNeeded,unlocked,fits,available,daysLeft,offer,openRast,resume,geo:()=>({truckY,TH,laneW,SC,H,roadX,roadW,TW}),laneX}}
 renderTitle();
 show('title');
 
