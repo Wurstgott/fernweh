@@ -298,6 +298,11 @@ nav.tabs button[aria-current="page"] svg{transform:translateY(-1px) scale(1.08)}
 
 /* Aura: Licht, das sich nach außen verliert */
 .cwrap{position:relative;display:grid;place-items:center;isolation:isolate}
+.cwrap:has(.sharehome){width:100%}
+.sharehome{position:absolute;top:-4px;right:0;z-index:3;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:color-mix(in srgb,var(--card) 85%,transparent);color:var(--muted);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 18px -8px color-mix(in srgb,var(--accent) 60%,transparent);transition:color .3s,border-color .3s,transform .2s;-webkit-tap-highlight-color:transparent}
+.sharehome svg{width:19px;height:19px}
+.sharehome:hover,.sharehome:active{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.sharehome:active{transform:scale(.94)}
 .halo{position:absolute;inset:-9%;border-radius:50%;z-index:-1;background:conic-gradient(from -90deg,var(--s1) 0 20%,var(--s2) 0 40%,var(--s3) 0 60%,var(--s4) 0 80%,var(--s5) 0 100%);filter:blur(22px);opacity:.28}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:25;overflow:hidden}
 #fx .ring{position:fixed;border-radius:50%;background:conic-gradient(from -90deg,var(--s1) 0 20%,var(--s2) 0 40%,var(--s3) 0 60%,var(--s4) 0 80%,var(--s5) 0 100%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));filter:blur(3px)}
@@ -1448,7 +1453,7 @@ function viewBites(){
   return `<section class="view">
     ${nudge}${moodChip}
     <div class="hero">
-      <div class="cwrap"><span class="halo" aria-hidden="true"></span><button class="compass breath" id="go" aria-label="Neues Häppchen aufdecken"><span class="orbit" aria-hidden="true"><i></i></span><span class="core"><em class="ccat" id="ccat"></em><b>Häppchen</b><span id="cnew">${unread?`${unread} noch neu`:"alle gelesen · Wiederholung"}</span></span></button></div>
+      <div class="cwrap"><span class="halo" aria-hidden="true"></span><button class="sharehome" id="shareapp2" aria-label="Glückskompass mit jemandem teilen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M8 7.2l4-3.7 4 3.7"/><path d="M7.5 10.5H6.8A1.8 1.8 0 0 0 5 12.3v6.4a1.8 1.8 0 0 0 1.8 1.8h10.4a1.8 1.8 0 0 0 1.8-1.8v-6.4a1.8 1.8 0 0 0-1.8-1.8h-.7"/></svg></button><button class="compass breath" id="go" aria-label="Neues Häppchen aufdecken"><span class="orbit" aria-hidden="true"><i></i></span><span class="core"><em class="ccat" id="ccat"></em><b>Häppchen</b><span id="cnew">${unread?`${unread} noch neu`:"alle gelesen · Wiederholung"}</span></span></button></div>
       <p>${nRead?"Tippe auf den Kompass für die nächste Erkenntnis.":"Tippe auf den Kompass, um eine Erkenntnis aus der Glücksforschung zu bekommen. Bei jeder steht die Quelle und wie gut sie belegt ist."}</p>
     </div>
     ${filt}
@@ -1601,7 +1606,7 @@ function viewWay(){
       <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:37 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:43 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -1616,7 +1621,7 @@ let shared=null;
 function firstSentence(s){const m=s.match(/^.*?[.!?](\s|$)/);return (m?m[0]:s).trim()}
 async function shareOut(title,text,url){
   const full=text+"\n\n"+url;
-  if(navigator.share){try{await navigator.share({title,text,url});return}catch(e){if(e&&e.name==="AbortError")return}}
+  if(navigator.share){try{await navigator.share({title,text:full});return}catch(e){if(e&&e.name==="AbortError")return}}
   try{await navigator.clipboard.writeText(full);toast("Text und Link kopiert. Jetzt einfügen und verschicken.");return}catch(e){}
   sheet(`<div class="label">Zum Verschicken</div><h2>Text kopieren</h2><p class="muted" style="font-size:15px">Markiere den Text und kopiere ihn in eine Nachricht.</p><textarea id="sharetext" readonly style="min-height:200px">${esc(full)}</textarea>`);
   const ta=$("#sharetext");ta.focus();ta.select();
@@ -1626,7 +1631,7 @@ function shareBite(b){
   shareOut(b.t,text,APP_URL+"#h-"+b.id);
 }
 function shareApp(){
-  shareOut("Glückskompass","Ich nutze gerade den „Glückskompass“: eine kleine, kostenlose App, die Erkenntnisse aus der Glücksforschung in Häppchen serviert, mit Quellen und ehrlicher Einschätzung, wie sicher sie sind. Dazu Begriffe zum Üben und kleine Experimente für den Alltag. Ohne Anmeldung, deine Daten bleiben auf deinem Gerät.",APP_URL);
+  shareOut("Glückskompass","Hey, ich habe eine kleine App entdeckt, die mir gerade Freude macht: den Glückskompass. Jeden Tag gibt es eine kurze Erkenntnis aus der Glücksforschung mit Quelle, dazu kleine Experimente für den Alltag. Sie ist kostenlos und braucht keine Anmeldung. Magst du sie mal ausprobieren?",APP_URL);
 }
 
 function countUp(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;document.querySelectorAll(".tile b").forEach(el=>{const to=+el.textContent;if(!to)return;const t0=performance.now();const step=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e);if(k<1)requestAnimationFrame(step)};el.textContent="0";requestAnimationFrame(step)})}
@@ -1941,6 +1946,7 @@ document.addEventListener("click",e=>{
   if(t.id==="back"){anim=true;S.cur=null;shared=null;save();render();return}
   if(t.id==="share"&&S.cur){shareBite(B[S.cur]);return}
   if(t.id==="shareapp"){shareApp();return}
+  if(t.id==="shareapp2"){buzz(6);auraSoft(t,"var(--accent)");shareApp();return}
   if(t.id==="explore"){shared=null;S.cur=null;try{history.replaceState(null,"",location.pathname)}catch(x){}render();window.scrollTo(0,0);return}
   if(t.id==="save"&&S.cur){if(S.saved[S.cur])delete S.saved[S.cur];else{S.saved[S.cur]=now();toast("Gemerkt. Du findest es unter „Dein Weg“.")}save();render();return}
   if(d.filter){if(S.filter===d.filter)return;S.filter=d.filter;save();
@@ -1988,7 +1994,7 @@ if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
 /* Selbst-Aktualisierung: Wenn auf GitHub eine neuere Version liegt, lädt die App sie still nach (wichtig für die Version auf dem Home-Bildschirm). */
-const BUILD="17.10.2026, 19:37";
+const BUILD="17.10.2026, 19:43";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;
