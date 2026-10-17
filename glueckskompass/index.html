@@ -1429,7 +1429,11 @@ document.addEventListener("click",e=>{
   const d=t.dataset;
   if(t.id==="go"){const b=pickBite();if(!b)return;t.classList.remove("breath");t.classList.add("spin");buzz(12);auraRings(t);setTimeout(()=>openBite(b.id),matchMedia("(prefers-reduced-motion:reduce)").matches?0:520);return}
   if(t.id==="next"){const b=pickBite();if(b)openBite(b.id);return}
-  if(t.id==="home"||t.id==="home2"){if(tab!=="bites"||S.cur){tab="bites";goHome()}else window.scrollTo({top:0,behavior:"smooth"});return}
+  if(t.id==="home"||t.id==="home2"){
+    // Erster Tipp: zum Kompass, Richtung bleibt. Tipp auf dem Kompass: zurück zu „Alle“.
+    if(tab!=="bites"||S.cur){tab="bites";goHome();return}
+    if(S.filter!=="alle"){S.filter="alle";save();document.querySelectorAll("[data-filter]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.filter==="alle"));setCompass(true)}
+    window.scrollTo({top:0,behavior:"smooth"});return}
   if(t.id==="tobite"){const id=fromBite;fromBite=null;openBite(id);return}
   if(t.id==="back"){anim=true;S.cur=null;shared=null;save();render();return}
   if(t.id==="share"&&S.cur){shareBite(B[S.cur]);return}
