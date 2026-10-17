@@ -250,6 +250,44 @@ nav.tabs button[aria-current="page"] svg{transform:translateY(-1px) scale(1.08)}
 @property --s4{syntax:"<color>";inherits:true;initial-value:#4A73A0}
 @property --s5{syntax:"<color>";inherits:true;initial-value:#8667AE}
 :root{--s1:var(--c-ich);--s2:var(--c-wir);--s3:var(--c-welt);--s4:var(--c-sein);--s5:var(--c-zeit);transition:--s1 .7s,--s2 .7s,--s3 .7s,--s4 .7s,--s5 .7s}
+
+/* Richtungen als Farbstufen */
+.dirs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:-4px}
+.dir{border:0;background:none;padding:6px 0 4px;display:flex;flex-direction:column;align-items:center;gap:7px;border-radius:12px;color:var(--muted);font-family:var(--f-ui);font-weight:600;font-size:11.5px;line-height:1.15;text-align:center;--c:var(--ink)}
+.dial{width:30px;height:30px;border-radius:50%;box-shadow:inset 0 0 0 2.5px var(--c);display:grid;place-items:center;transition:transform .4s cubic-bezier(.34,1.45,.45,1),box-shadow .35s,background .35s}
+.dial::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--c);transform:scale(0);transition:transform .35s cubic-bezier(.34,1.45,.45,1)}
+.dial.all{background:conic-gradient(from -90deg,var(--c-ich) 0 20%,var(--c-wir) 0 40%,var(--c-welt) 0 60%,var(--c-sein) 0 80%,var(--c-zeit) 0 100%);box-shadow:none;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px))}
+.dir[aria-pressed="true"]{color:var(--ink)}
+.dir[aria-pressed="true"] .dial{background:var(--c);box-shadow:inset 0 0 0 2.5px var(--c),0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent);transform:scale(1.08)}
+.dir[aria-pressed="true"] .dial::after{background:var(--paper);transform:scale(1)}
+.dir[aria-pressed="true"] .dial.all{background:conic-gradient(from -90deg,var(--c-ich) 0 20%,var(--c-wir) 0 40%,var(--c-welt) 0 60%,var(--c-sein) 0 80%,var(--c-zeit) 0 100%);-webkit-mask:none;mask:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+.dn{min-height:2.3em}
+/* Aufklappliste */
+.fold{border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.fold summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 2px;cursor:pointer;font-family:var(--f-ui);font-weight:600;font-size:15px}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary>span:first-child{flex:1}
+.chev{width:16px;height:16px;color:var(--muted);transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.fold[open] .chev{transform:rotate(180deg)}
+.fold .list{border-top:0}
+.fold .li:last-child{border-bottom:0}
+@media (prefers-reduced-motion:no-preference){.fold[open] .list>*{animation:fadeUp .35s cubic-bezier(.2,.7,.2,1) both}.fold[open] .list>*:nth-child(2){animation-delay:.04s}.fold[open] .list>*:nth-child(3){animation-delay:.08s}.fold[open] .list>*:nth-child(n+4){animation-delay:.12s}}
+/* Hinweis auf laufendes Experiment */
+.nudge{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:9px 14px;font-family:var(--f-ui);font-size:14px;color:var(--muted)}
+.nudge b{color:var(--ink);font-weight:600}
+.nudge>span:nth-child(2){flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+a.btn{text-decoration:none;display:inline-flex;align-items:center}
+
+#fx .bloom{position:fixed;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 55%,transparent),color-mix(in srgb,var(--c-wir) 25%,transparent) 45%,color-mix(in srgb,var(--c-sein) 15%,transparent) 70%,transparent);filter:blur(6px)}
+.fold .sec.about{animation:none}
+@media (prefers-reduced-motion:no-preference){.fold[open]>*:not(summary){animation:foldIn .5s cubic-bezier(.2,.7,.2,1) both}}
+@keyframes foldIn{from{opacity:0;transform:translateY(-6px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+
+.dirs.small{grid-template-columns:repeat(6,1fr);margin:2px 0 6px}
+.dirs.small .dial{width:24px;height:24px}
+.dirs.small .dir{font-size:10.5px;gap:5px}
+.dirs .dn small{display:block;font-family:var(--f-mono);font-weight:400;font-size:9.5px;color:var(--muted);margin-top:2px}
+.more{align-self:center;margin-top:4px}
 </style>
 
 </head><body><div class="app" id="app">
@@ -1113,18 +1151,19 @@ function biteCard(b){
 }
 function viewBites(){
   const nRead=Object.keys(S.read).length,p=pool(),unread=p.filter(b=>!S.read[b.id]).length;
-  const filt=`<div class="chips" role="group" aria-label="Richtung wählen">${[["alle","Alle"],...Object.entries(CATS).map(([k,v])=>[k,v.n])].map(([k,n])=>`<button class="chip" data-filter="${k}" aria-pressed="${S.filter===k}">${k!=="alle"?dot(k):""}${n}</button>`).join("")}</div>`;
+  const filt=`<div class="dirs" role="group" aria-label="Richtung wählen">${[["alle","Alle"],...Object.entries(CATS).map(([k,v])=>[k,v.n])].map(([k,n])=>`<button class="dir" data-filter="${k}" aria-pressed="${S.filter===k}" ${k!=="alle"?cc(k):""}><span class="dial ${k==="alle"?"all":""}"></span><span class="dn">${n.replace(" & ","<br>& ")}</span></button>`).join("")}</div>`;
   if(S.cur&&B[S.cur])return `<section class="view">${biteCard(B[S.cur])}${matchMedia("(pointer:coarse)").matches&&Object.keys(S.read).length<6?'<p class="swipehint">Tipp: Nach links wischen für das nächste Häppchen, nach rechts zurück zum Kompass</p>':''}</section>`;
-  const recent=S.history.filter(id=>B[id]).slice(0,4);
+  const recent=S.history.filter(id=>B[id]).slice(0,8);
+  const act=activeExps().map(id=>[id,S.exps[id]]).sort((x,y)=>x[1].start-y[1].start)[0];
+  const nudge=act?(()=>{const e=X[act[0]],left=Math.max(0,e.d-Math.floor((now()-act[1].start)/DAY));return `<button class="nudge" data-goexps="1" ${cc(e.cat)}><span class="dot" ${cc(e.cat)}></span><span><b>${e.t}</b> · ${left?`noch ${left} Tag${left>1?"e":""}`:"heute ist der letzte Tag"}</span><span class="label">Experiment</span></button>`})():"";
   return `<section class="view">
+    ${nudge}
     <div class="hero">
       <div class="cwrap"><span class="halo" aria-hidden="true"></span><button class="compass breath" id="go" aria-label="Neues Häppchen aufdecken"><span class="orbit" aria-hidden="true"><i></i></span><span class="core"><em class="ccat" id="ccat"></em><b>Häppchen</b><span id="cnew">${unread?`${unread} noch neu`:"alle gelesen · Wiederholung"}</span></span></button></div>
       <p>${nRead?"Drück auf den Kompass für die nächste Erkenntnis.":"Drück auf den Kompass. Du bekommst eine Erkenntnis aus der Glücksforschung, mit Quelle und ehrlicher Einschätzung, wie sicher sie ist."}</p>
     </div>
-    <div class="sec"><div class="label">Richtung</div>${filt}</div>
-    <div class="sec"><div class="sec-h"><h3>Zuletzt gelesen</h3><span class="label">${nRead} von ${BITES.length}</span></div>
-      ${recent.length?`<div class="list">${recent.map(id=>{const b=B[id];return `<button class="li" data-open="${id}">${dot(b.cat)}<span class="tx"><b>${b.t}</b><small>${b.src}</small></span><span class="aside">${fmtDate(S.read[id])}</span></button>`}).join("")}</div>`:`<p class="empty">Hier sammeln sich deine gelesenen Häppchen. Ein bis drei am Tag sind ein guter Rhythmus.</p>`}
-    </div>
+    ${filt}
+    ${recent.length?`<details class="fold" ${S.foldOpen?"open":""} id="recent"><summary><span>Zuletzt gelesen</span><span class="label">${nRead} von ${BITES.length}</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><div class="list">${recent.map(id=>{const b=B[id];return `<button class="li" data-open="${id}">${dot(b.cat)}<span class="tx"><b>${b.t}</b><small>${b.src}</small></span><span class="aside">${fmtDate(S.read[id])}</span></button>`}).join("")}</div></details>`:""}
   </section>`;
 }
 
@@ -1170,10 +1209,9 @@ function viewTerms(){
       <div class="row"><button class="btn accent" id="quiz">${due?`Wiederholen (${Math.min(due,8)})`:"Üben"}</button></div>
     </div>`;
   if(Q)h+=quizCard();
-  h+=`<div class="sec"><div class="label">Alle Begriffe</div>`;
-  Object.entries(CATS).forEach(([k,c])=>{const ts=TERMS.filter(t=>t.cat===k);if(!ts.length)return;
-    h+=`<h3 style="display:flex;gap:8px;align-items:center">${dot(k)}${c.n}</h3><div class="list">`+ts.map(t=>`<div><button class="li" data-tt="${t.id}" aria-expanded="${openTerm===t.id}"><span class="tx"><b>${t.n}</b></span><span class="boxes" ${cc(t.cat)}>${[1,2,3,4,5].map(i=>`<b class="${box(t.id)>=i?"on":""}"></b>`).join("")}</span></button>${openTerm===t.id?`<div class="term-def"><p>${t.d}</p><em>Beispiel: ${t.e}</em></div>`:""}</div>`).join("")+`</div>`});
-  h+=`<p class="label" style="text-transform:none;letter-spacing:0">Die Balken zeigen das Fach im Karteikasten: von neu (leer) bis sicher verankert (fünf).</p></div></section>`;
+  {const list=TERMS.filter(t=>termFilter==="alle"||t.cat===termFilter),lim=termMore?list.length:8,cnt={alle:TERMS.length};Object.keys(CATS).forEach(k=>cnt[k]=TERMS.filter(t=>t.cat===k).length);
+   h+=`<details class="fold" id="termfold" ${S.termOpen||openTerm?"open":""}><summary><span>Alle Begriffe</span><span class="label">${TERMS.length} zum Stöbern</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><div class="sec" style="padding:6px 0 14px">${dirPicker("tfilter",termFilter,cnt)}<div class="list">`+list.slice(0,lim).map(t=>`<div><button class="li" data-tt="${t.id}" aria-expanded="${openTerm===t.id}">${dot(t.cat)}<span class="tx"><b>${t.n}</b></span><span class="boxes" ${cc(t.cat)}>${[1,2,3,4,5].map(i=>`<b class="${box(t.id)>=i?"on":""}"></b>`).join("")}</span></button>${openTerm===t.id?`<div class="term-def"><p>${t.d}</p><em>Beispiel: ${t.e}</em></div>`:""}</div>`).join("")+`</div>${list.length>lim?`<button class="linkbtn more" id="tmore">${list.length-lim} weitere anzeigen</button>`:""}<p class="label" style="text-transform:none;letter-spacing:0">Die Balken zeigen das Fach im Karteikasten: von neu (leer) bis sicher verankert (fünf).</p></div></details>`;}
+  h+=`</section>`;
   return h;
 }
 
@@ -1196,7 +1234,7 @@ function expCard(e,mode){
   let extra="";
   if(mode==="active"){const total=e.d,el=Math.min(total,Math.floor((now()-v.start)/DAY)),left=Math.max(0,total-el);
     extra=`<div class="prog"><div class="meter"><span style="width:${Math.max(4,Math.round(el/total*100))}%;background:var(--c-${e.cat})"></span></div><span class="dur">${left?`Noch ${left} Tag${left>1?"e":""} · bis ${fmtDate(v.start+total*DAY)}`:"Zeit ist um. Wie lief es?"}</span></div>
-    <div class="row"><button class="btn primary" data-done="${e.id}">Geschafft</button><button class="btn ghost" data-open-exp="${e.id}">Anleitung</button><button class="linkbtn" data-drop="${e.id}">Abbrechen</button></div>`}
+    <div class="row"><button class="btn primary" data-done="${e.id}">Geschafft</button><button class="btn ghost" data-remind="${e.id}">Erinnern</button><button class="btn ghost" data-open-exp="${e.id}">Anleitung</button><button class="linkbtn" data-drop="${e.id}">Abbrechen</button></div>`}
   else extra=`<div class="row"><button class="btn accent" data-accept="${e.id}" ${activeExps().length>=MAXACT?"disabled":""}>Annehmen</button><button class="btn ghost" data-open-exp="${e.id}">Mehr dazu</button>${mode==="suggest"?`<button class="linkbtn" id="other">Anderer Vorschlag</button>`:""}</div>${activeExps().length>=MAXACT?`<p class="muted" style="font-size:14px">Du hast schon ${MAXACT} Experimente laufen. Schließ erst eins ab.</p>`:""}`;
   return `<article class="card exp" ${cc(e.cat)}><div class="meta"><span class="catn">${dot(e.cat)}${CATS[e.cat].n}</span><span>${e.d===1?"Heute":e.d+" Tage"}</span></div><h2>${e.t}</h2><p style="font-size:16px">${e.x}</p>${extra}</article>`;
 }
@@ -1205,9 +1243,8 @@ function viewExps(){
   let h=`<section class="view">`;
   h+=`<div class="sec"><div class="sec-h"><h3>Läuft gerade</h3><span class="label">${act.length} von ${MAXACT}</span></div>${act.length?act.map(id=>expCard(X[id],"active")).join(""):`<p class="empty">Noch kein Experiment angenommen. Experimente sind kleine, befristete Versuche, dein Leben ein Stück umzubauen. Nichts davon muss perfekt gelingen.</p>`}</div>`;
   if(sug)h+=`<div class="sec"><h3>Vorschlag für dich</h3>${expCard(sug,"suggest")}</div>`;
-  const chips=`<div class="chips">${[["alle","Alle"],...Object.entries(CATS).map(([k,v])=>[k,v.n])].map(([k,n])=>`<button class="chip" data-efilter="${k}" aria-pressed="${expFilter===k}">${k!=="alle"?dot(k):""}${n}</button>`).join("")}</div>`;
-  const list=EXPS.filter(e=>expFilter==="alle"||e.cat===expFilter);
-  h+=`<div class="sec"><h3>Alle Experimente</h3>${chips}<div class="list">${list.map(e=>{const v=S.exps[e.id];const st=v?(v.status==="active"?"läuft":v.status==="done"?"geschafft ✓":"abgebrochen"):(e.d===1?"heute":e.d+" Tage");return `<button class="li" data-open-exp="${e.id}">${dot(e.cat)}<span class="tx"><b>${e.t}</b></span><span class="aside">${st}</span></button>`}).join("")}</div></div>`;
+  const list=EXPS.filter(e=>expFilter==="alle"||e.cat===expFilter),lim=expMore?list.length:6,cnt={alle:EXPS.length};Object.keys(CATS).forEach(k=>cnt[k]=EXPS.filter(e=>e.cat===k).length);
+  h+=`<details class="fold" id="expfold" ${S.expOpen?"open":""}><summary><span>Alle Experimente</span><span class="label">${EXPS.length} zur Auswahl</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><div class="sec" style="padding:6px 0 14px">${dirPicker("efilter",expFilter,cnt)}<div class="list">${list.slice(0,lim).map(e=>{const v=S.exps[e.id];const st=v?(v.status==="active"?"läuft":v.status==="done"?"geschafft ✓":"abgebrochen"):(e.d===1?"heute":e.d+" Tage");return `<button class="li" data-open-exp="${e.id}">${dot(e.cat)}<span class="tx"><b>${e.t}</b></span><span class="aside">${st}</span></button>`}).join("")}</div>${list.length>lim?`<button class="linkbtn more" id="emore">${list.length-lim} weitere anzeigen</button>`:""}</div></details>`;
   return h+`</section>`;
 }
 function sheet(html){const l=$("#layer");if(!l.innerHTML)pushNav();l.innerHTML=`<div class="sheet" id="sh"><div class="panel" role="dialog" aria-modal="true"><button class="close" id="shx">Schließen</button>${html}</div></div>`;
@@ -1239,7 +1276,7 @@ function viewWay(){
       <p class="muted" style="font-size:15px">${nRead+done.length?balanceHint(score):"Sobald du liest und ausprobierst, zeigt sich hier, in welche Richtungen dein Leben gerade wächst."}</p></div>
     <div class="sec"><h3>Tagebuch der Experimente</h3>${journal.length?`<div class="journal">${journal.map(([id,v])=>`<div class="jr" ${cc(X[id].cat)}><b>${X[id].t}</b><small>${fmtDate(v.end)}${v.mood?" · "+moodN[v.mood]:""}</small>${v.note?`<p style="font-size:16px">${esc(v.note)}</p>`:""}</div>`).join("")}</div>`:`<p class="empty">Wenn du ein Experiment abschließt, kannst du festhalten, wie es war. Diese Notizen erscheinen hier.</p>`}</div>
     <div class="sec"><h3>Gemerkte Häppchen</h3>${saved.length?`<div class="list">${saved.map(id=>{const b=B[id];return `<button class="li" data-open="${id}">${dot(b.cat)}<span class="tx"><b>${b.t}</b><small>${b.src}</small></span></button>`}).join("")}</div>`:`<p class="empty">Tippe bei einem Häppchen auf „Merken“, um es hier wiederzufinden.</p>`}</div>
-    <div class="sec about"><h3>Über diese App</h3>
+    <details class="fold" id="aboutfold" ${S.aboutOpen||confirmReset?"open":""}><summary><span>Über diese App</span><span class="label">Haltung · Quellen · Daten</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><div class="sec about" style="padding:4px 2px 16px">
       <p>Der Glückskompass zeigt, was die Forschung über ein gutes Leben weiß, und bringt es in kleinen Portionen in deinen Alltag. Die Haltung dahinter: Ein gutes Leben heißt, sich selbst gut zu behandeln, andere glücklich zu machen und die Welt intakt zu halten. Dazu gehört die Frage, wer wir sind, wenn wir uns weniger über Arbeit und Besitz definieren.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
@@ -1247,7 +1284,7 @@ function viewWay(){
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
-    </div>
+    </div></details>
   </section>`;
 }
 function balanceHint(s){const e=Object.entries(s).sort((a,b)=>a[1]-b[1]);const low=e[0],high=e[e.length-1];if(high[1]-low[1]<3)return "Deine Richtungen sind gerade ziemlich ausgewogen.";return `Am meisten bewegst du dich gerade bei ${CATS[high[0]].n}. ${CATS[low[0]].n} kommt noch zu kurz. Im Kompass kannst du gezielt diese Richtung wählen.`}
@@ -1291,6 +1328,10 @@ function auraRings(el,col,count){if(calm())return;const r=el.getBoundingClientRe
 function glow(el,col,str){if(calm())return;const r=el.getBoundingClientRect(),cs=getComputedStyle(el);const d=document.createElement("span");d.className="glow";
   Object.assign(d.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px",borderRadius:cs.borderRadius,boxShadow:`0 0 0 2px ${col}, 0 0 28px 6px ${col}`});fx().appendChild(d);
   d.animate([{transform:"scale(1)",opacity:str||.55},{transform:"scale(1.045)",opacity:0}],{duration:1000,easing:"cubic-bezier(.2,.7,.2,1)",fill:"both"}).onfinish=()=>d.remove()}
+/* Sphärisches Aufblühen: ein weicher Lichtschein breitet sich vom Aufklapp-Titel aus */
+function bloom(el){if(calm()||!el)return;const r=el.getBoundingClientRect(),s=Math.max(r.width,240);const d=document.createElement("span");d.className="bloom";
+  Object.assign(d.style,{left:(r.left+r.width/2-s/2)+"px",top:(r.top+r.height/2-s/2)+"px",width:s+"px",height:s+"px"});fx().appendChild(d);
+  d.animate([{transform:"scale(.15)",opacity:.0},{transform:"scale(.6)",opacity:.55,offset:.25},{transform:"scale(1.25)",opacity:0}],{duration:1100,easing:"cubic-bezier(.2,.7,.2,1)",fill:"both"}).onfinish=()=>d.remove();buzz(5)}
 function ripple(e,el){if(calm())return;const r=el.getBoundingClientRect(),s=Math.max(r.width,r.height)*2.2;const d=document.createElement("span");d.className="ripple";
   Object.assign(d.style,{left:(e.clientX-r.left-s/2)+"px",top:(e.clientY-r.top-s/2)+"px",width:s+"px",height:s+"px"});el.appendChild(d);
   d.animate([{transform:"scale(0)",opacity:.32},{transform:"scale(1)",opacity:0}],{duration:650,easing:"cubic-bezier(.2,.7,.2,1)"}).onfinish=()=>d.remove()}
@@ -1308,6 +1349,37 @@ function setCompass(changed){const f=S.filter,root=document.documentElement,keys
   const cc=$("#ccat");if(cc){cc.textContent=f==="alle"?"":CATS[f].n;if(changed){cc.classList.remove("pop");void cc.offsetWidth;cc.classList.add("pop")}}
   const n=$("#cnew");if(n){const p=pool(),u=p.filter(b=>!S.read[b.id]).length;n.textContent=u?`${u} noch neu`:"alle gelesen · Wiederholung"}
   if(changed){buzz(6);if(f!=="alle")auraRings(go,`var(--c-${f})`,1)}}
+
+/* ---------- Erinnerungen über den eigenen Kalender ---------- */
+const APP_LINK="https://wurstgott.github.io/fernweh/glueckskompass/#exps";
+const pad=n=>String(n).padStart(2,"0");
+const icsDate=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+function remindPlan(id,mode){const e=X[id],v=S.exps[id],start=new Date(),endDay=new Date(v.start+e.d*DAY);
+  let first=new Date(),count=1,hour=8;
+  if(mode==="morgen"){first.setDate(first.getDate()+1);hour=8}
+  if(mode==="taeglich"){hour=19;if(first.getHours()>=19)first.setDate(first.getDate()+1);count=Math.max(1,Math.ceil((endDay-first)/DAY))}
+  if(mode==="ende"){first=new Date(endDay.getTime()-DAY);hour=18;if(first<start)first=new Date()}
+  first.setHours(hour,0,0,0);const end=new Date(first.getTime()+15*60000);
+  const text=`Glückskompass: ${e.t}`,details=`${e.x}\n\n${e.s.map(s=>"• "+s).join("\n")}\n\n${APP_LINK}`;
+  return {e,first,end,count,text,details}}
+function icsFor(p){const esc2=s=>s.replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\;");
+  return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Glueckskompass//DE","CALSCALE:GREGORIAN","BEGIN:VEVENT",`UID:${p.e.id}-${Date.now()}@glueckskompass`,`DTSTAMP:${icsDate(new Date())}`,`DTSTART:${icsDate(p.first)}`,`DTEND:${icsDate(p.end)}`,p.count>1?`RRULE:FREQ=DAILY;COUNT=${p.count}`:"",`SUMMARY:${esc2(p.text)}`,`DESCRIPTION:${esc2(p.details)}`,`URL:${APP_LINK}`,"BEGIN:VALARM","ACTION:DISPLAY",`DESCRIPTION:${esc2(p.text)}`,"TRIGGER:PT0M","END:VALARM","END:VEVENT","END:VCALENDAR"].filter(Boolean).join("\r\n")}
+function googleFor(p){const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;let u=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(p.text)}&dates=${icsDate(p.first)}/${icsDate(p.end)}&ctz=${encodeURIComponent(tz)}&details=${encodeURIComponent(p.details)}`;if(p.count>1)u+=`&recur=${encodeURIComponent("RRULE:FREQ=DAILY;COUNT="+p.count)}`;return u}
+let remindMode="taeglich";
+function remindSheet(id){const e=X[id];const p=remindPlan(id,remindMode);
+  const when=p.first.toLocaleString("de-DE",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
+  sheet(`<div class="label">Erinnerung</div><h2>${e.t}</h2><p class="muted" style="font-size:15px">Die Erinnerung landet in deinem eigenen Kalender. So meldet sich dein Handy zuverlässig, auch wenn die App geschlossen ist.</p>
+  <div class="moods" id="rmode">${[["morgen","Morgen früh"],["taeglich","Jeden Abend bis zum Ende"],["ende","Am letzten Tag"]].map(([k,n])=>`<button class="chip" data-rmode="${k}" data-id="${id}" aria-pressed="${remindMode===k}">${n}</button>`).join("")}</div>
+  <p class="dur">${p.count>1?`${p.count}× täglich um 19 Uhr, zuerst ${when}`:when}</p>
+  <div class="row"><button class="btn primary" data-ics="${id}">Apple- oder iPhone-Kalender</button><a class="btn ghost" href="${googleFor(p)}" target="_blank" rel="noopener">Google Kalender</a></div>
+  <p class="muted" style="font-size:13px">Der erste Knopf lädt eine Kalenderdatei, die auch Outlook und andere Kalender öffnen.</p>`)}
+function downloadIcs(id){const p=remindPlan(id,remindMode),blob=new Blob([icsFor(p)],{type:"text/calendar;charset=utf-8"}),url=URL.createObjectURL(blob);
+  const l=document.createElement("a");l.href=url;l.download=`glueckskompass-${id}.ics`;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);
+  S.exps[id].remind=remindMode;save();toast("Kalenderdatei geöffnet. Jetzt nur noch hinzufügen.")}
+
+/* Richtungsauswahl als Farbstufen, wiederverwendbar */
+function dirPicker(attr,cur,counts){return `<div class="dirs small" role="group" aria-label="Richtung wählen">${[["alle","Alle"],...Object.entries(CATS).map(([k,v])=>[k,v.n])].map(([k,n])=>`<button class="dir" data-${attr}="${k}" aria-pressed="${cur===k}" ${k!=="alle"?cc(k):""}><span class="dial ${k==="alle"?"all":""}"></span><span class="dn">${n.replace(" & ","<br>& ")}${counts?`<small>${counts[k]}</small>`:""}</span></button>`).join("")}</div>`}
+let termFilter="alle",termMore=false,expMore=false;
 
 /* ---------- Navigation ---------- */
 let fromBite=null;
@@ -1352,7 +1424,7 @@ document.addEventListener("click",e=>{
   if(d.filter){if(S.filter===d.filter)return;S.filter=d.filter;save();
     if(tab==="bites"&&!S.cur&&$("#go")){document.querySelectorAll("[data-filter]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.filter===S.filter));setCompass(true)}else render();return}
   if(d.open){closeSheet();openBite(d.open);return}
-  if(d.term){fromBite=S.cur;openTerm=d.term;anim=true;tab="terms";render();const el=document.querySelector(`[data-tt="${d.term}"]`);if(el)el.scrollIntoView({block:"center"});return}
+  if(d.term){fromBite=S.cur;openTerm=d.term;termFilter=T[d.term].cat;termMore=true;anim=true;tab="terms";render();const el=document.querySelector(`[data-tt="${d.term}"]`);if(el)el.scrollIntoView({block:"center"});return}
   if(d.exp){expSheet(d.exp);return}
   if(t.id==="quiz"){startQuiz();return}
   if(d.ans&&Q&&!Q.answered){answer(d.ans);return}
@@ -1360,17 +1432,26 @@ document.addEventListener("click",e=>{
   if(t.id==="qagain"){startQuiz();return}
   if(t.id==="qend"){Q=null;render();return}
   if(d.tt){openTerm=openTerm===d.tt?null:d.tt;render();return}
-  if(d.efilter){expFilter=d.efilter;render();return}
+  if(d.efilter){expFilter=d.efilter;expMore=false;buzz(5);render();return}
+  if(d.tfilter){termFilter=d.tfilter;termMore=false;buzz(5);render();return}
+  if(t.id==="tmore"){termMore=true;render();return}
+  if(t.id==="emore"){expMore=true;render();return}
   if(d.openExp){expSheet(d.openExp);return}
   if(d.accept){if(activeExps().length>=MAXACT)return;S.exps[d.accept]={status:"active",start:now()};save();closeSheet();anim=true;tab="exps";render();buzz([10,40,10]);{const c=document.querySelector(`[data-done="${d.accept}"]`);const card=c&&c.closest(".card");if(card)glow(card,`var(--c-${X[d.accept].cat})`)}toast("Angenommen. Viel Freude beim Ausprobieren.");return}
   if(t.id==="other"){S.skip=(S.skip||0)+1;save();render();return}
   if(d.drop){S.exps[d.drop]={status:"dropped",start:S.exps[d.drop].start,end:now()};save();render();return}
+  if(d.remind){remindSheet(d.remind);return}
+  if(d.rmode){remindMode=d.rmode;remindSheet(d.id);return}
+  if(d.ics){downloadIcs(d.ics);return}
+  if(d.goexps){anim=true;tab="exps";render();window.scrollTo(0,0);return}
   if(d.done){doneSheet(d.done);return}
   if(t.id==="savedone"){const id=t.dataset.id,m=document.querySelector('#moods [aria-pressed="true"]');S.exps[id]=Object.assign(S.exps[id]||{start:now()},{status:"done",end:now(),mood:m?m.dataset.mood:null,note:$("#note").value.trim()});save();closeSheet();render();buzz([12,60,12,60,20]);{const tl=document.querySelector(".tiles")||document.querySelector("#main .card");if(tl)glow(tl,"var(--accent)")}toast("Gespeichert. Schön, dass du es ausprobiert hast.");return}
   if(t.id==="reset"){confirmReset=true;render();return}
   if(t.id==="resetno"){confirmReset=false;render();return}
   if(t.id==="resetyes"){S={read:{},saved:{},terms:{},exps:{},filter:"alle",history:[],cur:null};save();confirmReset=false;Q=null;render();toast("Alles zurückgesetzt.");return}
 });
+let lastSum=0;document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("summary"))lastSum=Date.now()},true);
+document.addEventListener("toggle",e=>{const t=e.target;if(t.id==="recent"){S.foldOpen=t.open;save()}if(t.id==="aboutfold"){S.aboutOpen=t.open;save()}if(t.id==="termfold"){S.termOpen=t.open;save()}if(t.id==="expfold"){S.expOpen=t.open;save()}if(t.classList&&t.classList.contains("fold")&&t.open&&Date.now()-lastSum<600)bloom(t.querySelector("summary"));},true);
 document.addEventListener("keydown",e=>{if(e.target.closest&&e.target.closest("textarea,input"))return;
   if(e.key==="Escape"){if($("#layer").innerHTML)closeSheet();else if(tab==="bites"&&S.cur)goHome();return}
   if(tab==="bites"&&(e.key==="ArrowRight"||e.key===" ")&&!$("#layer").innerHTML){e.preventDefault();const b=pickBite();if(b)openBite(b.id)}
