@@ -391,7 +391,7 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .mcell small{display:none}
 .mcell.on svg{transform:scale(1.15)}
 .mhint{margin:-6px 0 0;font-size:11px;color:var(--muted);text-align:center}
-.mbig{position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:60;width:min(260px,76vw);background:var(--cream);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:16px 14px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;pointer-events:none;animation:bigIn .15s ease-out}
+.mbig{position:fixed;left:50%;top:18%;max-height:calc(50vh - 40px);transform:translateX(-50%);z-index:60;width:min(260px,76vw);background:var(--cream);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:16px 14px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;pointer-events:none;animation:bigIn .15s ease-out}
 .mbig svg{width:130px;height:130px}
 .mbig b{font-size:16px;letter-spacing:.06em;text-transform:uppercase}
 .mbig span{font-family:var(--type);font-size:13px;line-height:1.45}
@@ -437,6 +437,7 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .lights-wild .hl-r{animation-delay:-.11s}
 @keyframes hlBlink{0%{opacity:.7}50%{opacity:0}}
 @keyframes hlBlinkF{0%{fill:#FFF3C4}50%{fill:#FBF1E6}}
+@media (max-height:700px){.mbig svg{width:96px;height:96px}}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -1448,6 +1449,8 @@ function trophyCard(){const tr=trophies(),life=LIFE();
     const when=got&&tr[t.id]>1?new Date(tr[t.id]).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'}):'';
     big.innerHTML=medalSVG(t,got)+'<b>'+(secret?'Geheim':t.n)+'</b><span>'+(secret?(t.sec===3?'Diese Plakette versteckt sich irgendwo im Spiel. Mehr wird nicht verraten.':'Diese Plakette findest du nur unterwegs. Mehr wird nicht verraten.'):t.d)+'</span>'+
       (got?'<small>Erhalten'+(when?' am '+when:'')+'</small>':p!==null?'<i class="mprog big"><span style="width:'+Math.round(p/t.prog[1]*100)+'%"></span></i><small class="todo">'+p.toLocaleString('de-DE')+' von '+t.prog[1].toLocaleString('de-DE')+'</small>':'');big.hidden=false;
+    // Vorschau immer auf der anderen Bildschirmhälfte als der Finger, damit man sie lesen kann
+    {const vh=window.innerHeight,bh=big.offsetHeight,m=16;big.style.top=(y>vh/2?Math.max(m,Math.min(y-bh-70,vh*.12)):Math.min(vh-bh-m,Math.max(y+70,vh*.88-bh)))+'px'}
     $('#ovcard').querySelectorAll('.mcell').forEach(m=>m.classList.toggle('on',m===c));AU.fx('click')};
   const hide=()=>{clearTimeout(tm);down=false;last=-1;big.hidden=true;$('#ovcard').querySelectorAll('.mcell.on').forEach(m=>m.classList.remove('on'))};
   $('#ovcard').querySelectorAll('.medals').forEach(grid=>{
