@@ -373,9 +373,9 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .dircloud .mist{position:absolute;inset:8% 6%;border-radius:50%;background:radial-gradient(40% 45% at 30% 30%,color-mix(in srgb,var(--c-ich) 22%,transparent),transparent 70%),radial-gradient(40% 45% at 72% 28%,color-mix(in srgb,var(--c-wir) 20%,transparent),transparent 70%),radial-gradient(38% 45% at 88% 55%,color-mix(in srgb,var(--c-welt) 18%,transparent),transparent 70%),radial-gradient(40% 45% at 65% 85%,color-mix(in srgb,var(--c-sein) 18%,transparent),transparent 70%),radial-gradient(40% 45% at 22% 75%,color-mix(in srgb,var(--c-zeit) 18%,transparent),transparent 70%);filter:blur(14px);opacity:.9;pointer-events:none}
 .dircloud .dir{position:absolute;transform:translate(-50%,-50%);padding:4px;width:auto;border-radius:16px}
 .dircloud .fl{display:flex;flex-direction:column;align-items:center;gap:5px}
-.dircloud .dir{transition:left .6s cubic-bezier(.2,.9,.3,1),top .6s cubic-bezier(.2,.9,.3,1),opacity .4s}
-.dircloud .dial{transition:width .45s cubic-bezier(.2,.9,.3,1),height .45s cubic-bezier(.2,.9,.3,1),transform .4s cubic-bezier(.34,1.45,.45,1),box-shadow .5s,background .35s}
-.dircloud .dn{transition:font-size .4s cubic-bezier(.2,.9,.3,1),color .3s}
+.dircloud .dir{transition:left .75s cubic-bezier(.4,.1,.2,1),top .75s cubic-bezier(.4,.1,.2,1),opacity .6s}
+.dircloud .dial{transition:width .75s cubic-bezier(.4,.1,.2,1),height .75s cubic-bezier(.4,.1,.2,1),transform .4s cubic-bezier(.34,1.45,.45,1),box-shadow .5s,background .35s}
+.dircloud .dn{transition:font-size .7s cubic-bezier(.4,.1,.2,1),color .5s}
 .dircloud .dir.lead{z-index:2}
 .dircloud .dir.lead .dial{width:58px;height:58px;box-shadow:inset 0 0 0 3px var(--c),0 0 26px 2px color-mix(in srgb,var(--c) 50%,transparent)}
 .dircloud .dir.lead .dial::after{width:12px;height:12px}
@@ -547,6 +547,8 @@ input[type="time"]{font:inherit;font-family:var(--f-mono);font-size:15px;border:
 .tdue{gap:11px}
 .tdue i{width:8px;height:8px;background:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 14%,transparent),0 0 10px 1px color-mix(in srgb,var(--c) 40%,transparent)}
 .dgo .dd{width:30px;height:30px;background:radial-gradient(closest-side,var(--c) 0 32%,color-mix(in srgb,var(--c) 30%,transparent) 38%,color-mix(in srgb,var(--c) 10%,transparent) 70%,transparent);box-shadow:none}
+.dircloud .dir[aria-pressed="true"] .dial{transform:none}
+.dircloud .dial::after{transition:transform .6s cubic-bezier(.4,.1,.2,1),width .6s,height .6s}
 </style>
 
 </head><body><div class="app" id="app">
@@ -1378,7 +1380,10 @@ function renderTabs(){
 }
 $("#tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(!b)return;const to=b.dataset.tab;
   if(to===tab){ // gleicher Reiter: zurück zum Anfang dieses Bereichs
-    if(to==="bites"&&S.cur){goHome();return}
+    if(to==="bites"){ // Tipp auf „Häppchen“: immer zurück zum Kompass in der Grundeinstellung „Alle“
+      if(S.cur||shared){S.filter="alle";goHome();return}
+      if(S.filter!=="alle"){S.filter="alle";save();document.querySelectorAll("[data-filter]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.filter==="alle"));applyCloud("alle",true);setCompass(true)}
+      window.scrollTo({top:0,behavior:calm()?"auto":"smooth"});return}
     if(to==="terms"&&(Q||openTerm)){Q=null;openTerm=null;anim=true;render()}
     window.scrollTo({top:0,behavior:calm()?"auto":"smooth"});return}
   if(to==="bites"&&tab!=="bites"){S.filter="alle";S.cur=null;shared=null;save()} // zurück zum Kompass in der Grundeinstellung „Alle“
@@ -1427,7 +1432,7 @@ function lineFocus(sel){const R=$("#rose");if(R&&R.dataset.sel!==sel){R.dataset.
 function applyCloud(sel,fresh){lineFocus(sel);const P=cloudPos(sel);document.querySelectorAll(".dircloud .dir").forEach(el=>{const k=el.dataset.filter,q=P[k];el.style.left=q[0]+"%";el.style.top=q[1]+"%";el.classList.toggle("lead",k===sel&&k!=="alle");el.classList.toggle("recede",k==="alle"&&sel!=="alle")});
   const c=document.querySelector(".dircloud");if(c)c.dataset.sel=sel;
   if(fresh){const el=document.querySelector(`.dircloud .dir[data-filter="${sel}"] .dial`);if(el){const col=sel==="alle"?"var(--accent)":`var(--c-${sel})`;
-    if(!calm()){el.animate([{transform:"scale(1)"},{transform:"scale(1.2)",offset:.35},{transform:"scale(1)"}],{duration:420,easing:"cubic-bezier(.2,.9,.3,1)"});auraSoft(el,col)}}}}
+    if(!calm()){auraRings(el,col,2);auraSoft(el,col)}}}}
 function viewBites(){
   const nRead=Object.keys(S.read).length,p=pool(),unread=p.filter(b=>!S.read[b.id]).length;
   const filt=`<div class="dircloud" data-sel="${S.filter}" role="group" aria-label="Richtung wählen"><span class="mist" aria-hidden="true"></span>${[["alle","Alle"],...Object.entries(CATS).map(([k,v])=>[k,v.n])].map(([k,n],i)=>`<button class="dir ${k==="alle"?"center":""} ${k===S.filter&&k!=="alle"?"lead":""} ${k==="alle"&&S.filter!=="alle"?"recede":""}" data-filter="${k}" aria-pressed="${S.filter===k}" style="${k!=="alle"?`--c:var(--c-${k});`:""}left:${cloudPos(S.filter)[k][0]}%;top:${cloudPos(S.filter)[k][1]}%;--d:${i*.9}s"><span class="fl"><span class="dial ${k==="alle"?"all":""}"></span><span class="dn">${n}</span></span></button>`).join("")}</div>`;
@@ -1596,7 +1601,7 @@ function viewWay(){
       <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:28 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:32 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -1983,11 +1988,11 @@ if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
 /* Selbst-Aktualisierung: Wenn auf GitHub eine neuere Version liegt, lädt die App sie still nach (wichtig für die Version auf dem Home-Bildschirm). */
-const BUILD="17.10.2026, 19:28";
+const BUILD="17.10.2026, 19:32";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
-    let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;try{sessionStorage.setItem("gk-upd",m[1])}catch(e){}
-    if($("#layer").innerHTML||Q){toast("Eine neue Version ist da. Sie lädt beim nächsten Öffnen.");return}location.reload()}).catch(()=>{})}
+    let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;
+    const go=()=>{if($("#layer").innerHTML||Q||momentOpen){setTimeout(go,4000);return}try{sessionStorage.setItem("gk-upd",m[1])}catch(e){}location.reload()};go()}).catch(()=>{})}
 setTimeout(checkUpdate,1500);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate()});setTimeout(welcome,600);
 })();
 </script>
