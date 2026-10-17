@@ -1253,7 +1253,15 @@ function countUp(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)retu
 
 /* ---------- Aura & Vibration ---------- */
 const calm=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
-function buzz(p){if(calm())return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+/* Vibration: Android über navigator.vibrate. iPhone erlaubt das nicht, aber Safari (ab iOS 18) gibt beim Umschalten
+   eines Schalter-Kästchens ein leichtes Haptik-Feedback. Das nutzen wir mit einem unsichtbaren Schalter. */
+let hapt=null;
+function haptic(){if(!hapt){const l=document.createElement("label");l.setAttribute("aria-hidden","true");l.style.cssText="position:fixed;left:-99px;top:0;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none";
+  const i=document.createElement("input");i.type="checkbox";i.setAttribute("switch","");i.tabIndex=-1;l.appendChild(i);document.body.appendChild(l);hapt=l}try{hapt.click()}catch(e){}}
+function buzz(p){if(calm())return;
+  if(navigator.vibrate){try{navigator.vibrate(p)}catch(e){}return}
+  const pulses=Array.isArray(p)?p.filter((_,k)=>k%2===0).length:1,gaps=Array.isArray(p)?p.filter((_,k)=>k%2===1):[];
+  haptic();let t=0;for(let k=1;k<pulses;k++){t+=(gaps[k-1]||60)+(Array.isArray(p)?p[k*2-2]:0);setTimeout(haptic,t)}}
 function fx(){let l=document.getElementById("fx");if(!l){l=document.createElement("div");l.id="fx";document.body.appendChild(l)}return l}
 function auraRings(el){if(calm())return;const r=el.getBoundingClientRect();
   for(let k=0;k<3;k++){const d=document.createElement("span");d.className="ring";Object.assign(d.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});fx().appendChild(d);
