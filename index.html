@@ -421,6 +421,8 @@ i.gold{font-style:normal;color:#9A6E1A;font-weight:600}
 .tip u{text-decoration:none;border-bottom:1px solid currentColor;color:var(--burgundy);white-space:nowrap}
 .tip.in{animation:tipIn .6s ease-out}
 @keyframes tipIn{from{opacity:0;transform:translateY(4px)}to{opacity:.85;transform:none}}
+.beans{display:flex;justify-content:center;gap:3px;margin-top:3px}
+.beans svg{width:10px;height:13px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -2270,6 +2272,8 @@ function askHelp(o){
 }
 function resume(){if(!D)return;D.paused=false;last=performance.now();AU.engineSet({paused:false})}
 $('#btn-flash').addEventListener('click',e=>{e.stopPropagation();AU.init();flash()});
+// Kaffeebohnen statt Punkten: volle Bohne braun, getrunkene nur als Umriss
+const BEAN=f=>'<svg viewBox="0 0 12 16" aria-hidden="true"><ellipse cx="6" cy="8" rx="4.3" ry="6.3" transform="rotate(18 6 8)" fill="'+(f?'#6B4226':'none')+'" stroke="'+(f?'#2B2230':'currentColor')+'" stroke-width="1.3" opacity="'+(f?1:.45)+'"/><path d="M7.6 2.6C4.6 5.5 7.6 10 4.4 13.4" fill="none" stroke="'+(f?'#E9D2B4':'currentColor')+'" stroke-width="1.2" stroke-linecap="round" opacity="'+(f?1:.45)+'"/></svg>';
 $('#btn-coffee').addEventListener('click',e=>{e.stopPropagation();AU.init();if(!D||D.paused||D.coffee<=0)return;D.coffee--;D.energy=Math.min(100,D.energy+28);D.kick=8;D.kickFx=1;AU.fx('slurp');setTimeout(()=>AU.fx('wake'),350);msg('Kaffee! Kalle ist hellwach.','good');
   const tx=D.x+sway(truckY);for(let i=0;i<10;i++)D.parts.push({k:'steam',x:tx+(Math.random()-.5)*TW*.6,y:truckY-TH/2,vx:(Math.random()-.5)*30,vy:-40-Math.random()*50,life:1.2,max:1.2,r:6*SC})});
 $('#btn-pause').addEventListener('click',e=>{e.stopPropagation();pauseMenu()});
@@ -2364,7 +2368,7 @@ function hud(){
   const c=$('#h-cargo');c.textContent=Math.round(D.cargo);c.className=D.cargo<40?'warn':D.cargo>=99.5?'perf':'';
   $('#h-energy').style.width=D.energy+'%';$('#h-energy').style.background=D.energy<40?'#C8432F':D.energy<60?'#D8A23A':'';
   $('#h-elabel').textContent=D.nap?'Augen zu!':D.energy<25?'Kalle kämpft mit dem Schlaf':D.hunger>=70?'Kalle hat Hunger':D.energy>=60?'Kalle ist wach':D.energy>=40?'Kalle wird müde':'Kalle ist sehr müde';
-  const cb=$('#btn-coffee');cb.innerHTML='Kaffee<small>'+'●'.repeat(D.coffee)+'○'.repeat(Math.max(0,1+S.up.thermos-D.coffee))+'</small>';cb.disabled=D.coffee<=0;cb.classList.toggle('ready',D.coffee>0&&D.energy<45);
+  const cb=$('#btn-coffee');{const full=D.coffee,empty=Math.max(0,1+S.up.thermos-D.coffee),key=full+'/'+empty;if(cb.dataset.k!==key){cb.dataset.k=key;cb.innerHTML='Kaffee<small class="beans">'+BEAN(1).repeat(full)+BEAN(0).repeat(empty)+'</small>'}}cb.disabled=D.coffee<=0;cb.classList.toggle('ready',D.coffee>0&&D.energy<45);
   const fb=$('#btn-flash');const k=greetTarget();fb.disabled=!k;fb.classList.toggle('ready',!!k);fb.innerHTML=k&&k.type==='panne'?'Helfen?':k&&k.type==='overpass'?'Winken':k&&k.type==='korso'?'Gratulieren':'Lichthupe';
 }
 
