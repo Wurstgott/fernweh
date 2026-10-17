@@ -3,6 +3,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mehr Sein"><meta name="theme-color" content="#EEF0E9">
 <meta name="description" content="Glücksforschung in Häppchen: Erkenntnisse mit Quellen, Begriffe zum Üben und Experimente für ein Leben mit mehr Sein.">
+<meta property="og:title" content="Mehr Sein"><meta property="og:description" content="Glücksforschung in Häppchen: Erkenntnisse mit Quellen, Begriffe zum Üben und Experimente für ein Leben mit mehr Sein.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23D98E22'/%3E%3Ccircle cx='32' cy='32' r='22' fill='%23FBFBF7'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23D98E22'/%3E%3C/svg%3E">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Mehr Sein</title>
@@ -145,6 +146,9 @@ p{margin:0}
 .jr small{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
 .about{font-size:16px;display:flex;flex-direction:column;gap:10px}
 .legend{display:flex;flex-direction:column;gap:6px;font-size:15px}
+.gift{background:var(--card);border:1px dashed var(--accent);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.gift b{font-family:var(--f-display);font-weight:700;font-size:17px}
+.gift span{font-size:16px;color:var(--muted)}
 .empty{font-size:15px;color:var(--muted);border:1px dashed var(--line);border-radius:12px;padding:14px}
 
 /* Tabs */
@@ -597,7 +601,8 @@ function pickBite(){
 function openBite(id){S.cur=id;if(!S.read[id])S.read[id]=now();S.history=[id,...S.history.filter(x=>x!==id)].slice(0,12);save();tab="bites";render();window.scrollTo(0,0)}
 function biteCard(b){
   const t=b.term&&T[b.term],x=b.exp&&X[b.exp];
-  return `<article class="card bite" ${cc(b.cat)}>
+  const gift=shared===b.id?`<div class="gift"><b>Jemand möchte dir dieses Häppchen zeigen.</b><span>Es stammt aus „Mehr Sein“, einer kleinen, kostenlosen App mit Erkenntnissen aus der Glücksforschung, Begriffen zum Üben und Experimenten für den Alltag. Ohne Anmeldung, deine Daten bleiben auf deinem Gerät.</span><button class="btn accent" id="explore">Selbst ausprobieren</button></div>`:"";
+  return gift+`<article class="card bite" ${cc(b.cat)}>
     <div class="meta"><span class="catn">${dot(b.cat)}${CATS[b.cat].n}</span>${evHTML(b.ev)}</div>
     <h2>${b.t}</h2>
     <p class="body">${b.x}</p>
@@ -605,7 +610,7 @@ function biteCard(b){
     <div class="take"><b>Was heißt das für dich?</b>${b.tip}</div>
     <p class="src">Quelle: <a href="${esc(b.u)}" target="_blank" rel="noopener">${b.src} ↗</a></p>
     ${t||x?`<div class="links">${t?`<button class="chip" data-term="${t.id}">${dot(t.cat)}Begriff: ${t.n}</button>`:""}${x?`<button class="chip" data-exp="${x.id}">${dot(x.cat)}Experiment: ${x.t}</button>`:""}</div>`:""}
-    <div class="row"><button class="btn primary" id="next">Nächstes Häppchen</button><button class="btn ghost" id="save" aria-pressed="${!!S.saved[b.id]}">${S.saved[b.id]?"Gemerkt ✓":"Merken"}</button><button class="linkbtn" id="back">Zum Kompass</button></div>
+    <div class="row"><button class="btn primary" id="next">Nächstes Häppchen</button><button class="btn ghost" id="save" aria-pressed="${!!S.saved[b.id]}">${S.saved[b.id]?"Gemerkt ✓":"Merken"}</button><button class="btn ghost" id="share">Teilen</button><button class="linkbtn" id="back">Zum Kompass</button></div>
   </article>`;
 }
 function viewBites(){
@@ -742,11 +747,31 @@ function viewWay(){
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
       <p>Stand der Recherche: Oktober 2026. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
+      <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
     </div>
   </section>`;
 }
 function balanceHint(s){const e=Object.entries(s).sort((a,b)=>a[1]-b[1]);const low=e[0],high=e[e.length-1];if(high[1]-low[1]<3)return "Deine Richtungen sind gerade ziemlich ausgewogen.";return `Am meisten bewegst du dich gerade bei ${CATS[high[0]].n}. ${CATS[low[0]].n} kommt noch zu kurz. Im Kompass kannst du gezielt diese Richtung wählen.`}
+
+/* ---------- Teilen ---------- */
+const APP_URL="https://wurstgott.github.io/fernweh/mehrsein/";
+let shared=null;
+function firstSentence(s){const m=s.match(/^.*?[.!?](\s|$)/);return (m?m[0]:s).trim()}
+async function shareOut(title,text,url){
+  const full=text+"\n\n"+url;
+  if(navigator.share){try{await navigator.share({title,text,url});return}catch(e){if(e&&e.name==="AbortError")return}}
+  try{await navigator.clipboard.writeText(full);toast("Text und Link kopiert. Jetzt einfügen und verschicken.");return}catch(e){}
+  sheet(`<div class="label">Zum Verschicken</div><h2>Text kopieren</h2><p class="muted" style="font-size:15px">Markiere den Text und kopiere ihn in eine Nachricht.</p><textarea id="sharetext" readonly style="min-height:200px">${esc(full)}</textarea>`);
+  const ta=$("#sharetext");ta.focus();ta.select();
+}
+function shareBite(b){
+  const text=`„${b.t}“\n\n${firstSentence(b.x)}\n\nDas stammt aus „Mehr Sein“, einer kleinen, kostenlosen App mit Erkenntnissen aus der Glücksforschung in Häppchen, Begriffen zum Üben und Experimenten für den Alltag. Ohne Anmeldung, einfach öffnen und stöbern. Das ganze Häppchen mit Quelle (${b.src}) findest du hier:`;
+  shareOut(b.t,text,APP_URL+"#h-"+b.id);
+}
+function shareApp(){
+  shareOut("Mehr Sein","Ich nutze gerade „Mehr Sein“: eine kleine, kostenlose App, die Erkenntnisse aus der Glücksforschung in Häppchen serviert, mit Quellen und ehrlicher Einschätzung, wie sicher sie sind. Dazu Begriffe zum Üben und kleine Experimente für den Alltag. Ohne Anmeldung, deine Daten bleiben auf deinem Gerät.",APP_URL);
+}
 
 /* ---------- Rendern & Ereignisse ---------- */
 function render(){
@@ -759,7 +784,10 @@ document.addEventListener("click",e=>{
   const d=t.dataset;
   if(t.id==="go"){const b=pickBite();if(!b)return;t.classList.remove("breath");t.classList.add("spin");setTimeout(()=>openBite(b.id),matchMedia("(prefers-reduced-motion:reduce)").matches?0:520);return}
   if(t.id==="next"){const b=pickBite();if(b)openBite(b.id);return}
-  if(t.id==="back"){S.cur=null;save();render();return}
+  if(t.id==="back"){S.cur=null;shared=null;save();render();return}
+  if(t.id==="share"&&S.cur){shareBite(B[S.cur]);return}
+  if(t.id==="shareapp"){shareApp();return}
+  if(t.id==="explore"){shared=null;S.cur=null;try{history.replaceState(null,"",location.pathname)}catch(x){}render();window.scrollTo(0,0);return}
   if(t.id==="save"&&S.cur){if(S.saved[S.cur])delete S.saved[S.cur];else{S.saved[S.cur]=now();toast("Gemerkt. Du findest es unter „Dein Weg“.")}save();render();return}
   if(d.filter){S.filter=d.filter;save();render();return}
   if(d.open){closeSheet();openBite(d.open);return}
@@ -783,7 +811,9 @@ document.addEventListener("click",e=>{
   if(t.id==="resetyes"){S={read:{},saved:{},terms:{},exps:{},filter:"alle",history:[],cur:null};save();confirmReset=false;Q=null;render();toast("Alles zurückgesetzt.");return}
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet()});
-if(location.hash){const h=location.hash.slice(1);if(["bites","terms","exps","way"].includes(h))tab=h}
+function fromHash(){const h=location.hash.slice(1);if(["bites","terms","exps","way"].includes(h)){tab=h;return}if(h.startsWith("h-")&&B[h.slice(2)]){shared=h.slice(2);openBite(shared)}}
+if(location.hash)fromHash();
+window.addEventListener("hashchange",()=>{fromHash();render()});
 render();
 })();
 </script>
