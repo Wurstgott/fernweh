@@ -1330,8 +1330,8 @@ function rufCard(){const l=rufLv();openCard('<p class="eyebrow">Dein Ruf · '+S.
    Jupp braucht einen Anlasser aus München, Ottilie möchte drei Ansichtskarten, Doris wartet auf Senf aus Bautzen (vom Berliner Markt). */
 const Q=()=>S.q=S.q||{};
 const QUESTS={
-  jupp:{start:'Jupp kratzt sich am Kopf. „Für Hildes alten Anlasser gibt es nur noch in München Ersatz, bei einem Schrotthändler am Ostbahnhof. Bringst du mir einen mit, wenn du mal dort bist?“',btn:'Mach ich',
-    todo:'Für Jupp einen Anlasser aus München mitbringen',ok:'muc',got:' In München hat Kalle beim Schrotthändler den Anlasser für Jupp gefunden.'},
+  jupp:{start:'Jupp kratzt sich am Kopf. „Für Hildes alten Anlasser gibt es nirgends mehr Ersatz. Aber mein alter Lehrling Bernd hat noch einen. Er wartet damit am Rasthof Holledau, auf dem Weg nach München. Fahr da raus und nimm ihn mit, ja?“',btn:'Mach ich',
+    todo:'Am Rasthof Holledau (Tour nach München) Jupps Anlasser abholen'},
   ott:{start:'Ottilie bleibt an Hilde stehen. „Mein Vater hat mir früher von jeder Fahrt eine Ansichtskarte geschickt. Würdest du das auch tun? Drei verschiedene Städte würden mich sehr freuen.“',btn:'Gern, Ottilie',
     todo:'Ottilie Ansichtskarten aus drei Städten schicken'},
   doris:{start:'Doris ruft an. „Kalle, mein Senf aus Bautzen ist alle. Der aus dem Großmarkt schmeckt nach nichts. Wenn du mal nach Berlin fährst, bring mir doch ein Glas vom Markt mit?“',btn:'Wird gemacht, Doris',
@@ -1350,14 +1350,15 @@ function questStart(){const q=Q();if(S.finale||S.day<3)return false;
   q[k]=1;if(k==='ott')q.cards=[];save();AU.fx('ding');
   openCard('<p class="eyebrow">Eine kleine Bitte</p><p class="typed" style="margin:0">'+Qd.start+'</p>',[{label:Qd.btn,fn:closeCard}]);return true}
 function questProgress(t,ok){const q=Q();let add='';if(q.kissen===1&&D&&D.naps)q.kStreak=0;if(!ok)return add;
-  ['jupp','doris'].forEach(k=>{if(q[k]===1&&t.id===QUESTS[k].ok){q[k]=2;add+=QUESTS[k].got}});
+  ['doris'].forEach(k=>{if(q[k]===1&&t.id===QUESTS[k].ok){q[k]=2;add+=QUESTS[k].got}});
+  if(q.jupp===2&&D&&D.gotAnlasser)add+=' Am Rasthof Holledau hat Kalle bei Bernd den Anlasser für Jupp abgeholt.';
   if(q.stamm===1&&D&&D.greets>=4){q.stamm=2;add+=' Vier Kollegen hat Kalle heute gegrüßt. Der Stammtisch hat es über Funk mitgehört.'}
   if(q.kissen===1&&D){if(D.naps){q.kStreak=0}else{q.kStreak=(q.kStreak||0)+1;if(q.kStreak>=2){q.kissen=2;add+=' Zweimal hintereinander ausgeschlafen gefahren. Ottilie wird sich freuen.'}}}
   if(q.ott===1&&!t.final&&!q.cards.includes(t.to)){q.cards.push(t.to);add+=' Kalle hat Ottilie eine Ansichtskarte aus '+t.to+' geschickt'+(q.cards.length>=3?'. Das war die dritte.':'.');if(q.cards.length>=3)q.ott=2}
   return add}
 function questFinish(){const q=Q();
   if(q.jupp===2){q.jupp=3;let gift;if(S.up.reifen<3){S.up.reifen++;gift='Als Dank zieht er Hilde einen Satz neue Reifen auf. „Geschenkt. Keine Widerrede.“'}else{S.money+=80;gift='Als Dank steckt er dir 80 € zu. „Für die Fahrt. Keine Widerrede.“'}S.respect+=3;save();AU.fx('wrench');
-    openCard('<p class="eyebrow">Jupps Werkstatt</p><p class="typed" style="margin:0">Jupp hält den Anlasser ins Licht. „Der passt. Den hätte ich nirgends mehr bekommen.“ '+gift+'</p>',[{label:'Gern geschehen',fn:closeCard}]);return true}
+    openCard('<p class="eyebrow">Jupps Werkstatt</p><p class="typed" style="margin:0">Jupp wickelt den Anlasser aus dem Zeitungspapier und hält ihn ins Licht. „Der passt. Auf Bernd ist eben Verlass.“ '+gift+'</p>',[{label:'Gern geschehen',fn:closeCard}]);return true}
   if(q.ott===2){q.ott=3;S.respect+=4;if(S.up.thermos<3)S.up.thermos++;save();AU.fx('ding');
     openCard('<p class="eyebrow">Im Büro</p><p class="typed" style="margin:0">Ottilie hat die drei Karten neben das Foto ihres Vaters gestellt. Sie gibt Kalle seine alte Thermoskanne, aus Blech und mit einer Beule. „Er hätte gewollt, dass sie wieder fährt.“ In die Kanne passt ein Becher mehr.</p>',[{label:'Danke, Ottilie',fn:closeCard}]);return true}
   if(q.stamm===2){q.stamm=3;S.respect+=6;save();AU.fx('hornBack');
@@ -1479,7 +1480,7 @@ function renderShop(){
 /* ================= Fahrtenbuch ================= */
 function renderLog(){
   const L=$('#loglist');L.innerHTML='';
-  {const q=Q(),rows=Object.keys(QUESTS).filter(k=>q[k]).map(k=>{const d=q[k]===3,lbl=QUESTS[k].todo+(k==='ott'&&q[k]<3?' ('+(q.cards||[]).length+' von 3)':'')+(q[k]===2&&['jupp','doris'].includes(k)?' · erledigt, noch abgeben':'')+(k==='kissen'&&q[k]===1?' ('+(q.kStreak||0)+' von 2)':'');return '<li class="'+(d?'done':'')+'">'+lbl+'</li>'});
+  {const q=Q(),rows=Object.keys(QUESTS).filter(k=>q[k]).map(k=>{const d=q[k]===3,lbl=QUESTS[k].todo+(k==='ott'&&q[k]<3?' ('+(q.cards||[]).length+' von 3)':'')+(q[k]===2&&['jupp','doris'].includes(k)?' · dabei, noch abgeben':'')+(k==='kissen'&&q[k]===1?' ('+(q.kStreak||0)+' von 2)':'');return '<li class="'+(d?'done':'')+'">'+lbl+'</li>'});
    if(rows.length){const d=document.createElement('div');d.className='panel todo';d.innerHTML='<p class="eyebrow" style="margin:0 0 6px">Nicht vergessen</p><ul>'+rows.join('')+'</ul>';L.appendChild(d)}}
   if(!S.log.length){L.innerHTML='<div class="log typed">Nach jeder Tour schreibt Kalle hier auf, was er unterwegs erlebt hat.</div>'}
   S.log.slice().reverse().forEach(e=>{const d=document.createElement('div');d.className='log';d.innerHTML='<div class="d">Tag '+e.day+' · '+e.to+(e.ok?'':' · nicht zugestellt')+'</div><div class="typed"></div>';d.querySelector('.typed').textContent=e.note;L.appendChild(d)});
@@ -2138,6 +2139,7 @@ function openRast(name){
        {label:'Hilde abspritzen <span>'+Math.round(6*DIFF[S.diff].priceMul)+' €</span>',disabled:D._wash||S.money<Math.round(6*DIFF[S.diff].priceMul),fn:()=>{D._wash=true;S.money-=Math.round(6*DIFF[S.diff].priceMul);S.glanz=Math.min(100,S.glanz+30);AU.fx('bubbles');render('Am Waschplatz ist Hilde gleich wieder sauber.')}}];
     if(duftLv()&&S.duftFrisch<70)opts.push({label:'Neues Duftbäumchen <span>3 €</span>',disabled:D._tree||S.money<3,fn:()=>{D._tree=true;S.money-=3;S.duftFrisch=100;AU.fx('pop');render('Das neue Bäumchen riecht nach '+UP[0].lv[duftLv()-1]+'.')}});
     const cap=DIFF[S.diff].coffee+S.up.thermos;if(cap>0&&D.coffee<cap)opts.push({label:'Thermoskanne auffüllen <span>2 €</span>',disabled:D._fill||S.money<2,fn:()=>{D._fill=true;S.money-=2;D.coffee=cap;AU.fx('slurp');render('Die Kanne ist wieder voll. '+cap+' Becher für unterwegs.')}});
+    if(Q().jupp===1&&/Holledau/.test(name))opts.push({label:'Bei Bernd den Anlasser abholen',disabled:D.gotAnlasser,fn:()=>{Q().jupp=2;D.gotAnlasser=true;save();AU.fx('wrench');render('Bernd wartet schon am Lkw-Parkplatz, mit dem Anlasser in Zeitungspapier. „Grüß mir den Alten. Sag ihm, der läuft noch hundert Jahre.“ Kalle verstaut ihn hinter dem Sitz.')}});
     if(H0.who==='Doris'&&Q().doris===2)opts.push({label:'Doris den Senf geben',fn:()=>{Q().doris=3;S.respect+=3;S.dorisFreund=true;save();AU.fx('ding');render('Doris schraubt das Glas auf und riecht daran. „Das ist er.“ Sie stellt es neben die Kasse wie einen Pokal. „Ab jetzt geht die Kettwurst öfter aufs Haus, Kalle.“')}});
     if(hitch&&!D.anhalter)opts.push({label:'Anhalter mitnehmen',fn:()=>{D.anhalter=hitch;render(hitch.n+' steigt ein und bedankt sich.')}});
     opts.push({label:'Weiterfahren',cls:'teal',fn:()=>{closeCard();D._kett=D._pause=D._wash=D._tree=D._fill=false;resume()}});
