@@ -104,7 +104,7 @@ p{margin:0}
 .ev i{display:inline-flex;gap:3px}
 .ev i b{width:7px;height:7px;border-radius:2px;background:var(--line)}
 .ev i b.on{background:var(--ink)}
-.bite h2{font-size:24px}
+.bite h2{font-size:28px;font-weight:760;letter-spacing:-.02em;line-height:1.12;font-optical-sizing:auto}
 .bite .body{font-size:18px;line-height:1.55;max-width:65ch}
 .caveat{font-family:var(--f-mono);font-size:12.5px;line-height:1.55;color:var(--muted);border-left:2px solid var(--line);padding-left:12px}
 .take{background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-style:italic}
@@ -289,6 +289,12 @@ nav.tabs button svg{transition:transform .3s cubic-bezier(.2,.7,.2,1)}
 nav.tabs button[aria-current="page"] svg{transform:translateY(-1px) scale(1.08)}
 @media (prefers-reduced-motion:no-preference){
  #main.anim .view>*{animation:fadeUp .55s cubic-bezier(.2,.7,.2,1) both}
+ #main.anim .view>.bite{animation:biteIn .75s cubic-bezier(.2,.8,.2,1) both}
+ .morph #main.anim .view>.bite{animation:none}
+ #main.anim .bite>*:not(.bglow){animation:revealIn .75s cubic-bezier(.2,.8,.2,1) both}
+ #main.anim .bite>*:nth-child(2){animation-delay:.10s}#main.anim .bite>*:nth-child(3){animation-delay:.17s}#main.anim .bite>*:nth-child(4){animation-delay:.24s}#main.anim .bite>*:nth-child(5){animation-delay:.31s}#main.anim .bite>*:nth-child(6){animation-delay:.38s}#main.anim .bite>*:nth-child(7){animation-delay:.44s}#main.anim .bite>*:nth-child(n+8){animation-delay:.5s}
+ .morph #main.anim .bite>h2{animation:none}
+ #main.anim .bglow{animation:bglowIn 1.8s cubic-bezier(.2,.7,.2,1) both}
  #main.anim .view>*:nth-child(2){animation-delay:.07s}#main.anim .view>*:nth-child(3){animation-delay:.14s}#main.anim .view>*:nth-child(4){animation-delay:.21s}#main.anim .view>*:nth-child(n+5){animation-delay:.28s}
  #main.anim .list>*,#main.anim .opts>*{animation:fadeUp .45s cubic-bezier(.2,.7,.2,1) both}
  #main.anim .list>*:nth-child(1),#main.anim .opts>*:nth-child(1){animation-delay:0.155s}#main.anim .list>*:nth-child(2),#main.anim .opts>*:nth-child(2){animation-delay:0.190s}#main.anim .list>*:nth-child(3),#main.anim .opts>*:nth-child(3){animation-delay:0.225s}#main.anim .list>*:nth-child(4),#main.anim .opts>*:nth-child(4){animation-delay:0.260s}#main.anim .list>*:nth-child(5),#main.anim .opts>*:nth-child(5){animation-delay:0.295s}#main.anim .list>*:nth-child(6),#main.anim .opts>*:nth-child(6){animation-delay:0.330s}#main.anim .list>*:nth-child(7),#main.anim .opts>*:nth-child(7){animation-delay:0.365s}#main.anim .list>*:nth-child(8),#main.anim .opts>*:nth-child(8){animation-delay:0.400s}#main.anim .list>*:nth-child(9),#main.anim .opts>*:nth-child(9){animation-delay:0.435s}#main.anim .list>*:nth-child(10),#main.anim .opts>*:nth-child(10){animation-delay:0.470s}#main.anim .list>*:nth-child(11),#main.anim .opts>*:nth-child(11){animation-delay:0.505s}#main.anim .list>*:nth-child(12),#main.anim .opts>*:nth-child(12){animation-delay:0.540s}#main.anim .list>*:nth-child(13),#main.anim .opts>*:nth-child(13){animation-delay:0.575s}#main.anim .list>*:nth-child(14),#main.anim .opts>*:nth-child(14){animation-delay:0.610s}
@@ -308,6 +314,9 @@ nav.tabs button[aria-current="page"] svg{transform:translateY(-1px) scale(1.08)}
  #save[aria-pressed="true"]{animation:pop .4s cubic-bezier(.2,.7,.2,1)}
  .compass.spin .core{animation:coreSpin .7s cubic-bezier(.3,.7,.3,1)}
 }
+@keyframes biteIn{from{opacity:0;transform:translateY(16px) scale(.985)}}
+@keyframes revealIn{from{opacity:0;transform:translateY(9px);filter:blur(5px)}}
+@keyframes bglowIn{0%{opacity:0;transform:translateX(-50%) scale(.3)}35%{opacity:.95}100%{opacity:.45;transform:translateX(-50%) scale(1)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}}
 @keyframes grow{from{transform:scaleX(0)}}
@@ -426,7 +435,22 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .daily::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:conic-gradient(from var(--ang),var(--c),color-mix(in srgb,var(--c) 15%,transparent),var(--accent),color-mix(in srgb,var(--c) 15%,transparent),var(--c));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
 .dglow{position:absolute;inset:-10px;z-index:-1;border-radius:24px;background:radial-gradient(60% 80% at 20% 50%,color-mix(in srgb,var(--c) 35%,transparent),transparent 70%),radial-gradient(50% 70% at 85% 50%,color-mix(in srgb,var(--accent) 30%,transparent),transparent 70%);filter:blur(16px);opacity:.55}
 .daily .dl{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
-.daily .dl b{font-family:var(--f-display);font-weight:650;font-variation-settings:"SOFT" 100;font-size:19px;line-height:1.25}
+.daily .dl .dt{font-family:var(--f-display);font-weight:760;font-variation-settings:"SOFT" 100;font-optical-sizing:auto;font-size:22px;line-height:1.16;letter-spacing:-.015em;text-wrap:balance}
+.daily .dk{display:inline-flex;align-items:center;gap:7px;font-family:var(--f-ui);font-weight:700;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--c)}
+.daily .dk i{width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 8px 1px color-mix(in srgb,var(--c) 70%,transparent)}
+.daily .dd{font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;color:var(--muted)}
+.daily{transition:transform .5s cubic-bezier(.3,.75,.2,1),box-shadow .5s}
+.daily .dstate{transition:transform .5s cubic-bezier(.3,.75,.2,1),background .4s,color .4s}
+.daily.go{transform:scale(1.025);box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 40%,transparent),0 18px 50px -12px color-mix(in srgb,var(--c) 60%,transparent)}
+.daily.go .dglow{opacity:1;filter:blur(22px)}
+.daily.go .dstate{transform:translateX(5px) scale(1.12);background:var(--c);color:var(--paper)}
+.daily.go::before{filter:brightness(1.25) drop-shadow(0 0 6px var(--c))}
+.bite{position:relative;isolation:isolate}
+.bglow{position:absolute;left:50%;top:-30px;width:130%;height:240px;transform:translateX(-50%);z-index:-1;pointer-events:none;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 26%,transparent),color-mix(in srgb,var(--accent) 8%,transparent) 60%,transparent);filter:blur(18px);opacity:.45}
+::view-transition-group(bcard),::view-transition-group(btitle){animation-duration:.78s;animation-timing-function:cubic-bezier(.22,.8,.2,1)}
+::view-transition-old(bcard),::view-transition-new(bcard){animation-duration:.55s;height:100%;object-fit:none;object-position:top}
+::view-transition-old(btitle),::view-transition-new(btitle){animation-duration:.6s;height:100%;object-fit:contain;object-position:left top}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.45s}
 .daily .dstate{font-family:var(--f-ui);font-weight:700;font-size:18px;color:var(--c);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 14%,transparent)}
 .daily.seen .dglow{opacity:.25}
 .special{border-radius:16px;padding:14px 16px;background:color-mix(in srgb,var(--accent) 12%,var(--card));display:flex;flex-direction:column;gap:8px}
@@ -1378,11 +1402,16 @@ function pickBite(){
   if(c&&S.cur===c.id&&list.length>1)c=list.find(b=>b.id!==S.cur);
   return c;
 }
+/* Häppchen des Tages: die Karte verwandelt sich fließend in das Häppchen (View Transitions, sonst sanftes Einblenden) */
+function openDaily(id,el){if(!document.startViewTransition||calm()){openBite(id);return}
+  const tt=el.querySelector(".dt");el.style.viewTransitionName="bcard";if(tt)tt.style.viewTransitionName="btitle";document.documentElement.classList.add("morph");
+  const vt=document.startViewTransition(()=>{openBite(id);const c=document.querySelector(".bite"),h=c&&c.querySelector("h2");if(c)c.style.viewTransitionName="bcard";if(h)h.style.viewTransitionName="btitle"});
+  vt.finished.finally(()=>{document.documentElement.classList.remove("morph");document.querySelectorAll(".bite,.bite h2").forEach(x=>x.style.viewTransitionName="")})}
 function openBite(id){if(!S.cur&&!shared)pushNav();anim=true;pendingGlow=true;S.cur=id;if(!S.read[id])S.read[id]=now();S.history=[id,...S.history.filter(x=>x!==id)].slice(0,12);save();tab="bites";render();window.scrollTo(0,0)}
 function biteCard(b){
   const t=b.term&&T[b.term],x=b.exp&&X[b.exp];
   const gift=shared===b.id?`<div class="gift"><b>Jemand möchte dir dieses Häppchen zeigen.</b><span>Es stammt aus dem „Glückskompass“, einer kostenlosen App mit Erkenntnissen aus der Glücksforschung. Du brauchst keine Anmeldung, und deine Daten bleiben auf deinem Gerät.</span><button class="btn accent" id="explore">Selbst ausprobieren</button></div>`:"";
-  return gift+`<article class="card bite" ${cc(b.cat)}>
+  return gift+`<article class="card bite" ${cc(b.cat)}><span class="bglow" aria-hidden="true"></span>
     <div class="meta"><span class="catn">${dot(b.cat)}${CATS[b.cat].n}</span>${evHTML(b.ev)}</div>
     <h2>${b.t}</h2>
     <p class="body">${b.x}</p>
@@ -1418,7 +1447,7 @@ function viewBites(){
   if(S.settings.mood&&!moodAsked&&!shared)return `<section class="view">${moodCard()}</section>`;
   const db=dailyBite(),sr=currentSeries(),sp=specialToday();
   const moodChip=mood?`<button class="moodchip" data-mood-pick="change">Für dich, weil du dich <b>${MOODS[mood].n}</b> fühlst · ändern</button>`:"";
-  const daily=`<button class="daily ${S.read[db.id]?"seen":""}" data-open="${db.id}" style="--c:var(--c-${db.cat})"><span class="dglow" aria-hidden="true"></span><span class="dl"><span class="label">Häppchen des Tages · ${new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}</span><b>${db.t}</b></span><span class="dstate">${S.read[db.id]?"✓":"→"}</span></button>`;
+  const daily=`<button class="daily ${S.read[db.id]?"seen":""}" data-daily="${db.id}" style="--c:var(--c-${db.cat})"><span class="dglow" aria-hidden="true"></span><span class="dl"><span class="dk"><i></i>Häppchen des Tages</span><b class="dt">${db.t}</b><span class="dd">${new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})} · ${CATS[db.cat].n}</span></span><span class="dstate">${S.read[db.id]?"✓":"→"}</span></button>`;
   const spec=sp?`<div class="special"><span class="label">Besonderer Tag</span><p>${sp.t}</p><div class="row">${sp.b&&B[sp.b]?`<button class="chip" data-open="${sp.b}">${dot(B[sp.b].cat)}${B[sp.b].t}</button>`:""}${sp.x&&X[sp.x]?`<button class="chip" data-exp="${sp.x}">${dot(X[sp.x].cat)}Experiment: ${X[sp.x].t}</button>`:""}</div></div>`:"";
   return `<section class="view">
     ${nudge}${moodChip}
@@ -1598,7 +1627,7 @@ function viewWay(){
       <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:09 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:11 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -1937,6 +1966,7 @@ document.addEventListener("click",e=>{
   if(d.deep&&S.cur){const b=B[S.cur],col=`var(--c-${b.cat})`,r=t.getBoundingClientRect();t.style.setProperty("--x",((e.clientX||r.left+r.width/2)-r.left)+"px");t.style.setProperty("--y",((e.clientY||r.top+r.height/2)-r.top)+"px");
     t.classList.add("lit");buzz([8,40,8,40,14]);glow(t,col,.9);auraBurst(e,t,col);
     setTimeout(()=>{d.deep==="ev"?evSheet(b):deepSheet(b);setTimeout(()=>t.classList.remove("lit"),300)},calm()?0:640);return}
+  if(d.daily){const id=d.daily,col=`var(--c-${B[id].cat})`;if(t.classList.contains("go"))return;t.classList.add("go");buzz([8,40,10,40,16]);auraBurst(e,t,col);setTimeout(()=>openDaily(id,t),calm()?0:480);return}
   if(d.open){closeSheet();openBite(d.open);return}
   if(d.term){closeSheet();fromBite=S.cur;openTerm=d.term;termFilter=T[d.term].cat;termMore=true;anim=true;tab="terms";render();const el=document.querySelector(`[data-tt="${d.term}"]`);if(el)el.scrollIntoView({block:"center"});return}
   if(d.exp){expSheet(d.exp);return}
