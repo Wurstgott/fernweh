@@ -348,6 +348,20 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .dircloud .mist{position:absolute;inset:8% 6%;border-radius:50%;background:radial-gradient(40% 45% at 30% 30%,color-mix(in srgb,var(--c-ich) 22%,transparent),transparent 70%),radial-gradient(40% 45% at 72% 28%,color-mix(in srgb,var(--c-wir) 20%,transparent),transparent 70%),radial-gradient(38% 45% at 88% 55%,color-mix(in srgb,var(--c-welt) 18%,transparent),transparent 70%),radial-gradient(40% 45% at 65% 85%,color-mix(in srgb,var(--c-sein) 18%,transparent),transparent 70%),radial-gradient(40% 45% at 22% 75%,color-mix(in srgb,var(--c-zeit) 18%,transparent),transparent 70%);filter:blur(14px);opacity:.9;pointer-events:none}
 .dircloud .dir{position:absolute;transform:translate(-50%,-50%);padding:4px;width:auto;border-radius:16px}
 .dircloud .fl{display:flex;flex-direction:column;align-items:center;gap:5px}
+.dircloud .dir{transition:left 1.25s cubic-bezier(.3,.75,.2,1),top 1.25s cubic-bezier(.3,.75,.2,1),opacity .6s}
+.dircloud .dial{transition:width .9s cubic-bezier(.3,.75,.2,1),height .9s cubic-bezier(.3,.75,.2,1),transform .4s cubic-bezier(.34,1.45,.45,1),box-shadow .5s,background .35s}
+.dircloud .dn{transition:font-size .8s cubic-bezier(.3,.75,.2,1),color .4s}
+.dircloud .dir.lead{z-index:2}
+.dircloud .dir.lead .dial{width:50px;height:50px;box-shadow:inset 0 0 0 3px var(--c),0 0 0 6px color-mix(in srgb,var(--c) 18%,transparent),0 0 30px 4px color-mix(in srgb,var(--c) 45%,transparent)}
+.dircloud .dir.lead .dial::after{width:12px;height:12px}
+.dircloud .dir.lead .dn{font-size:13.5px;font-weight:700;color:var(--ink)}
+.dircloud .dir.lead .fl::before{content:"";position:absolute;left:50%;top:25px;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;z-index:-1;pointer-events:none;background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 32%,transparent),transparent);filter:blur(6px)}
+.dircloud .dir.lead .fl{position:relative}
+.dircloud .dir.recede .dial{width:34px;height:34px}
+.dircloud .dir.recede .dn{font-size:12px;font-weight:600;color:var(--muted)}
+.dircloud[data-sel]:not([data-sel="alle"]) .dir:not(.lead):not(.recede){opacity:.8}
+@media (prefers-reduced-motion:no-preference){.dircloud .dir.lead .fl::before{animation:leadhalo 4.5s ease-in-out infinite}}
+@keyframes leadhalo{50%{transform:scale(1.18);opacity:.7}}
 .dircloud .dn{min-height:0;white-space:nowrap;font-size:12px}
 .dircloud .dir.center .dial{width:52px;height:52px}
 .dircloud .dir.center .dn{font-size:13.5px;font-weight:700;color:var(--ink)}
@@ -401,6 +415,19 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .rose2{width:100%;max-width:360px;height:auto;overflow:visible}
 .rose2 .glowp{opacity:.6}
 .rose2 .pt{opacity:.92}
+.rose2 .pg{cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
+.rose2 .rl{cursor:pointer}
+.rose2 .glowp g{transition:opacity .6s}
+.rose2 .pg .pt{transition:opacity .5s,filter .5s}
+.rose2.sel .pg:not(.on) .pt{opacity:.45}
+.rose2 .pg.on .pt{opacity:1}
+.rose2 .pg:focus-visible .pt{stroke:var(--ink);stroke-width:1.5}
+#pinfo:empty{display:none}
+.pinfo{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:color-mix(in srgb,var(--c) 7%,var(--card));border:1px solid color-mix(in srgb,var(--c) 30%,var(--line));box-shadow:0 0 30px -12px color-mix(in srgb,var(--c) 70%,transparent);animation:pIn .5s cubic-bezier(.2,.9,.25,1.1) both}
+.pinfo b{font-family:var(--f-ui);font-size:15px;color:var(--c)}
+.pinfo p{margin:4px 0 10px;font-size:15px;line-height:1.45}
+.pdot{flex:none;width:14px;height:14px;margin-top:3px;border-radius:50%;background:var(--c);box-shadow:0 0 14px 2px color-mix(in srgb,var(--c) 60%,transparent)}
+@keyframes pIn{from{opacity:0;transform:translateY(8px) scale(.98)}}
 .rose2 .rl{font-family:var(--f-ui);font-weight:700;font-size:12px}
 .rose2 .rn{font-family:var(--f-mono);font-size:11px;fill:var(--muted)}
 .moms{display:flex;flex-wrap:wrap;gap:8px}
@@ -1317,10 +1344,21 @@ function biteCard(b){
     <div class="row"><button class="btn primary" id="next">Nächstes Häppchen</button><button class="btn ghost" id="save" aria-pressed="${!!S.saved[b.id]}">${S.saved[b.id]?"Gemerkt ✓":"Merken"}</button><button class="btn ghost" id="share">Teilen</button><button class="linkbtn" id="back">Zum Kompass</button></div>
   </article>`;
 }
+const CPOS={ich:[18.4,28.3],wir:[62.1,14.8],welt:[89.0,50.0],sein:[62.1,85.2],zeit:[18.4,71.7],alle:[50,50]};
+/* Wolke formiert sich um die gewählte Richtung: sie rückt fast ins Zentrum, „Alle“ weicht auf die Gegenseite, die anderen machen etwas Platz */
+function cloudPos(sel){const P={};Object.keys(CPOS).forEach(k=>P[k]=CPOS[k].slice());if(sel==="alle"||!CPOS[sel])return P;
+  const b=CPOS[sel],sp=[b[0]+(50-b[0])*.55,b[1]+(50-b[1])*.55];P[sel]=sp;
+  const px=q=>[q[0]*3.4,q[1]*2],dist=(p1,p2)=>{const A=px(p1),B=px(p2);return Math.hypot(A[0]-B[0],(A[1]-B[1])*1.25)};
+  Object.keys(CATS).forEach(k=>{if(k===sel)return;const q=CPOS[k],A=px(q),S0=px(sp);let dx=A[0]-S0[0],dy=A[1]-S0[1];const d=Math.hypot(dx,dy)||1;P[k]=[Math.min(91,Math.max(9,q[0]+dx/d*14/3.4)),Math.min(88,Math.max(12,q[1]+dy/d*10/2))]});
+  // „Alle“ sucht sich den freiesten Platz in der Wolke, nicht zu weit vom Zentrum
+  let best=null,bs=-1e9;for(let x=14;x<=86;x+=3)for(let y=14;y<=86;y+=3){const c=[x,y];let m=1e9;Object.keys(CATS).forEach(k=>{m=Math.min(m,dist(c,P[k]))});const sc=Math.min(m,110)-.35*dist(c,[50,50]);if(sc>bs){bs=sc;best=c}}
+  P.alle=best;return P}
+function applyCloud(sel,fresh){const P=cloudPos(sel);document.querySelectorAll(".dircloud .dir").forEach(el=>{const k=el.dataset.filter,q=P[k];el.style.left=q[0]+"%";el.style.top=q[1]+"%";el.classList.toggle("lead",k===sel&&k!=="alle");el.classList.toggle("recede",k==="alle"&&sel!=="alle")});
+  const c=document.querySelector(".dircloud");if(c)c.dataset.sel=sel;
+  if(fresh){const el=document.querySelector(`.dircloud .dir[data-filter="${sel}"] .dial`);if(el){const col=sel==="alle"?"var(--accent)":`var(--c-${sel})`;setTimeout(()=>{glow(el,col,.9);auraRings(el,col,2)},60)}}}
 function viewBites(){
   const nRead=Object.keys(S.read).length,p=pool(),unread=p.filter(b=>!S.read[b.id]).length;
-  const CPOS={ich:[18.4,28.3],wir:[62.1,14.8],welt:[89.0,50.0],sein:[62.1,85.2],zeit:[18.4,71.7]};
-  const filt=`<div class="dircloud" role="group" aria-label="Richtung wählen"><span class="mist" aria-hidden="true"></span>${[["alle","Alle"],...Object.entries(CATS).map(([k,v])=>[k,v.n])].map(([k,n],i)=>`<button class="dir ${k==="alle"?"center":""}" data-filter="${k}" aria-pressed="${S.filter===k}" style="${k!=="alle"?`--c:var(--c-${k});`:""}left:${k==="alle"?50:CPOS[k][0]}%;top:${k==="alle"?50:CPOS[k][1]}%;--d:${i*.9}s"><span class="fl"><span class="dial ${k==="alle"?"all":""}"></span><span class="dn">${n}</span></span></button>`).join("")}</div>`;
+  const filt=`<div class="dircloud" data-sel="${S.filter}" role="group" aria-label="Richtung wählen"><span class="mist" aria-hidden="true"></span>${[["alle","Alle"],...Object.entries(CATS).map(([k,v])=>[k,v.n])].map(([k,n],i)=>`<button class="dir ${k==="alle"?"center":""} ${k===S.filter&&k!=="alle"?"lead":""} ${k==="alle"&&S.filter!=="alle"?"recede":""}" data-filter="${k}" aria-pressed="${S.filter===k}" style="${k!=="alle"?`--c:var(--c-${k});`:""}left:${cloudPos(S.filter)[k][0]}%;top:${cloudPos(S.filter)[k][1]}%;--d:${i*.9}s"><span class="fl"><span class="dial ${k==="alle"?"all":""}"></span><span class="dn">${n}</span></span></button>`).join("")}</div>`;
   if(S.cur&&B[S.cur])return `<section class="view">${biteCard(B[S.cur])}${matchMedia("(pointer:coarse)").matches&&Object.keys(S.read).length<6?'<p class="swipehint">Tipp: Nach links wischen für das nächste Häppchen, nach rechts zurück zum Kompass</p>':''}</section>`;
   const recent=S.history.filter(id=>B[id]).slice(0,8);
   const act=activeExps().map(id=>[id,S.exps[id]]).sort((x,y)=>x[1].start-y[1].start)[0];
@@ -1476,6 +1514,7 @@ function viewWay(){
     <p class="nopen">Hier verfällt nichts, wenn du eine Pause machst.</p>
     <div class="sec"><div class="sec-h"><h3>Deine Kompassrose</h3><span class="label">Lesen 1 · Tun 3</span></div>
       <div class="rosewrap"><span class="rhalo" aria-hidden="true"></span>${roseSVG(score)}</div>
+      <div id="pinfo" aria-live="polite"></div>
       <p class="muted" style="font-size:15px">${nRead+done.length?balanceHint(score):"Hier siehst du, in welchen Richtungen du gelesen und ausprobiert hast."}</p></div>
     ${(()=>{const got=MOMENTS.filter(m=>S.moments[m.id]);return got.length?`<div class="sec"><div class="sec-h"><h3>Momente</h3><span class="label">${got.length} von ${MOMENTS.length}</span></div><div class="moms">${got.map(m=>`<span class="mom" title="${fmtDate(S.moments[m.id])}"><i></i>${m.t}</span>`).join("")}</div></div>`:""})()}
     <div class="sec"><h3>Tagebuch der Experimente</h3>${journal.length?`<div class="journal">${journal.map(([id,v])=>`<div class="jr" ${cc(X[id].cat)}><b>${X[id].t}</b><small>${fmtDate(v.end)}${v.mood?" · "+moodN[v.mood]:""}</small>${v.note?`<p style="font-size:16px">${esc(v.note)}</p>`:""}</div>`).join("")}</div>`:`<p class="empty">Wenn du ein Experiment abschließt, kannst du festhalten, wie es war. Diese Notizen erscheinen hier.</p>`}</div>
@@ -1679,14 +1718,26 @@ let invited=null;
 
 /* ---------- Kompassrose ---------- */
 function roseSVG(score){const mx=Math.max(1,...Object.values(score));const ks=Object.keys(CATS);
-  const petal=(k)=>{const v=score[k],len=16+84*Math.sqrt(v/mx)*(v?1:0),w=Math.max(9,len*.3);return `<g transform="rotate(${CANG[k]+90-90})"><path class="pt" d="M0 0 C ${w} ${-len*.3}, ${w*.75} ${-len*.85}, 0 ${-len} C ${-w*.75} ${-len*.85}, ${-w} ${-len*.3}, 0 0Z" fill="var(--c-${k})"/></g>`};
-  const labels=ks.map(k=>{const a=CANG[k]*Math.PI/180,r=124;return `<text x="${(Math.sin(a)*r).toFixed(1)}" y="${(-Math.cos(a)*r+4).toFixed(1)}" text-anchor="middle" class="rl" fill="var(--c-${k})">${CATS[k].n}</text><text x="${(Math.sin(a)*r).toFixed(1)}" y="${(-Math.cos(a)*r+18).toFixed(1)}" text-anchor="middle" class="rn">${score[k]}</text>`}).join("");
+  const petal=(k,top)=>{const v=score[k],len=16+84*Math.sqrt(v/mx)*(v?1:0),w=Math.max(9,len*.3),d=`M0 0 C ${w} ${-len*.3}, ${w*.75} ${-len*.85}, 0 ${-len} C ${-w*.75} ${-len*.85}, ${-w} ${-len*.3}, 0 0Z`;
+    return top?`<g class="pg" transform="rotate(${CANG[k]})" data-petal="${k}" role="button" tabindex="0" aria-label="${CATS[k].n} ansehen"><path class="hit" d="M0 -6 L 30 -60 L 0 -112 L -30 -60Z" fill="transparent"/><path class="pt" d="${d}" fill="var(--c-${k})"/></g>`:`<g transform="rotate(${CANG[k]})" data-g="${k}"><path class="pt" d="${d}" fill="var(--c-${k})"/></g>`};
+  const labels=ks.map(k=>{const a=CANG[k]*Math.PI/180,r=124;return `<text data-petal="${k}" x="${(Math.sin(a)*r).toFixed(1)}" y="${(-Math.cos(a)*r+4).toFixed(1)}" text-anchor="middle" class="rl" fill="var(--c-${k})">${CATS[k].n}</text><text x="${(Math.sin(a)*r).toFixed(1)}" y="${(-Math.cos(a)*r+18).toFixed(1)}" text-anchor="middle" class="rn">${score[k]}</text>`}).join("");
   return `<svg class="rose2" viewBox="-160 -150 320 300" role="img" aria-label="Deine Kompassrose">
    <circle r="100" fill="none" stroke="var(--line)" stroke-dasharray="2 5"/><circle r="50" fill="none" stroke="var(--line)" stroke-dasharray="2 5"/>
-   <g class="petals glowp" filter="url(#rblur)">${ks.map(petal).join("")}</g><g class="petals">${ks.map(petal).join("")}</g>
+   <g class="petals glowp" filter="url(#rblur)">${ks.map(k=>petal(k,false)).join("")}</g><g class="petals top">${ks.map(k=>petal(k,true)).join("")}</g>
    <circle r="7" fill="var(--card)" stroke="var(--accent)" stroke-width="3"/>
    ${labels}
    <defs><filter id="rblur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter></defs></svg>`}
+
+function petalTap(k){const svg=document.querySelector(".rose2");if(!svg)return;const col=`var(--c-${k})`;
+  svg.classList.add("sel");svg.querySelectorAll(".pg").forEach(g=>{const on=g.dataset.petal===k;g.classList.toggle("on",on);const p=g.querySelector(".pt");
+    if(calm())return;if(on)p.animate([{transform:"scale(1)"},{transform:"scale(1.15)",offset:.35},{transform:"scale(.97)",offset:.7},{transform:"scale(1.04)"}],{duration:950,easing:"cubic-bezier(.3,.7,.2,1)",fill:"forwards"});
+    else p.animate([{transform:"scale(1)"}],{duration:500,fill:"forwards"})});
+  svg.querySelectorAll(".glowp [data-g]").forEach(g=>g.style.opacity=g.dataset.g===k?1:.35);
+  const p=svg.querySelector(`.pg[data-petal="${k}"] .pt`);if(p){glow(p,col,.6);auraRings(p,col,2)}buzz([6,30,8]);
+  const all=BITES.filter(b=>b.cat===k),r=all.filter(b=>S.read[b.id]).length,ex=EXPS.filter(e=>e.cat===k),d=ex.filter(e=>S.exps[e.id]&&S.exps[e.id].status==="done").length;
+  $("#pinfo").innerHTML=`<div class="pinfo" style="--c:var(--c-${k})"><span class="pdot"></span><div><b>${CATS[k].n}</b><p>Du hast ${r} von ${all.length} Häppchen gelesen und ${d} von ${ex.length} Experimenten geschafft.</p><div class="row"><button class="btn ghost" data-rose-go="${k}">Häppchen aus ${CATS[k].n}</button><button class="linkbtn" data-rose-exp="${k}">Experimente ansehen</button></div></div></div>`}
+document.addEventListener("click",e=>{const g=e.target.closest&&e.target.closest("[data-petal]");if(g)petalTap(g.dataset.petal)});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.petal){e.preventDefault();petalTap(e.target.dataset.petal)}});
 
 /* ---------- Momente: selten und bedeutungsvoll ---------- */
 const MOMENTS=[
@@ -1764,13 +1815,15 @@ document.addEventListener("click",e=>{
   if(d.check){const v=S.exps[d.check];v.checks=v.checks||{};v.checks[dayIdx(v)]=+d.val;save();buzz([8,40,8]);const card=t.closest(".card");render();const c2=document.querySelector(`[data-done="${d.check}"]`);const cd=c2&&c2.closest(".card");if(cd)glow(cd,`var(--c-${X[d.check].cat})`);toast("Eingetragen.");return}
   if(d.shareExp){shareExp(d.shareExp);return}
   if(d.setting){S.settings[d.setting]=!S.settings[d.setting];save();buzz(6);if(d.setting==="mood"&&!S.settings.mood){mood=null;try{sessionStorage.removeItem("gk-mood")}catch(x){}}if(d.setting==="mood"&&S.settings.mood)moodAsked=true;render();return}
+  if(d.roseGo){S.filter=d.roseGo;S.cur=null;save();tab="bites";anim=true;render();window.scrollTo(0,0);return}
+  if(d.roseExp){expFilter=d.roseExp;expMore=true;S.expOpen=true;save();tab="exps";anim=true;render();const f=$("#expfold");if(f)f.scrollIntoView({block:"start"});return}
   if(t.id==="dailyics"){dailyIcs();return}
   if(t.id==="shx2"){closeSheet();return}
   if(t.id==="nohint"){S.settings.antiScroll=false;save();closeSheet();toast("Alles klar. Du findest die Einstellung unter „Dein Weg“.");return}
   if(t.id==="home"||t.id==="home2"){
     // Erster Tipp: zum Kompass, Richtung bleibt. Tipp auf dem Kompass: zurück zu „Alle“.
     if(tab!=="bites"||S.cur){tab="bites";goHome();return}
-    if(S.filter!=="alle"){S.filter="alle";save();document.querySelectorAll("[data-filter]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.filter==="alle"));setCompass(true)}
+    if(S.filter!=="alle"){S.filter="alle";save();document.querySelectorAll("[data-filter]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.filter==="alle"));applyCloud("alle",true);setCompass(true)}
     window.scrollTo({top:0,behavior:"smooth"});return}
   if(t.id==="tobite"){const id=fromBite;fromBite=null;openBite(id);return}
   if(t.id==="back"){anim=true;S.cur=null;shared=null;save();render();return}
@@ -1779,7 +1832,7 @@ document.addEventListener("click",e=>{
   if(t.id==="explore"){shared=null;S.cur=null;try{history.replaceState(null,"",location.pathname)}catch(x){}render();window.scrollTo(0,0);return}
   if(t.id==="save"&&S.cur){if(S.saved[S.cur])delete S.saved[S.cur];else{S.saved[S.cur]=now();toast("Gemerkt. Du findest es unter „Dein Weg“.")}save();render();return}
   if(d.filter){if(S.filter===d.filter)return;S.filter=d.filter;save();
-    if(tab==="bites"&&!S.cur&&$("#go")){document.querySelectorAll("[data-filter]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.filter===S.filter));setCompass(true)}else render();return}
+    if(tab==="bites"&&!S.cur&&$("#go")){document.querySelectorAll("[data-filter]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.filter===S.filter));applyCloud(S.filter,true);buzz(8);setCompass(true)}else render();return}
   if(d.deep&&S.cur){const b=B[S.cur],col=`var(--c-${b.cat})`;t.classList.add("lit");buzz([6,30,10]);glow(t,col,.9);auraRings(t,col,2);
     setTimeout(()=>{t.classList.remove("lit");d.deep==="ev"?evSheet(b):deepSheet(b)},calm()?0:420);return}
   if(d.open){closeSheet();openBite(d.open);return}
