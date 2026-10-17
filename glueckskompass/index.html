@@ -275,7 +275,7 @@ nav.tabs button[aria-current="page"] svg{transform:translateY(-1px) scale(1.08)}
  #main.anim .bite>*:not(.bglow){animation:revealIn .75s cubic-bezier(.2,.8,.2,1) both}
  #main.anim .bite>*:nth-child(2){animation-delay:.10s}#main.anim .bite>*:nth-child(3){animation-delay:.17s}#main.anim .bite>*:nth-child(4){animation-delay:.24s}#main.anim .bite>*:nth-child(5){animation-delay:.31s}#main.anim .bite>*:nth-child(6){animation-delay:.38s}#main.anim .bite>*:nth-child(7){animation-delay:.44s}#main.anim .bite>*:nth-child(n+8){animation-delay:.5s}
  .morph #main.anim .bite>h2{animation:none}
- #main.anim .bglow{animation:bglowIn 1.8s cubic-bezier(.2,.7,.2,1) both}
+ #main.anim .bglow{animation:bglowIn 1.6s ease-out both}
  #main.anim .view>*:nth-child(2){animation-delay:.07s}#main.anim .view>*:nth-child(3){animation-delay:.14s}#main.anim .view>*:nth-child(4){animation-delay:.21s}#main.anim .view>*:nth-child(n+5){animation-delay:.28s}
  #main.anim .list>*,#main.anim .opts>*{animation:fadeUp .45s cubic-bezier(.2,.7,.2,1) both}
  #main.anim .list>*:nth-child(1),#main.anim .opts>*:nth-child(1){animation-delay:0.155s}#main.anim .list>*:nth-child(2),#main.anim .opts>*:nth-child(2){animation-delay:0.190s}#main.anim .list>*:nth-child(3),#main.anim .opts>*:nth-child(3){animation-delay:0.225s}#main.anim .list>*:nth-child(4),#main.anim .opts>*:nth-child(4){animation-delay:0.260s}#main.anim .list>*:nth-child(5),#main.anim .opts>*:nth-child(5){animation-delay:0.295s}#main.anim .list>*:nth-child(6),#main.anim .opts>*:nth-child(6){animation-delay:0.330s}#main.anim .list>*:nth-child(7),#main.anim .opts>*:nth-child(7){animation-delay:0.365s}#main.anim .list>*:nth-child(8),#main.anim .opts>*:nth-child(8){animation-delay:0.400s}#main.anim .list>*:nth-child(9),#main.anim .opts>*:nth-child(9){animation-delay:0.435s}#main.anim .list>*:nth-child(10),#main.anim .opts>*:nth-child(10){animation-delay:0.470s}#main.anim .list>*:nth-child(11),#main.anim .opts>*:nth-child(11){animation-delay:0.505s}#main.anim .list>*:nth-child(12),#main.anim .opts>*:nth-child(12){animation-delay:0.540s}#main.anim .list>*:nth-child(13),#main.anim .opts>*:nth-child(13){animation-delay:0.575s}#main.anim .list>*:nth-child(14),#main.anim .opts>*:nth-child(14){animation-delay:0.610s}
@@ -295,9 +295,9 @@ nav.tabs button[aria-current="page"] svg{transform:translateY(-1px) scale(1.08)}
  #save[aria-pressed="true"]{animation:pop .4s cubic-bezier(.2,.7,.2,1)}
  .compass.spin .core{animation:coreSpin .7s cubic-bezier(.3,.7,.3,1)}
 }
-@keyframes biteIn{from{opacity:0;transform:translateY(16px) scale(.985)}}
-@keyframes revealIn{from{opacity:0;transform:translateY(9px);filter:blur(5px)}}
-@keyframes bglowIn{0%{opacity:0;transform:translateX(-50%) scale(.3)}35%{opacity:.95}100%{opacity:.32;transform:translateX(-50%) scale(1)}}
+@keyframes biteIn{from{opacity:0;transform:translate3d(0,14px,0)}}
+@keyframes revealIn{from{opacity:0;transform:translate3d(0,8px,0)}}
+@keyframes bglowIn{0%{opacity:0}40%{opacity:.7}100%{opacity:.32}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}}
 @keyframes grow{from{transform:scaleX(0)}}
@@ -1622,7 +1622,7 @@ function viewWay(){
       <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:51 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 19:54 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -1924,7 +1924,7 @@ function render(){
   const M=$("#main");M.classList.remove("anim","animq");M.innerHTML=v;void M.offsetWidth;if(anim)M.classList.add("anim");if(animQ)M.classList.add("animq");const wasAnim=anim;anim=false;animQ=false;renderTabs();
   if(wasAnim&&tab==="way")countUp();
   if(tab==="bites"&&!S.cur){const go=$("#go");if(go)go.style.transition="none";setCompass(false);if(go){void go.offsetWidth;go.style.transition=""}}else setCompass(false);
-  if(pendingGlow){pendingGlow=false;const c=document.querySelector('.bite');if(c&&S.cur&&B[S.cur])setTimeout(()=>glow(c,`var(--c-${B[S.cur].cat})`),260)}
+  if(pendingGlow){pendingGlow=false;const c=document.querySelector('.bite');if(c&&S.cur&&B[S.cur])setTimeout(()=>glow(c,`var(--c-${B[S.cur].cat})`,.45),850)}
   checkMoments();
   const n=Object.keys(S.read).length;$("#topline").textContent=n?`${n} / ${BITES.length}`:"";
   {const W={};Object.keys(CATS).forEach(k=>{const all=BITES.filter(b=>b.cat===k),r=all.filter(b=>S.read[b.id]).length;W[k]=[Math.round(r/all.length*100),r,all.length]});const R=$("#rose");
@@ -1938,7 +1938,7 @@ document.addEventListener("click",e=>{
   if(t.closest(".bite .links")&&!t.dataset.lit){const col=getComputedStyle(t).getPropertyValue("--c").trim()||"var(--accent)";t.dataset.lit=1;t.classList.add("lit");buzz([6,30,10]);glow(t,col,.9);auraRings(t,col,2);
     setTimeout(()=>{t.click();delete t.dataset.lit;t.classList.remove("lit")},calm()?0:400);return}
   if(t.closest(".bite .src")){const col=`var(--c-${B[S.cur]?B[S.cur].cat:"ich"})`;buzz(8);glow(t,col,.8);auraRings(t,col,2)}
-  if(t.id==="go"){sessionReads++;if(maybeScrollHint())return;const b=pickBite();if(!b)return;t.classList.remove("breath");t.classList.add("spin");buzz(12);auraRings(t);setTimeout(()=>openBite(b.id),matchMedia("(prefers-reduced-motion:reduce)").matches?0:520);return}
+  if(t.id==="go"){sessionReads++;if(maybeScrollHint())return;const b=pickBite();if(!b)return;t.classList.remove("breath");t.classList.add("spin");buzz(12);auraRings(t);setTimeout(()=>requestAnimationFrame(()=>openBite(b.id)),matchMedia("(prefers-reduced-motion:reduce)").matches?0:480);return}
   if(t.id==="next"){sessionReads++;if(maybeScrollHint())return;const b=pickBite();if(b)openBite(b.id);return}
   if(d.sitem){const [k,id]=d.sitem.split(":");if(k==="b")openBite(id);else expSheet(id);return}
   if(d.moodPick){if(d.moodPick==="change"){moodAsked=false;mood=null;try{sessionStorage.removeItem("gk-mood")}catch(x){}anim=true;render();return}
@@ -2010,7 +2010,7 @@ if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
 /* Selbst-Aktualisierung: Wenn auf GitHub eine neuere Version liegt, lädt die App sie still nach (wichtig für die Version auf dem Home-Bildschirm). */
-const BUILD="17.10.2026, 19:51";
+const BUILD="17.10.2026, 19:54";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;
