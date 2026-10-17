@@ -1262,6 +1262,7 @@ function show(id){
   const el=$('#s-'+id);if(el)el.scrollTop=0;
   updateDots();renderToggles();
   AU.play(id==='end'?SONGS.ende:SONGS.hof);
+  flushAwards();
 }
 document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',()=>{AU.init();AU.fx('click');show(b.dataset.tab)}));
 /* Versteckte Kleinigkeiten: egg(name, n, ms) meldet true, wenn etwas n-mal innerhalb von ms passiert ist */
@@ -1393,7 +1394,12 @@ function medalSVG(t,got){const lock='#C9C0C8',c=got?t.c:lock,ink=got?(t.ink?t.in
   return '<svg viewBox="0 0 64 64" class="medal'+(got?'':' locked')+'"><path d="'+r+'Z" fill="'+c+'" stroke="'+(got?'#2B2230':'#9C93A0')+'" stroke-width="2"/>'+(got?'<path d="'+r+'Z" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1" transform="translate(32 32) scale(.93) translate(-32 -32)"/>':'')+'<circle cx="32" cy="32" r="19" fill="#FBF1E6" stroke="'+(got?'#2B2230':'#9C93A0')+'" stroke-width="1.6"/>'+glyph+'</svg>'}
 const trophies=()=>store.get('fernweh-trophies')||{};
 function award(id){const tr=trophies();if(tr[id])return;const t=TROPHIES.find(x=>x.id===id);if(!t)return;tr[id]=Date.now();store.set('fernweh-trophies',tr);
-  setTimeout(()=>{AU.fx('ding');toast('Neue Plakette: '+t.n)},D?900:500);renderTrophyBtn()}
+  AQ.push(t);renderTrophyBtn();flushAwards()}
+/* Neue Plaketten kommen nacheinander und nie mitten in die Fahrt, die Ankunftsmelodie oder den Abspann.
+   Sonst klingen mehrere Glöckchen gleichzeitig über die Musik. */
+const AQ=[];let aqT=0;
+function flushAwards(){if(aqT||!AQ.length)return;if((D&&!$('#drive').hidden)||curScreen==='end')return;
+  aqT=setTimeout(()=>{aqT=0;if((D&&!$('#drive').hidden)||curScreen==='end')return;const t=AQ.shift();if(!t)return;AU.fx('ding');toast('Neue Plakette: '+t.n);flushAwards()},2200)}
 function renderTrophyBtn(){const b=$('#btn-trophy');if(!b)return;const n=Object.keys(trophies()).length;b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0z" fill="#D8A23A" stroke="#2B2230" stroke-width="1.5"/><path d="M7 6H4.5a2.5 2.5 0 0 0 3 3M17 6h2.5a2.5 2.5 0 0 1-3 3" fill="none" stroke="#2B2230" stroke-width="1.5"/><path d="M12 13v3M8.5 20h7l-1-4h-5z" fill="#D8A23A" stroke="#2B2230" stroke-width="1.5" stroke-linejoin="round"/></svg><span>'+n+'/'+TROPHIES.length+'</span>'}
 function bestCard(){const best=store.get('fernweh-best')||{};
   let h='<p class="eyebrow">Bestwerte</p><div class="hsl">';
