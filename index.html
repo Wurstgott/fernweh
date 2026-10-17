@@ -317,9 +317,17 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
 .post:nth-child(even) .stamp-svg{transform:rotate(-2deg)}
 .post b,.post>span{display:block;padding-right:36px}
 /* Versteckte Kleinigkeiten */
-.title-word{cursor:default;transition:opacity .25s,letter-spacing .4s}
-.title-word.swap{animation:sigh 2.6s ease-in-out}
-@keyframes sigh{0%{opacity:1}9%{opacity:0}12%{opacity:1;color:var(--teal);letter-spacing:.24em}85%{opacity:1;color:var(--teal)}92%{opacity:0}100%{opacity:1}}
+.title-word{cursor:default;perspective:300px}
+.title-word span{display:inline-block;transform-origin:50% 50%;transition:color .3s}
+.title-word span.heim{color:var(--teal)}
+.title-word span.flip{animation:flap .28s ease-in-out}
+@keyframes flap{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+.title-word.nudge{animation:nudge .25s ease-out}
+@keyframes nudge{0%{transform:scale(1)}40%{transform:scale(.985,1.015)}100%{transform:scale(1)}}
+.title-sub{transition:opacity .35s}
+.title-sub.fade{opacity:0}
+#title-emblem{transition:transform .8s ease-in-out}
+#title-emblem.sad{transform:rotate(-3deg) translateY(4px) scale(.97)}
 .hilde-stage{transition:background 1.2s}
 .hilde-stage .sun{cursor:default}
 .hilde-stage.night{background:#3A3A5C}
@@ -745,6 +753,9 @@ const AU=(function(){
         [84,88,91,96,100,103,108].forEach((m,i)=>inst('celesta',m,hit+.12+i*.08,.3,.06,D));
         inst('bell',96,hit+1.3,.6,.05,D);if(big)inst('bell',103,hit+2.1,.8,.045,D);
         break}
+      case 'flap':{const g=gain(0,D);const bp=filt('bandpass',2400,2,g);noise(t,.04,bp);envAD(g,t,.05,.001,.035);break}
+      case 'heimweh':{[[69,0,.5],[74,.5,.5],[77,1,.7],[76,1.75,.45],[74,2.2,1.1]].forEach(([m,d,l])=>inst('celesta',m,t+d,l,.07,D));[[50,0,2],[46,1,1.2],[45,2.2,1.1]].forEach(([m,d,l])=>inst('pad',m,t+d,l,.035,D));break}
+      case 'fernweh':{[74,78,81,86].forEach((m,i)=>inst('celesta',m,t+i*.09,.3,.07,D));inst('bell',90,t+.36,.5,.04,D);break}
       case 'perfect':{[84,88,91,96].forEach((m,i)=>inst('celesta',m,t+i*.07,.4,.07,D));inst('bell',100,t+.32,.8,.05,D);break}
       case 'ring':{for(let r=0;r<2;r++){const st=t+r*.55;const g=gain(0,D);const bp=filt('bandpass',1300,3,g);const o=_osc('square',1250,st,bp);const lf=_osc('square',22,st,gain(80,o.frequency));envASR(g,st,.045,.01,.32,.05);o.start(st);o.stop(st+.42);lf.start(st);lf.stop(st+.42)}break}
       case 'rumble':{const g=gain(0,D);const lp=filt('lowpass',220,1,g);noise(t,1.2,lp);const am=_osc('square',26,t,gain(.18,g.gain));am.start(t);am.stop(t+1.2);envASR(g,t,.3,.03,.85,.25);break}
@@ -1160,9 +1171,20 @@ document.querySelectorAll('.tgl').forEach(b=>b.addEventListener('click',()=>{AU.
 window.addEventListener('pointerdown',()=>{AU.init()},{once:false,passive:true});
 
 /* ================= Titel ================= */
-$('.title-word').addEventListener('click',()=>{AU.init();const tw=$('.title-word');
-  if(tw.dataset.busy||!egg('title',7,4000))return;tw.dataset.busy=1;tw.classList.add('swap');AU.fx('sad');
-  const sub=$('.title-sub'),old=sub.textContent;setTimeout(()=>{tw.textContent='HEIMWEH';sub.textContent='Ein Spiel über Kalle, der manchmal lieber zu Hause auf dem Sofa säße.'},250);setTimeout(()=>{tw.textContent='FERNWEH';sub.textContent=old;tw.classList.remove('swap');delete tw.dataset.busy},2800)});
+/* Versteckt: Tippt man oft genug auf den Titel, klappt „FERN“ wie auf einer Bahnhofs-Anzeigetafel zu „HEIM“ um.
+   Kalle hat kurz Heimweh, dann gewinnt das Fernweh wieder. */
+{const tw=$('.title-word');tw.innerHTML='FERNWEH'.split('').map(c=>'<span>'+c+'</span>').join('');
+ const flipTo=(word,cls)=>[...word].forEach((c,k)=>setTimeout(()=>{const sp=tw.children[k];sp.classList.remove('flip');void sp.offsetWidth;sp.classList.add('flip');AU.fx('flap');
+   setTimeout(()=>{sp.textContent=c;sp.classList.toggle('heim',cls)},140)},k*120));
+ tw.addEventListener('click',()=>{AU.init();if(tw.dataset.busy)return;
+   const n=(EGG.title||[]).length+1;if(n>=3){tw.classList.remove('nudge');void tw.offsetWidth;tw.classList.add('nudge')}
+   if(!egg('title',7,4000))return;tw.dataset.busy=1;tw.classList.remove('nudge');
+   const sub=$('.title-sub'),old=sub.textContent,em=$('#title-emblem');
+   flipTo('HEIM',true);setTimeout(()=>AU.fx('heimweh'),520);
+   setTimeout(()=>{sub.classList.add('fade');em.classList.add('sad')},300);
+   setTimeout(()=>{sub.textContent='Ein Spiel über Kalle, der manchmal lieber zu Hause auf dem Sofa säße.';sub.classList.remove('fade')},700);
+   setTimeout(()=>{flipTo('FERN',false);sub.classList.add('fade');em.classList.remove('sad')},4300);
+   setTimeout(()=>{sub.textContent=old;sub.classList.remove('fade');AU.fx('fernweh');delete tw.dataset.busy},4300+620)});}
 function renderTitle(){
   $('#title-emblem').innerHTML='<div class="emblem">'+hildeSVG({duft:1,glanz:80})+'</div>';
   const d=$('#diff');d.innerHTML='';
