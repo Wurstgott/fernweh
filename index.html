@@ -1339,6 +1339,12 @@ const QUESTS={
   // Nur für Leute, die viel grüßen
   stamm:{cond:S=>S.stats.greets>=8,start:'Über Funk meldet sich Brummi-Bär. „Kalle, wir haben gehört, du grüßt jeden. Der Stammtisch vom Rasthof Kirchheim will dich kennenlernen. Grüß auf einer einzigen Tour vier Kollegen, dann gehörst du dazu. Over.“',btn:'Over und aus',
     todo:'Auf einer Tour vier Kollegen grüßen'},
+  // Erst wenn die Wien-Tour offen ist: Kalles Mutter wohnt an der Strecke
+  mama:{cond:S=>unlocked(TOURS.find(t=>t.id==='wien')),start:'Kalles Mutter ruft an. „Junge, ich werde nächste Woche 70. Ich weiß, du hast viel zu tun. Aber wenn du mal nach Wien fährst, kommst du doch am Rasthof Passau vorbei. Ich backe dir was.“',btn:'Ich komme, Mama',
+    todo:'Auf der Tour nach Wien am Rasthof Passau Mama zum Geburtstag gratulieren'},
+  // Nur für Leute, die den Kindern auf der Brücke winken
+  bruecke:{cond:S=>(S.stats.kids||0)>=1,start:'Im Radio liest die Moderatorin einen Hörerbrief vor: „Meine Kinder winken jeden Nachmittag von der Autobahnbrücke. Neulich hat ein gelber Laster zurückgegrüßt. Wenn er das noch dreimal tut, malen sie ihm ein Plakat.“',btn:'Das bin ich!',
+    todo:'Den Kindern auf der Autobahnbrücke noch dreimal zuwinken'},
   // Nur für Leute, die schon eingenickt sind
   kissen:{cond:S=>(S.stats.naps||0)>=2,start:'Ottilie hat gehört, dass Kalle am Steuer eingenickt ist. Sie sagt nichts dazu. Sie sagt nur: „Fahr mir zweimal hintereinander ausgeschlafen. Dann bekommst du etwas von mir.“',btn:'Versprochen',
     todo:'Zwei Touren hintereinander ohne Sekundenschlaf fahren'}
@@ -1480,7 +1486,7 @@ function renderShop(){
 /* ================= Fahrtenbuch ================= */
 function renderLog(){
   const L=$('#loglist');L.innerHTML='';
-  {const q=Q(),rows=Object.keys(QUESTS).filter(k=>q[k]).map(k=>{const d=q[k]===3,lbl=QUESTS[k].todo+(k==='ott'&&q[k]<3?' ('+(q.cards||[]).length+' von 3)':'')+(q[k]===2&&['jupp','doris'].includes(k)?' · dabei, noch abgeben':'')+(k==='kissen'&&q[k]===1?' ('+(q.kStreak||0)+' von 2)':'');return '<li class="'+(d?'done':'')+'">'+lbl+'</li>'});
+  {const q=Q(),rows=Object.keys(QUESTS).filter(k=>q[k]).map(k=>{const d=q[k]===3,lbl=QUESTS[k].todo+(k==='ott'&&q[k]<3?' ('+(q.cards||[]).length+' von 3)':'')+(q[k]===2&&['jupp','doris'].includes(k)?' · dabei, noch abgeben':'')+(k==='kissen'&&q[k]===1?' ('+(q.kStreak||0)+' von 2)':'')+(k==='bruecke'&&q[k]===1?' ('+(q.bw||0)+' von 3)':'');return '<li class="'+(d?'done':'')+'">'+lbl+'</li>'});
    if(rows.length){const d=document.createElement('div');d.className='panel todo';d.innerHTML='<p class="eyebrow" style="margin:0 0 6px">Nicht vergessen</p><ul>'+rows.join('')+'</ul>';L.appendChild(d)}}
   if(!S.log.length){L.innerHTML='<div class="log typed">Nach jeder Tour schreibt Kalle hier auf, was er unterwegs erlebt hat.</div>'}
   S.log.slice().reverse().forEach(e=>{const d=document.createElement('div');d.className='log';d.innerHTML='<div class="d">Tag '+e.day+' · '+e.to+(e.ok?'':' · nicht zugestellt')+'</div><div class="typed"></div>';d.querySelector('.typed').textContent=e.note;L.appendChild(d)});
@@ -2048,7 +2054,7 @@ function flash(){
   if(k.type==='ente'){D.duckGreet=true;AU.fx('quack');[260,420,560].forEach(t=>setTimeout(()=>AU.fx('quack'),t));for(let i=0;i<5;i++)D.parts.push({k:'heart',x:roadX+k.fx*roadW,y:k.y-6*SC,vx:(Math.random()-.5)*60,vy:-50-Math.random()*40,g:40,life:1.2,max:1.2,r:4*SC});D.extraResp.push(['Der Entenmama zugenickt',1]);floatText('+1 Respekt',roadX+k.fx*roadW,k.y-14*SC);msg('Die Entenmama nickt dir zu.','good');return}
   if(k.type==='korso'){D.korsoDone=true;D.objs.forEach(o=>{if(o.type==='korso')o.wave=1.6});AU.fx('hochzeit');D.extraResp.push(['Dem Brautpaar gratuliert',3]);
     const kx=laneX(k.lx)+sway(k.y);floatText('+3 Respekt',kx,k.y-k.h/2,'#7B2D3B');for(let i=0;i<14;i++)D.parts.push({k:'heart',x:kx,y:k.y,vx:(Math.random()-.5)*160,vy:-Math.random()*140-30,g:90,life:1.3,max:1.3,r:5*SC});msg('Das Brautpaar winkt.','good');return}
-  if(k.type==='overpass'){k.greeted=true;k.cheer=2;AU.fx(S.up.fanfare?'fanfare':'horn');AU.fx('cheer');D.extraResp.push(['Kinder auf der Brücke gegrüßt',1]);floatText('+1 Respekt',W/2,k.y-20*SC);msg('Die Kinder jubeln.','good');return}
+  if(k.type==='overpass'){S.stats.kids=(S.stats.kids||0)+1;{const q=Q();if(q.bruecke===1){q.bw=(q.bw||0)+1;if(q.bw>=3){q.bruecke=3;D.extraResp.push(['Plakat von den Brückenkindern',5]);later(1.2,()=>{msg('Die Kinder halten ein Plakat hoch: „HILDE“ mit Herz!','good');AU.fx('cheer')})}}}k.greeted=true;k.cheer=2;AU.fx(S.up.fanfare?'fanfare':'horn');AU.fx('cheer');D.extraResp.push(['Kinder auf der Brücke gegrüßt',1]);floatText('+1 Respekt',W/2,k.y-20*SC);msg('Die Kinder jubeln.','good');return}
   if(k.hildegard){k.greeted=true;k.wave=1.5;D.greets++;AU.fx(S.up.fanfare?'fanfare':'horn');setTimeout(()=>AU.fx('fanfare'),450);
     D.extraResp.push(['Hildegard aus Bremen gegrüßt',4]);S.stats.hildegard=(S.stats.hildegard||0)+1;const kx=laneX(k.lx)+sway(k.y);floatText('+4 Respekt',kx,k.y-k.h/2,'#7B2D3B');
     for(let i=0;i<12;i++)D.parts.push({k:'heart',x:kx,y:k.y,vx:(Math.random()-.5)*150,vy:-Math.random()*130-30,g:90,life:1.3,max:1.3,r:5*SC});
@@ -2139,6 +2145,7 @@ function openRast(name){
        {label:'Hilde abspritzen <span>'+Math.round(6*DIFF[S.diff].priceMul)+' €</span>',disabled:D._wash||S.money<Math.round(6*DIFF[S.diff].priceMul),fn:()=>{D._wash=true;S.money-=Math.round(6*DIFF[S.diff].priceMul);S.glanz=Math.min(100,S.glanz+30);AU.fx('bubbles');render('Am Waschplatz ist Hilde gleich wieder sauber.')}}];
     if(duftLv()&&S.duftFrisch<70)opts.push({label:'Neues Duftbäumchen <span>3 €</span>',disabled:D._tree||S.money<3,fn:()=>{D._tree=true;S.money-=3;S.duftFrisch=100;AU.fx('pop');render('Das neue Bäumchen riecht nach '+UP[0].lv[duftLv()-1]+'.')}});
     const cap=DIFF[S.diff].coffee+S.up.thermos;if(cap>0&&D.coffee<cap)opts.push({label:'Thermoskanne auffüllen <span>2 €</span>',disabled:D._fill||S.money<2,fn:()=>{D._fill=true;S.money-=2;D.coffee=cap;AU.fx('slurp');render('Die Kanne ist wieder voll. '+cap+' Becher für unterwegs.')}});
+    if(Q().mama===1&&/Passau/.test(name))opts.push({label:'Mama zum Geburtstag gratulieren',fn:()=>{Q().mama=3;S.respect+=4;D.energy=100;D.hunger=0;save();AU.fx('ding');render('Mama sitzt am Fenstertisch, mit Hut und einer Tupperdose voll Rouladen. „Du bist dünn geworden.“ Kalle isst alles auf und singt ihr leise ein Ständchen. Am Nachbartisch singen zwei Kollegen mit.')}});
     if(Q().jupp===1&&/Holledau/.test(name))opts.push({label:'Bei Bernd den Anlasser abholen',disabled:D.gotAnlasser,fn:()=>{Q().jupp=2;D.gotAnlasser=true;save();AU.fx('wrench');render('Bernd wartet schon am Lkw-Parkplatz, mit dem Anlasser in Zeitungspapier. „Grüß mir den Alten. Sag ihm, der läuft noch hundert Jahre.“ Kalle verstaut ihn hinter dem Sitz.')}});
     if(H0.who==='Doris'&&Q().doris===2)opts.push({label:'Doris den Senf geben',fn:()=>{Q().doris=3;S.respect+=3;S.dorisFreund=true;save();AU.fx('ding');render('Doris schraubt das Glas auf und riecht daran. „Das ist er.“ Sie stellt es neben die Kasse wie einen Pokal. „Ab jetzt geht die Kettwurst öfter aufs Haus, Kalle.“')}});
     if(hitch&&!D.anhalter)opts.push({label:'Anhalter mitnehmen',fn:()=>{D.anhalter=hitch;render(hitch.n+' steigt ein und bedankt sich.')}});
@@ -2387,6 +2394,8 @@ function drawOverpass(o){
   const cxm=W/2+sway(y);o.kids.forEach((c,i)=>{const x=cxm+(i-1.5)*26*s,wave=Math.sin(D.t*(o.cheer>0?14:6)+i)*(o.cheer>0?7:4)*s;
     cx.strokeStyle='#2B2230';cx.lineWidth=2;cx.beginPath();cx.moveTo(x-5*s,y+2*s);cx.lineTo(x-10*s,y-8*s+wave);cx.moveTo(x+5*s,y+2*s);cx.lineTo(x+10*s,y-8*s-wave);cx.stroke();
     cx.fillStyle=c;cx.beginPath();cx.ellipse(x,y+5*s,7*s,5*s,0,0,7);cx.fill();cx.stroke();cx.fillStyle='#E9C9A8';cx.beginPath();cx.arc(x,y-2*s,4.5*s,0,7);cx.fill();cx.stroke()});
+  if((S.q||{}).bruecke===3){const bx=cxm+70*s,bw=58*s,bh=18*s;cx.save();cx.translate(bx,y-6*s);cx.rotate(-.04);cx.fillStyle='#FBF8F0';cx.strokeStyle='#2B2230';cx.lineWidth=1.5;cx.fillRect(-bw/2,-bh/2,bw,bh);cx.strokeRect(-bw/2,-bh/2,bw,bh);
+    cx.fillStyle='#C8432F';cx.font='700 '+Math.round(10*s)+'px Jost, Futura, sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText('HILDE ♥',0,1*s);cx.restore()}
   if(o.cheer>0)o.cheer-=.016;
 }
 function drawGantry(o){
@@ -2811,6 +2820,8 @@ function ending(){
    if(q.doris===3)f.push('Doris hat zum ersten Mal seit dreißig Jahren ihren Imbiss zugemacht. Sie kam mit einem Blech Kettwurst und dem Glas aus Bautzen. Jupp hat drei genommen.');
    else f.push('Doris hat ein Paket Kettwürste geschickt, mit einem Zettel: „Mit extra Senf, wie immer.“');
    if(q.ott===3)f.push('Ottilie hat die drei Ansichtskarten aufgestellt, gleich neben das Foto ihres Vaters.');
+   if(q.mama===3)f.push('Kalles Mutter hat allen erzählt, dass ihr Junge das Nordkap geschafft hat. Mehrmals. Auch Leuten, die es schon wussten.');
+   if(q.bruecke===3)f.push('Die Kinder von der Autobahnbrücke haben ihr Plakat mitgebracht. Es hängt jetzt in der Halle.');
    if(q.stamm===3)f.push('Der Stammtisch vom Rasthof Kirchheim kam geschlossen, mit Funkgeräten und zwei Blechen Bienenstich.');
    if(q.kissen===3)f.push('Als die Reden zu lang wurden, hat Kalle auf Ottilies Nackenkissen ein kleines Nickerchen gemacht. Diesmal durfte er.');
    if(S.stats.hildegard)f.push('Aus Bremen kam Hildegard angefahren und hat zur Begrüßung dreistimmig gehupt.');
