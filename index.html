@@ -335,6 +335,7 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:600}
 .senf{position:absolute;left:10px;bottom:8px;width:18px;height:38px;padding:0;border:0;background:none;z-index:2;transform:rotate(-8deg);filter:drop-shadow(0 0 4px rgba(240,197,102,.8))}
 .senf svg{display:block;width:100%;height:auto}
 @media (prefers-reduced-motion: reduce){.zzz span{animation:none;opacity:1}}
+.tour h3 .perf{color:var(--mustard);font-size:.8em;vertical-align:.1em;text-shadow:0 0 1px var(--ink)}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -744,6 +745,7 @@ const AU=(function(){
         [84,88,91,96,100,103,108].forEach((m,i)=>inst('celesta',m,hit+.12+i*.08,.3,.06,D));
         inst('bell',96,hit+1.3,.6,.05,D);if(big)inst('bell',103,hit+2.1,.8,.045,D);
         break}
+      case 'perfect':{[84,88,91,96].forEach((m,i)=>inst('celesta',m,t+i*.07,.4,.07,D));inst('bell',100,t+.32,.8,.05,D);break}
       case 'ring':{for(let r=0;r<2;r++){const st=t+r*.55;const g=gain(0,D);const bp=filt('bandpass',1300,3,g);const o=_osc('square',1250,st,bp);const lf=_osc('square',22,st,gain(80,o.frequency));envASR(g,st,.045,.01,.32,.05);o.start(st);o.stop(st+.42);lf.start(st);lf.stop(st+.42)}break}
       case 'rumble':{const g=gain(0,D);const lp=filt('lowpass',220,1,g);noise(t,1.2,lp);const am=_osc('square',26,t,gain(.18,g.gain));am.start(t);am.stop(t+1.2);envASR(g,t,.3,.03,.85,.25);break}
       case 'pssh':{const g=gain(0,D);const hp=filt('highpass',3000,.5,g);noise(t,.75,hp);envAD(g,t,.2,.01,.65);break}
@@ -1326,7 +1328,7 @@ function renderTours(){
       else if(t.final&&S.finale)right='<span class="stamp">Zugestellt</span>';
       else if(!fits(t))right='<span class="stamp">Zu wenig Zeit</span>';
       const pay=t.final?'Ehrenfahrt':eur(Math.round(t.pay*TUNE.payMul*(o&&o.eilig?1.35:1)));
-      c.innerHTML='<div><h3>'+t.to+'</h3></div><div>'+right+'</div>'+
+      c.innerHTML='<div><h3>'+t.to+((S.perfect||{})[t.id]?' <span class="perf" title="Schon einmal makellos zugestellt">★</span>':'')+'</h3></div><div>'+right+'</div>'+
         '<div class="meta num"><span>'+t.km.toLocaleString('de-DE')+' km</span><span>'+t.days+' Tag'+(t.days>1?'e':'')+'</span><span>'+pay+'</span>'+(S.done[t.id]?'<span>'+S.done[t.id]+'× gefahren</span>':'')+'</div>'+
         '<div class="cargo">'+t.cargo+'</div>'+chipsHTML(t,o);
       if(!un){const p=document.createElement('div');p.className='meta';p.textContent='Fahr zuerst zwei Touren aus '+CHAP[ch-1].split(' · ')[0]+'.';c.appendChild(p)}
@@ -1855,7 +1857,7 @@ function update(dt){
   D.msgs.forEach(m=>m.t-=dt);D.msgs=D.msgs.filter(m=>m.t>0);
   AU.engineSet({speed:D.speedF,rain:D.wxA.rain,tunnel:segIn('tunnel')});
   if(D.arrive)D.arrive+=dt;
-  ['banner','rays','fade'].forEach(k=>{if(D[k])D[k]+=dt});D.hop=Math.max(0,(D.hop||0)-dt*2.4);
+  ['banner','rays','fade','seal'].forEach(k=>{if(D[k])D[k]+=dt});D.hop=Math.max(0,(D.hop||0)-dt*2.4);
 }
 function burst(x,y,type){
   const col=type==='gans'?'#FBF1E6':type==='ren'||type==='reh'||type==='elch'?'#A0704C':'#B5832A';
@@ -1874,6 +1876,7 @@ function startArrival(){
   later(hit-.62,()=>{D.banner=0.001});
   later(hit,()=>{confetti();D.hop=1;D.rays=0.001;D.flashA=1;later(.12,()=>AU.fx('cheer'))});
   if(big)later(hit+1.6,()=>{confetti(true);AU.fx('cheer')});
+  if(D.cargo>=99.5){D.perfect=true;later(hit+.7,()=>{D.seal=0.001;AU.fx('perfect');for(let i=0;i<18;i++)D.parts.push({k:'star',x:W/2+(Math.random()-.5)*W*.7,y:H*.37+(Math.random()-.5)*H*.22,vx:(Math.random()-.5)*60,vy:-20-Math.random()*40,life:.8+Math.random()*1.2,max:2,r:(4+Math.random()*5)*SC})})}
   later(card-.5,()=>{D.fade=0.001});
   later(card,()=>finishDrive(true));
 }
@@ -1886,7 +1889,7 @@ function asleep(){
 /* Konfetti: Zwei Kanonen schießen von unten, danach rieselt es von oben nach.
    Jedes Stück flattert, pendelt zur Seite, zeigt Vorder- und Rückseite und bleibt am Ende auf der Straße liegen. */
 const CONF=[['#D8A23A','#A87A22'],['#7B2D3B','#561E29'],['#2F6F73','#1F4D50'],['#E3AFB4','#B9858B'],['#BFDCC8','#8FB39C'],['#FBF1E6','#D6C8B8'],['#F0C566','#C49A3E'],['#C8432F','#932F20']];
-function confPiece(x,y,vx,vy){const c=pick(CONF),sh=Math.random();
+function confPiece(x,y,vx,vy){const c=D&&D.perfect&&Math.random()<.45?pick([['#F0C566','#C49A3E'],['#D8A23A','#A87A22'],['#FBF1E6','#D6C8B8']]):pick(CONF),sh=Math.random();
   return {k:'conf',x,y,vx,vy,g:520,life:30,max:30,r:(3.5+Math.random()*3)*SC,col:c[0],col2:c[1],shape:sh<.62?0:sh<.85?1:2,
     rot:Math.random()*6,vr:(Math.random()-.5)*8,ph:Math.random()*6,fs:6+Math.random()*7,sw:30+Math.random()*50,
     floor:truckY+TH*.6-Math.random()*H*.6,front:Math.random()<.3}}
@@ -2337,6 +2340,13 @@ function drawArrivalFx(){
     cx.font='600 '+Math.round(11*s)+'px Jost, Futura, sans-serif';cx.fillText(big?'ANGEKOMMEN AM':'ANGEKOMMEN IN',0,-bh/2+22*s);
     cx.font='700 '+Math.round(27*s)+'px Jost, Futura, sans-serif';cx.fillText(D.tour.to.toUpperCase(),0,-bh/2+52*s,bw-30*s);
     if(big){cx.font='600 '+Math.round(11*s)+'px "Courier Prime", monospace';cx.fillStyle='#7B2D3B';cx.fillText('1926 · 2026',0,-bh/2+74*s)}
+    // Siegel für eine Fahrt ohne Kratzer
+    if(D.seal){const k=Math.min(1,D.seal/.35),pop=k<1?1+Math.sin(k*Math.PI)*.35:1,r=27*s;cx.save();cx.translate(bw/2-8*s,-bh/2-4*s);cx.rotate(.18+Math.sin(D.t*1.6)*.03);cx.scale(k*pop,k*pop);
+      cx.fillStyle='#7B2D3B';[-1,1].forEach(d=>{cx.beginPath();cx.moveTo(d*8*s,r*.6);cx.lineTo(d*14*s,r*1.55);cx.lineTo(d*4*s,r*1.3);cx.lineTo(d*1*s,r*.7);cx.closePath();cx.fill()});
+      cx.fillStyle='#F0C566';cx.strokeStyle='#2B2230';cx.lineWidth=2;cx.beginPath();for(let i=0;i<24;i++){const a=i/24*Math.PI*2,rr2=i%2?r*.88:r;cx.lineTo(Math.cos(a)*rr2,Math.sin(a)*rr2)}cx.closePath();cx.fill();cx.stroke();
+      cx.strokeStyle='#B5832A';cx.lineWidth=1.2;cx.beginPath();cx.arc(0,0,r*.68,0,7);cx.stroke();
+      cx.fillStyle='#7B2D3B';cx.textAlign='center';cx.font='700 '+Math.round(11*s)+'px Jost, Futura, sans-serif';cx.fillText('100 %',0,1*s);
+      cx.font='600 '+Math.round(6.5*s)+'px Jost, Futura, sans-serif';cx.fillText('MAKELLOS',0,10*s);cx.restore()}
     cx.restore()}
   if(D.fade){cx.fillStyle='rgba(251,241,230,'+Math.min(1,D.fade/.5)+')';cx.fillRect(0,0,W,H)}
 }
@@ -2486,13 +2496,14 @@ function finishDrive(ok,aborted){
   const t=D.tour;
   const onTime=D.clock<=D.due;
   const first=!S.done[t.id];
-  let pay=0,resp=0,fine=0,tip=0;const lines=[],rl=[];
+  let pay=0,resp=0,fine=0,tip=0,perfB=0;const lines=[],rl=[];
   const R=(label,v)=>{if(v){rl.push([label,v]);resp+=v}};
   if(ok){
     const cargoF=.4+.6*D.cargo/100,glanzF=1+S.glanz/500,timeF=onTime?1.15:1,eilF=D.eilig?1.35:1;
     const rl2=rufLv();const base=Math.round(t.pay*TUNE.payMul*DIFF[S.diff].payMul*eilF*(1+rufPerks().lohn));
     pay=Math.round(base*cargoF*glanzF*timeF);
     if(!t.final)lines.push(['Lohn <small>('+Math.round(D.cargo)+' % heil, '+(onTime?'pünktlich':'verspätet')+')</small>','+ '+eur(pay)]);
+    if(!t.final&&D.cargo>=99.5){perfB=Math.max(5,Math.round(pay*.12));lines.push(['Makellos-Bonus <small>(kein Kratzer)</small>','+ '+eur(perfB)])}
     if(!t.final&&D.cargo>=80&&Math.random()<.3){tip=Math.round(rnd(10,30));lines.push(['Trinkgeld','+ '+eur(tip)])}
     R(first?'Neues Ziel':'Zugestellt',first?6:2);
     if(D.cargo>=99.5)R('Makellos, kein Kratzer',9);else R('Ladung '+Math.round(D.cargo)+' %',Math.max(0,Math.round((D.cargo-40)/10)));
@@ -2522,7 +2533,7 @@ function finishDrive(ok,aborted){
   const repair=Math.round(D.hits*6*DIFF[S.diff].dmg*(1-.15*S.up.reifen));costs+=repair;
   if(costs)lines.push(['Diesel'+(ok&&t.maut?(t.id==='kop'?', Fähre':', Maut'):'')+(repair?', Reparatur':''),'− '+eur(costs)]);
   if(D.bonus){lines.push(['Gewinnspiel','+ '+eur(D.bonus)])}
-  const net=pay+tip+D.bonus-fine-costs;
+  const net=pay+tip+perfB+D.bonus-fine-costs;
   S.money=Math.max(0,S.money+net);
   S.respect=Math.max(0,S.respect+resp);
   S.day+=t.days;
@@ -2532,6 +2543,7 @@ function finishDrive(ok,aborted){
   if(duftLv())S.duftFrisch=Math.max(0,S.duftFrisch-UP[0].fade[duftLv()]);
   S.stats.km+=ok?t.km:Math.round(t.km*D.prog);S.stats.greets+=D.greets;S.stats.kett+=D.kett;S.stats.pauses+=D.pauses;
   if(ok){S.done[t.id]=(S.done[t.id]||0)+1;if(t.final)S.finale=true}
+  if(ok&&D.cargo>=99.5){S.perfect=S.perfect||{};S.perfect[t.id]=true;S.stats.perfekt=(S.stats.perfekt||0)+1}
   if(ok&&D.anhalter&&D.anhalter.n!=='Jule')S.stats.anhalter=(S.stats.anhalter||0)+1;
   delete S.driving;delete S.offers[t.id];
   let note=ok?t.note:aborted==='schlaf'?'Auf dem Weg nach '+t.to+' ist Kalle am Steuer eingeschlafen. Zum Glück ist nichts passiert. Ottilie hat einen Ersatzfahrer geschickt. Sie hat nicht geschimpft, sondern Kalle eine Decke mitgebracht.':(aborted?'Kalle hat die Tour nach '+t.to+' abgebrochen. Jupp sagt: „Besser umkehren als liegen bleiben.“':'Die Ladung nach '+t.to+' war nicht mehr zu retten. Kalle hat sich beim Empfänger entschuldigt. Der hat ihm trotzdem einen Kaffee gegeben.');
@@ -2620,6 +2632,7 @@ function ending(){
   h+='<div class="panel"><div class="ledger">'+
     '<span>Gefahrene Kilometer</span><b>'+S.stats.km.toLocaleString('de-DE')+'</b>'+
     '<span>Kollegen gegrüßt</span><b>'+S.stats.greets+'</b>'+
+    '<span>Makellose Fahrten</span><b>'+(S.stats.perfekt||0)+'</b>'+
     '<span>Kolleginnen bei Pannen geholfen</span><b>'+(S.stats.helped||0)+'</b>'+
     '<span>Kettwürste und Co.'+(S.senf?' · Goldene Senftube':'')+'</span><b>'+S.stats.kett+'</b>'+(S.stats.hildegard?'<span>Hildegard getroffen</span><b>'+S.stats.hildegard+'</b>':'')+
     '<span>Pausen gemacht</span><b>'+S.stats.pauses+'</b>'+
