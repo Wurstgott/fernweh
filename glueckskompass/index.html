@@ -1283,7 +1283,7 @@ function pickBite(){
 function openBite(id){if(!S.cur&&!shared)pushNav();anim=true;pendingGlow=true;S.cur=id;if(!S.read[id])S.read[id]=now();S.history=[id,...S.history.filter(x=>x!==id)].slice(0,12);save();tab="bites";render();window.scrollTo(0,0)}
 function biteCard(b){
   const t=b.term&&T[b.term],x=b.exp&&X[b.exp];
-  const gift=shared===b.id?`<div class="gift"><b>Jemand möchte dir dieses Häppchen zeigen.</b><span>Es stammt aus dem „Glückskompass“, einer kleinen, kostenlosen App mit Erkenntnissen aus der Glücksforschung, Begriffen zum Üben und Experimenten für den Alltag. Ohne Anmeldung, deine Daten bleiben auf deinem Gerät.</span><button class="btn accent" id="explore">Selbst ausprobieren</button></div>`:"";
+  const gift=shared===b.id?`<div class="gift"><b>Jemand möchte dir dieses Häppchen zeigen.</b><span>Es stammt aus dem „Glückskompass“, einer kostenlosen App mit Erkenntnissen aus der Glücksforschung. Du brauchst keine Anmeldung, und deine Daten bleiben auf deinem Gerät.</span><button class="btn accent" id="explore">Selbst ausprobieren</button></div>`:"";
   return gift+`<article class="card bite" ${cc(b.cat)}>
     <div class="meta"><span class="catn">${dot(b.cat)}${CATS[b.cat].n}</span>${evHTML(b.ev)}</div>
     <h2>${b.t}</h2>
@@ -1312,7 +1312,7 @@ function viewBites(){
     ${nudge}${moodChip}
     <div class="hero">
       <div class="cwrap"><span class="halo" aria-hidden="true"></span><button class="compass breath" id="go" aria-label="Neues Häppchen aufdecken"><span class="orbit" aria-hidden="true"><i></i></span><span class="core"><em class="ccat" id="ccat"></em><b>Häppchen</b><span id="cnew">${unread?`${unread} noch neu`:"alle gelesen · Wiederholung"}</span></span></button></div>
-      <p>${nRead?"Drück auf den Kompass für die nächste Erkenntnis.":"Drück auf den Kompass. Du bekommst eine Erkenntnis aus der Glücksforschung, mit Quelle und ehrlicher Einschätzung, wie sicher sie ist."}</p>
+      <p>${nRead?"Tippe auf den Kompass für die nächste Erkenntnis.":"Tippe auf den Kompass, um eine Erkenntnis aus der Glücksforschung zu bekommen. Bei jeder steht die Quelle und wie gut sie belegt ist."}</p>
     </div>
     ${filt}
     ${daily}
@@ -1390,13 +1390,13 @@ function expCard(e,mode){
   if(mode==="active"){const total=e.d,el=Math.min(total,Math.floor((now()-v.start)/DAY)),left=Math.max(0,total-el);
     extra=`<div class="prog"><div class="meter"><span style="width:${Math.max(4,Math.round(el/total*100))}%;background:var(--c-${e.cat})"></span></div><span class="dur">${left?`Noch ${left} Tag${left>1?"e":""} · bis ${fmtDate(v.start+total*DAY)}`:"Zeit ist um. Wie lief es?"}</span></div>
     <div class="row"><button class="btn primary" data-done="${e.id}">Geschafft</button><button class="btn ghost" data-remind="${e.id}">Erinnern</button><button class="btn ghost" data-open-exp="${e.id}">Anleitung</button><button class="linkbtn" data-drop="${e.id}">Abbrechen</button></div>${checkRow(e.id)}<button class="mini" data-share-exp="${e.id}">Mit jemandem machen</button>`}
-  else extra=`<div class="row"><button class="btn accent" data-accept="${e.id}" ${activeExps().length>=MAXACT?"disabled":""}>Annehmen</button><button class="btn ghost" data-open-exp="${e.id}">Mehr dazu</button>${mode==="suggest"?`<button class="linkbtn" id="other">Anderer Vorschlag</button>`:""}</div><button class="mini" data-share-exp="${e.id}">Mit jemandem machen</button>${activeExps().length>=MAXACT?`<p class="muted" style="font-size:14px">Du hast schon ${MAXACT} Experimente laufen. Schließ erst eins ab.</p>`:""}`;
+  else extra=`<div class="row"><button class="btn accent" data-accept="${e.id}" ${activeExps().length>=MAXACT?"disabled":""}>Annehmen</button><button class="btn ghost" data-open-exp="${e.id}">Mehr dazu</button>${mode==="suggest"?`<button class="linkbtn" id="other">Anderer Vorschlag</button>`:""}</div><button class="mini" data-share-exp="${e.id}">Mit jemandem machen</button>${activeExps().length>=MAXACT?`<p class="muted" style="font-size:14px">Du hast schon ${MAXACT} Experimente laufen. Schließ zuerst eines ab, bevor du ein neues beginnst.</p>`:""}`;
   return `<article class="card exp" ${cc(e.cat)}><div class="meta"><span class="catn">${dot(e.cat)}${CATS[e.cat].n}</span><span>${e.d===1?"Heute":e.d+" Tage"}</span></div><h2>${e.t}</h2><p style="font-size:16px">${e.x}</p>${extra}</article>`;
 }
 function viewExps(){
   const act=activeExps(),sug=suggest();
   let h=`<section class="view">`;
-  h+=`<div class="sec"><div class="sec-h"><h3>Läuft gerade</h3><span class="label">${act.length} von ${MAXACT}</span></div>${act.length?act.map(id=>expCard(X[id],"active")).join(""):`<p class="empty">Noch kein Experiment angenommen. Experimente sind kleine, befristete Versuche, dein Leben ein Stück umzubauen. Nichts davon muss perfekt gelingen.</p>`}</div>`;
+  h+=`<div class="sec"><div class="sec-h"><h3>Läuft gerade</h3><span class="label">${act.length} von ${MAXACT}</span></div>${act.length?act.map(id=>expCard(X[id],"active")).join(""):`<p class="empty">Du hast noch kein Experiment angenommen. Experimente sind kleine Versuche für einen oder mehrere Tage, und nichts davon muss perfekt gelingen.</p>`}</div>`;
   if(sug)h+=`<div class="sec"><h3>Vorschlag für dich</h3>${expCard(sug,"suggest")}</div>`;
   const list=EXPS.filter(e=>expFilter==="alle"||e.cat===expFilter),lim=expMore?list.length:6,cnt={alle:EXPS.length};Object.keys(CATS).forEach(k=>cnt[k]=EXPS.filter(e=>e.cat===k).length);
   h+=`<details class="fold" id="expfold" ${S.expOpen?"open":""}><summary><span>Alle Experimente</span><span class="label">${EXPS.length} zur Auswahl</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><div class="sec" style="padding:6px 0 14px">${dirPicker("efilter",expFilter,cnt)}<div class="list">${list.slice(0,lim).map(e=>{const v=S.exps[e.id];const st=v?(v.status==="active"?"läuft":v.status==="done"?"geschafft ✓":"abgebrochen"):(e.d===1?"heute":e.d+" Tage");return `<button class="li" data-open-exp="${e.id}">${dot(e.cat)}<span class="tx"><b>${e.t}</b></span><span class="aside">${st}</span></button>`}).join("")}</div>${list.length>lim?`<button class="linkbtn more" id="emore">${list.length-lim} weitere anzeigen</button>`:""}</div></details>`;
@@ -1406,7 +1406,7 @@ function sheet(html){const l=$("#layer");if(!l.innerHTML)pushNav();l.innerHTML=`
   $("#sh").addEventListener("click",e=>{if(e.target.id==="sh"||e.target.id==="shx")closeSheet()})}
 function closeSheet(){$("#layer").innerHTML=""}
 function expSheet(id){const e=X[id],v=S.exps[id],b=B[e.b];
-  sheet(`${invited===id?`<div class="gift"><b>Eine Einladung</b><span>Jemand möchte dieses Experiment gemeinsam mit dir ausprobieren. Es stammt aus dem „Glückskompass“, einer kleinen, kostenlosen App ohne Anmeldung.</span></div>`:""}<div class="meta"><span class="catn">${dot(e.cat)}${CATS[e.cat].n}</span><span>${e.d===1?"Heute":e.d+" Tage"}</span></div><h2>${e.t}</h2><p>${e.x}</p><h3>So gehst du vor</h3><ol class="steps">${e.s.map(s=>`<li>${s}</li>`).join("")}</ol>${b?`<div class="take"><b>Warum das?</b>${b.t}. <button class="linkbtn" data-open="${b.id}">Häppchen lesen</button></div>`:""}
+  sheet(`${invited===id?`<div class="gift"><b>Eine Einladung</b><span>Jemand möchte dieses Experiment gemeinsam mit dir ausprobieren. Es stammt aus dem „Glückskompass“, einer kostenlosen App ohne Anmeldung.</span></div>`:""}<div class="meta"><span class="catn">${dot(e.cat)}${CATS[e.cat].n}</span><span>${e.d===1?"Heute":e.d+" Tage"}</span></div><h2>${e.t}</h2><p>${e.x}</p><h3>So gehst du vor</h3><ol class="steps">${e.s.map(s=>`<li>${s}</li>`).join("")}</ol>${b?`<div class="take"><b>Warum das?</b>${b.t}. <button class="linkbtn" data-open="${b.id}">Häppchen lesen</button></div>`:""}
   <div class="row">${!v||v.status==="dropped"?`<button class="btn accent" data-accept="${id}" ${activeExps().length>=MAXACT?"disabled":""}>Annehmen</button>`:v.status==="active"?`<button class="btn primary" data-done="${id}">Geschafft</button>`:`<span class="label">Geschafft am ${fmtDate(v.end)}</span><button class="btn ghost" data-accept="${id}" ${activeExps().length>=MAXACT?"disabled":""}>Noch einmal</button>`}</div><button class="mini" data-share-exp="${id}">Mit jemandem machen</button>`)}
 const EVTXT=["Eine Idee, eine Einzelbeobachtung oder eine plausible Theorie. Noch nicht gut geprüft.","Erste Studien deuten in diese Richtung, aber sie sind klein, neu oder widersprechen sich teilweise.","Mehrere gute Studien kommen zu einem ähnlichen Ergebnis. Die Größe des Effekts ist aber noch umstritten.","Viele Studien und Übersichtsarbeiten bestätigen den Befund. Daran zweifelt kaum noch jemand."];
 function goBtn(kind,id,c,label,title,sub){return `<button class="dgo" ${cc(c)} data-${kind}="${id}"><span class="dd" aria-hidden="true"></span><span class="tx"><small>${label}</small><b>${title}</b>${sub?`<i>${sub}</i>`:""}</span><span aria-hidden="true">→</span></button>`}
@@ -1429,7 +1429,7 @@ function evSheet(b){
   glowSheet(b.cat)}
 function glowSheet(cat){const p=document.querySelector("#sh .panel");if(p&&!calm()){p.animate([{boxShadow:`0 0 0 0 transparent`},{boxShadow:`0 -10px 60px -6px color-mix(in srgb,var(--c-${cat}) 55%,transparent)`,offset:.35},{boxShadow:`0 -6px 30px -10px color-mix(in srgb,var(--c-${cat}) 25%,transparent)`}],{duration:1300,easing:"cubic-bezier(.2,.7,.2,1)",fill:"forwards"})}}
 function doneSheet(id){const e=X[id],v=S.exps[id]||{};
-  sheet(`<span class="hring" aria-hidden="true"></span><div class="label">Geschafft</div><h2>${e.t}</h2>${v.checks&&Object.keys(v.checks).length?`<div class="dcurve"><span class="dur">Deine Zwischenstationen</span>${spark(v,`var(--c-${e.cat})`)}</div>`:""}<p>Wie war es? Deine Antwort bleibt nur auf diesem Gerät und hilft dir später beim Zurückschauen.</p><div class="moods" id="moods">${[["gut","Hat mir gutgetan"],["mix","Gemischt"],["nein","Eher nicht"]].map(([k,n])=>`<button class="chip" data-mood="${k}" aria-pressed="false">${n}</button>`).join("")}</div><label class="label" for="note">Was nimmst du mit?</label><textarea id="note" placeholder="Ein, zwei Sätze reichen."></textarea><div class="row"><button class="btn primary" id="savedone" data-id="${id}">Speichern</button></div>`);
+  sheet(`<span class="hring" aria-hidden="true"></span><div class="label">Geschafft</div><h2>${e.t}</h2>${v.checks&&Object.keys(v.checks).length?`<div class="dcurve"><span class="dur">Deine Zwischenstationen</span>${spark(v,`var(--c-${e.cat})`)}</div>`:""}<p>Wie war es? Deine Antwort bleibt auf diesem Gerät, damit du später zurückschauen kannst.</p><div class="moods" id="moods">${[["gut","Hat mir gutgetan"],["mix","Gemischt"],["nein","Eher nicht"]].map(([k,n])=>`<button class="chip" data-mood="${k}" aria-pressed="false">${n}</button>`).join("")}</div><label class="label" for="note">Was nimmst du mit?</label><textarea id="note" placeholder="Ein, zwei Sätze reichen."></textarea><div class="row"><button class="btn primary" id="savedone" data-id="${id}">Speichern</button></div>`);
   $("#moods").addEventListener("click",ev=>{const c=ev.target.closest("[data-mood]");if(!c)return;$("#moods").querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));});
 }
 
@@ -1446,16 +1446,16 @@ function viewWay(){
   const moodN={gut:"Hat mir gutgetan",mix:"Gemischt",nein:"Eher nicht"};
   return `<section class="view">
     <div class="tiles"><div class="tile"><b>${nRead}</b><span>Häppchen gelesen</span></div><div class="tile"><b>${learned()}</b><span>Begriffe verankert</span></div><div class="tile"><b>${done.length}</b><span>Experimente geschafft</span></div></div>
-    <p class="nopen">Keine Serien, die reißen. Keine Punkte, die verfallen. Pausen gehören dazu.</p>
+    <p class="nopen">Hier verfällt nichts, wenn du eine Pause machst.</p>
     <div class="sec"><div class="sec-h"><h3>Deine Kompassrose</h3><span class="label">Lesen 1 · Tun 3</span></div>
       <div class="rosewrap"><span class="rhalo" aria-hidden="true"></span>${roseSVG(score)}</div>
-      <p class="muted" style="font-size:15px">${nRead+done.length?balanceHint(score):"Sobald du liest und ausprobierst, zeigt sich hier, in welche Richtungen dein Leben gerade wächst."}</p></div>
+      <p class="muted" style="font-size:15px">${nRead+done.length?balanceHint(score):"Hier siehst du, in welchen Richtungen du gelesen und ausprobiert hast."}</p></div>
     ${(()=>{const got=MOMENTS.filter(m=>S.moments[m.id]);return got.length?`<div class="sec"><div class="sec-h"><h3>Momente</h3><span class="label">${got.length} von ${MOMENTS.length}</span></div><div class="moms">${got.map(m=>`<span class="mom" title="${fmtDate(S.moments[m.id])}"><i></i>${m.t}</span>`).join("")}</div></div>`:""})()}
     <div class="sec"><h3>Tagebuch der Experimente</h3>${journal.length?`<div class="journal">${journal.map(([id,v])=>`<div class="jr" ${cc(X[id].cat)}><b>${X[id].t}</b><small>${fmtDate(v.end)}${v.mood?" · "+moodN[v.mood]:""}</small>${v.note?`<p style="font-size:16px">${esc(v.note)}</p>`:""}</div>`).join("")}</div>`:`<p class="empty">Wenn du ein Experiment abschließt, kannst du festhalten, wie es war. Diese Notizen erscheinen hier.</p>`}</div>
     <div class="sec"><h3>Gemerkte Häppchen</h3>${saved.length?`<div class="list">${saved.map(id=>{const b=B[id];return `<button class="li" data-open="${id}">${dot(b.cat)}<span class="tx"><b>${b.t}</b><small>${b.src}</small></span></button>`}).join("")}</div>`:`<p class="empty">Tippe bei einem Häppchen auf „Merken“, um es hier wiederzufinden.</p>`}</div>
     ${settingsFold()}
     <details class="fold" id="aboutfold" ${S.aboutOpen||confirmReset?"open":""}><summary><span>Über diese App</span><span class="label">Haltung · Quellen · Daten</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><div class="sec about" style="padding:4px 2px 16px">
-      <p>Der Glückskompass zeigt, was die Forschung über ein gutes Leben weiß, und bringt es in kleinen Portionen in deinen Alltag. Die Haltung dahinter: Ein gutes Leben heißt, sich selbst gut zu behandeln, andere glücklich zu machen und die Welt intakt zu halten. Dazu gehört die Frage, wer wir sind, wenn wir uns weniger über Arbeit und Besitz definieren.</p>
+      <p>Der Glückskompass zeigt in kleinen Häppchen, was die Forschung über ein gutes Leben weiß. Die Haltung dahinter: Gut leben heißt, gut mit sich selbst umzugehen, anderen Gutes zu tun und die Welt zu schonen. Dazu gehört auch die Frage, wer wir sind, wenn Arbeit und Besitz weniger wichtig werden.</p>
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${["Philosophie oder Zusammenschau, keine Studie","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder randomisierte Studien"][l]}</span></div>`).join("")}</div>
       <p>Stand der Recherche: Oktober 2026. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
@@ -1465,7 +1465,7 @@ function viewWay(){
     </div></details>
   </section>`;
 }
-function balanceHint(s){const e=Object.entries(s).sort((a,b)=>a[1]-b[1]);const low=e[0],high=e[e.length-1];if(high[1]-low[1]<3)return "Deine Richtungen sind gerade ziemlich ausgewogen.";return `Am meisten bewegst du dich gerade bei ${CATS[high[0]].n}. ${CATS[low[0]].n} kommt noch zu kurz. Im Kompass kannst du gezielt diese Richtung wählen.`}
+function balanceHint(s){const e=Object.entries(s).sort((a,b)=>a[1]-b[1]);const low=e[0],high=e[e.length-1];if(high[1]-low[1]<3)return "Deine Richtungen sind gerade ausgewogen.";return `Bisher warst du am meisten bei ${CATS[high[0]].n} und am wenigsten bei ${CATS[low[0]].n}. Im Kompass kannst du ${CATS[low[0]].n} gezielt wählen.`}
 
 /* ---------- Teilen ---------- */
 const APP_URL="https://wurstgott.github.io/fernweh/glueckskompass/";
@@ -1479,7 +1479,7 @@ async function shareOut(title,text,url){
   const ta=$("#sharetext");ta.focus();ta.select();
 }
 function shareBite(b){
-  const text=`„${b.t}“\n\n${firstSentence(b.x)}\n\nDas stammt aus dem „Glückskompass“, einer kleinen, kostenlosen App mit Erkenntnissen aus der Glücksforschung in Häppchen, Begriffen zum Üben und Experimenten für den Alltag. Ohne Anmeldung, einfach öffnen und stöbern. Das ganze Häppchen mit Quelle (${b.src}) findest du hier:`;
+  const text=`„${b.t}“\n\n${firstSentence(b.x)}\n\nDas stammt aus dem „Glückskompass“, einer kostenlosen App mit Erkenntnissen aus der Glücksforschung. Man braucht keine Anmeldung. Das ganze Häppchen mit Quelle (${b.src}) findest du hier:`;
   shareOut(b.t,text,APP_URL+"#h-"+b.id);
 }
 function shareApp(){
@@ -1553,7 +1553,7 @@ function remindSheet(id){const e=X[id];const p=remindPlan(id,remindMode);
   <p class="muted" style="font-size:13px">Der erste Knopf lädt eine Kalenderdatei, die auch Outlook und andere Kalender öffnen.</p>`)}
 function downloadIcs(id){const p=remindPlan(id,remindMode),blob=new Blob([icsFor(p)],{type:"text/calendar;charset=utf-8"}),url=URL.createObjectURL(blob);
   const l=document.createElement("a");l.href=url;l.download=`glueckskompass-${id}.ics`;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);
-  S.exps[id].remind=remindMode;save();toast("Kalenderdatei geöffnet. Jetzt nur noch hinzufügen.")}
+  S.exps[id].remind=remindMode;save();toast("Kalenderdatei geöffnet. Du musst den Termin nur noch hinzufügen.")}
 
 /* Richtungsauswahl als Farbstufen, wiederverwendbar */
 function dirPicker(attr,cur,counts){return `<div class="dirs small" role="group" aria-label="Richtung wählen">${[["alle","Alle"],...Object.entries(CATS).map(([k,v])=>[k,v.n])].map(([k,n])=>`<button class="dir" data-${attr}="${k}" aria-pressed="${cur===k}" ${k!=="alle"?cc(k):""}><span class="dial ${k==="alle"?"all":""}"></span><span class="dn">${n.replace(" & ","<br>& ")}${counts?`<small>${counts[k]}</small>`:""}</span></button>`).join("")}</div>`}
@@ -1593,17 +1593,17 @@ function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=
 function advent1(y){const x=new Date(y,11,24);const back=x.getDay()===0?28:21+x.getDay();return new Date(y,11,24-back)}
 const D0=(y,m,d)=>new Date(y,m-1,d);
 const SERIES=[
- {id:"advent",t:"Advent: Genug statt mehr",x:"In den Wochen vor Weihnachten wird viel gekauft. Diese Reihe lädt ein, Zeit, Nähe und Großzügigkeit in den Mittelpunkt zu stellen.",win:y=>[advent1(y),D0(y,12,24)],items:["x:zeitstattzeug","b:gift_exp","x:kaufpause","b:advertising","x:portemonnaie","b:prosocial","x:tisch"]},
- {id:"fasten",t:"Sieben Wochen Genug",x:"Zwischen Aschermittwoch und Ostern verzichten viele bewusst. Hier geht es nicht um Verbote, sondern darum, das Genug wiederzuentdecken.",win:y=>{const e=easter(y);return [new Date(e.getTime()-46*DAY),new Date(e.getTime()-DAY)]},items:["x:kaufpause","b:materialism","x:stoisch","b:treat","x:feedfasten","b:fromm","x:werbefrei"]},
- {id:"jahreswechsel",t:"Zwischen den Jahren",x:"Die stillen Tage nach Weihnachten eignen sich zum Zurückschauen und Ausruhen, ohne Vorsatzdruck.",win:y=>[D0(y,12,25),D0(y,12,31)],items:["x:stille","b:thinking_alone","b:peakend","x:schreiben","b:meaninghappy","x:bestesselbst"]},
- {id:"neujahr",t:"Neu anfangen, ohne Vorsätze",x:"Statt großer Vorsätze: kleine Versuche, die zeigen, was dir wirklich guttut.",win:y=>[D0(y,1,1),D0(y,1,31)],items:["b:forecast","x:genug","b:adapt","x:kiste30","b:woop","x:bestesselbst"]},
- {id:"fruehling",t:"Frühjahrsputz für die Seele",x:"Wenn es draußen hell wird, ist Zeit zum Ausmisten, Tauschen und Leichterwerden.",win:y=>[D0(y,3,20),D0(y,4,30)],items:["x:buecher","b:clutter","x:tauschkreis","b:endowment","x:geraet","b:minimal"]},
- {id:"draussen",t:"Draußen-Wochen",x:"Mai und Juni sind wie gemacht für Grün, Staunen und Bewegung unter freiem Himmel.",win:y=>[D0(y,5,1),D0(y,6,20)],items:["x:natur120","b:nature","x:ehrfurcht","b:awe","x:garten","b:gardening","x:naturnotiz"]},
- {id:"sommer",t:"Sommer der schwachen Bindungen",x:"Lange Abende, offene Türen: die beste Zeit für Begegnungen mit Nachbar:innen, Bekannten und Fremden.",win:y=>[D0(y,6,21),D0(y,8,31)],items:["x:stammgast","b:weakties","x:tiefefrage","b:strangers","x:tisch","b:dining","x:fuenfhaus"]},
- {id:"herbst",t:"Ernte und Dankbarkeit",x:"Der Herbst ist Erntezeit. Diese Reihe sammelt, was schon da ist, und sagt Danke dafür.",win:y=>[D0(y,9,1),D0(y,10,31)],items:["x:dankesbrief","b:gratletter","x:dreigute","b:gratitude","x:zeitlupe","b:savor","x:gutesende"]},
- {id:"november",t:"Licht im November",x:"Wenn die Tage kurz werden, wärmen Gemeinschaft, Kultur und Bewegung von innen.",win:y=>[D0(y,11,1),new Date(advent1(y).getTime()-DAY)],items:["x:gruppe","b:groups","x:kultur","b:arts","x:anruf","b:who","x:puls"]}
+ {id:"advent",t:"Advent: Genug statt mehr",x:"In den Wochen vor Weihnachten geht es hier um Zeit, Nähe und Großzügigkeit statt um Geschenke.",win:y=>[advent1(y),D0(y,12,24)],items:["x:zeitstattzeug","b:gift_exp","x:kaufpause","b:advertising","x:portemonnaie","b:prosocial","x:tisch"]},
+ {id:"fasten",t:"Sieben Wochen Genug",x:"Zwischen Aschermittwoch und Ostern verzichten viele Menschen bewusst auf etwas. Diese Reihe zeigt, wie gut sich weniger anfühlen kann.",win:y=>{const e=easter(y);return [new Date(e.getTime()-46*DAY),new Date(e.getTime()-DAY)]},items:["x:kaufpause","b:materialism","x:stoisch","b:treat","x:feedfasten","b:fromm","x:werbefrei"]},
+ {id:"jahreswechsel",t:"Zwischen den Jahren",x:"Die Tage nach Weihnachten sind gut zum Zurückschauen und Ausruhen. Vorsätze braucht es dafür nicht.",win:y=>[D0(y,12,25),D0(y,12,31)],items:["x:stille","b:thinking_alone","b:peakend","x:schreiben","b:meaninghappy","x:bestesselbst"]},
+ {id:"neujahr",t:"Neu anfangen, ohne Vorsätze",x:"Statt großer Vorsätze gibt es hier kleine Versuche, die zeigen, was dir guttut.",win:y=>[D0(y,1,1),D0(y,1,31)],items:["b:forecast","x:genug","b:adapt","x:kiste30","b:woop","x:bestesselbst"]},
+ {id:"fruehling",t:"Frühjahrsputz",x:"Im Frühling geht es hier ums Ausmisten, Tauschen und Weitergeben.",win:y=>[D0(y,3,20),D0(y,4,30)],items:["x:buecher","b:clutter","x:tauschkreis","b:endowment","x:geraet","b:minimal"]},
+ {id:"draussen",t:"Draußen-Wochen",x:"Im Mai und Juni geht es hier um Natur, Bewegung und das Staunen draußen.",win:y=>[D0(y,5,1),D0(y,6,20)],items:["x:natur120","b:nature","x:ehrfurcht","b:awe","x:garten","b:gardening","x:naturnotiz"]},
+ {id:"sommer",t:"Sommer der Begegnungen",x:"An langen Sommerabenden geht es hier um Begegnungen mit Nachbarn, Bekannten und Fremden.",win:y=>[D0(y,6,21),D0(y,8,31)],items:["x:stammgast","b:weakties","x:tiefefrage","b:strangers","x:tisch","b:dining","x:fuenfhaus"]},
+ {id:"herbst",t:"Ernte und Dankbarkeit",x:"Im Herbst geht es hier um Dankbarkeit für das, was schon da ist.",win:y=>[D0(y,9,1),D0(y,10,31)],items:["x:dankesbrief","b:gratletter","x:dreigute","b:gratitude","x:zeitlupe","b:savor","x:gutesende"]},
+ {id:"november",t:"Licht im November",x:"Wenn die Tage kurz werden, geht es hier um Gemeinschaft, Kultur und Bewegung.",win:y=>[D0(y,11,1),new Date(advent1(y).getTime()-DAY)],items:["x:gruppe","b:groups","x:kultur","b:arts","x:anruf","b:who","x:puls"]}
 ];
-const SPECIAL={"03-20":{t:"Heute ist Weltglückstag der Vereinten Nationen.",b:"compass"},"04-22":{t:"Heute ist Tag der Erde.",b:"boundaries",x:"reparieren"},"06-05":{t:"Heute ist Weltumwelttag.",b:"proenv",x:"leihenfirst"},"07-30":{t:"Heute ist Internationaler Tag der Freundschaft.",b:"friend_hours",x:"anruf"},"10-10":{t:"Heute ist Welttag der psychischen Gesundheit.",b:"selfcompassion",x:"freundesbrief"},"11-13":{t:"Heute ist Welttag der Freundlichkeit.",b:"kindness",x:"freundlich"},"12-05":{t:"Heute ist Internationaler Tag des Ehrenamts.",b:"volunteer",x:"ehrenamt"}};
+const SPECIAL={"03-20":{t:"Heute ist der Weltglückstag der Vereinten Nationen.",b:"compass"},"04-22":{t:"Heute ist der Tag der Erde.",b:"boundaries",x:"reparieren"},"06-05":{t:"Heute ist der Weltumwelttag.",b:"proenv",x:"leihenfirst"},"07-30":{t:"Heute ist der Internationale Tag der Freundschaft.",b:"friend_hours",x:"anruf"},"10-10":{t:"Heute ist der Welttag der psychischen Gesundheit.",b:"selfcompassion",x:"freundesbrief"},"11-13":{t:"Heute ist der Welttag der Freundlichkeit.",b:"kindness",x:"freundlich"},"12-05":{t:"Heute ist der Internationale Tag des Ehrenamts.",b:"volunteer",x:"ehrenamt"}};
 function currentSeries(){const n=new Date(),y=n.getFullYear(),t=new Date(y,n.getMonth(),n.getDate()).getTime();
   for(const s of SERIES){const [a,b]=s.win(y);if(t>=a.getTime()&&t<=b.getTime())return Object.assign({},s,{from:a,to:b,key:s.id+"-"+y})}return null}
 function specialToday(){const n=new Date();return SPECIAL[`${pad2(n.getMonth()+1)}-${pad2(n.getDate())}`]||null}
@@ -1615,7 +1615,7 @@ function seriesCard(s){const done=s.items.filter(itemDone).length,next=s.items.f
    <div class="meta"><span>Reihe</span><span>bis ${s.to.toLocaleDateString("de-DE",{day:"numeric",month:"long"})}</span></div>
    <h2>${s.t}</h2><p class="sx">${s.x}</p>
    <div class="sdots" aria-label="${done} von ${s.items.length} erledigt">${s.items.map(i=>{const f=itemInfo(i);return `<span class="sd ${itemDone(i)?"on":""}" style="--c:var(--c-${f.c})" title="${f.k==="b"?"Häppchen":"Experiment"}: ${f.t}"></span>`}).join("")}<em>${done} / ${s.items.length}</em></div>
-   ${ni?`<button class="btn primary" data-sitem="${next}">${ni.k==="b"?"Weiter: Häppchen":"Weiter: Experiment"} · ${ni.t}</button>`:`<p class="sdone">Diese Reihe hast du vollendet. Schön.</p>`}
+   ${ni?`<button class="btn primary" data-sitem="${next}">${ni.k==="b"?"Weiter: Häppchen":"Weiter: Experiment"} · ${ni.t}</button>`:`<p class="sdone">Du hast alle Schritte dieser Reihe gemacht.</p>`}
   </section>`}
 
 /* ---------- Stimmung (freiwillig) ---------- */
@@ -1647,7 +1647,7 @@ function checkRow(id){const e=X[id],v=S.exps[id];if(!(e.d>=3))return "";const di
 
 /* ---------- Mit jemandem machen ---------- */
 function shareExp(id){const e=X[id],v=S.exps[id],st=v&&v.status==="active"?new Date(v.start):new Date();
-  shareOut(e.t,`Hast du Lust, gemeinsam mit mir ein kleines Experiment auszuprobieren? „${e.t}“: ${firstSentence(e.x)}\n\nIch fange ${v&&v.status==="active"?"seit":"am"} ${st.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})} an, ${e.d===1?"es dauert nur einen Tag":`es dauert ${e.d} Tage`}. Die Anleitung steht im „Glückskompass“, einer kleinen, kostenlosen App ohne Anmeldung:`,APP_URL+"#x-"+id)}
+  shareOut(e.t,`Hast du Lust, gemeinsam mit mir ein kleines Experiment auszuprobieren? „${e.t}“: ${firstSentence(e.x)}\n\n${v&&v.status==="active"?"Ich habe am":"Ich fange am"} ${st.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})} ${v&&v.status==="active"?"angefangen":"an"}. ${e.d===1?"Es dauert nur einen Tag.":`Es dauert ${e.d} Tage.`} Die Anleitung steht im „Glückskompass“, einer kostenlosen App ohne Anmeldung:`,APP_URL+"#x-"+id)}
 let invited=null;
 
 /* ---------- Kompassrose ---------- */
@@ -1663,16 +1663,16 @@ function roseSVG(score){const mx=Math.max(1,...Object.values(score));const ks=Ob
 
 /* ---------- Momente: selten und bedeutungsvoll ---------- */
 const MOMENTS=[
- {id:"first",t:"Das erste Häppchen",x:"Der Anfang ist gemacht. Der Kompass zeigt dir ab jetzt jeden Tag eine neue Richtung.",ok:()=>Object.keys(S.read).length>=1},
- {id:"term1",t:"Der erste verankerte Begriff",x:"Viermal richtig, in wachsenden Abständen. Der sitzt jetzt.",ok:()=>learned()>=1},
- {id:"exp1",t:"Dein erstes Experiment",x:"Vom Wissen ins Tun: Genau da beginnt die Wirkung.",ok:()=>Object.values(S.exps).some(v=>v.status==="done")},
- {id:"ten",t:"Zehn Häppchen",x:"Zehn Erkenntnisse aus der Glücksforschung. Welche davon hat dich am meisten überrascht?",ok:()=>Object.keys(S.read).length>=10},
- {id:"five",t:"Alle fünf Richtungen",x:"Ich, Wir, Welt, Haben & Sein, Arbeit & Zeit: Du hast in jede Richtung geschaut.",ok:()=>Object.keys(CATS).every(k=>BITES.some(b=>b.cat===k&&S.read[b.id]))},
- {id:"series",t:"Eine Reihe vollendet",x:"Eine ganze Reihe, Schritt für Schritt. Das ist mehr als Lesen, das ist ein kleines Stück Leben.",ok:()=>Object.values(S.series).some(v=>v&&v.complete)},
- {id:"exp5",t:"In allen Richtungen ausprobiert",x:"Du hast in jeder der fünf Richtungen ein Experiment gemacht. Ein Kompass in Bewegung.",ok:()=>new Set(Object.entries(S.exps).filter(([,v])=>v.status==="done").map(([id])=>X[id]&&X[id].cat)).size>=5},
- {id:"terms10",t:"Zehn Begriffe verankert",x:"Du sprichst jetzt ein gutes Stück Glücksforschung.",ok:()=>learned()>=10},
- {id:"fifty",t:"Fünfzig Häppchen",x:"Fünfzig Erkenntnisse. Vielleicht ist es Zeit, eine davon jemandem zu erzählen.",ok:()=>Object.keys(S.read).length>=50},
- {id:"all",t:"Alle Häppchen gelesen",x:"Du kennst jetzt den ganzen Fundus. Ab hier kommen sie als Wiederbegegnung zurück.",ok:()=>Object.keys(S.read).length>=BITES.length}
+ {id:"first",t:"Das erste Häppchen",x:"Unter dem Kompass findest du jeden Tag ein Häppchen des Tages.",ok:()=>Object.keys(S.read).length>=1},
+ {id:"term1",t:"Der erste Begriff sitzt",x:"Du hattest ihn viermal in wachsenden Abständen richtig. Ab jetzt kommt er nur noch selten dran.",ok:()=>learned()>=1},
+ {id:"exp1",t:"Das erste Experiment",x:"Deine Notiz dazu findest du unter „Dein Weg“.",ok:()=>Object.values(S.exps).some(v=>v.status==="done")},
+ {id:"ten",t:"Zehn Häppchen",x:"Unter „Dein Weg“ zeigt deine Kompassrose, aus welchen Richtungen du gelesen hast.",ok:()=>Object.keys(S.read).length>=10},
+ {id:"five",t:"Alle fünf Richtungen",x:"Du hast aus jeder Richtung mindestens ein Häppchen gelesen.",ok:()=>Object.keys(CATS).every(k=>BITES.some(b=>b.cat===k&&S.read[b.id]))},
+ {id:"series",t:"Eine Reihe abgeschlossen",x:"Du hast alle Schritte dieser Reihe gemacht. Die nächste beginnt mit der nächsten Jahreszeit.",ok:()=>Object.values(S.series).some(v=>v&&v.complete)},
+ {id:"exp5",t:"In jeder Richtung ausprobiert",x:"Du hast in jeder Richtung mindestens ein Experiment abgeschlossen.",ok:()=>new Set(Object.entries(S.exps).filter(([,v])=>v.status==="done").map(([id])=>X[id]&&X[id].cat)).size>=5},
+ {id:"terms10",t:"Zehn Begriffe",x:"Zehn Begriffe sind verankert und kommen nur noch selten zur Wiederholung.",ok:()=>learned()>=10},
+ {id:"fifty",t:"Fünfzig Häppchen",x:"Häppchen, die du dir gemerkt hast, findest du unter „Dein Weg“.",ok:()=>Object.keys(S.read).length>=50},
+ {id:"all",t:"Alle Häppchen gelesen",x:"Ab jetzt kommen die Häppchen in größeren Abständen wieder.",ok:()=>Object.keys(S.read).length>=BITES.length}
 ];
 let momentOpen=false;
 function checkMoments(){if(momentOpen||$("#layer").innerHTML)return;const s=currentSeries();if(s&&s.items.every(itemDone)){S.series[s.key]={complete:now()};save()}
@@ -1684,7 +1684,7 @@ function showMoment(m){momentOpen=true;const d=document.createElement("div");d.c
 /* ---------- Gegen endloses Lesen ---------- */
 let sessionReads=0,scrollHinted=false;
 function maybeScrollHint(){if(!S.settings.antiScroll||scrollHinted)return false;if(sessionReads<5)return false;scrollHinted=true;
-  sheet(`<span class="hring" aria-hidden="true"></span><div class="label">Kleine Pause?</div><h2>Fünf Häppchen am Stück</h2><p>Lesen ist schön, aber am meisten verändert sich, wenn du etwas ausprobierst. Vielleicht ein kleines Experiment, ein Anruf oder zehn Minuten draußen?</p>
+  sheet(`<span class="hring" aria-hidden="true"></span><div class="label">Kleine Pause?</div><h2>Fünf Häppchen am Stück</h2><p>Du hast fünf Häppchen hintereinander gelesen. Am meisten bewirkt es, wenn du etwas davon ausprobierst.</p>
    <div class="row"><button class="btn accent" data-goexps="1">Ein Experiment ansehen</button><button class="btn ghost" id="shx2">Weiterlesen</button></div>
    <button class="linkbtn" id="nohint">Diesen Hinweis nicht mehr zeigen</button>`);return true}
 
@@ -1693,13 +1693,13 @@ function dailyPlan(){const [h,mi]=(S.settings.remindTime||"08:00").split(":").ma
   return {first:f,end,text:"Glückskompass: Häppchen des Tages",details:`Ein kurzer Blick in den Kompass: das Häppchen des Tages und deine Experimente.\n\n${APP_URL}`}}
 function dailyIcs(){const p=dailyPlan(),esc2=s=>s.replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;");
   const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Glueckskompass//DE","BEGIN:VEVENT",`UID:daily-${Date.now()}@glueckskompass`,`DTSTAMP:${icsDate(new Date())}`,`DTSTART:${icsDate(p.first)}`,`DTEND:${icsDate(p.end)}`,"RRULE:FREQ=DAILY",`SUMMARY:${esc2(p.text)}`,`DESCRIPTION:${esc2(p.details)}`,`URL:${APP_URL}`,"BEGIN:VALARM","ACTION:DISPLAY",`DESCRIPTION:${esc2(p.text)}`,"TRIGGER:PT0M","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
-  const url=URL.createObjectURL(new Blob([ics],{type:"text/calendar;charset=utf-8"}));const l=document.createElement("a");l.href=url;l.download="glueckskompass-taeglich.ics";document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);toast("Kalenderdatei geöffnet. Jetzt nur noch hinzufügen.")}
+  const url=URL.createObjectURL(new Blob([ics],{type:"text/calendar;charset=utf-8"}));const l=document.createElement("a");l.href=url;l.download="glueckskompass-taeglich.ics";document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);toast("Kalenderdatei geöffnet. Du musst den Termin nur noch hinzufügen.")}
 function dailyGoogle(){const p=dailyPlan(),tz=Intl.DateTimeFormat().resolvedOptions().timeZone;return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(p.text)}&dates=${icsDate(p.first)}/${icsDate(p.end)}&ctz=${encodeURIComponent(tz)}&details=${encodeURIComponent(p.details)}&recur=${encodeURIComponent("RRULE:FREQ=DAILY")}`}
 function settingsFold(){const sw=(id,on,label,sub)=>`<button class="setrow" data-setting="${id}" role="switch" aria-checked="${on}"><span><b>${label}</b><small>${sub}</small></span><span class="sw"><i></i></span></button>`;
   return `<details class="fold" id="setfold" ${S.setOpen?"open":""}><summary><span>Einstellungen</span><span class="label">Stimmung · Hinweise · Erinnerung</span>${CHEV}</summary><div class="sec" style="padding:6px 2px 16px">
    ${sw("mood",S.settings.mood,"Nach meiner Stimmung fragen","Beim Öffnen fragt der Kompass, wie es dir geht, und wählt passende Häppchen.")}
-   ${sw("antiScroll",S.settings.antiScroll,"Hinweis gegen Endlos-Lesen","Nach fünf Häppchen am Stück eine freundliche Erinnerung, etwas auszuprobieren.")}
-   <div class="setrow static"><span><b>Tägliche Erinnerung</b><small>Nur wenn du willst: ein täglicher Termin in deinem eigenen Kalender. Die App selbst schickt keine Nachrichten und sammelt keine Daten.</small></span></div>
+   ${sw("antiScroll",S.settings.antiScroll,"Hinweis gegen Endlos-Lesen","Nach fünf Häppchen hintereinander erinnert dich die App daran, etwas auszuprobieren.")}
+   <div class="setrow static"><span><b>Tägliche Erinnerung</b><small>Wenn du möchtest, legst du dir einen täglichen Termin in deinem Kalender an. Die App selbst schickt keine Nachrichten und sammelt keine Daten.</small></span></div>
    <div class="row"><label class="label" for="rtime">Uhrzeit</label><input type="time" id="rtime" value="${S.settings.remindTime}"><button class="btn ghost" id="dailyics">Apple-Kalender</button><a class="btn ghost" id="dailyg" href="${dailyGoogle()}" target="_blank" rel="noopener">Google Kalender</a></div>
   </div></details>`}
 const CHEV='<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -1734,7 +1734,7 @@ document.addEventListener("click",e=>{
   if(d.moodPick){if(d.moodPick==="change"){moodAsked=false;mood=null;try{sessionStorage.removeItem("gk-mood")}catch(x){}anim=true;render();return}
     if(d.moodPick==="skip"){moodAsked=true;anim=true;render();return}
     setMood(d.moodPick);buzz(8);auraRings(t,null,2);setTimeout(()=>{anim=true;render()},380);return}
-  if(d.check){const v=S.exps[d.check];v.checks=v.checks||{};v.checks[dayIdx(v)]=+d.val;save();buzz([8,40,8]);const card=t.closest(".card");render();const c2=document.querySelector(`[data-done="${d.check}"]`);const cd=c2&&c2.closest(".card");if(cd)glow(cd,`var(--c-${X[d.check].cat})`);toast("Eingetragen. Danke fürs Dranbleiben.");return}
+  if(d.check){const v=S.exps[d.check];v.checks=v.checks||{};v.checks[dayIdx(v)]=+d.val;save();buzz([8,40,8]);const card=t.closest(".card");render();const c2=document.querySelector(`[data-done="${d.check}"]`);const cd=c2&&c2.closest(".card");if(cd)glow(cd,`var(--c-${X[d.check].cat})`);toast("Eingetragen.");return}
   if(d.shareExp){shareExp(d.shareExp);return}
   if(d.setting){S.settings[d.setting]=!S.settings[d.setting];save();buzz(6);if(d.setting==="mood"&&!S.settings.mood){mood=null;try{sessionStorage.removeItem("gk-mood")}catch(x){}}if(d.setting==="mood"&&S.settings.mood)moodAsked=true;render();return}
   if(t.id==="dailyics"){dailyIcs();return}
@@ -1769,7 +1769,7 @@ document.addEventListener("click",e=>{
   if(t.id==="tmore"){termMore=true;render();return}
   if(t.id==="emore"){expMore=true;render();return}
   if(d.openExp){expSheet(d.openExp);return}
-  if(d.accept){if(activeExps().length>=MAXACT)return;S.exps[d.accept]={status:"active",start:now()};save();closeSheet();anim=true;tab="exps";render();buzz([10,40,10]);{const c=document.querySelector(`[data-done="${d.accept}"]`);const card=c&&c.closest(".card");if(card)glow(card,`var(--c-${X[d.accept].cat})`)}toast("Angenommen. Viel Freude beim Ausprobieren.");return}
+  if(d.accept){if(activeExps().length>=MAXACT)return;S.exps[d.accept]={status:"active",start:now()};save();closeSheet();anim=true;tab="exps";render();buzz([10,40,10]);{const c=document.querySelector(`[data-done="${d.accept}"]`);const card=c&&c.closest(".card");if(card)glow(card,`var(--c-${X[d.accept].cat})`)}toast("Experiment angenommen.");return}
   if(t.id==="other"){S.skip=(S.skip||0)+1;save();render();return}
   if(d.drop){S.exps[d.drop]={status:"dropped",start:S.exps[d.drop].start,end:now()};save();render();return}
   if(d.remind){remindSheet(d.remind);return}
@@ -1777,7 +1777,7 @@ document.addEventListener("click",e=>{
   if(d.ics){downloadIcs(d.ics);return}
   if(d.goexps){anim=true;tab="exps";render();window.scrollTo(0,0);return}
   if(d.done){doneSheet(d.done);return}
-  if(t.id==="savedone"){const id=t.dataset.id,m=document.querySelector('#moods [aria-pressed="true"]');S.exps[id]=Object.assign(S.exps[id]||{start:now()},{status:"done",end:now(),mood:m?m.dataset.mood:null,note:$("#note").value.trim()});save();closeSheet();render();buzz([12,60,12,60,20]);{const tl=document.querySelector(".tiles")||document.querySelector("#main .card");if(tl)glow(tl,"var(--accent)")}toast("Gespeichert. Schön, dass du es ausprobiert hast.");return}
+  if(t.id==="savedone"){const id=t.dataset.id,m=document.querySelector('#moods [aria-pressed="true"]');S.exps[id]=Object.assign(S.exps[id]||{start:now()},{status:"done",end:now(),mood:m?m.dataset.mood:null,note:$("#note").value.trim()});save();closeSheet();render();buzz([12,60,12,60,20]);{const tl=document.querySelector(".tiles")||document.querySelector("#main .card");if(tl)glow(tl,"var(--accent)")}toast("Gespeichert.");return}
   if(t.id==="reset"){confirmReset=true;render();return}
   if(t.id==="resetno"){confirmReset=false;render();return}
   if(t.id==="resetyes"){S={read:{},saved:{},terms:{},exps:{},filter:"alle",history:[],cur:null,settings:S.settings,moments:{},series:{},welcomed:S.welcomed};save();confirmReset=false;Q=null;render();toast("Alles zurückgesetzt.");return}
