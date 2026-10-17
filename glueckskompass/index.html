@@ -9,7 +9,7 @@
 <title>Glückskompass</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,500..800,100;1,9..144,500..700,100&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&family=Figtree:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: eine ruhige App-Spalte wie ein Feldnotizbuch, unten fest die vier Bereiche. Ein Kompass aus fünf Farben als Herzstück. */
 :root{
@@ -17,8 +17,9 @@
   --accent:#D98E22;--accent-soft:#F6E3C2;--on-accent:#1C2624;
   --c-ich:#D98E22;--c-wir:#CF6352;--c-welt:#4A8659;--c-sein:#4A73A0;--c-zeit:#8667AE;
   --ok:#3E7F52;--warn:#B5523F;
-  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
-  --f-body:"Newsreader",Georgia,"Times New Roman",serif;
+  --f-display:"Fraunces",Georgia,"Times New Roman",serif;
+  --f-body:"Literata",Georgia,"Times New Roman",serif;
+  --f-ui:"Figtree",ui-sans-serif,system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --r:14px;
 }
@@ -45,8 +46,8 @@ header.top{display:grid;grid-template-columns:auto 1fr auto;align-items:center;c
 .logo span{width:28px;height:28px;border-radius:50%;background:var(--paper);display:grid;place-items:center}
 .logo span::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
 .titles{min-width:0;display:flex;flex-direction:column;gap:3px}
-.mark{font-family:var(--f-display);font-weight:800;font-size:27px;letter-spacing:-.025em;line-height:1}
-.mark i{font-style:normal;color:var(--accent)}
+.mark{font-family:var(--f-display);font-weight:700;font-size:29px;letter-spacing:-.02em;line-height:1;font-variation-settings:"SOFT" 100,"opsz" 72}
+.mark i{font-style:italic;font-weight:600;color:var(--accent)}
 .tagline{font-family:var(--f-body);font-style:italic;font-size:15.5px;line-height:1.25;color:var(--muted);text-wrap:balance}
 .pill{align-self:start;font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 9px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .pill:empty{display:none}
@@ -54,8 +55,8 @@ header.top{display:grid;grid-template-columns:auto 1fr auto;align-items:center;c
 .rose b{height:3px;border-radius:3px;background:var(--soft);overflow:hidden;display:block}
 .rose b i{display:block;height:100%;min-width:8px;background:var(--c);border-radius:3px;transition:width .5s}
 @media (max-width:360px){.mark{font-size:23px}.tagline{font-size:14px}}
-h2{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:-.01em;margin:0;text-wrap:balance;line-height:1.2}
-h3{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.02em;margin:0}
+h2{font-family:var(--f-display);font-weight:650;font-variation-settings:"SOFT" 100;font-size:22px;letter-spacing:-.01em;margin:0;text-wrap:balance;line-height:1.2}
+h3{font-family:var(--f-ui);font-weight:700;font-size:15px;letter-spacing:.02em;margin:0}
 .label{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .view{display:flex;flex-direction:column;gap:22px}
 .muted{color:var(--muted)}
@@ -66,7 +67,7 @@ p{margin:0}
 .compass{position:relative;width:min(66vw,250px);aspect-ratio:1;max-width:100%;border:0;border-radius:50%;padding:0;background:conic-gradient(from -90deg,var(--c-ich) 0 20%,var(--c-wir) 0 40%,var(--c-welt) 0 60%,var(--c-sein) 0 80%,var(--c-zeit) 0 100%);box-shadow:0 1px 0 var(--line),0 18px 40px -22px rgba(0,0,0,.45);transition:transform .25s}
 .compass::after{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
 .compass .core{position:absolute;inset:14px;z-index:1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
-.compass .core b{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,7vw,30px);letter-spacing:-.02em;line-height:1}
+.compass .core b{font-family:var(--f-display);font-weight:700;font-variation-settings:"SOFT" 100;font-size:clamp(24px,7vw,30px);letter-spacing:-.02em;line-height:1}
 .compass .core span{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .compass .needle{width:10px;height:10px;border-radius:50%;background:var(--accent);margin-bottom:4px}
 .compass:active{transform:scale(.97)}
@@ -76,14 +77,13 @@ p{margin:0}
 .hero p{font-size:15px;color:var(--muted);text-align:center;max-width:34ch}
 
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-family:var(--f-display);font-weight:500;font-size:14px;display:inline-flex;align-items:center;gap:7px;line-height:1.2}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-family:var(--f-ui);font-weight:500;font-size:14px;display:inline-flex;align-items:center;gap:7px;line-height:1.2}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--c)}
 
 /* Karte */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
-.bite{border-top:6px solid var(--c);animation:rise .35s ease-out}
-@media (prefers-reduced-motion:reduce){.bite{animation:none}}
+.bite{border-top:6px solid var(--c)}
 @keyframes rise{from{transform:translateY(10px);opacity:.4}to{transform:none;opacity:1}}
 .meta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .meta .catn{display:inline-flex;gap:7px;align-items:center;color:var(--ink)}
@@ -95,22 +95,22 @@ p{margin:0}
 .bite .body{font-size:18px;line-height:1.55;max-width:65ch}
 .caveat{font-family:var(--f-mono);font-size:12.5px;line-height:1.55;color:var(--muted);border-left:2px solid var(--line);padding-left:12px}
 .take{background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-style:italic}
-.take b{font-style:normal;font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.04em;display:block;margin-bottom:2px}
+.take b{font-style:normal;font-family:var(--f-ui);font-weight:700;font-size:13px;letter-spacing:.04em;display:block;margin-bottom:2px}
 .src{font-family:var(--f-mono);font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
 .src a{color:var(--ink);text-underline-offset:3px}
 .links{display:flex;flex-wrap:wrap;gap:8px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.btn{border:1px solid var(--ink);background:transparent;border-radius:999px;padding:10px 18px;font-family:var(--f-display);font-weight:700;font-size:15px;line-height:1.2}
+.btn{border:1px solid var(--ink);background:transparent;border-radius:999px;padding:10px 18px;font-family:var(--f-ui);font-weight:700;font-size:15px;line-height:1.2}
 .btn.primary{background:var(--ink);color:var(--paper)}
 .btn.accent{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .btn.ghost{border-color:var(--line)}
 .btn:disabled{opacity:.4;cursor:default}
-.linkbtn{border:0;background:none;padding:0;font-family:var(--f-display);font-weight:500;font-size:14px;text-decoration:underline;text-underline-offset:3px;color:var(--muted)}
+.linkbtn{border:0;background:none;padding:0;font-family:var(--f-ui);font-weight:500;font-size:14px;text-decoration:underline;text-underline-offset:3px;color:var(--muted)}
 
 .list{display:flex;flex-direction:column;border-top:1px solid var(--line)}
 .li{display:flex;gap:12px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line);background:none;border-left:0;border-right:0;border-top:0;text-align:left;width:100%;min-width:0}
 .li .tx{flex:1;min-width:0}
-.li .tx b{font-family:var(--f-display);font-weight:500;font-size:16px;display:block;line-height:1.3}
+.li .tx b{font-family:var(--f-ui);font-weight:500;font-size:16px;display:block;line-height:1.3}
 .li .tx small{font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
 .li .aside{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
 .sec{display:flex;flex-direction:column;gap:12px}
@@ -130,7 +130,7 @@ p{margin:0}
 .opt.right{border-color:var(--ok);box-shadow:inset 0 0 0 1px var(--ok)}
 .opt.wrong{border-color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn);opacity:.8}
 .qhead{display:flex;justify-content:space-between;gap:10px}
-.fb{font-family:var(--f-display);font-weight:700}
+.fb{font-family:var(--f-ui);font-weight:700}
 .fb.ok{color:var(--ok)}.fb.no{color:var(--warn)}
 
 /* Experimente */
@@ -143,28 +143,28 @@ p{margin:0}
 /* Weg */
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
-.tile b{font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile b{font-family:var(--f-display);font-weight:700;font-variation-settings:"SOFT" 100;font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
 .tile span{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .bal{display:flex;flex-direction:column;gap:10px}
-.balrow{display:grid;grid-template-columns:110px 1fr 34px;gap:10px;align-items:center;font-family:var(--f-display);font-size:14px}
+.balrow{display:grid;grid-template-columns:110px 1fr 34px;gap:10px;align-items:center;font-family:var(--f-ui);font-size:14px}
 .balrow .bar{height:10px;background:var(--soft);border-radius:99px;overflow:hidden}
 .balrow .bar span{display:block;height:100%;background:var(--c);border-radius:99px}
 .balrow em{font-style:normal;font-family:var(--f-mono);font-size:12px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
 .journal{display:flex;flex-direction:column;gap:10px}
 .jr{border-left:3px solid var(--c);padding:2px 0 2px 12px;display:flex;flex-direction:column;gap:2px}
-.jr b{font-family:var(--f-display);font-weight:700;font-size:15px}
+.jr b{font-family:var(--f-ui);font-weight:700;font-size:15px}
 .jr small{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
 .about{font-size:16px;display:flex;flex-direction:column;gap:10px}
 .legend{display:flex;flex-direction:column;gap:6px;font-size:15px}
 .gift{background:var(--card);border:1px dashed var(--accent);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
-.gift b{font-family:var(--f-display);font-weight:700;font-size:17px}
+.gift b{font-family:var(--f-ui);font-weight:700;font-size:17px}
 .gift span{font-size:16px;color:var(--muted)}
 .empty{font-size:15px;color:var(--muted);border:1px dashed var(--line);border-radius:12px;padding:14px}
 
 /* Tabs */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
 nav.tabs .in{max-width:580px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
-nav.tabs button{border:0;background:none;padding:10px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--f-display);font-weight:500;font-size:12.5px;color:var(--muted);position:relative}
+nav.tabs button{border:0;background:none;padding:10px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--f-ui);font-weight:500;font-size:12.5px;color:var(--muted);position:relative}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{color:var(--ink)}
 nav.tabs button[aria-current="page"]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
@@ -175,11 +175,49 @@ nav.tabs .badge{position:absolute;top:6px;left:calc(50% + 8px);min-width:16px;he
 .sheet .panel{background:var(--card);width:100%;max-width:580px;max-height:88%;overflow:auto;border-radius:18px 18px 0 0;padding:22px max(18px,env(safe-area-inset-left,0px)) calc(22px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:up .25s ease-out}
 @media (prefers-reduced-motion:reduce){.sheet .panel{animation:none}}
 @keyframes up{from{transform:translateY(30px);opacity:.5}to{transform:none;opacity:1}}
-.close{align-self:flex-end;border:0;background:var(--soft);border-radius:999px;padding:6px 12px;font-family:var(--f-display);font-size:13px}
+.close{align-self:flex-end;border:0;background:var(--soft);border-radius:999px;padding:6px 12px;font-family:var(--f-ui);font-size:13px}
 textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font:inherit;font-size:16px;padding:10px 12px;resize:vertical}
 .moods{display:flex;gap:8px;flex-wrap:wrap}
-.toast{position:fixed;left:50%;width:max-content;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--paper);border-radius:999px;padding:9px 16px;font-family:var(--f-display);font-size:14px;max-width:calc(100% - 32px)}
+.toast{position:fixed;left:50%;width:max-content;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--paper);border-radius:999px;padding:9px 16px;font-family:var(--f-ui);font-size:14px;max-width:calc(100% - 32px)}
 @media (max-width:380px){.balrow{grid-template-columns:90px 1fr 30px}.tile b{font-size:24px}}
+
+/* Bewegung: ruhig, kurz, nur wo sie etwas erzählt */
+.btn,.chip,.opt,.li,.close,.linkbtn{transition:transform .18s cubic-bezier(.2,.7,.2,1),background-color .25s,color .25s,border-color .25s,box-shadow .25s}
+.btn:active,.chip:active,.opt:active,.close:active{transform:scale(.97)}
+@media (hover:hover){.li:hover{transform:translateX(3px)}.opt:hover:not(:disabled){border-color:var(--muted)}.compass:hover{box-shadow:0 1px 0 var(--line),0 22px 46px -20px rgba(0,0,0,.5)}}
+nav.tabs button svg{transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+nav.tabs button[aria-current="page"] svg{transform:translateY(-1px) scale(1.08)}
+@media (prefers-reduced-motion:no-preference){
+ #main.anim .view>*{animation:fadeUp .55s cubic-bezier(.2,.7,.2,1) both}
+ #main.anim .view>*:nth-child(2){animation-delay:.07s}#main.anim .view>*:nth-child(3){animation-delay:.14s}#main.anim .view>*:nth-child(4){animation-delay:.21s}#main.anim .view>*:nth-child(n+5){animation-delay:.28s}
+ #main.anim .list>*,#main.anim .opts>*{animation:fadeUp .45s cubic-bezier(.2,.7,.2,1) both}
+ #main.anim .list>*:nth-child(1),#main.anim .opts>*:nth-child(1){animation-delay:0.155s}#main.anim .list>*:nth-child(2),#main.anim .opts>*:nth-child(2){animation-delay:0.190s}#main.anim .list>*:nth-child(3),#main.anim .opts>*:nth-child(3){animation-delay:0.225s}#main.anim .list>*:nth-child(4),#main.anim .opts>*:nth-child(4){animation-delay:0.260s}#main.anim .list>*:nth-child(5),#main.anim .opts>*:nth-child(5){animation-delay:0.295s}#main.anim .list>*:nth-child(6),#main.anim .opts>*:nth-child(6){animation-delay:0.330s}#main.anim .list>*:nth-child(7),#main.anim .opts>*:nth-child(7){animation-delay:0.365s}#main.anim .list>*:nth-child(8),#main.anim .opts>*:nth-child(8){animation-delay:0.400s}#main.anim .list>*:nth-child(9),#main.anim .opts>*:nth-child(9){animation-delay:0.435s}#main.anim .list>*:nth-child(10),#main.anim .opts>*:nth-child(10){animation-delay:0.470s}#main.anim .list>*:nth-child(11),#main.anim .opts>*:nth-child(11){animation-delay:0.505s}#main.anim .list>*:nth-child(12),#main.anim .opts>*:nth-child(12){animation-delay:0.540s}#main.anim .list>*:nth-child(13),#main.anim .opts>*:nth-child(13){animation-delay:0.575s}#main.anim .list>*:nth-child(14),#main.anim .opts>*:nth-child(14){animation-delay:0.610s}
+ #main.animq .quiz{animation:fadeUp .4s cubic-bezier(.2,.7,.2,1) both}
+ #main.anim .meter span,#main.anim .balrow .bar span{animation:grow 1s .25s cubic-bezier(.2,.7,.2,1) both;transform-origin:left}
+ #main.anim .boxes b.on{animation:fadeIn .4s both;animation-delay:calc(.3s + var(--k,0)*.05s)}
+ .rose.grow b i{animation:grow 1.1s cubic-bezier(.2,.7,.2,1) both;transform-origin:left}
+ .rose.grow b:nth-child(2) i{animation-delay:.06s}.rose.grow b:nth-child(3) i{animation-delay:.12s}.rose.grow b:nth-child(4) i{animation-delay:.18s}.rose.grow b:nth-child(5) i{animation-delay:.24s}
+ .logo{animation:logoIn 1.2s cubic-bezier(.2,.7,.2,1) both}
+ .opt.right{animation:pop .45s cubic-bezier(.2,.7,.2,1)}
+ .opt.wrong{animation:shake .4s}
+ .fb,.take{animation:fadeIn .4s both}
+ .sheet{animation:fadeIn .25s both}
+ .toast{animation:toastIn .35s cubic-bezier(.2,.7,.2,1) both}
+ .toast.out{animation:toastOut .3s ease-in both}
+ nav.tabs button[aria-current="page"]::before{animation:tabIn .35s cubic-bezier(.2,.7,.2,1) both}
+ #save[aria-pressed="true"]{animation:pop .4s cubic-bezier(.2,.7,.2,1)}
+ .compass.spin .core{animation:coreSpin .7s cubic-bezier(.3,.7,.3,1)}
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}}
+@keyframes grow{from{transform:scaleX(0)}}
+@keyframes pop{40%{transform:scale(1.035)}}
+@keyframes shake{20%{transform:translateX(-5px)}50%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}}
+@keyframes toastOut{to{opacity:0;transform:translate(-50%,8px)}}
+@keyframes tabIn{from{transform:scaleX(0)}}
+@keyframes logoIn{from{transform:rotate(-200deg) scale(.6);opacity:0}}
+@keyframes coreSpin{to{transform:rotate(-360deg)}}
 </style>
 
 </head><body><div class="app" id="app">
@@ -572,6 +610,414 @@ const EXPS=[
 {id:"tauschkreis",cat:"welt",d:21,t:"Ein Tauschkreis",x:"Organisiere mit Freund:innen oder Nachbar:innen eine Tauschparty für Kleidung, Bücher oder Werkzeug. Was übrig bleibt, wird gespendet.",s:["Termin und Ort festlegen, jede:r bringt mindestens fünf Dinge","Einfache Regel: Nimm, was du wirklich nutzt","Reste gemeinsam wegbringen"],b:"vs2025"}
 ];
 
+/* Fundus: weitere Häppchen, Begriffe und Experimente (Stand Oktober 2026) */
+BITES.push(
+{id:"grundeinkommen_de",cat:"zeit",ev:2,t:"Grundeinkommen in Deutschland: keine Hängematte",
+ x:"Im Pilotprojekt Grundeinkommen bekamen 107 Menschen drei Jahre lang 1.200 Euro im Monat, verglichen mit über 1.500 Personen ohne Zahlung. Niemand zog sich vom Arbeitsmarkt zurück, die Arbeitsstunden sanken nicht. Die Lebenszufriedenheit stieg deutlich und blieb über die ganze Zeit höher. Über ein Drittel des Geldes wurde gespart, etwa 7 % gingen an Familie, Freunde oder Spenden.",
+ c:"Randomisiert und unabhängig ausgewertet, aber mit kleiner Gruppe von Empfänger:innen.",
+ src:"DIW Wochenbericht 15/2025",u:"https://www.diw.de/de/diw_01.c.945347.de/publikationen/wochenberichte/2025_15_1/pilotprojekt_grundeinkommen__kein_rueckzug_vom_arbeitsmarkt__aber_bessere_mentale_gesundheit.html",
+ tip:"Sicherheit scheint Menschen nicht faul zu machen, sondern ruhiger und großzügiger.",term:"jahoda",exp:"ohnejob"},
+{id:"chatbot",cat:"zeit",ev:1,t:"Viel mit KI plaudern, mehr Einsamkeit?",
+ x:"In einer vierwöchigen Studie von MIT Media Lab und OpenAI mit rund 1.000 Menschen ging eine höhere tägliche Nutzung von ChatGPT mit mehr Einsamkeit, stärkerer emotionaler Abhängigkeit und weniger Kontakten zu echten Menschen einher. Besonders persönliche Gespräche mit dem Chatbot hingen mit mehr Einsamkeit zusammen.",
+ c:"Kurzer Zeitraum, vor allem Zusammenhänge. Einsamere Menschen nutzen Chatbots vielleicht einfach mehr.",
+ src:"Fang et al. & Phang et al. (2025), MIT Media Lab und OpenAI",u:SCH("Fang Phang 2025 how AI and human behaviors shape psychosocial effects of chatbot use longitudinal randomized controlled study"),
+ tip:"KI kann vieles abnehmen. Eine Umarmung, einen gemeinsamen Abend und ein ehrliches Gegenüber eher nicht.",term:"loneliness"},
+{id:"ai_work",cat:"zeit",ev:2,t:"KI hilft vor allem den Unerfahrenen",
+ x:"In einem Callcenter mit über 5.000 Beschäftigten steigerte ein KI-Assistent die Produktivität im Schnitt um 14 %. Neue und weniger erfahrene Kräfte profitierten am meisten, erfahrene kaum. Die Kundschaft war freundlicher, und weniger Beschäftigte kündigten.",
+ c:"Eine Firma, eine Branche. Langfristige Folgen für Arbeit und Sinn sind offen.",
+ src:"Brynjolfsson, Li & Raymond (2025), Quarterly Journal of Economics",u:SCH("Brynjolfsson Li Raymond generative AI at work"),
+ tip:"Wenn Maschinen Können verteilen, wird die Frage wichtiger, wofür wir unsere Zeit einsetzen wollen."},
+{id:"keynes",cat:"zeit",ev:0,t:"Keynes' 15-Stunden-Woche",
+ x:"1930 sagte der Ökonom John Maynard Keynes voraus, dass seine Enkel dank Produktivität nur noch etwa 15 Stunden pro Woche arbeiten würden. Die eigentliche Herausforderung werde dann sein, wie man die Freiheit gut nutzt und weise, angenehm und gut lebt. Die Produktivität kam, die 15 Stunden kamen nicht. Stattdessen wuchsen Konsum und Ansprüche.",
+ c:"Historischer Denkanstoß, keine Studie.",
+ src:"Keynes (1930), Economic Possibilities for our Grandchildren",u:SCH("Keynes 1930 economic possibilities for our grandchildren"),
+ tip:"Vielleicht ist die Frage nicht, ob wir weniger arbeiten können, sondern ob wir mit weniger zufrieden sein wollen.",term:"sufficiency"},
+{id:"russell",cat:"zeit",ev:0,t:"Lob des Müßiggangs",
+ x:"Bertrand Russell schrieb 1932, der Glaube an die Tugend der Arbeit richte großen Schaden an. Mit vier Stunden Arbeit am Tag hätten alle genug, und die freie Zeit würde Menschen neugieriger, freundlicher und weniger kriegerisch machen. Müßiggang meinte er nicht als Faulheit, sondern als Raum für Wissen, Kunst und Spiel.",
+ c:"Philosophischer Essay, keine Studie.",
+ src:"Russell (1932), In Praise of Idleness",u:SCH("Russell 1932 in praise of idleness"),
+ tip:"Freie Zeit ist kein Loch, das man stopfen muss. Sie kann der Ort sein, an dem ein Leben stattfindet."},
+{id:"arendt",cat:"zeit",ev:0,t:"Arbeiten, Herstellen, Handeln",
+ x:"Hannah Arendt unterschied drei Tätigkeiten: Arbeiten für das Lebensnotwendige, Herstellen von bleibenden Dingen und Handeln, also gemeinsam mit anderen etwas anfangen und die Welt gestalten. Sie warnte vor einer Gesellschaft von Arbeitenden, denen die Arbeit ausgeht. Denn sie kenne kaum noch andere Tätigkeiten, für die es sich zu leben lohnt.",
+ c:"Philosophie, keine Studie. Sehr aktuell, wenn KI Arbeit übernimmt.",
+ src:"Arendt (1958), Vita activa oder Vom tätigen Leben",u:SCH("Arendt Vita activa oder vom tätigen Leben"),
+ tip:"Frag dich: Was stelle ich her, das bleibt? Wo handle ich mit anderen?"},
+{id:"unemployment_scar",cat:"zeit",ev:3,t:"Arbeitslosigkeit hinterlässt Narben",
+ x:"Arbeitslosigkeit senkt die Lebenszufriedenheit stark, und viele gewöhnen sich auch nach Jahren nicht daran. Selbst nach einer neuen Stelle bleibt oft ein Rest. Der Verlust von Rolle, Struktur und Zugehörigkeit wiegt dabei schwerer als der Einkommensverlust.",
+ c:"Viele große Paneldaten aus Deutschland und Großbritannien.",
+ src:"Clark et al. (2008), Economic Journal; Lucas et al. (2004), Psychological Science",u:SCH("Lucas Clark Georgellis Diener 2004 unemployment alters the set point for life satisfaction"),
+ tip:"Für eine Welt mit weniger Erwerbsarbeit brauchen wir neue Rollen, die Menschen Würde geben.",term:"jahoda"},
+{id:"control",cat:"zeit",ev:3,t:"Kontrolle über die eigene Arbeit schützt das Herz",
+ x:"Die Whitehall-Studien an britischen Beamten zeigten: Wer bei der Arbeit wenig Entscheidungsspielraum hat, erkrankt häufiger an Herzkrankheiten, unabhängig von Rang, Rauchen und Blutdruck. Nicht der Druck an der Spitze macht krank, sondern das Gefühl, nichts mitbestimmen zu können.",
+ c:"Große Langzeitstudie, oft bestätigt.",
+ src:"Marmot et al. (1997), The Lancet",u:SCH("Marmot Bosma Hemingway Brunner Stansfeld 1997 contribution of job control and other risk factors to social variations in coronary heart disease"),
+ tip:"Autonomie ist kein Luxus. Wo du mitentscheiden kannst, lohnt es sich, darum zu bitten.",term:"sdt"},
+{id:"jobcrafting",cat:"zeit",ev:2,t:"Den eigenen Job umbauen",
+ x:"Job Crafting heißt, die eigene Arbeit innerhalb ihrer Grenzen umzugestalten: Aufgaben, Beziehungen und die Art, wie man über die Arbeit denkt. In Studien erlebten Menschen danach mehr Sinn und Engagement. Ein bekanntes Beispiel sind Reinigungskräfte im Krankenhaus, die sich als Teil der Heilung verstehen.",
+ c:"Viele Studien, meist mit Selbstauskunft, einige Interventionen.",
+ src:"Wrzesniewski & Dutton (2001), Academy of Management Review",u:SCH("Wrzesniewski Dutton 2001 crafting a job revisioning employees as active crafters of their work"),
+ tip:"Auch eine Arbeit, die man nicht wechseln kann, kann man ein Stück umbauen."},
+{id:"tv",cat:"zeit",ev:2,t:"Viel Fernsehen, wenig Zufriedenheit",
+ x:"Menschen, die sehr viel fernsehen, sind im Schnitt weniger zufrieden mit ihrem Leben, besonders wenn ihre Zeit eigentlich knapp ist. Viele bereuen den Fernsehkonsum hinterher. Ein Grund: Fernsehen ist sofort angenehm, die Kosten kommen erst später.",
+ c:"Große europäische Umfragedaten, Zusammenhänge. Heute gilt Ähnliches wohl für Streaming und Feeds.",
+ src:"Frey, Benesch & Stutzer (2007), Journal of Economic Psychology",u:SCH("Frey Benesch Stutzer 2007 does watching TV make us happy"),
+ tip:"Nicht der Film ist das Problem, sondern der Abend, an dem man nur noch weiterschaut, weil das nächste Video von selbst startet."},
+{id:"email",cat:"zeit",ev:2,t:"E-Mails seltener abrufen senkt Stress",
+ x:"Erwachsene sollten eine Woche lang ihre E-Mails nur dreimal am Tag abrufen, in einer anderen Woche so oft sie wollten. In der Woche mit seltenem Abrufen fühlten sie sich weniger gestresst, und das wirkte sich auf ihr Wohlbefinden aus.",
+ c:"Kleines Experiment mit 124 Personen.",
+ src:"Kushlev & Dunn (2015), Computers in Human Behavior",u:SCH("Kushlev Dunn 2015 checking email less frequently reduces stress"),
+ tip:"Feste Zeiten für Nachrichten schenken dir Stunden ohne innere Unruhe.",exp:"stapel"},
+{id:"phubbing",cat:"wir",ev:2,t:"Das Handy auf dem Tisch stört",
+ x:"Menschen, die beim Essen mit Freund:innen ihr Handy griffbereit hatten, genossen das Essen weniger und fühlten sich abgelenkter als jene, deren Handys weggeräumt waren. Allein die sichtbare Möglichkeit, aufs Handy zu schauen, zieht Aufmerksamkeit ab.",
+ c:"Ein Feldexperiment mit über 300 Personen in Restaurants, Effekt klein bis mittel.",
+ src:"Dwyer, Kushlev & Dunn (2018), Journal of Experimental Social Psychology",u:SCH("Dwyer Kushlev Dunn 2018 smartphone use undermines enjoyment of face-to-face social interactions"),
+ tip:"Eine Schale für Handys in der Mitte des Tisches ist ein kleines Ritual mit großer Wirkung.",exp:"tisch"},
+{id:"busy",cat:"zeit",ev:2,t:"Beschäftigt sein als Statussymbol",
+ x:"In den USA gilt es zunehmend als Zeichen von Status, viel zu tun zu haben und wenig Freizeit. Menschen, die über ihre Überlastung klagen, werden als wichtiger wahrgenommen. In Italien war es in Studien eher umgekehrt: Wer Muße hat, gilt dort als privilegiert.",
+ c:"Mehrere Experimente, kulturelle Unterschiede.",
+ src:"Bellezza, Paharia & Keinan (2017), Journal of Consumer Research",u:SCH("Bellezza Paharia Keinan 2017 conspicuous consumption of time busyness status symbol"),
+ tip:"Vielleicht kann Muße wieder ein Zeichen von Wohlstand werden. Fang bei dir an.",term:"timeaffluence"},
+{id:"working_hours_emissions",cat:"welt",ev:2,t:"Weniger arbeiten, weniger Emissionen",
+ x:"Länder mit kürzeren Arbeitszeiten haben im Schnitt geringere ökologische Fußabdrücke und CO₂-Emissionen. Wer weniger arbeitet, verdient und konsumiert meist weniger und hat mehr Zeit für langsamere, ressourcenschonendere Lebensweisen.",
+ c:"Ländervergleich über Jahrzehnte, Zusammenhänge.",
+ src:"Knight, Rosa & Schor (2013), Global Environmental Change",u:SCH("Knight Rosa Schor 2013 could working less reduce pressures on the environment"),
+ tip:"Zeitwohlstand und Klimaschutz können zwei Seiten derselben Medaille sein.",term:"sufficiency"},
+{id:"boundaries",cat:"welt",ev:2,t:"Gutes Leben innerhalb der Grenzen des Planeten",
+ x:"Forschende verglichen 150 Länder: Kein einziges erfüllt die Grundbedürfnisse seiner Bevölkerung, ohne die ökologischen Grenzen des Planeten zu überschreiten. Länder, die viele soziale Ziele erreichen, verbrauchen zu viele Ressourcen. Nötig wären laut den Autoren weniger Konsum in reichen Ländern und mehr Teilen.",
+ c:"Große Modellrechnung, Bewertung der Grenzen mit Unsicherheiten.",
+ src:"O'Neill et al. (2018), Nature Sustainability",u:SCH("O'Neill Fanning Lamb Steinberger 2018 a good life for all within planetary boundaries"),
+ tip:"Ein gutes Leben für alle braucht Glück, das nicht an steigenden Verbrauch gebunden ist.",term:"sufficiency"},
+{id:"doughnut",cat:"welt",ev:0,t:"Die Donut-Ökonomie",
+ x:"Die Ökonomin Kate Raworth zeichnet die Wirtschaft als Donut: Der innere Ring ist das soziale Fundament, unter das niemand fallen soll, also Nahrung, Wohnung, Bildung und Teilhabe. Der äußere Ring ist die ökologische Decke, über die wir nicht hinaus dürfen. Dazwischen liegt der sichere und gerechte Raum für ein gutes Leben.",
+ c:"Ein Denkmodell, keine Studie. Amsterdam und andere Städte nutzen es als Leitbild.",
+ src:"Raworth (2017), Die Donut-Ökonomie",u:SCH("Raworth 2017 Doughnut Economics seven ways to think like a 21st century economist"),
+ tip:"Genug ist nicht wenig. Genug ist das, was zwischen Mangel und Übermaß liegt."},
+{id:"wellbeing_budget",cat:"welt",ev:2,t:"Wenn Staaten Wohlbefinden messen",
+ x:"Neuseeland stellte 2019 einen der ersten Wohlbefindenshaushalte vor. Ausgaben werden dort auch danach bewertet, ob sie psychische Gesundheit, Kinder und Umwelt fördern, nicht nur nach dem Wachstum. Wales hat ein Gesetz zum Wohlergehen künftiger Generationen. Island, Schottland und Finnland arbeiten ebenfalls als Wellbeing Economy Governments zusammen.",
+ c:"Politische Praxis. Ob es messbar mehr Glück bringt, lässt sich noch nicht sagen.",
+ src:"New Zealand Treasury (2019); Wellbeing Economy Governments",u:SCH("New Zealand wellbeing budget 2019 evaluation"),
+ tip:"Was gemessen wird, wird wichtig. Das gilt für Länder und für das eigene Leben."},
+{id:"advertising",cat:"sein",ev:2,t:"Werbung macht unzufriedener",
+ x:"Eine Auswertung mit rund einer Million Menschen in 27 europäischen Ländern über drei Jahrzehnte fand: Stiegen in einem Land die Werbeausgaben, sank danach die Lebenszufriedenheit, auch wenn man die Wirtschaftslage herausrechnet. Werbung weckt Wünsche und lässt das Vorhandene kleiner wirken.",
+ c:"Große Datenbasis, aber Ländervergleiche über die Zeit, keine Experimente.",
+ src:"Michel, Sovinsky, Proto & Oswald (2019), Advertising as a Major Source of Human Dissatisfaction",u:SCH("Michel Sovinsky Proto Oswald advertising as a major source of human dissatisfaction cross-national evidence on one million Europeans"),
+ tip:"Jede Werbung, die du nicht siehst, ist ein Wunsch weniger, den du nicht hattest.",term:"comparison",exp:"werbefrei"},
+{id:"savings",cat:"sein",ev:2,t:"Ein Polster beruhigt mehr als ein Gehalt",
+ x:"Wie viel Geld jemand auf dem Konto hat, sagt die Lebenszufriedenheit besser voraus als das Einkommen. Ein Notgroschen schützt vor Sorgen und gibt das Gefühl, das Leben im Griff zu haben. Wichtig war dabei nicht Reichtum, sondern schnell verfügbares Geld für den Notfall.",
+ c:"Mehrere Studien mit Zehntausenden Befragten, Zusammenhänge.",
+ src:"Ruberton, Gladstone & Lyubomirsky (2016), Emotion",u:SCH("Ruberton Gladstone Lyubomirsky 2016 how your bank balance buys happiness liquid wealth"),
+ tip:"Wer weniger braucht, kann leichter ein Polster aufbauen. Und ein Polster schenkt Gelassenheit.",exp:"polster"},
+{id:"debt",cat:"sein",ev:3,t:"Schulden belasten die Seele",
+ x:"Eine Meta-Analyse über 65 Studien fand einen deutlichen Zusammenhang zwischen Schulden und psychischen Problemen, besonders Depression. Menschen mit Schulden hatten etwa dreimal so häufig eine psychische Erkrankung.",
+ c:"Viele Studien, aber vor allem Zusammenhänge. Schulden und Krankheit verstärken sich wohl gegenseitig.",
+ src:"Richardson, Elliott & Roberts (2013), Clinical Psychology Review",u:SCH("Richardson Elliott Roberts 2013 the relationship between personal unsecured debt and mental and physical health systematic review meta-analysis"),
+ tip:"Konsum auf Pump kauft selten Glück, aber oft Sorgen. Wenn Schulden drücken, hilft eine kostenlose Schuldnerberatung."},
+{id:"endowment",cat:"sein",ev:3,t:"Was uns gehört, halten wir für wertvoller",
+ x:"In klassischen Experimenten bekamen Studierende eine Kaffeetasse geschenkt. Verkaufen wollten sie sie im Schnitt erst für etwa doppelt so viel Geld, wie andere dafür zahlen wollten. Besitz macht Dinge in unseren Augen wertvoller. Das nennt man Besitztumseffekt.",
+ c:"Oft wiederholt, das Ausmaß schwankt je nach Situation.",
+ src:"Kahneman, Knetsch & Thaler (1990), Journal of Political Economy",u:SCH("Kahneman Knetsch Thaler 1990 experimental tests of the endowment effect and the Coase theorem"),
+ tip:"Beim Ausmisten hilft die Frage: Würde ich das heute für diesen Preis kaufen?",term:"endowment",exp:"buecher"},
+{id:"ikea",cat:"welt",ev:2,t:"Selbst gemacht ist mehr wert",
+ x:"Menschen schätzen Dinge, die sie selbst gebaut oder repariert haben, deutlich mehr als gleichwertige fertige Dinge. Forschende nannten das den IKEA-Effekt. Die eigene Mühe stiftet Bindung, solange das Ergebnis gelingt.",
+ c:"Mehrere Experimente, gut bestätigt.",
+ src:"Norton, Mochon & Ariely (2012), Journal of Consumer Psychology",u:SCH("Norton Mochon Ariely 2012 the IKEA effect when labor leads to love"),
+ tip:"Was du reparierst, bekommst du doppelt zurück: das Ding und die Liebe dazu.",exp:"reparieren"},
+{id:"clutter",cat:"sein",ev:1,t:"Unordnung kann stressen",
+ x:"Paare beschrieben ihre Wohnung in eigenen Worten. Frauen, die viel von Unordnung und Unfertigem sprachen, hatten über den Tag einen ungünstigeren Verlauf des Stresshormons Cortisol und mehr depressive Stimmung. Bei Männern zeigte sich das nicht.",
+ c:"Kleine Studie mit 30 Paaren, Zusammenhang, kein Experiment.",
+ src:"Saxbe & Repetti (2010), Personality and Social Psychology Bulletin",u:SCH("Saxbe Repetti 2010 no place like home home tours correlate with daily patterns of mood and cortisol"),
+ tip:"Ausmisten ist auch Seelenpflege. Aber nur, wenn es nicht zum nächsten Druck wird.",exp:"kiste30"},
+{id:"shared_exp",cat:"wir",ev:2,t:"Geteilte Erlebnisse wiegen doppelt",
+ x:"Erlebnisse machen vor allem dann glücklich, wenn man sie mit anderen teilt. In Experimenten verlor der Vorteil von Erlebnissen gegenüber Dingen viel von seiner Kraft, wenn das Erlebnis allein stattfand.",
+ c:"Mehrere Studien, gut zur Beziehungsforschung passend.",
+ src:"Caprariello & Reis (2013), Journal of Personality and Social Psychology",u:SCH("Caprariello Reis 2013 to do to have or to share valuing experiences over material possessions depends on the involvement of others"),
+ tip:"Nicht das Erlebnis an sich zählt, sondern mit wem du es teilst.",term:"anticipation",exp:"erlebnis"},
+{id:"gift_exp",cat:"wir",ev:2,t:"Erlebnisse verschenken verbindet",
+ x:"Wer ein Erlebnis verschenkt, etwa ein Konzert oder einen Kochkurs, stärkt die Beziehung zur beschenkten Person mehr als mit einem Gegenstand. Das gilt sogar, wenn man das Erlebnis nicht gemeinsam macht. Erlebnisse lösen stärkere Gefühle aus, und die verbinden.",
+ c:"Mehrere Experimente.",
+ src:"Chan & Mogilner (2017), Journal of Consumer Research",u:SCH("Chan Mogilner 2017 experiential gifts foster stronger social relationships than material gifts"),
+ tip:"Das nächste Geschenk darf eine Erinnerung sein statt eines Gegenstands.",exp:"zeitstattzeug"},
+{id:"groups",cat:"wir",ev:2,t:"Gruppen schützen vor Depression",
+ x:"In einer englischen Langzeitstudie mit über 4.000 Menschen ab 50 sank bei depressiven Menschen das Rückfallrisiko von 41 % auf 31 %, wenn sie einer Gruppe beitraten. Bei drei Gruppen sank es auf 15 %. Gemeint sind Chöre, Sportvereine, Kirchengemeinden oder Strickkreise.",
+ c:"Große Längsschnittdaten, aber Beobachtung, kein Experiment.",
+ src:"Cruwys et al. (2013), Social Science & Medicine",u:SCH("Cruwys Dingle Haslam Jetten Morton 2013 social group memberships protect against future depression"),
+ tip:"Eine Gruppe ist mehr als ihre Summe. Sie gibt Rolle, Rhythmus und das Gefühl, gebraucht zu werden.",term:"socialcure",exp:"gruppe"},
+{id:"friend_hours",cat:"wir",ev:1,t:"Freundschaft braucht Stunden",
+ x:"Eine Studie schätzte, wie viel gemeinsame Zeit Freundschaft braucht: etwa 50 Stunden für eine lockere Freundschaft, rund 90 für eine Freundschaft und über 200 für eine enge Freundschaft. Wichtig war dabei gemeinsame Freizeit, nicht Zeit im Büro.",
+ c:"Zwei Befragungen, grobe Schätzwerte.",
+ src:"Hall (2019), Journal of Social and Personal Relationships",u:SCH("Hall 2019 how many hours does it take to make a friend"),
+ tip:"Freundschaft entsteht nicht nur durch Sympathie, sondern durch Wiederholung. Ein fester Termin hilft.",exp:"stammgast"},
+{id:"loneliness_cog",cat:"wir",ev:3,t:"Was gegen Einsamkeit am besten hilft",
+ x:"Eine Meta-Analyse über 50 Interventionen fand: Am wirksamsten gegen Einsamkeit waren Programme, die an den Gedanken ansetzen. Einsame Menschen erwarten oft Ablehnung und deuten Situationen negativ. Wer diese Muster erkennt, findet leichter Kontakt. Mehr Gelegenheiten allein halfen weniger.",
+ c:"Meta-Analyse, aber mit unterschiedlich guten Einzelstudien.",
+ src:"Masi et al. (2011), Personality and Social Psychology Review",u:SCH("Masi Chen Hawkley Cacioppo 2011 a meta-analysis of interventions to reduce loneliness"),
+ tip:"Wenn du dich einsam fühlst: Die meisten Menschen freuen sich mehr über deinen Anruf, als du denkst.",term:"loneliness"},
+{id:"marriage",cat:"wir",ev:2,t:"Nicht die Ehe macht glücklich, sondern die Freundschaft darin",
+ x:"Verheiratete sind im Schnitt zufriedener als Alleinstehende. In britischen Daten war der Effekt aber doppelt so groß bei Menschen, die ihren Partner oder ihre Partnerin als besten Freund oder beste Freundin bezeichneten. Freundschaft trägt also viel vom Glück einer Beziehung.",
+ c:"Große Paneldaten, Zusammenhänge.",
+ src:"Grover & Helliwell (2019), Journal of Happiness Studies",u:SCH("Grover Helliwell 2019 how's life at home new evidence on marriage and the set point for happiness"),
+ tip:"Auch in langen Beziehungen lohnt es sich, wie gute Freunde miteinander umzugehen."},
+{id:"parents",cat:"wir",ev:2,t:"Eltern sind dort glücklicher, wo Politik sie stützt",
+ x:"In vielen Ländern sind Eltern etwas weniger zufrieden als Kinderlose. In einem Vergleich von 22 Ländern verschwand diese Lücke dort, wo es gute Elternzeit, Kinderbetreuung und flexible Arbeit gab. In Ländern wie Norwegen und Portugal waren Eltern sogar zufriedener.",
+ c:"Ländervergleich mit Umfragedaten.",
+ src:"Glass, Simon & Andersson (2016), American Journal of Sociology",u:SCH("Glass Simon Andersson 2016 parenthood and happiness effects of work-family reconciliation policies in 22 OECD countries"),
+ tip:"Glück ist nicht nur privat. Wie wir zusammenleben, entscheidet mit."},
+{id:"contagion",cat:"wir",ev:1,t:"Steckt Glück an?",
+ x:"Daten der Framingham-Studie deuteten an, dass Glück sich in sozialen Netzwerken ausbreitet. Wer glückliche Freund:innen in der Nähe hat, wird mit höherer Wahrscheinlichkeit selbst glücklich, bis zu drei Kontaktstufen weit.",
+ c:"Viel diskutiert und methodisch umstritten. Ähnliche Menschen finden sich auch einfach zueinander.",
+ src:"Fowler & Christakis (2008), BMJ",u:SCH("Fowler Christakis 2008 dynamic spread of happiness in a large social network Framingham"),
+ tip:"Selbst wenn der Effekt kleiner ist als gedacht: Deine Laune ist nie ganz privat."},
+{id:"forgive",cat:"wir",ev:2,t:"Vergeben kann man lernen",
+ x:"Eine Meta-Analyse über 54 Studien fand: Programme, die Vergebung üben, verringern Groll und erhöhen Hoffnung, mit mittleren Effekten. Längere Programme wirkten stärker. Vergeben heißt dabei nicht, Unrecht gutzuheißen, sondern den eigenen Groll loszulassen.",
+ c:"Meta-Analyse, solide Effekte, Studien teils klein.",
+ src:"Wade et al. (2014), Journal of Consulting and Clinical Psychology",u:SCH("Wade Hoyt Kidwell Worthington 2014 efficacy of psychotherapeutic interventions to promote forgiveness meta-analysis"),
+ tip:"Vergebung ist ein Geschenk, das man vor allem sich selbst macht.",exp:"vergeben"},
+{id:"dunbar",cat:"wir",ev:1,t:"Die Kreise der Nähe",
+ x:"Der Anthropologe Robin Dunbar beschreibt unsere Beziehungen als Kreise: etwa 5 sehr enge Menschen, 15 gute Freund:innen, 50 Freund:innen und rund 150 Bekannte, deren Namen und Geschichte wir kennen. Die engsten Kreise brauchen am meisten Zeit.",
+ c:"Einflussreich, aber die genauen Zahlen sind umstritten.",
+ src:"Dunbar (2018), Trends in Cognitive Sciences",u:SCH("Dunbar 2018 the anatomy of friendship"),
+ tip:"Für die fünf Menschen im innersten Kreis lohnt es sich, Zeit zu reservieren.",term:"weakties"},
+{id:"touch",cat:"wir",ev:1,t:"Umarmungen als Schutz",
+ x:"Erwachsene wurden zwei Wochen lang zu Konflikten und Umarmungen befragt und dann absichtlich einem Erkältungsvirus ausgesetzt. Wer mehr soziale Unterstützung und Umarmungen erlebte, war vor stressbedingter Ansteckung besser geschützt und hatte mildere Symptome.",
+ c:"Spannendes Experiment, aber eine einzelne Studie mit 404 Personen.",
+ src:"Cohen et al. (2015), Psychological Science",u:SCH("Cohen Janicki-Deverts Turner Doyle 2015 does hugging provide stress-buffering social support"),
+ tip:"Eine Umarmung ist eine der ältesten Formen von Medizin."},
+{id:"listening",cat:"wir",ev:1,t:"Zuhören verändert beide",
+ x:"Wer gut zugehört bekommt, wird in Experimenten weniger ängstlich, denkt differenzierter und ist offener für andere Sichtweisen. Gutes Zuhören heißt: Aufmerksamkeit, Verständnis und keine Ratschläge, solange niemand danach fragt.",
+ c:"Mehrere kleinere Studien, junges Forschungsfeld.",
+ src:"Itzchakov et al. (2018), Personality and Social Psychology Bulletin",u:SCH("Itzchakov Kluger Castro 2017 I am aware of my inconsistencies but can tolerate them effect of high quality listening"),
+ tip:"Das Beste, was du heute jemandem schenken kannst, ist vielleicht deine ungeteilte Aufmerksamkeit.",exp:"zuhoeren"},
+{id:"inequality",cat:"sein",ev:2,t:"Ungleichheit kostet Vertrauen",
+ x:"In den Jahren, in denen die Einkommensungleichheit in den USA höher war, waren die Menschen im Schnitt weniger glücklich. Das galt vor allem für Menschen mit geringerem Einkommen. Erklärt wurde es durch weniger Vertrauen und das Gefühl, dass es ungerecht zugeht.",
+ c:"Daten über fast vier Jahrzehnte, Zusammenhänge.",
+ src:"Oishi, Kesebir & Diener (2011), Psychological Science",u:SCH("Oishi Kesebir Diener 2011 income inequality and happiness"),
+ tip:"Teilen ist nicht nur gut für andere. Gerechtere Gesellschaften sind für fast alle angenehmere Orte.",term:"trust"},
+{id:"seneca",cat:"sein",ev:0,t:"Nicht wer wenig hat, ist arm",
+ x:"Der römische Philosoph Seneca schrieb an seinen Freund Lucilius: Nicht wer zu wenig hat, ist arm, sondern wer mehr begehrt. Die Stoiker übten sogar bewusst Verzicht, etwa einfache Kleidung und schlichtes Essen für ein paar Tage, um die Angst vor dem Verlust zu verlieren.",
+ c:"Philosophischer Denkanstoß, keine Studie. Passt zur Forschung über hedonische Anpassung.",
+ src:"Seneca, Briefe an Lucilius (2. Brief)",u:SCH("Seneca Epistulae morales ad Lucilium 2 non qui parum habet sed qui plus cupit pauper est"),
+ tip:"Wer freiwillig ab und zu verzichtet, verliert die Angst davor und freut sich wieder über das Normale.",term:"adaptation",exp:"stoisch"},
+{id:"tolle",cat:"ich",ev:0,t:"Die Kraft der Gegenwart",
+ x:"Eckhart Tolle beschreibt, wie wir uns mit unserem Denken verwechseln. Ein großer Teil des Leidens entstehe aus Grübeln über Vergangenheit und Sorgen über die Zukunft. Frieden finde man, wenn man den gegenwärtigen Moment annimmt, statt gegen ihn anzudenken.",
+ c:"Spirituelle Lehre, keine Studie. Die Forschung zum Gedankenwandern und zur Akzeptanz passt aber in Teilen dazu.",
+ src:"Tolle (1997), Jetzt! Die Kraft der Gegenwart",u:SCH("Tolle The Power of Now"),
+ tip:"Du musst nicht spirituell sein, um es auszuprobieren: einmal ganz da sein, beim Abwasch, beim Gehen, beim Zuhören.",term:"mindwander",exp:"gedankenwecker"},
+{id:"thinking_alone",cat:"ich",ev:2,t:"Lieber ein Stromschlag als allein mit den Gedanken",
+ x:"Teilnehmende sollten 6 bis 15 Minuten allein in einem Raum sitzen und nur nachdenken. Viele fanden das unangenehm. Ein Viertel der Frauen und zwei Drittel der Männer verpassten sich lieber selbst einen leichten Stromschlag, als einfach nur mit ihren Gedanken zu sein.",
+ c:"Mehrere Experimente, viel diskutiert und in Teilen wiederholt.",
+ src:"Wilson et al. (2014), Science",u:SCH("Wilson Reinhard Westgate 2014 just think the challenges of the disengaged mind"),
+ tip:"Mit sich allein sein ist eine Fähigkeit, die man üben kann. Und eine, die in einer Welt mit mehr freier Zeit wichtiger wird.",exp:"stille"},
+{id:"pursuit",cat:"ich",ev:2,t:"Wer Glück zu sehr jagt, verliert es",
+ x:"Menschen, die Glück sehr hoch bewerten und ständig danach streben, sind paradoxerweise oft weniger glücklich, besonders in eigentlich angenehmen Situationen. Sie vergleichen jeden Moment mit einem hohen Ideal und werden enttäuscht.",
+ c:"Mehrere Studien inklusive Experimente.",
+ src:"Mauss et al. (2011), Emotion",u:SCH("Mauss Tamir Anderson Savino 2011 can seeking happiness make people unhappy"),
+ tip:"Diese App ist ein Kompass, kein Messgerät. Glück ist eher eine Nebenwirkung eines guten Lebens als ein Ziel."},
+{id:"acceptance",cat:"ich",ev:2,t:"Schlechte Gefühle annehmen hilft",
+ x:"Menschen, die negative Gefühle eher annehmen statt sie zu bewerten oder zu bekämpfen, hatten in mehreren Studien eine bessere psychische Gesundheit. In stressigen Situationen fühlten sie sich weniger schlecht, und Monate später ging es ihnen besser.",
+ c:"Mehrere Studien, auch mit Tagebuchdaten und Verlaufsmessungen.",
+ src:"Ford, Lam, John & Mauss (2018), Journal of Personality and Social Psychology",u:SCH("Ford Lam John Mauss 2018 the psychological health benefits of accepting negative emotions and thoughts"),
+ tip:"Traurigkeit ist kein Fehler im System. Sie darf da sein, dann geht sie oft leichter."},
+{id:"selfcompassion",cat:"ich",ev:3,t:"Selbstmitgefühl statt Selbstkritik",
+ x:"Selbstmitgefühl heißt, mit sich selbst so freundlich umzugehen wie mit einem guten Freund. Eine Meta-Analyse über 27 randomisierte Studien fand: Übungen in Selbstmitgefühl verringern Selbstkritik, Grübeln, Stress und depressive Symptome.",
+ c:"Meta-Analyse randomisierter Studien, mittlere Effekte.",
+ src:"Ferrari et al. (2019), Mindfulness",u:SCH("Ferrari 2019 self-compassion interventions and psychosocial outcomes a meta-analysis of RCTs"),
+ tip:"Frag dich in schweren Momenten: Was würde ich jetzt einem Menschen sagen, den ich gern habe?",term:"selfcompassion",exp:"freundesbrief"},
+{id:"bestself",cat:"ich",ev:2,t:"Das bestmögliche Selbst",
+ x:"Wer einige Minuten lang aufschreibt, wie sein Leben in der Zukunft aussieht, wenn alles gut läuft, wird in Studien optimistischer und erlebt mehr positive Gefühle. Eine Meta-Analyse fand kleine bis mittlere Effekte.",
+ c:"Meta-Analyse über zahlreiche Studien, die Effekte nehmen mit der Zeit ab.",
+ src:"Carrillo et al. (2019), PLoS ONE",u:SCH("Carrillo 2019 effects of the best possible self intervention a systematic review and meta-analysis"),
+ tip:"Schreib nicht nur Ziele auf, sondern male dir aus, wie ein guter Dienstag in fünf Jahren aussieht.",exp:"bestesselbst"},
+{id:"woop",cat:"ich",ev:2,t:"Wünschen plus Hindernis",
+ x:"Positives Fantasieren allein kann sogar bremsen: Wer sich sein Ziel nur schön ausmalt, entspannt sich, als wäre es schon erreicht. Wirksamer ist mentales Kontrastieren: erst den Wunsch ausmalen, dann das innere Hindernis benennen und einen Wenn-dann-Plan machen.",
+ c:"Viele Studien von Gabriele Oettingen und anderen.",
+ src:"Oettingen (2014), Die Psychologie des Gelingens",u:SCH("Oettingen mental contrasting implementation intentions WOOP meta-analysis"),
+ tip:"Wenn du ein Experiment annimmst: Was wird dich wahrscheinlich abhalten, und was tust du dann?",term:"woop"},
+{id:"satisfice",cat:"sein",ev:2,t:"Gut genug ist oft besser",
+ x:"Manche Menschen wollen immer die beste Wahl treffen und vergleichen ohne Ende. Andere hören auf, sobald etwas gut genug ist. Die Gut-genug-Wähler waren in Studien zufriedener und bereuten weniger, obwohl die Maximierer oft objektiv bessere Ergebnisse erzielten.",
+ c:"Mehrere Studien, die Skala ist methodisch diskutiert.",
+ src:"Schwartz et al. (2002), Journal of Personality and Social Psychology",u:SCH("Schwartz Ward Monterosso Lyubomirsky 2002 maximizing versus satisficing happiness is a matter of choice"),
+ tip:"Für viele Entscheidungen reicht eine Regel: Die erste Option, die deine Kriterien erfüllt, ist die richtige.",term:"satisficing",exp:"gutgenug"},
+{id:"choice",cat:"sein",ev:1,t:"Zu viel Auswahl lähmt manchmal",
+ x:"Im berühmten Marmeladen-Experiment kauften mehr Menschen, wenn sie zwischen 6 statt 24 Sorten wählen konnten. Spätere Meta-Analysen zeigen: Der Effekt tritt nicht immer auf, aber bei komplexen Entscheidungen und unklaren Vorlieben macht große Auswahl unsicher und unzufrieden.",
+ c:"Der Effekt ist im Schnitt klein und hängt stark von der Situation ab.",
+ src:"Iyengar & Lepper (2000); Chernev et al. (2015), Journal of Consumer Psychology",u:SCH("Chernev Böckenholt Goodman 2015 choice overload a conceptual review and meta-analysis"),
+ tip:"Weniger Besitz heißt auch weniger Entscheidungen. Eine kleine Garderobe ist morgens eine kleine Erleichterung."},
+{id:"heritability",cat:"ich",ev:3,t:"Wie viel Glück liegt in den Genen?",
+ x:"Zwillingsstudien zeigen, dass etwa ein Drittel der Unterschiede im Wohlbefinden zwischen Menschen erblich ist. Die oft zitierte Torte, nach der 40 % des Glücks in unserer Hand liegen, gilt aber als zu einfach. Gene, Umstände und Verhalten wirken zusammen.",
+ c:"Meta-Analyse über Zehntausende Zwillinge. Die Kritik an der 40-%-Regel ist inzwischen gut begründet.",
+ src:"Bartels (2015), Behavior Genetics; Brown & Rohrer (2020)",u:SCH("Bartels 2015 genetics of wellbeing and its components satisfaction with life happiness and quality of life meta-analysis"),
+ tip:"Du bist nicht dein Thermostat, aber du hast eine Grundtemperatur. Arbeite mit ihr, nicht gegen sie."},
+{id:"ucurve",cat:"ich",ev:1,t:"Die Glückskurve des Lebens",
+ x:"In vielen Ländern verläuft die Lebenszufriedenheit im Leben wie ein flaches U: hoch in der Jugend, ein Tief um die Lebensmitte, etwa Ende 40, und danach wieder höher. Neuere Daten zeigen aber, dass junge Menschen heute oft am unzufriedensten sind.",
+ c:"Viel diskutiert. Die Form hängt von Land, Zeit und Methode ab.",
+ src:"Blanchflower (2021), Journal of Population Economics; Global Flourishing Study (2025)",u:SCH("Blanchflower 2021 is happiness U-shaped everywhere age and subjective well-being in 145 countries"),
+ tip:"Eine Krise in der Lebensmitte ist häufig und geht oft vorbei. Und für junge Menschen braucht es heute besondere Aufmerksamkeit.",term:"flourishing"},
+{id:"optimism",cat:"ich",ev:2,t:"Optimismus und ein langes Leben",
+ x:"In zwei großen US-Kohorten lebten die optimistischsten Menschen im Schnitt 11 bis 15 % länger als die pessimistischsten und erreichten häufiger ein Alter von 85 Jahren.",
+ c:"Große Langzeitstudien, aber Beobachtung. Optimismus hängt auch mit gesünderem Verhalten zusammen.",
+ src:"Lee et al. (2019), PNAS",u:"https://www.pnas.org/doi/10.1073/pnas.1900712116",
+ tip:"Optimismus heißt nicht, alles schönzureden, sondern daran zu glauben, dass das eigene Handeln etwas bewirkt."},
+{id:"purpose_mort",cat:"ich",ev:2,t:"Ein Ziel im Leben schützt",
+ x:"In einer Studie mit über 6.000 Erwachsenen hatten Menschen mit einem starken Sinn für ihre Lebensziele über 14 Jahre ein geringeres Sterberisiko, unabhängig vom Alter. Das galt für junge, mittlere und ältere Menschen.",
+ c:"Große Langzeitdaten, aber Beobachtung.",
+ src:"Hill & Turiano (2014), Psychological Science",u:SCH("Hill Turiano 2014 purpose in life as a predictor of mortality across adulthood"),
+ tip:"Ein Ziel muss nicht groß sein. Es reicht, gebraucht zu werden und etwas vorzuhaben.",term:"eudaimonia"},
+{id:"arts",cat:"ich",ev:2,t:"Kultur verlängert das Leben",
+ x:"In einer englischen Langzeitstudie mit über 6.000 Erwachsenen ab 50 hatten Menschen, die regelmäßig Museen, Theater oder Konzerte besuchten, über 14 Jahre ein um 31 % geringeres Sterberisiko. Auch seltene Besuche gingen mit einem geringeren Risiko einher.",
+ c:"Beobachtungsstudie. Viele Einflüsse wie Bildung und Gesundheit wurden herausgerechnet, aber nicht alle.",
+ src:"Fancourt & Steptoe (2019), BMJ",u:SCH("Fancourt Steptoe 2019 the art of life and death 14 year follow-up analyses of associations between arts engagement and mortality"),
+ tip:"Ein Konzertbesuch ist keine Ablenkung vom Leben, sondern ein Teil davon.",exp:"kultur"},
+{id:"singing",cat:"wir",ev:2,t:"Gemeinsam singen",
+ x:"Studien zum Singen in Gruppen zeigen: Schon nach kurzer Zeit fühlen sich Menschen verbundener, selbst mit Fremden. Gruppensingen kann Bindung schneller herstellen als andere gemeinsame Aktivitäten. In Programmen für Mütter nach der Geburt verringerte es depressive Symptome schneller.",
+ c:"Mehrere Studien, teils randomisiert, meist kleine Stichproben.",
+ src:"Pearce, Launay & Dunbar (2015); Fancourt & Perkins (2018), British Journal of Psychiatry",u:SCH("Pearce Launay Dunbar 2015 the ice-breaker effect singing mediates fast social bonding"),
+ tip:"Du musst nicht gut singen können. Ein Chor sucht meist eher Menschen als Stimmen.",term:"socialcure",exp:"gruppe"},
+{id:"smile",cat:"ich",ev:2,t:"Lächeln hebt die Stimmung, ein bisschen",
+ x:"Lange war umstritten, ob ein bewusst aufgesetztes Lächeln die Stimmung hebt. Eine große Zusammenarbeit von Laboren in 19 Ländern fand: Ja, der Effekt existiert, aber er ist klein.",
+ c:"Große, vorab registrierte Studie mit über 3.800 Teilnehmenden.",
+ src:"Coles et al. (2022), Nature Human Behaviour",u:SCH("Coles 2022 a multi-lab test of the facial feedback hypothesis by the Many Smiles Collaboration"),
+ tip:"Ein Lächeln ist kein Wundermittel. Aber ein kleiner Schubs, der nichts kostet.",term:"effect"},
+{id:"powerpose",cat:"ich",ev:2,t:"Nicht alles hält: Power Posing",
+ x:"Eine berühmte Studie von 2010 behauptete, zwei Minuten in einer Siegerpose würden Hormone verändern und mutiger machen. Größere Wiederholungen fanden keine Hormonveränderungen. Übrig blieb höchstens ein kleiner Effekt darauf, wie mächtig man sich fühlt.",
+ c:"Ein Beispiel für die Replikationskrise. Darum zeigt diese App bei jedem Häppchen, wie sicher es ist.",
+ src:"Ranehill et al. (2015), Psychological Science",u:SCH("Ranehill 2015 assessing the robustness of power posing no effect on hormones and risk tolerance"),
+ tip:"Bei Ratgebern lohnt die Frage: Wurde das wiederholt? Wie groß ist der Effekt?",term:"replication"},
+{id:"sleep",cat:"ich",ev:2,t:"Eine Nacht ohne Schlaf macht ängstlicher",
+ x:"Nach einer durchwachten Nacht stieg die Angst bei Versuchspersonen um bis zu 30 %. Tiefschlaf dagegen senkte die Angst am nächsten Morgen. Hirnregionen, die Gefühle regulieren, arbeiteten nach Schlafentzug schlechter.",
+ c:"Experimente mit kleinen Gruppen, ergänzt durch Online-Daten.",
+ src:"Ben Simon et al. (2020), Nature Human Behaviour",u:SCH("Ben Simon Rossi Harvey Walker 2020 overanxious and underslept"),
+ tip:"Manches Problem sieht nach einer guten Nacht kleiner aus. Das ist keine Ausrede, sondern Biologie.",exp:"handy"},
+{id:"green_child",cat:"welt",ev:2,t:"Grün in der Kindheit",
+ x:"In Dänemark hatten Menschen, die als Kinder mit wenig Grünflächen in der Nähe aufwuchsen, später ein bis zu 55 % höheres Risiko für psychische Erkrankungen, auch nach Berücksichtigung von Einkommen und Familie.",
+ c:"Registerdaten von fast einer Million Menschen, aber Beobachtung.",
+ src:"Engemann et al. (2019), PNAS",u:"https://www.pnas.org/doi/10.1073/pnas.1807504116",
+ tip:"Ein Baum vor dem Fenster ist auch Gesundheitspolitik. Gemeinschaftsgärten und Stadtgrün zählen."},
+{id:"bluespace",cat:"welt",ev:2,t:"Wasser beruhigt",
+ x:"Menschen, die nah an der Küste oder an Gewässern leben oder sich regelmäßig dort aufhalten, berichten im Schnitt bessere psychische Gesundheit. In einigen Studien profitierten Menschen mit geringerem Einkommen besonders.",
+ c:"Mehrere große Studien aus Europa, vor allem Zusammenhänge.",
+ src:"White et al. (2021), Scientific Reports",u:SCH("White 2021 associations between green blue spaces and mental health across 18 countries"),
+ tip:"Ein Fluss, ein See oder ein Brunnen in der Stadt kann für zwanzig Minuten wie eine kleine Reise sein.",exp:"natur120"},
+{id:"nature_conn",cat:"welt",ev:2,t:"Drei gute Dinge in der Natur",
+ x:"Menschen, die eine Woche lang jeden Tag drei gute Dinge notierten, die ihnen in der Natur auffielen, fühlten sich danach stärker mit der Natur verbunden und berichteten mehr Wohlbefinden. Verbundenheit mit der Natur hängt außerdem mit umweltfreundlichem Verhalten zusammen.",
+ c:"Randomisierte Studie, aber mit Selbstauskunft.",
+ src:"Richardson, McEwan u. a. (2019–2021)",u:SCH("three good things in nature randomised controlled trial nature connectedness Richardson McEwan"),
+ tip:"Hinschauen verbindet. Wer die Amsel kennt, schützt den Garten lieber.",term:"awe",exp:"naturnotiz"},
+{id:"gardening",cat:"welt",ev:2,t:"Gärtnern tut gut",
+ x:"Eine Meta-Analyse über 22 Studien fand, dass Gärtnern mit weniger Depression und Angst, mehr Lebenszufriedenheit und mehr Gemeinschaftsgefühl zusammenhängt. Gemeinschaftsgärten verbinden Natur, Bewegung und Menschen.",
+ c:"Meta-Analyse, aber viele Einzelstudien ohne Kontrollgruppe.",
+ src:"Soga, Gaston & Yamaura (2017), Preventive Medicine Reports",u:SCH("Soga Gaston Yamaura 2017 gardening is beneficial for health a meta-analysis"),
+ tip:"Ein Topf Kräuter auf dem Balkon ist ein Anfang. Ein Beet mit Nachbar:innen ist noch besser.",exp:"garten"},
+{id:"cycling",cat:"welt",ev:2,t:"Radfahrende sind auf dem Weg am glücklichsten",
+ x:"In US-Zeitverwendungsdaten berichteten Menschen auf dem Fahrrad unterwegs die beste Stimmung aller Verkehrsmittel, vor Auto und öffentlichem Verkehr. Zu Fuß Gehende lagen ebenfalls weit vorn.",
+ c:"Große Datenbasis, aber wer Rad fährt, hat vielleicht auch kürzere Wege.",
+ src:"Morris & Guerra (2015), Transportation",u:SCH("Morris Guerra 2015 mood and mode does how we travel affect how we feel"),
+ tip:"Der Weg kann Teil des Tages sein statt verlorene Zeit.",exp:"langsam"},
+{id:"airpollution",cat:"welt",ev:2,t:"Schlechte Luft drückt die Stimmung",
+ x:"Eine Auswertung von über 200 Millionen Social-Media-Beiträgen aus China zeigte: An Tagen mit stärkerer Luftverschmutzung drückten die Beiträge weniger Glück aus. Umweltschutz ist also auch Stimmungsschutz.",
+ c:"Riesige Datenmenge, aber Stimmung wurde aus Texten geschätzt.",
+ src:"Zheng et al. (2019), Nature Human Behaviour",u:SCH("Zheng Wang Sun Zhang Kahn 2019 air pollution lowers Chinese urbanites expressed happiness on social media"),
+ tip:"Saubere Luft ist ein Glücksfaktor, den wir nur gemeinsam herstellen können."},
+{id:"trees",cat:"welt",ev:1,t:"Zehn Bäume mehr pro Straße",
+ x:"In Toronto fühlten sich Menschen in Straßen mit mehr Bäumen gesünder. Zehn zusätzliche Bäume pro Häuserblock entsprachen in der Wirkung etwa einem deutlichen Einkommensplus oder einer Verjüngung um mehrere Jahre.",
+ c:"Eine Querschnittsstudie mit Zehntausenden Menschen, Selbstauskunft.",
+ src:"Kardan et al. (2015), Scientific Reports",u:"https://www.nature.com/articles/srep11610",
+ tip:"Baumpatenschaften und Begrünungsaktionen sind Glücksarbeit für die ganze Straße."},
+{id:"sharing_econ",cat:"welt",ev:1,t:"Teilen spart Ressourcen, wenn es richtig gemacht wird",
+ x:"Viele Werkzeuge und Geräte werden im Haushalt nur selten benutzt. Geteilte Gegenstände sparen Material und Geld. Den größten ökologischen Nutzen hat Teilen, wenn es Neukäufe tatsächlich ersetzt und nicht zusätzlichen Konsum auslöst.",
+ c:"Junges Forschungsfeld, viele Fallstudien, wenige harte Zahlen.",
+ src:"Fallstudien zu Leihläden und Bibliotheken der Dinge",u:SCH("library of things sharing economy environmental impact study"),
+ tip:"Teilen wirkt doppelt: weniger Dinge, mehr Begegnungen.",term:"sufficiency",exp:"geraet"},
+{id:"kasser_values",cat:"sein",ev:2,t:"Werte lassen sich verschieben",
+ x:"In einem Programm für Jugendliche, die über Geld, Werbung und eigene Werte sprachen, sank der Materialismus, und das Selbstwertgefühl stieg. Werte sind nicht festgelegt. Sie lassen sich durch Gespräche, Gemeinschaft und bewusstes Nachdenken verändern.",
+ c:"Kleine Interventionsstudie, aber passend zu vielen Befunden über Werte.",
+ src:"Kasser et al. (2014), Motivation and Emotion",u:SCH("Kasser Rosenblum Sameroff 2014 changes in materialism changes in psychological well-being three longitudinal studies and an intervention experiment"),
+ tip:"Über Werte zu sprechen verändert sie. Vielleicht ist diese App ein Anfang dafür.",term:"intrinsic"},
+{id:"happy_money",cat:"sein",ev:2,t:"Fünf Regeln für Geld, das glücklich macht",
+ x:"Die Psycholog:innen Elizabeth Dunn und Michael Norton fassen die Forschung in fünf Regeln: Kauf Erlebnisse. Mach es zu etwas Besonderem, statt es täglich zu haben. Kauf Zeit. Zahl jetzt, genieß später. Investiere in andere.",
+ c:"Eine Zusammenfassung vieler Einzelstudien mit unterschiedlicher Belastbarkeit.",
+ src:"Dunn & Norton (2013), Happy Money",u:SCH("Dunn Norton 2013 Happy Money the science of smarter spending"),
+ tip:"Seltener genießen macht Genuss größer. Der Cappuccino am Sonntag schmeckt besser als der tägliche.",term:"adaptation"},
+{id:"treat",cat:"sein",ev:2,t:"Pausen machen Genuss wieder frisch",
+ x:"Menschen, die eine Woche lang auf Schokolade verzichteten, genossen sie danach mehr als jene, die sie weiter aßen oder sogar mehr davon bekamen. Eine kurze Pause unterbricht die Gewöhnung.",
+ c:"Kleines Experiment, aber gut zu vielen Befunden über Gewöhnung passend.",
+ src:"Quoidbach & Dunn (2013), Social Psychological and Personality Science",u:SCH("Quoidbach Dunn 2013 give it up a strategy for combating hedonic adaptation"),
+ tip:"Verzicht kann Genuss sein. Was du eine Weile nicht hast, wird wieder besonders.",term:"adaptation",exp:"stoisch"},
+{id:"gratitude_visit",cat:"wir",ev:2,t:"Der Dankbarkeitsbesuch",
+ x:"In einer frühen Studie der Positiven Psychologie schrieben Menschen einen Dankesbrief und lasen ihn der Person persönlich vor. Das hob ihr Glücksgefühl unter allen getesteten Übungen am stärksten, allerdings hielt der Effekt nur etwa einen Monat.",
+ c:"Einzelne randomisierte Studie. Die starke Wirkung ist kurz, wiederholen lohnt sich.",
+ src:"Seligman et al. (2005), American Psychologist",u:SCH("Seligman Steen Park Peterson 2005 positive psychology progress empirical validation of interventions"),
+ tip:"Vorlesen wirkt stärker als nur verschicken. Es ist aufregend, aber es lohnt sich.",exp:"dankesbrief"},
+{id:"three_good",cat:"ich",ev:2,t:"Drei gute Dinge am Abend",
+ x:"Menschen, die eine Woche lang jeden Abend drei Dinge aufschrieben, die gut gelaufen waren, und warum, waren noch Monate später etwas glücklicher und weniger depressiv. Spätere Wiederholungen fanden kleinere, aber ähnliche Effekte.",
+ c:"Mehrere Studien, eher kleine Effekte.",
+ src:"Seligman et al. (2005), American Psychologist",u:SCH("three good things intervention replication Mongrain Anselmo-Matthews 2012"),
+ tip:"Das Warum ist wichtig: Es lenkt den Blick darauf, was du selbst beitragen kannst.",exp:"dreigute"},
+{id:"strengths",cat:"ich",ev:2,t:"Die eigenen Stärken neu einsetzen",
+ x:"Wer eine Woche lang jeden Tag eine seiner größten Stärken auf eine neue Weise einsetzte, etwa Neugier, Humor oder Fürsorge, war in Studien noch Monate später glücklicher. Es geht nicht darum, Schwächen zu reparieren, sondern Stärken zu leben.",
+ c:"Mehrere randomisierte Studien, kleine bis mittlere Effekte.",
+ src:"Seligman et al. (2005); Gander et al. (2013), Journal of Happiness Studies",u:SCH("Gander Proyer Ruch Wyss 2013 strength-based positive interventions further evidence"),
+ tip:"Frag dich, wofür andere dich um Hilfe bitten. Dort liegt oft eine Stärke.",exp:"staerke"},
+{id:"writing",cat:"ich",ev:2,t:"Schreiben über das Schwere",
+ x:"Wer an drei oder vier Tagen jeweils 15 bis 20 Minuten über seine tiefsten Gedanken und Gefühle zu einer belastenden Erfahrung schreibt, ist in vielen Studien danach etwas gesünder und ausgeglichener. Unmittelbar nach dem Schreiben fühlen sich viele kurz schlechter.",
+ c:"Über 100 Studien, Meta-Analysen zeigen kleine Effekte.",
+ src:"Pennebaker & Beall (1986); Frattaroli (2006), Psychological Bulletin",u:SCH("Frattaroli 2006 experimental disclosure and its moderators a meta-analysis"),
+ tip:"Schreib für niemanden außer dich. Du kannst das Blatt danach wegwerfen.",exp:"schreiben"},
+{id:"volunteer_time",cat:"zeit",ev:2,t:"Wer Zeit verschenkt, hat mehr davon",
+ x:"Menschen, die Zeit für andere einsetzten, etwa beim Helfen oder Schreiben an jemanden, fühlten sich danach weniger gehetzt und hatten das Gefühl, mehr Zeit zu haben, als wenn sie die Zeit für sich verwendeten oder sogar unerwartet freie Zeit bekamen.",
+ c:"Mehrere Experimente, kleine bis mittlere Effekte.",
+ src:"Mogilner, Chance & Norton (2012), Psychological Science",u:SCH("Mogilner Chance Norton 2012 giving time gives you time"),
+ tip:"Gegen Zeitnot hilft paradoxerweise, Zeit zu verschenken.",term:"timeaffluence",exp:"ehrenamt"},
+{id:"spending_time_people",cat:"zeit",ev:2,t:"Die schönste Stunde des Tages",
+ x:"In der Tagesrekonstruktion berufstätiger Frauen in Texas waren die angenehmsten Tätigkeiten Intimität, Treffen mit anderen und Entspannung. Pendeln und Arbeit lagen ganz unten. Die Gesellschaft, in der man etwas tut, prägte die Stimmung oft mehr als die Tätigkeit selbst.",
+ c:"Klassische Studie mit 909 Frauen, viel zitiert und methodisch einflussreich.",
+ src:"Kahneman et al. (2004), Science",u:SCH("Kahneman Krueger Schkade Schwarz Stone 2004 a survey method for characterizing daily life experience the day reconstruction method"),
+ tip:"Plane nicht nur, was du tust, sondern mit wem.",term:"esm"},
+{id:"novelty",cat:"ich",ev:2,t:"Neues macht Tage lebendiger",
+ x:"Menschen, die an einem Tag mehr unterschiedliche Orte besuchten, fühlten sich glücklicher, das zeigten GPS-Daten über Monate. Im Gehirn hing dieser Effekt mit der Verbindung zwischen Erinnerungs- und Belohnungszentren zusammen.",
+ c:"Eine Studie mit 132 Personen in New York und Miami.",
+ src:"Heller et al. (2020), Nature Neuroscience",u:SCH("Heller Shi Ezie 2020 association between real-world experiential diversity and positive affect relates to hippocampal-striatal functional connectivity"),
+ tip:"Ein neuer Weg nach Hause zählt auch. Abwechslung muss nicht teuer sein.",term:"richness",exp:"umweg"}
+);
+
+TERMS.push(
+{id:"socialcure",cat:"wir",n:"Soziale Heilung (Social Cure)",d:"Die Erkenntnis, dass Zugehörigkeit zu Gruppen Gesundheit und Wohlbefinden schützt, weil Gruppen Identität, Sinn und Unterstützung geben.",e:"Wer einem Chor beitritt, hat ein geringeres Risiko für einen Rückfall in die Depression."},
+{id:"endowment",cat:"sein",n:"Besitztumseffekt",d:"Die Neigung, Dinge höher zu bewerten, sobald sie einem gehören.",e:"Die eigene Tasse soll beim Verkauf doppelt so viel kosten, wie man selbst für sie zahlen würde."},
+{id:"satisficing",cat:"sein",n:"Satisficing (Gut-genug-Wahl)",d:"Die Strategie, die erste Option zu wählen, die die eigenen Ansprüche erfüllt, statt nach der besten zu suchen. Das Gegenteil heißt Maximieren.",e:"Den ersten Pullover kaufen, der warm, schön und bezahlbar ist."},
+{id:"selfcompassion",cat:"ich",n:"Selbstmitgefühl",d:"Sich selbst in schwierigen Momenten mit Freundlichkeit zu begegnen, das eigene Leid als Teil des Menschseins zu sehen und achtsam damit umzugehen.",e:"Nach einem Fehler sagen: Das ist ärgerlich, und es geht vielen so."},
+{id:"woop",cat:"ich",n:"Mentales Kontrastieren (WOOP)",d:"Eine Methode für Ziele: Wunsch, bestes Ergebnis, inneres Hindernis und ein Wenn-dann-Plan. Wirksamer als reines positives Denken.",e:"Wenn ich abends müde bin, dann ziehe ich nur die Laufschuhe an und gehe zehn Minuten."},
+{id:"replication",cat:"welt",n:"Replikationskrise",d:"Die Erkenntnis, dass sich viele bekannte psychologische Befunde in größeren Wiederholungsstudien nicht oder nur schwächer bestätigen ließen.",e:"Power Posing ist ein bekanntes Beispiel."},
+{id:"preregistration",cat:"welt",n:"Präregistrierung",d:"Forschende legen vor einer Studie öffentlich fest, was sie wie messen und auswerten. Das verhindert, dass im Nachhinein nach passenden Ergebnissen gesucht wird.",e:"Die Many-Smiles-Studie zum Lächeln war präregistriert."},
+{id:"metaanalysis",cat:"welt",n:"Meta-Analyse",d:"Eine Auswertung, die die Ergebnisse vieler Studien zu einer Frage statistisch zusammenfasst. Sie ist meist belastbarer als eine einzelne Studie.",e:"Eine Meta-Analyse über 78 Studien zeigte den Zusammenhang von Nachhaltigkeit und Wohlbefinden."},
+{id:"rct",cat:"welt",n:"Randomisierte Studie",d:"Ein Experiment, bei dem der Zufall entscheidet, wer eine Maßnahme bekommt und wer nicht. Nur so lassen sich Ursachen sauber zeigen.",e:"Beim finnischen Grundeinkommen wurden die Empfänger:innen ausgelost."},
+{id:"wellbeingeconomy",cat:"welt",n:"Wohlbefindensökonomie",d:"Eine Wirtschaftsweise, die menschliches und ökologisches Wohlergehen statt reinem Wachstum als Ziel setzt.",e:"Neuseelands Wohlbefindenshaushalt von 2019."},
+{id:"degrowth",cat:"welt",n:"Postwachstum",d:"Die Idee, dass reiche Länder ihr Wohlbefinden sichern sollten, ohne dass Produktion und Konsum weiter wachsen, etwa durch kürzere Arbeitszeiten und Teilen.",e:"Kürzere Arbeitszeiten statt höherer Löhne bei steigender Produktivität."},
+{id:"stoicism",cat:"sein",n:"Freiwilliges Unbehagen",d:"Eine stoische Übung: bewusst und vorübergehend auf Bequemlichkeiten verzichten, um die Angst vor Verlust zu verlieren und das Normale wieder zu schätzen.",e:"Eine Woche kalt duschen oder nur einfaches Essen kochen."},
+{id:"jobcrafting",cat:"zeit",n:"Job Crafting",d:"Die eigene Arbeit innerhalb ihrer Grenzen umgestalten, durch andere Aufgaben, Beziehungen oder eine neue Sicht auf ihren Sinn.",e:"Ein Busfahrer, der sich als Gastgeber seiner Fahrgäste versteht."},
+{id:"musse",cat:"zeit",n:"Muße",d:"Freie Zeit, die nicht der Erholung für die nächste Arbeit dient, sondern ihren Wert in sich selbst hat: Nachdenken, Spielen, Betrachten.",e:"Ein Nachmittag am Fluss ohne Plan."},
+{id:"psychimmune",cat:"ich",n:"Psychologisches Immunsystem",d:"Die unbewussten Prozesse, mit denen wir schlechte Erfahrungen verarbeiten und neu deuten, sodass sie uns weniger lang belasten als erwartet.",e:"Nach einer Absage sagt man nach ein paar Wochen: Wer weiß, wofür es gut war."}
+);
+
+EXPS.push(
+{id:"stapel",cat:"zeit",d:7,t:"Nachrichten im Stapel",x:"Ruf eine Woche lang E-Mails und Messenger nur zu drei festen Zeiten am Tag ab. Schalte Benachrichtigungen dazwischen aus.",s:["Drei Zeiten festlegen, etwa 9, 13 und 17 Uhr","Benachrichtigungen für Mail und Messenger ausschalten","Ausnahme festlegen, etwa Anrufe von Familie","Abends notieren: Wie unruhig war der Tag?"],b:"email"},
+{id:"werbefrei",cat:"sein",d:14,t:"Zwei Wochen werbefrei",x:"Reduziere zwei Wochen lang Werbung, so gut es geht: „Bitte keine Werbung“ an den Briefkasten, Werbeblocker im Browser, Newsletter von Läden abbestellen.",s:["Briefkasten-Aufkleber anbringen","Fünf Händler-Newsletter abbestellen","Werbeblocker einrichten oder werbefreie Alternativen nutzen","Notieren: Habe ich weniger Wünsche als sonst?"],b:"advertising"},
+{id:"polster",cat:"sein",d:30,t:"Das Gelassenheitspolster",x:"Leg einen Monat lang jede Woche einen festen kleinen Betrag auf ein eigenes Konto oder in einen Umschlag, als Notgroschen, nicht als Sparziel für einen Kauf.",s:["Betrag wählen, der nicht wehtut","Konto oder Umschlag beschriften: Gelassenheit","Nach einem Monat spüren: Fühlt sich etwas ruhiger an?"],b:"savings"},
+{id:"stoisch",cat:"sein",d:7,t:"Eine stoische Woche",x:"Verzichte eine Woche lang bewusst auf eine Bequemlichkeit, die du sonst selbstverständlich nimmst: Kaffee außer Haus, Süßes, Aufzug, warmes Duschen am Ende oder Streaming.",s:["Eine Bequemlichkeit auswählen","Eine Woche durchhalten","Am achten Tag bewusst wieder genießen","Notieren: Wie groß war die Freude danach?"],b:"treat"},
+{id:"gutgenug",cat:"sein",d:7,t:"Gut genug",x:"Triff diese Woche jede Konsumentscheidung nach der Gut-genug-Regel: Lege vorher drei Kriterien fest und nimm die erste Option, die sie erfüllt.",s:["Bei jedem Kauf vorher drei Kriterien notieren","Erste passende Option nehmen, nicht weitersuchen","Notieren: Wie viel Zeit und Grübeln hat das gespart?"],b:"satisfice"},
+{id:"zeitstattzeug",cat:"wir",d:14,t:"Zeit statt Zeug schenken",x:"Verschenke beim nächsten Anlass statt eines Gegenstands ein gemeinsames Erlebnis: einen Kochabend, eine Wanderung, einen Konzertbesuch oder einen Nachmittag Hilfe beim Umzug.",s:["Anlass und Person wählen","Gutschein selbst gestalten, mit Datumsvorschlag","Das Erlebnis wirklich stattfinden lassen"],b:"gift_exp"},
+{id:"gruppe",cat:"wir",d:30,t:"Einer Gruppe beitreten",x:"Tritt in diesem Monat einer Gruppe bei, die sich regelmäßig trifft: Chor, Sportverein, Lesekreis, Repair-Café, Spieleabend oder Laufgruppe.",s:["Drei Gruppen in deiner Nähe heraussuchen","Zum Schnuppern hingehen, ohne Verpflichtung","Mindestens dreimal hingehen, bevor du entscheidest"],b:"groups"},
+{id:"vergeben",cat:"wir",d:7,t:"Einen Groll loslassen",x:"Wähle einen kleinen, alten Groll gegen jemanden. Schreib auf, was passiert ist und wie es dich verletzt hat. Versuch dann, die Lage der anderen Person zu verstehen, und entscheide, ob du den Groll ablegen willst.",s:["Einen eher kleinen Groll wählen, nicht die schwerste Wunde","Aufschreiben: Was ist passiert, was hat es mit mir gemacht?","Perspektivwechsel: Was war bei der anderen Person los?","Entscheiden, ob du loslässt. Du musst es niemandem sagen."],b:"forgive"},
+{id:"zuhoeren",cat:"wir",d:7,t:"Eine Woche richtig zuhören",x:"Übe in drei Gesprächen diese Woche gutes Zuhören: Handy weg, nachfragen, zusammenfassen, keine Ratschläge, außer die andere Person fragt danach.",s:["Drei Gespräche auswählen","Mindestens zweimal nachfragen: Wie meinst du das?","Am Ende kurz zusammenfassen, was du gehört hast","Beobachten, wie sich das Gespräch verändert"],b:"listening"},
+{id:"stille",cat:"ich",d:7,t:"Zehn Minuten Nichts",x:"Setz dich eine Woche lang jeden Tag zehn Minuten hin und tu nichts: kein Handy, keine Musik, kein Buch. Schau aus dem Fenster und lass die Gedanken kommen und gehen.",s:["Fester Ort und feste Zeit","Wecker auf zehn Minuten stellen","Nicht bewerten, ob es gut war","Am Ende der Woche: Wird es leichter?"],b:"thinking_alone"},
+{id:"freundesbrief",cat:"ich",d:3,t:"Ein Brief wie an einen Freund",x:"Denk an etwas, das dich an dir selbst stört. Schreib dir einen Brief darüber, so wie ein guter Freund ihn schreiben würde: ehrlich, warm und ohne Vorwürfe.",s:["Thema wählen, das dich gerade beschäftigt","Brief in der Du-Form schreiben, wie von einem Freund","Ein paar Tage später noch einmal lesen"],b:"selfcompassion"},
+{id:"bestesselbst",cat:"ich",d:4,t:"Das bestmögliche Selbst",x:"Schreib an vier Tagen jeweils 15 Minuten, wie dein Leben in fünf Jahren aussieht, wenn alles gut gelaufen ist. Beschreib einen ganz normalen Tag darin.",s:["Vier Termine im Kalender eintragen","Konkret schreiben: Wo wachst du auf, mit wem bist du, was tust du?","Am Ende: Welcher kleine Schritt führt schon heute dorthin?"],b:"bestself"},
+{id:"dreigute",cat:"ich",d:7,t:"Drei gute Dinge",x:"Schreib eine Woche lang jeden Abend drei Dinge auf, die heute gut waren, und zu jedem einen Satz, warum sie passiert sind.",s:["Notizbuch neben das Bett legen","Drei Dinge, klein ist erlaubt","Zu jedem das Warum notieren"],b:"three_good"},
+{id:"staerke",cat:"ich",d:7,t:"Eine Stärke, neu eingesetzt",x:"Wähle eine deiner größten Stärken, etwa Humor, Neugier, Fürsorge oder Ausdauer, und setze sie eine Woche lang jeden Tag auf eine neue Weise ein.",s:["Drei Menschen fragen, was deine größte Stärke ist","Eine auswählen","Jeden Tag eine neue Anwendung ausprobieren und notieren"],b:"strengths"},
+{id:"schreiben",cat:"ich",d:4,t:"Vier Abende Schreiben",x:"Schreib an vier Abenden je 15 Minuten über eine Erfahrung, die dich belastet, mit deinen tiefsten Gedanken und Gefühlen. Niemand liest es.",s:["Ruhigen Ort und Zeit wählen","Ohne Pause schreiben, Rechtschreibung egal","Danach etwas Angenehmes tun, es kann kurz aufwühlen","Wenn es zu schwer wird: aufhören und mit jemandem reden"],b:"writing"},
+{id:"kultur",cat:"ich",d:30,t:"Ein Kulturabend im Monat",x:"Geh diesen Monat einmal bewusst zu einer Kulturveranstaltung: Konzert, Theater, Lesung, Museum oder Kino, am besten mit jemandem zusammen.",s:["Programm deiner Stadt anschauen","Termin festlegen und jemanden einladen","Danach darüber reden, was euch berührt hat"],b:"arts"},
+{id:"naturnotiz",cat:"welt",d:7,t:"Drei gute Dinge in der Natur",x:"Notiere eine Woche lang jeden Tag drei Dinge, die dir in der Natur aufgefallen sind: ein Vogel, Licht auf einer Wand, der Geruch nach Regen.",s:["Jeden Tag kurz bewusst draußen hinschauen","Drei Beobachtungen notieren","Am Ende: Siehst du deine Umgebung anders?"],b:"nature_conn"},
+{id:"garten",cat:"welt",d:30,t:"Etwas wachsen lassen",x:"Säe oder pflanze diesen Monat etwas: Kräuter auf dem Fensterbrett, ein Balkonkasten oder ein Beet im Gemeinschaftsgarten.",s:["Ort und Pflanze wählen","Regelmäßig gießen und beobachten","Wenn möglich, Ernte teilen"],b:"gardening"}
+);
+
 </script>
 <script>
 (()=>{
@@ -588,7 +1034,8 @@ const cc=c=>`style="--c:var(--c-${c})"`;
 const dot=c=>`<span class="dot" ${cc(c)}></span>`;
 const evHTML=l=>`<span class="ev"><i>${[1,2,3].map(k=>`<b class="${l>=k?"on":""}"></b>`).join("")}</i>${EV[l]}</span>`;
 const fmtDate=t=>new Date(t).toLocaleDateString("de-DE",{day:"numeric",month:"short"});
-function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+function toast(m){document.querySelectorAll(".toast").forEach(x=>x.remove());const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>{t.classList.add("out");setTimeout(()=>t.remove(),320)},2200)}
+let anim=true,animQ=false,roseKey="";
 
 /* ---------- Tabs ---------- */
 const TABS=[
@@ -602,7 +1049,7 @@ function renderTabs(){
   const due=dueTerms().length,act=activeExps().length;
   $("#tabs").innerHTML=TABS.map(([id,n,ic])=>`<button data-tab="${id}" ${tab===id?'aria-current="page"':""}>${ic}<span>${n}</span>${id==="terms"&&due?`<span class="badge">${due>9?"9+":due}</span>`:""}${id==="exps"&&act?`<span class="badge">${act}</span>`:""}</button>`).join("");
 }
-$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(!b)return;tab=b.dataset.tab;S.cur=tab==="bites"?S.cur:S.cur;render();window.scrollTo(0,0)});
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(!b)return;if(tab!==b.dataset.tab)anim=true;tab=b.dataset.tab;render();window.scrollTo(0,0)});
 
 /* ---------- Häppchen ---------- */
 function pool(){const f=S.filter;return BITES.filter(b=>f==="alle"||b.cat===f)}
@@ -613,7 +1060,7 @@ function pickBite(){
   if(c&&S.cur===c.id&&list.length>1)c=list.find(b=>b.id!==S.cur);
   return c;
 }
-function openBite(id){S.cur=id;if(!S.read[id])S.read[id]=now();S.history=[id,...S.history.filter(x=>x!==id)].slice(0,12);save();tab="bites";render();window.scrollTo(0,0)}
+function openBite(id){anim=true;S.cur=id;if(!S.read[id])S.read[id]=now();S.history=[id,...S.history.filter(x=>x!==id)].slice(0,12);save();tab="bites";render();window.scrollTo(0,0)}
 function biteCard(b){
   const t=b.term&&T[b.term],x=b.exp&&X[b.exp];
   const gift=shared===b.id?`<div class="gift"><b>Jemand möchte dir dieses Häppchen zeigen.</b><span>Es stammt aus dem „Glückskompass“, einer kleinen, kostenlosen App mit Erkenntnissen aus der Glücksforschung, Begriffen zum Üben und Experimenten für den Alltag. Ohne Anmeldung, deine Daten bleiben auf deinem Gerät.</span><button class="btn accent" id="explore">Selbst ausprobieren</button></div>`:"";
@@ -658,7 +1105,7 @@ function startQuiz(){
   let list=dueTerms();
   if(list.length<5){const fresh=TERMS.filter(t=>!S.terms[t.id]&&!list.includes(t));list=list.concat(fresh.sort(()=>Math.random()-.5).slice(0,6-list.length))}
   if(list.length<5){const rest=TERMS.filter(t=>!list.includes(t)).sort((a,b)=>((S.terms[a.id]||{}).next||0)-((S.terms[b.id]||{}).next||0));list=list.concat(rest.slice(0,6-list.length))}
-  Q={items:list.slice(0,8).map(t=>({id:t.id,mode:Math.random()<.6?"def":"term"})),i:0,right:0,answered:null};render();
+  animQ=true;Q={items:list.slice(0,8).map(t=>({id:t.id,mode:Math.random()<.6?"def":"term"})),i:0,right:0,answered:null};render();
 }
 function quizCard(){
   if(Q.i>=Q.items.length){return `<article class="card quiz"><div class="label">Runde geschafft</div><h2>${Q.right} von ${Q.items.length} richtig</h2><p>Richtige Begriffe wandern ein Fach weiter und kommen später wieder. Falsche kommen bald noch einmal. So verankern sie sich Schritt für Schritt.</p><div class="row"><button class="btn primary" id="qagain">Noch eine Runde</button><button class="btn ghost" id="qend">Fertig</button></div></article>`}
@@ -669,7 +1116,7 @@ function quizCard(){
   return `<article class="card quiz">
     <div class="qhead"><span class="label">Frage ${Q.i+1} von ${Q.items.length}</span><button class="linkbtn" id="qend">Abbrechen</button></div>
     ${q}
-    <div class="opts">${it.opts.map(id=>{const o=T[id];let cls="opt";if(a){if(id===t.id)cls+=" right";else if(id===a)cls+=" wrong"}return `<button class="${cls}" data-ans="${id}" ${a?"disabled":""}>${it.mode==="def"?`<b style="font-family:var(--f-display)">${o.n}</b>`:o.d}</button>`}).join("")}</div>
+    <div class="opts">${it.opts.map(id=>{const o=T[id];let cls="opt";if(a){if(id===t.id)cls+=" right";else if(id===a)cls+=" wrong"}return `<button class="${cls}" data-ans="${id}" ${a?"disabled":""}>${it.mode==="def"?`<b style="font-family:var(--f-ui)">${o.n}</b>`:o.d}</button>`}).join("")}</div>
     ${a?`<p class="fb ${a===t.id?"ok":"no"}">${a===t.id?"Richtig.":"Nicht ganz. Gemeint war: "+t.n+"."}</p><p class="muted" style="font-size:15px">Beispiel: ${t.e}</p><div class="row"><button class="btn primary" id="qnext">Weiter</button></div>`:""}
   </article>`;
 }
@@ -788,19 +1235,22 @@ function shareApp(){
   shareOut("Glückskompass","Ich nutze gerade den „Glückskompass“: eine kleine, kostenlose App, die Erkenntnisse aus der Glücksforschung in Häppchen serviert, mit Quellen und ehrlicher Einschätzung, wie sicher sie sind. Dazu Begriffe zum Üben und kleine Experimente für den Alltag. Ohne Anmeldung, deine Daten bleiben auf deinem Gerät.",APP_URL);
 }
 
+function countUp(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;document.querySelectorAll(".tile b").forEach(el=>{const to=+el.textContent;if(!to)return;const t0=performance.now();const step=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e);if(k<1)requestAnimationFrame(step)};el.textContent="0";requestAnimationFrame(step)})}
+
 /* ---------- Rendern & Ereignisse ---------- */
 function render(){
   const v={bites:viewBites,terms:viewTerms,exps:viewExps,way:viewWay}[tab]();
-  $("#main").innerHTML=v;renderTabs();
+  const M=$("#main");M.classList.remove("anim","animq");M.innerHTML=v;void M.offsetWidth;if(anim)M.classList.add("anim");if(animQ)M.classList.add("animq");const wasAnim=anim;anim=false;animQ=false;renderTabs();
+  if(wasAnim&&tab==="way")countUp();
   const n=Object.keys(S.read).length;$("#topline").textContent=n?`${n} / ${BITES.length}`:"";
-  $("#rose").innerHTML=Object.keys(CATS).map(k=>{const all=BITES.filter(b=>b.cat===k),r=all.filter(b=>S.read[b.id]).length;return `<b style="--c:var(--c-${k})" title="${CATS[k].n}: ${r} von ${all.length}"><i style="width:${Math.round(r/all.length*100)}%"></i></b>`}).join("");
+  {const html=Object.keys(CATS).map(k=>{const all=BITES.filter(b=>b.cat===k),r=all.filter(b=>S.read[b.id]).length;return `<b style="--c:var(--c-${k})" title="${CATS[k].n}: ${r} von ${all.length}"><i style="width:${Math.round(r/all.length*100)}%"></i></b>`}).join("");const R=$("#rose");if(html!==roseKey){const first=!roseKey;roseKey=html;R.innerHTML=html;R.classList.toggle("grow",first)}}
 }
 document.addEventListener("click",e=>{
   const t=e.target.closest("button,a");if(!t)return;
   const d=t.dataset;
   if(t.id==="go"){const b=pickBite();if(!b)return;t.classList.remove("breath");t.classList.add("spin");setTimeout(()=>openBite(b.id),matchMedia("(prefers-reduced-motion:reduce)").matches?0:520);return}
   if(t.id==="next"){const b=pickBite();if(b)openBite(b.id);return}
-  if(t.id==="back"){S.cur=null;shared=null;save();render();return}
+  if(t.id==="back"){anim=true;S.cur=null;shared=null;save();render();return}
   if(t.id==="share"&&S.cur){shareBite(B[S.cur]);return}
   if(t.id==="shareapp"){shareApp();return}
   if(t.id==="explore"){shared=null;S.cur=null;try{history.replaceState(null,"",location.pathname)}catch(x){}render();window.scrollTo(0,0);return}
@@ -811,7 +1261,7 @@ document.addEventListener("click",e=>{
   if(d.exp){expSheet(d.exp);return}
   if(t.id==="quiz"){startQuiz();return}
   if(d.ans&&Q&&!Q.answered){answer(d.ans);return}
-  if(t.id==="qnext"){Q.i++;Q.answered=null;render();return}
+  if(t.id==="qnext"){Q.i++;Q.answered=null;animQ=true;render();return}
   if(t.id==="qagain"){startQuiz();return}
   if(t.id==="qend"){Q=null;render();return}
   if(d.tt){openTerm=openTerm===d.tt?null:d.tt;render();return}
