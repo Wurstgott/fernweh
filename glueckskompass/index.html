@@ -153,6 +153,28 @@ button.caveat.tap.lit{border-left-color:var(--c);background:color-mix(in srgb,va
 .sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 
 /* Begriffe */
+.tcard{position:relative;isolation:isolate;overflow:hidden}
+.tmist{position:absolute;inset:-40%;z-index:-1;pointer-events:none;background:radial-gradient(30% 30% at 22% 28%,color-mix(in srgb,var(--accent) 34%,transparent),transparent 70%),radial-gradient(30% 34% at 80% 20%,color-mix(in srgb,var(--c-sein) 20%,transparent),transparent 70%),radial-gradient(34% 30% at 70% 85%,color-mix(in srgb,var(--c-zeit) 18%,transparent),transparent 70%);filter:blur(22px);opacity:.6}
+.thead{display:flex;gap:18px;align-items:center}
+.tring{--sz:96px;flex:none;width:var(--sz);height:var(--sz);border-radius:50%;position:relative;display:grid;place-items:center}
+.tring::before,.tring::after{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from -90deg,var(--c-ich),var(--c-wir),var(--c-welt),var(--c-sein),var(--c-zeit),var(--c-ich));-webkit-mask:radial-gradient(closest-side,transparent 78%,#000 80%);mask:radial-gradient(closest-side,transparent 78%,#000 80%)}
+.tring::before{opacity:.22}
+.tring::after{-webkit-mask:radial-gradient(closest-side,transparent 78%,#000 80%),conic-gradient(from -90deg,#000 var(--p),transparent 0);-webkit-mask-composite:source-in;mask:radial-gradient(closest-side,transparent 78%,#000 80%) intersect,conic-gradient(from -90deg,#000 var(--p),transparent 0);filter:drop-shadow(0 0 6px color-mix(in srgb,var(--accent) 70%,transparent))}
+.thalo{position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 30%,transparent),color-mix(in srgb,var(--c-wir) 12%,transparent) 60%,transparent);filter:blur(8px);z-index:-1}
+.tin{display:flex;flex-direction:column;align-items:center;line-height:1}
+.tin b{font-family:var(--f-display);font-size:30px;font-weight:800}
+.tin small{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;color:var(--muted);margin-top:4px;text-transform:uppercase}
+.ttx{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ttx h3{margin:0}
+.ttx p{margin:0;font-size:15.5px;line-height:1.45;color:var(--muted);text-wrap:pretty}
+.tdue{display:flex;flex-wrap:wrap;gap:9px;padding:2px 2px 0}
+.tdue i{width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 35%,color-mix(in srgb,var(--c) 35%,white),var(--c));box-shadow:0 0 10px -1px color-mix(in srgb,var(--c) 75%,transparent)}
+.tgo{box-shadow:0 0 22px -6px color-mix(in srgb,var(--accent) 80%,transparent)}
+.tnote{margin:0;font-family:var(--f-mono);font-size:11.5px;line-height:1.5;color:var(--muted);letter-spacing:.01em}
+@media (prefers-reduced-motion:no-preference){.thalo{animation:thalo 5s ease-in-out infinite}.tdue i{animation:tdot 3.2s ease-in-out var(--d) infinite}.tgo{animation:tgo 3.6s ease-in-out infinite}}
+@keyframes thalo{50%{transform:scale(1.12);opacity:.7}}
+@keyframes tdot{50%{transform:scale(1.25);box-shadow:0 0 16px 1px color-mix(in srgb,var(--c) 70%,transparent)}}
+@keyframes tgo{50%{box-shadow:0 0 30px -2px color-mix(in srgb,var(--accent) 75%,transparent)}}
 .meter{height:8px;border-radius:99px;background:var(--soft);overflow:hidden}
 .meter span{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
 .boxes{display:inline-flex;gap:3px}
@@ -1358,10 +1380,15 @@ let openTerm=null;
 function viewTerms(){
   const due=dueTerms().length,l=learned();
   let h=`<section class="view">${fromBite&&B[fromBite]?`<button class="backlink" id="tobite">← Zurück zum Häppchen „${B[fromBite].t}“</button>`:""}
-    <div class="card"><div class="sec-h"><h3>Im Kopf verankert</h3><span class="label">${l} von ${TERMS.length}</span></div>
-      <div class="meter"><span style="width:${Math.round(l/TERMS.length*100)}%"></span></div>
-      <p class="muted" style="font-size:15px">${due?`${due} Begriff${due>1?"e sind":" ist"} heute zur Wiederholung fällig.`:"Gerade ist nichts fällig. Du kannst trotzdem üben oder neue Begriffe kennenlernen."} Ein Begriff gilt als verankert, wenn du ihn viermal in wachsenden Abständen richtig hattest.</p>
-      <div class="row"><button class="btn accent" id="quiz">${due?`Wiederholen (${Math.min(due,8)})`:"Üben"}</button></div>
+    <div class="card tcard">
+      <span class="tmist" aria-hidden="true"></span>
+      <div class="thead">
+        <div class="tring" style="--p:${(l/TERMS.length*100).toFixed(1)}%" role="img" aria-label="${l} von ${TERMS.length} Begriffen verankert"><span class="thalo"></span><span class="tin"><b>${l}</b><small>von ${TERMS.length}</small></span></div>
+        <div class="ttx"><h3>Im Kopf verankert</h3><p>${due?`Heute ${due===1?"ist ein Begriff":`sind ${due} Begriffe`} zur Wiederholung fällig.${due>8?" Eine Runde hat bis zu acht Fragen.":""}`:"Gerade ist nichts fällig. Du kannst trotzdem üben oder neue Begriffe kennenlernen."}</p></div>
+      </div>
+      ${due?`<div class="tdue" aria-hidden="true">${dueTerms().slice(0,24).map((t,i)=>`<i style="--c:var(--c-${t.cat});--d:${(i*.18).toFixed(2)}s"></i>`).join("")}</div>`:""}
+      <div class="row"><button class="btn accent tgo" id="quiz">${due?`Wiederholen (${Math.min(due,8)})`:"Üben"}</button></div>
+      <p class="tnote">Ein Begriff gilt als verankert, wenn du ihn viermal in wachsenden Abständen richtig hattest.</p>
     </div>`;
   if(Q)h+=quizCard();
   {const list=TERMS.filter(t=>termFilter==="alle"||t.cat===termFilter),lim=termMore?list.length:8,cnt={alle:TERMS.length};Object.keys(CATS).forEach(k=>cnt[k]=TERMS.filter(t=>t.cat===k).length);
