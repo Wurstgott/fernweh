@@ -2216,6 +2216,8 @@ function draw(dt){
   for(const p of D.parts)if(p.k!=='puff'&&p.k!=='spray'&&!(p.front&&!p.landed))drawPart(p);
   for(const o of D.objs)if(o.type==='gantry')drawGantry(o);else if(o.type==='overpass')drawOverpass(o);
   if(D.balloon&&!inTunnel)drawBalloon(D.balloon);
+  // In Berlin steht kurz vor dem Ziel ein bunter Bär am Straßenrand
+  if(D.tour.id==='ber'){const by=yOf(.935);if(by>-40&&by<H+40)drawBaer(roadX+roadW+24*SC+sway(by),by)}
   // Tunnel: Decke, Lampen, Portale
   if(rTun)drawTunnel(rTun);
   // Nacht und Licht
@@ -2510,6 +2512,13 @@ function drawArrivalFx(){
     cx.restore()}
   if(D.fade){cx.fillStyle='rgba(251,241,230,'+Math.min(1,D.fade/.5)+')';cx.fillRect(0,0,W,H)}
 }
+function drawBaer(x,y){const s=SC,ink='#2B2230';
+  cx.fillStyle='rgba(43,34,48,.18)';cx.fillRect(x-11*s+3,y-11*s+3,22*s,22*s);cx.fillStyle='#C9C0C8';cx.fillRect(x-11*s,y-11*s,22*s,22*s);cx.strokeStyle=ink;cx.lineWidth=1.5;cx.strokeRect(x-11*s,y-11*s,22*s,22*s);
+  cx.fillStyle='#E8742C';cx.beginPath();cx.ellipse(x,y+1*s,6.5*s,7.5*s,0,0,7);cx.fill();cx.stroke();
+  [[-1,1],[1,1]].forEach(([d])=>{cx.beginPath();cx.arc(x+d*7.5*s,y-6*s,2.6*s,0,7);cx.fill();cx.stroke()});
+  cx.beginPath();cx.arc(x,y-4.5*s,4.4*s,0,7);cx.fill();cx.stroke();
+  cx.beginPath();cx.arc(x-3.4*s,y-7.6*s,1.6*s,0,7);cx.arc(x+3.4*s,y-7.6*s,1.6*s,0,7);cx.fill();
+  cx.fillStyle='#2F6F73';cx.beginPath();cx.arc(x-2*s,y+2*s,1.4*s,0,7);cx.fill();cx.fillStyle='#F0C566';cx.beginPath();cx.arc(x+2.4*s,y+4*s,1.3*s,0,7);cx.fill();cx.fillStyle='#E3AFB4';cx.beginPath();cx.arc(x+1*s,y-.5*s,1.1*s,0,7);cx.fill()}
 function drawBalloon(b){const s=SC,r=15*s;
   cx.fillStyle='rgba(43,34,48,.1)';cx.beginPath();cx.ellipse(b.x+26*s,b.y+60*s,r*.9,r*.6,0,0,7);cx.fill();
   for(let k=0;k<10;k++){const a0=k/10*Math.PI*2+D.t*.05,a1=a0+Math.PI*2/10;cx.fillStyle=b.cols[k%2];cx.beginPath();cx.moveTo(b.x,b.y);cx.arc(b.x,b.y,r,a0,a1);cx.closePath();cx.fill()}
