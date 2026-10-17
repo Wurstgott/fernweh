@@ -5,5 +5,7 @@ self.addEventListener('install',e=>self.skipWaiting());
 self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch',e=>{
   if(e.request.method!=='GET'||!e.request.url.startsWith(self.location.origin))return;
-  e.respondWith(fetch(e.request).then(r=>{const c=r.clone();caches.open(C).then(k=>k.put(e.request,c));return r}).catch(()=>caches.match(e.request)));
+  // Seiten immer beim Server nachfragen (ohne Browser-Zwischenspeicher), damit neue Versionen sofort ankommen.
+  const req=e.request.mode==='navigate'?fetch(e.request.url,{cache:'no-cache',credentials:'same-origin'}):fetch(e.request);
+  e.respondWith(req.then(r=>{const c=r.clone();caches.open(C).then(k=>k.put(e.request,c));return r}).catch(()=>caches.match(e.request)));
 });
