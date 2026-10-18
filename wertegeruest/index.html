@@ -10,17 +10,17 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#0B0D10">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Work+Sans:ital,wght@0,400..700;1,400..600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* Wertegerüst: dunkel, ruhig, reduziert. Im Mittelpunkt steht das Gerüst, das langsam Licht bekommt. */
 :root{
   --bg:#0B0D10;--s1:#111419;--s2:#171B21;--line:#252A32;--hair:#1C2027;
   --ink:#ECEEF1;--muted:#8B929D;--faint:#5C636E;
-  --lit:#F1ECE1;--ghost:#3A404A;--accent:#E7C27D;--accent-ink:#E7C27D;
+  --lit:#F4F1EA;--ghost:#363C46;--accent:#F4F1EA;--accent-ink:#F4F1EA;
   --on-lit:#0B0D10;
-  --c-selbst:#E0A267;--c-naehe:#E08A9C;--c-miteinander:#86A8F0;--c-welt:#8FC79B;--c-urteil:#B9A5EE;
-  --f-ui:"Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --c-selbst:#FFB224;--c-naehe:#FF5D7D;--c-miteinander:#4C8DFF;--c-welt:#2FD08F;--c-urteil:#B07CFF;
+  --f-ui:"Work Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-serif:"Bricolage Grotesque","Work Sans",ui-sans-serif,system-ui,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
   --r:12px;--ease:cubic-bezier(.2,.8,.2,1);
   color-scheme:dark;
@@ -28,8 +28,8 @@
 :root[data-theme="light"]{
   --bg:#F4F3EF;--s1:#FBFAF7;--s2:#EFEEE9;--line:#DCDAD3;--hair:#E7E5DF;
   --ink:#16191E;--muted:#5F6670;--faint:#9AA0A8;
-  --lit:#1E232B;--ghost:#C9C7C0;--accent:#B9852A;--accent-ink:#8A6119;--on-lit:#F4F3EF;
-  --c-selbst:#B8702F;--c-naehe:#B34E66;--c-miteinander:#3E63C2;--c-welt:#3F8150;--c-urteil:#7457C2;
+  --lit:#1A1D22;--ghost:#C9C7C0;--accent:#1A1D22;--accent-ink:#1A1D22;--on-lit:#F4F3EF;
+  --c-selbst:#E99A00;--c-naehe:#EC4466;--c-miteinander:#2D6BEA;--c-welt:#14A673;--c-urteil:#8B52EA;
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -47,7 +47,7 @@ h1,h2,h3{margin:0;font-weight:400}
 .top{display:flex;align-items:center;gap:12px;padding:6px 0 18px}
 .logo{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--s1);padding:5px;cursor:pointer;display:grid;place-items:center;flex:none}
 .logo svg{width:100%;height:100%;display:block}
-.mark{border:0;background:none;padding:0;cursor:pointer;font-family:var(--f-serif);font-size:27px;line-height:1;letter-spacing:-.005em;color:var(--ink)}
+.mark{border:0;background:none;padding:0;cursor:pointer;font-family:var(--f-serif);font-weight:700;font-size:22px;line-height:1;letter-spacing:-.02em;color:var(--ink)}
 .pill{margin-left:auto;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
 
 /* Grundbausteine */
@@ -59,7 +59,7 @@ h1,h2,h3{margin:0;font-weight:400}
 .sec{margin-top:34px}
 .view{display:flex;flex-direction:column}
 .vh{margin:4px 0 22px}
-.vh h1{font-family:var(--f-serif);font-size:44px;line-height:1;letter-spacing:-.01em}
+.vh h1{font-family:var(--f-serif);font-weight:700;font-size:34px;line-height:1.05;letter-spacing:-.025em}
 .vh p{color:var(--muted);margin-top:10px;font-size:15.5px;max-width:34em}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
 .btn{position:relative;overflow:hidden;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:11px 16px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:border-color .3s,background-color .3s,transform .15s}
@@ -103,23 +103,28 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .gwrap{position:relative;margin:0 -6px}
 .gwrap::before{content:"";position:absolute;left:12%;right:12%;top:30%;bottom:12%;background:radial-gradient(closest-side,color-mix(in srgb,var(--lit) 7%,transparent),transparent);pointer-events:none}
 .gsvg{display:block;width:100%;height:auto;overflow:visible;position:relative}
-.gsvg .gh{fill:none;stroke:var(--ghost);stroke-width:1;stroke-dasharray:3 4}
-.gsvg .gh.nx{stroke:var(--accent);stroke-width:1.3;stroke-dasharray:4 4}
-.gsvg .glow rect{fill:var(--lit);opacity:.16}
-:root[data-theme="light"] .gsvg .glow rect{opacity:.08}
-.gsvg .sg{fill:var(--lit);transition:opacity .5s}
-.gsvg.sel .sg:not(.on){opacity:.32}
-.gsvg .pk{stroke:var(--lit);stroke-opacity:.55;stroke-width:2.5;stroke-linecap:round}
-.gsvg .br{stroke:var(--accent);stroke-opacity:.6;stroke-width:1.2;stroke-linecap:round}
+.gsvg line{stroke-linecap:round;fill:none}
+.gsvg .gh{stroke:var(--ghost);stroke-width:1.3;stroke-dasharray:2 5}
+.gsvg .gh.nx{stroke:var(--lit);stroke-width:2.4;stroke-dasharray:4 6}
+.gsvg .ld{stroke-width:1;opacity:.5;stroke-dasharray:1 3}
+.gsvg .glow line{stroke-width:10;opacity:.42}
+:root[data-theme="light"] .gsvg .glow{display:none}
+.gsvg .gap{stroke:var(--bg)}
+.gsvg .rod{transition:opacity .5s}
+.gsvg .pk{stroke-width:3.6;transition:opacity .5s}
+.gsvg .br{stroke-width:2.2;stroke-dasharray:9 5;transition:opacity .5s}
+.gsvg .base{stroke:var(--lit);stroke-width:5}
+.gsvg .nd{fill:var(--bg);stroke:var(--lit);stroke-width:1.5}
+.gsvg.sel .rod:not(.on),.gsvg.sel .pk,.gsvg.sel .br{opacity:.2}
 .gsvg .slab{cursor:pointer}
-.gsvg .slab text{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.22em;fill:var(--muted)}
-.gsvg .lb{font-family:var(--f-ui);font-size:11.5px;font-weight:500;fill:var(--ink)}
-.gsvg .lb.free{fill:var(--faint);font-family:var(--f-mono);font-size:10px;letter-spacing:.1em}
+.gsvg .slab text{font-family:var(--f-mono);font-size:8.5px;letter-spacing:.24em;fill:var(--muted)}
+.gsvg .lb{font-family:var(--f-ui);font-size:11.5px;font-weight:600}
+.gsvg .lb.free{fill:var(--faint);font-family:var(--f-mono);font-size:10px;font-weight:400;letter-spacing:.1em}
 .gsvg .hit{fill:transparent;cursor:pointer;outline:none}
 @media (prefers-reduced-motion:no-preference){
   .gsvg .gh.nx{animation:nx 3.2s ease-in-out infinite}
 }
-@keyframes nx{0%,100%{stroke-opacity:.35}50%{stroke-opacity:1}}
+@keyframes nx{0%,100%{stroke-opacity:.3}50%{stroke-opacity:1}}
 #ginfo:empty{display:none}
 .pinfo{margin-top:8px;border:1px solid var(--line);border-radius:var(--r);padding:16px;background:var(--s1)}
 .steps5{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
@@ -129,7 +134,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .steps5 li.ok i{background:var(--lit);border:0}
 
 /* Nächster Schritt */
-.next{position:relative;overflow:hidden;margin-top:18px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;text-align:left;width:100%;border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));background:color-mix(in srgb,var(--accent) 5%,transparent);border-radius:var(--r);padding:15px 16px;cursor:pointer}
+.next{position:relative;overflow:hidden;margin-top:18px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;text-align:left;width:100%;border:1.5px solid transparent;background:linear-gradient(var(--s1),var(--s1)) padding-box,linear-gradient(100deg,var(--c-selbst),var(--c-naehe),var(--c-miteinander),var(--c-welt),var(--c-urteil)) border-box;border-radius:var(--r);padding:15px 16px;cursor:pointer}
 .next .label{color:var(--accent-ink);grid-column:1}
 .next b{grid-column:1;font-weight:600;font-size:16px;line-height:1.4}
 .next .arr{grid-column:2;grid-row:1/3;color:var(--accent-ink);font-size:18px}
@@ -137,12 +142,12 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 /* Festigen */
 .fest{margin-top:18px;border:1px solid var(--line);border-radius:var(--r);padding:16px;background:var(--s1)}
 .fest .q{color:var(--muted);font-size:14.5px}
-.fest blockquote,.leit q{font-family:var(--f-serif);font-size:24px;line-height:1.22;margin:8px 0 0;quotes:"„" "“"}
+.fest blockquote,.leit q{font-family:var(--f-serif);font-weight:500;font-size:20px;line-height:1.3;letter-spacing:-.01em;margin:8px 0 0;quotes:"„" "“"}
 .fest blockquote::before{content:"„"}.fest blockquote::after{content:"“"}
 .leits{display:flex;flex-direction:column;border-top:1px solid var(--hair)}
 .leit{border:0;border-bottom:1px solid var(--hair);background:none;text-align:left;padding:14px 2px 16px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
 .leit small{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:inline-flex;gap:7px;align-items:center}
-.leit q{font-size:21px}
+.leit q{font-size:17.5px}
 .special{padding:14px 2px;border-bottom:1px solid var(--hair);font-size:15px}
 .special .links{margin-top:10px}
 
@@ -159,13 +164,13 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .about p{margin-top:10px}
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 .tiles div{border:1px solid var(--line);border-radius:10px;padding:12px}
-.tiles b{display:block;font-family:var(--f-serif);font-size:32px;font-weight:400;line-height:1}
+.tiles b{display:block;font-family:var(--f-serif);font-size:28px;font-weight:700;line-height:1}
 .tiles span{font-size:12px;color:var(--muted);line-height:1.3;display:block;margin-top:6px}
 .journal{display:flex;flex-direction:column;gap:14px}
 .jr{border-left:2px solid var(--c);padding-left:12px;display:flex;flex-direction:column;gap:2px}
 .jr small{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em}
 .jr b{font-weight:600}
-.jr p{font-family:var(--f-serif);font-size:19px;line-height:1.3}
+.jr p{font-size:15.5px;line-height:1.5}
 .moms{display:flex;flex-wrap:wrap;gap:6px}
 .mom{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13.5px;display:inline-flex;gap:8px;align-items:baseline}
 .mom small{font-family:var(--f-mono);font-size:10px;color:var(--faint)}
@@ -199,17 +204,17 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .draw .stack i:nth-child(3){border-color:var(--lit);background:var(--s2)}
 .draw.pull .stack i:nth-child(3){transform:translate(-6px,-14px) rotate(-6deg);opacity:0;transition:transform .42s var(--ease),opacity .42s}
 .draw .dtx{flex:1;display:flex;flex-direction:column;gap:3px}
-.draw b{font-family:var(--f-serif);font-weight:400;font-size:28px;line-height:1}
+.draw b{font-family:var(--f-serif);font-weight:700;font-size:22px;line-height:1.1;letter-spacing:-.02em}
 .draw small{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .draw .arr{color:var(--muted);font-size:18px}
 .bite{display:flex;flex-direction:column;padding-top:4px}
 .bite .meta,.probe .meta,.exp .meta{display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .bite .meta>span:first-child,.probe .meta>span:first-child,.exp .meta>span:first-child{display:inline-flex;align-items:center;gap:7px}
-.bite h2{font-family:var(--f-serif);font-size:40px;line-height:1.04;letter-spacing:-.01em;margin:18px 0 16px;text-wrap:balance}
+.bite h2{font-family:var(--f-serif);font-weight:700;font-size:30px;line-height:1.1;letter-spacing:-.025em;margin:18px 0 16px;text-wrap:balance}
 .bite .body{font-size:17.5px;line-height:1.62}
 .note{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:6px;width:100%;text-align:left;border:0;border-top:1px solid var(--hair);background:none;padding:16px 2px;cursor:pointer;font-size:15.5px;line-height:1.5}
 .note:first-of-type{margin-top:22px}
-.note .tipx{font-family:var(--f-serif);font-size:22px;line-height:1.25}
+.note .tipx{font-family:var(--f-serif);font-weight:500;font-size:18.5px;line-height:1.35;letter-spacing:-.01em}
 .note .more{font-size:13px;color:var(--muted)}
 .bite .src{border-top:1px solid var(--hair);padding-top:14px;font-size:13.5px;color:var(--muted)}
 .bite .src a{text-decoration:none;border-bottom:1px solid var(--line)}
@@ -221,8 +226,8 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 /* ---------- Üben ---------- */
 .probe,.exp{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r);padding:18px 16px;background:var(--s1);margin-top:8px}
 .exp+.exp{margin-top:10px}
-.probe h2,.exp h2{font-family:var(--f-serif);font-size:32px;line-height:1.05;margin:14px 0 10px}
-.exp h2{font-size:27px}
+.probe h2,.exp h2{font-family:var(--f-serif);font-weight:700;font-size:25px;line-height:1.12;letter-spacing:-.02em;margin:14px 0 10px}
+.exp h2{font-size:21px}
 .probe .situ{font-size:17px;line-height:1.58;margin-bottom:18px}
 .exp p{font-size:15.5px}
 .opts{display:flex;flex-direction:column;gap:8px;margin-top:8px}
@@ -238,7 +243,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .ot{display:flex;flex-direction:column}
 .reveal{margin-top:18px;padding-top:16px;border-top:1px solid var(--hair);display:flex;flex-direction:column;gap:12px}
 .reveal p{font-size:15.5px}
-.ask{font-family:var(--f-serif);font-size:22px;line-height:1.25}
+.ask{font-family:var(--f-serif);font-weight:500;font-size:18.5px;line-height:1.35;letter-spacing:-.01em}
 .prog{display:flex;flex-direction:column;gap:6px;margin-top:14px}
 .meter{height:3px;background:var(--s2);border-radius:2px;overflow:hidden}
 .meter span{display:block;height:100%;background:var(--lit)}
@@ -277,7 +282,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .sheet.swap .panel{animation:none}
 .panel .grab{position:absolute;top:8px;left:50%;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--line)}
 .panel .close{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--s1);color:var(--muted);font-size:20px;line-height:1;cursor:pointer;z-index:2}
-.panel h2{font-family:var(--f-serif);font-size:36px;line-height:1.05;margin:10px 40px 12px 0;text-wrap:balance}
+.panel h2{font-family:var(--f-serif);font-weight:700;font-size:28px;line-height:1.1;letter-spacing:-.025em;margin:10px 40px 12px 0;text-wrap:balance}
 .panel .lead{font-size:16.5px;line-height:1.55}
 .panel .src{margin-top:16px;font-size:13.5px;color:var(--muted)}
 .panel .src a{text-decoration:none;border-bottom:1px solid var(--line)}
@@ -304,7 +309,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .wq .q.bot b{color:var(--muted);font-weight:500}
 .wq+p{margin-top:12px}
 .fundnote{border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));border-radius:10px;padding:13px 14px;font-size:15px;margin-top:6px}
-.leitbox textarea{font-family:var(--f-serif);font-size:21px;line-height:1.3;min-height:100px}
+.leitbox textarea{font-family:var(--f-serif);font-weight:500;font-size:18px;line-height:1.35;min-height:100px}
 .leitbox .row{margin-top:10px}
 .leitbox p{margin-top:10px}
 .wel .memb,.mcard .memb{width:64px;height:54px;display:block;margin-bottom:14px}
@@ -314,7 +319,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .moment.out{animation:fadeout .35s ease both}
 .mcard{width:100%;max-width:360px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
 .mcard .memb{width:84px;height:70px;margin:0 0 8px}
-.mcard h2{font-family:var(--f-serif);font-size:38px;line-height:1.05}
+.mcard h2{font-family:var(--f-serif);font-weight:700;font-size:30px;line-height:1.1;letter-spacing:-.025em}
 .mcard p:not(.label){color:var(--muted);font-size:15.5px;max-width:28em}
 .mcard .btn{margin-top:14px}
 
@@ -350,13 +355,62 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 @media (prefers-reduced-motion:no-preference){
   #main.anim .view>*{animation:rise .6s var(--ease) both}
   #main.anim .view>*:nth-child(2){animation-delay:.05s}#main.anim .view>*:nth-child(3){animation-delay:.1s}#main.anim .view>*:nth-child(4){animation-delay:.15s}#main.anim .view>*:nth-child(5){animation-delay:.2s}#main.anim .view>*:nth-child(n+6){animation-delay:.25s}
-  #main.anim .gsvg .sg,#main.anim .gsvg .foot{transform-box:fill-box;animation:segin .7s var(--ease) both;animation-delay:.25s}
+  #main.anim .gsvg .rod,#main.anim .gsvg .gap,#main.anim .gsvg .nd{animation:fade .8s ease both;animation-delay:.2s}
   #main.anim .gsvg .pk,#main.anim .gsvg .br{animation:fade .8s ease both;animation-delay:.6s}
   ::view-transition-group(btitle){animation-duration:.5s;animation-timing-function:cubic-bezier(.3,.7,.2,1)}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media (max-width:370px){.vh h1{font-size:38px}.bite h2{font-size:34px}.mark{font-size:24px}.slot .sn{font-size:10.5px}}
+@media (max-width:370px){.vh h1{font-size:30px}.bite h2{font-size:26px}.mark{font-size:20px}.slot .sn{font-size:10.5px}}
 .ask+.muted{margin-top:10px}
+
+/* Werte finden */
+.findcard{position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;width:100%;text-align:left;border:1px solid var(--line);background:var(--s1);border-radius:var(--r);padding:18px 16px;cursor:pointer;margin-bottom:20px}
+.findcard.small{padding:12px 14px;margin:18px 0 0}
+.findcard .rods{display:flex;align-items:flex-end;gap:4px;height:40px;flex:none}
+.findcard .rods i{width:5px;border-radius:3px;background:var(--c)}
+.findcard .rods i:nth-child(1){height:22px;transform:rotate(-8deg)}.findcard .rods i:nth-child(2){height:34px;transform:rotate(6deg)}.findcard .rods i:nth-child(3){height:40px;transform:rotate(-4deg)}.findcard .rods i:nth-child(4){height:28px;transform:rotate(9deg)}.findcard .rods i:nth-child(5){height:18px;transform:rotate(-6deg)}
+.findcard.small .rods{height:26px}.findcard.small .rods i{width:4px;height:auto!important;min-height:12px}
+.findcard .tx{flex:1;display:flex;flex-direction:column;gap:3px}
+.findcard b{font-family:var(--f-serif);font-weight:700;font-size:19px;letter-spacing:-.02em}
+.findcard small{color:var(--muted);font-size:13.5px;line-height:1.4}
+.findcard .arr{color:var(--muted)}
+.fsheet .panel{min-height:78vh}
+.finder{display:flex;flex-direction:column;gap:16px;padding-top:4px}
+.fsteps{display:flex;gap:14px;flex-wrap:wrap;margin-right:40px}
+.fsteps span{display:inline-flex;align-items:center;gap:7px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.fsteps i{width:14px;height:3px;border-radius:2px;background:var(--ghost)}
+.fsteps .on{color:var(--ink)}.fsteps .on i{background:var(--lit)}
+.fsteps .ok{color:var(--muted)}.fsteps .ok i{background:var(--muted)}
+.fbar{height:3px;border-radius:2px;background:var(--s2);overflow:hidden}
+.fbar i{display:block;height:100%;background:linear-gradient(90deg,var(--c-selbst),var(--c-naehe),var(--c-miteinander),var(--c-welt),var(--c-urteil));transition:width .5s var(--ease)}
+.fq{font-family:var(--f-serif);font-weight:600;font-size:20px;line-height:1.3;letter-spacing:-.015em}
+.fcard{position:relative;border:1px solid var(--line);border-radius:14px;padding:20px 18px 18px 30px;background:var(--bg);display:flex;flex-direction:column;gap:10px;min-height:190px}
+.rodmark{position:absolute;left:13px;top:18px;bottom:18px;width:5px;border-radius:3px;background:var(--c);transform:rotate(2deg)}
+.fcard .label{color:var(--c)}
+.fst{font-size:20px;line-height:1.4;font-weight:500}
+.fbtns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.fbtns .btn{justify-content:center;padding:13px 6px;font-size:14.5px;text-align:center}
+.fmeta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.fduel{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.fvs{align-self:center;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.fopt{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:6px;text-align:left;border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:16px 16px 16px 30px;cursor:pointer;transition:border-color .3s,background-color .3s}
+.fopt b{font-family:var(--f-serif);font-weight:700;font-size:21px;letter-spacing:-.02em;color:var(--c)}
+.fopt span:not(.rodmark){font-size:15px;line-height:1.45;color:var(--ink)}
+.fopt.won{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,var(--bg))}
+.fres{display:flex;flex-direction:column;gap:6px}
+.fr{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:12px 14px 12px 30px;cursor:pointer;opacity:.6;transition:opacity .3s,border-color .3s}
+.fr .rodmark{top:12px;bottom:12px}
+.fr.on{opacity:1;border-color:color-mix(in srgb,var(--c) 60%,var(--line))}
+.fr .tx{flex:1;display:flex;flex-direction:column;gap:2px}
+.fr b{font-weight:600;font-size:16px}
+.fr small{color:var(--muted);font-size:13px;line-height:1.4}
+.fr .ck{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line);flex:none}
+.fr.on .ck{background:var(--c);border-color:var(--c)}
+.fr .why{font-style:normal;font-size:12.5px;color:var(--c);line-height:1.4;margin-top:3px;display:block}
+.fcard .fst{font-family:var(--f-serif);font-weight:600;font-size:23px;line-height:1.3;letter-spacing:-.015em}
+.slot .psvg{width:100%;height:84px;display:block}
+.slot{min-height:0;justify-content:flex-start;padding-top:8px}
+.lead+.muted{margin-top:12px}
 
 </style>
 
@@ -430,6 +484,45 @@ const WERTE=[
  {id:"integritaet",cat:"urteil",n:"Integrität",d:"Deine Worte und Taten passen zusammen, auch wenn niemand hinschaut.",s:"Lernfähigkeit",zv:"Sturheit",zs:"Fähnchen im Wind",f:"Wo handelst du anders, wenn du dich unbeobachtet fühlst?",b:"Du gibst zu viel erhaltenes Wechselgeld zurück."},
  {id:"demut",cat:"urteil",n:"Erkenntnisdemut",d:"Du rechnest damit, dass du dich irren kannst, und bleibst offen für Gründe.",s:"Urteilsvertrauen",zv:"Lähmender Selbstzweifel",zs:"Selbstüberschätzung",f:"Bei welcher Überzeugung wärst du bereit, dich vom Gegenteil überzeugen zu lassen?",b:"Du sagst: Da könnte ich falschliegen, lass uns nachsehen."},
  {id:"fairness",cat:"urteil",n:"Fairness",d:"Du beurteilst andere nach denselben Maßstäben wie dich und deine Leute.",s:"Parteinahme für Schwächere",zv:"Falsche Ausgewogenheit",zs:"Einseitigkeit",f:"Würdest du genauso urteilen, wenn es um jemanden aus deiner eigenen Gruppe ginge?",b:"Du kritisierst auch einen Fehler deines Lieblingsvereins."}
+];
+
+/* Werte finden: alltägliche Sätze statt abstrakter Begriffe. w = [Hauptwert, Nebenwert] */
+const SAETZE=[
+ {t:"Wenn jemand vor anderen bloßgestellt wird, kann ich nicht einfach wegsehen.",w:["zivilcourage","solidaritaet"]},
+ {t:"Ich sage lieber eine unbequeme Wahrheit als eine bequeme Lüge.",w:["wahrhaftigkeit","echtheit"]},
+ {t:"Es macht mich zornig, wenn Regeln für manche gelten und für andere nicht.",w:["gerechtigkeit","fairness"]},
+ {t:"Wenn Freunde mich brauchen, lasse ich anderes liegen.",w:["loyalitaet","fuersorge"]},
+ {t:"Was ich zusage, halte ich auch dann, wenn es mir später nicht mehr passt.",w:["verlaesslichkeit","integritaet"]},
+ {t:"Ich will mir selbst ein Bild machen, statt zu übernehmen, was alle sagen.",w:["muendigkeit","differenzierung"]},
+ {t:"Ich frage nach, bis ich verstanden habe, wie etwas wirklich funktioniert.",w:["neugier","wachstum"]},
+ {t:"Es stört mich, wenn Dinge weggeworfen werden, die man noch reparieren könnte.",w:["sorgfalt","genuegsamkeit"]},
+ {t:"Ich denke manchmal darüber nach, wie die Welt für die aussieht, die nach uns kommen.",w:["zukunftsverantwortung","folgerichtigkeit"]},
+ {t:"Draußen in der Natur komme ich zur Ruhe und fühle mich verbunden.",w:["naturverbundenheit","gelassenheit"]},
+ {t:"Ich kann jemandem verzeihen, ohne zu vergessen, was passiert ist.",w:["vergebung","gelassenheit"]},
+ {t:"Ich traue mich an Dinge, vor denen ich Angst habe, wenn sie mir wichtig sind.",w:["mut","wachstum"]},
+ {t:"Ich lasse mir nicht alles gefallen, auch nicht von Menschen, die ich mag.",w:["selbstachtung","echtheit"]},
+ {t:"Ich höre gern zu, auch wenn jemand ganz anders denkt als ich.",w:["offenheit","toleranz"]},
+ {t:"Ich bewundere Menschen, die auch ihren Gegnern mit Respekt begegnen.",w:["weitherzigkeit","gewaltfreiheit"]},
+ {t:"Ich teile, was ich habe, auch wenn es gerade knapp ist.",w:["teilen","solidaritaet"]},
+ {t:"Es ist mir wichtig, dass nicht vergessen wird, was Menschen anderen angetan haben.",w:["erinnerung","verantwortlichkeit"]},
+ {t:"Wenn in der Klasse, im Verein oder im Viertel etwas entschieden wird, rede ich mit.",w:["beteiligung","muendigkeit"]},
+ {t:"Ich gebe zu, wenn ich falschlag, auch wenn es peinlich ist.",w:["verantwortlichkeit","demut"]},
+ {t:"Ich sage Menschen, wofür ich ihnen dankbar bin.",w:["dankbarkeit","zuwendung"]},
+ {t:"Wenn ich mit jemandem zusammen bin, ist das Handy weg.",w:["zuwendung","mass"]},
+ {t:"Ich merke, wann es genug ist, beim Essen, beim Scrollen oder beim Arbeiten.",w:["mass","gelassenheit"]},
+ {t:"Ich bleibe dran, auch wenn es gerade keinen Spaß macht.",w:["disziplin","verlaesslichkeit"]},
+ {t:"Ich will so leben, wie es zu mir passt, nicht wie andere es von mir erwarten.",w:["freiheit","echtheit"]},
+ {t:"Ich vertraue Menschen erst einmal, bis sie mir einen Grund geben, es nicht zu tun.",w:["vertrauen","offenheit"]},
+ {t:"Streit löse ich lieber mit Worten als mit Druck.",w:["gewaltfreiheit","fairness"]},
+ {t:"Bevor ich etwas weitererzähle, prüfe ich, ob es stimmt.",w:["differenzierung","wahrhaftigkeit"]},
+ {t:"Mich berührt, wie viel Leben in einer Wiese oder einem Wald steckt.",w:["ehrfurcht","naturverbundenheit"]},
+ {t:"Ich kaufe lieber weniger und dafür bewusster.",w:["genuegsamkeit","folgerichtigkeit"]},
+ {t:"Was ich sage und was ich tue, soll zusammenpassen.",w:["integritaet","folgerichtigkeit"]},
+ {t:"Ich weiß, dass ich mich irren kann, und höre deshalb auch Gegenargumente an.",w:["demut","toleranz"]},
+ {t:"Es macht mich zornig, wenn Menschen in Not allein gelassen werden.",w:["solidaritaet","fuersorge"]},
+ {t:"Ich behandle Menschen gleich, egal ob ich sie mag oder nicht.",w:["fairness","gerechtigkeit"]},
+ {t:"Ich lerne gern aus Fehlern, statt sie zu verstecken.",w:["wachstum","verantwortlichkeit"]},
+ {t:"Wenn jemand krank ist oder traurig, melde ich mich.",w:["fuersorge","zuwendung"]}
 ];
 
 /* Impulse: Gedanken und Befunde, je mit Quelle und Einschätzung */
@@ -984,12 +1077,12 @@ function nextFor(id){const w=W[id];
   if(!affirmed(id)){const L=S.leit[id];return {t:`Bekräftige deinen Leitsatz für ${w.n}, wenn die App nachfragt${L&&L.next>now()?`, voraussichtlich am ${fmtDate(L.next)}`:""}.`,wert:id,wait:true}}
   return null}
 function nextStep(){
-  if(!S.kern.length)return {t:"Wähle die erste Stütze für dein Gerüst.",tabgo:"werte",id:null};
+  if(!S.kern.length)return {t:"Finde heraus, welche Werte dich tragen. Es dauert etwa fünf Minuten.",finder:true,id:null};
   let wait=null;
   for(const id of S.kern){const n=nextFor(id);if(n&&!n.wait)return Object.assign(n,{id});if(n&&!wait)wait=Object.assign(n,{id})}
   if(S.kern.length<MAXKERN)return {t:"Wähle eine weitere Stütze.",tabgo:"werte",id:null};
   return wait||{t:"Dein Gerüst steht. Bleib im Gespräch mit dir: Impulse lesen, Proben entscheiden.",tabgo:"imp",id:null}}
-const actAttr=n=>n.wert?`data-wert="${n.wert}"`:n.ueb?`data-ueb="${n.ueb}"`:n.probe?`data-probe-open="${n.probe}"`:n.tabgo?`data-tabgo="${n.tabgo}"`:"";
+const actAttr=n=>n.finder?`data-finder="1"`:n.wert?`data-wert="${n.wert}"`:n.ueb?`data-ueb="${n.ueb}"`:n.probe?`data-probe-open="${n.probe}"`:n.tabgo?`data-tabgo="${n.tabgo}"`:"";
 
 /* Kurze Namen in zwei Zeilen fürs Gerüst */
 const HY={selbstachtung:"Selbst-achtung",gelassenheit:"Gelassen-heit",loyalitaet:"Loyali-tät",verlaesslichkeit:"Verläss-lichkeit",dankbarkeit:"Dank-barkeit",gerechtigkeit:"Gerech-tigkeit",zivilcourage:"Zivil-courage",solidaritaet:"Solida-rität",gewaltfreiheit:"Gewalt-freiheit",beteiligung:"Betei-ligung",genuegsamkeit:"Genüg-samkeit",zukunftsverantwortung:"Verantwortung-für Kommende",ehrfurcht:"Ehrfurcht-vor dem Leben",naturverbundenheit:"Natur-verbundenheit",folgerichtigkeit:"Folge-richtigkeit",weitherzigkeit:"Weit-herzigkeit",wahrhaftigkeit:"Wahr-haftigkeit",differenzierung:"Differen-zierung",verantwortlichkeit:"Verant-wortlichkeit",demut:"Erkenntnis-demut",integritaet:"Integri-tät",zuwendung:"Zu-wendung",offenheit:"Offen-heit",vergebung:"Ver-gebung",muendigkeit:"Mündig-keit",echtheit:"Echt-heit",disziplin:"Diszi-plin",freiheit:"Frei-heit",wachstum:"Wachs-tum",fuersorge:"Für-sorge",vertrauen:"Ver-trauen",erinnerung:"Erin-nerung",toleranz:"Tole-ranz",sorgfalt:"Sorg-falt",fairness:"Fair-ness"};
@@ -997,30 +1090,59 @@ const isWordBreak=id=>{const b=HY[id].split("-")[1];return b[0]===b[0].toLowerCa
 const two=id=>{const n=W[id].n;if(n.length<=9||!HY[id])return [n];const [a,b]=HY[id].split("-");return [a+(isWordBreak(id)?"-":""),b]};
 const shy=id=>HY[id]&&W[id].n.length>9?HY[id].replace("-",isWordBreak(id)?"&shy;":" "):W[id].n;
 
-/* Großes Gerüst */
-const GX=i=>44+i*68,GB=262,GH=48,segY=k=>GB-(k+1)*GH+4;
+/* Großes Gerüst: bunte Stäbe, die sich wie in einer Rauminstallation kreuzen und verbinden */
+const GY=300,PX=i=>48+i*66;
+const SHORT={zukunftsverantwortung:"Verantwortung",ehrfurcht:"Ehrfurcht",naturverbundenheit:"Naturverbunden",verantwortlichkeit:"Verantwortlich"};
+const rnd=(seed,k)=>(hashStr(seed+"#"+k)%1000)/1000;
+const lerp=(p,q,t)=>[p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t];
+/* Fünf Stäbe pro Stütze: Ständer, Verlängerung, Strebe, zweiter Ständer, Krone. Die Lage hängt vom Wert ab, so wird jedes Gerüst ein wenig anders. */
+function rodsFor(seed,i){const bx=PX(i),r=k=>rnd(seed,k);
+  const P0=[bx-4+r(1)*8,GY],A=[bx+(r(2)-.5)*24,GY-112-r(3)*16];
+  const B0=lerp(P0,A,.42+r(4)*.16),B=[bx+(r(5)-.5)*38,GY-176-r(6)*16];
+  const side=r(7)>.5?1:-1,C0=[bx+side*(21+r(8)*8),GY],C1=lerp(B0,B,.6);
+  const D0=lerp(P0,A,.8),D=[bx-side*(9+r(9)*13),GY-226-r(10)*14];
+  const E0=lerp(B0,B,.82),E=[bx+(r(11)-.5)*22,GY-262-r(12)*10];
+  return [{a:P0,b:A,w:7},{a:B0,b:B,w:6},{a:C0,b:C1,w:4.6},{a:D0,b:D,w:5.4},{a:E0,b:E,w:5}]}
+function ext(a,b,e){const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1;return [a[0],a[1],b[0]+dx/L*e,b[1]+dy/L*e]}
+const ln=(p,cls,extra)=>`<line class="${cls}" x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${p[2].toFixed(1)}" y2="${p[3].toFixed(1)}" ${extra||""}/>`;
+const seedOf=(id,i)=>id||"frei"+i;
 function geruestSVG(){
-  const slots=[0,1,2,3,4].map(i=>S.kern[i]||null),ns=nextStep();
-  let ghost="",lit="",glowS="",planks="",br="",lbl="",hit="";
-  slots.forEach((id,i)=>{const x=GX(i)-15,l=id?level(id):0;
-    for(let k=0;k<5;k++){if(k<l)continue;const nx=id&&ns.id===id&&k===l;ghost+=`<rect class="gh${nx?" nx":""}" x="${x}" y="${segY(k)}" width="30" height="${GH-6}" rx="3"/>`}
-    if(!id){if(!ns.id&&ns.tabgo==="werte"&&i===S.kern.length)ghost+=`<rect class="gh nx" x="${x}" y="${segY(0)}" width="30" height="${GH-6}" rx="3"/>`;lbl+=`<text class="lb free" x="${GX(i)}" y="${GB+44}" text-anchor="middle">frei</text>`;hit+=`<rect class="hit" data-slot="${i}" x="${GX(i)-32}" y="${segY(4)-8}" width="64" height="${GB-segY(4)+70}" role="button" aria-label="Freier Platz, Stütze wählen"/>`;return}
-    const w=W[id];
-    for(let k=0;k<l;k++){lit+=`<rect class="sg" data-seg="${id}:${k}" x="${x}" y="${segY(k)}" width="30" height="${GH-6}" rx="3"/>`;glowS+=`<rect x="${x}" y="${segY(k)}" width="30" height="${GH-6}" rx="3"/>`}
-    lit+=`<rect class="foot" x="${x}" y="${GB-1}" width="30" height="3" rx="1.5" fill="var(--c-${w.cat})"/>`;
-    const L=two(id);lbl+=`<text class="lb" x="${GX(i)}" y="${GB+44}" text-anchor="middle">${L.map((t,j)=>`<tspan x="${GX(i)}" dy="${j?13:0}">${t}</tspan>`).join("")}</text>`;
-    hit+=`<rect class="hit" data-pil="${id}" x="${GX(i)-32}" y="${segY(4)-8}" width="64" height="${GB-segY(4)+80}" role="button" tabindex="0" aria-label="${w.n}, Stufe ${l} von 5"/>`});
-  for(let i=0;i<4;i++){const a=slots[i],b=slots[i+1];if(!a||!b)continue;const c=Math.min(level(a),level(b));for(let k=1;k<c;k++){const y=segY(k)+GH-4;planks+=`<line class="pk" x1="${GX(i)+15}" y1="${y}" x2="${GX(i+1)-15}" y2="${y}"/>`}}
-  braces().forEach(([a,b])=>{const i=slots.indexOf(a),j=slots.indexOf(b);if(i<0||j<0)return;const [p,q]=i<j?[i,j]:[j,i];const h=Math.max(1,Math.min(level(slots[p]),level(slots[q])));
-    br+=`<line class="br" x1="${GX(p)+15}" y1="${GB-4}" x2="${GX(q)-15}" y2="${segY(h-1)+4}"/>`});
-  return `<svg class="gsvg" viewBox="0 0 360 330" role="img" aria-label="Dein Wertegerüst mit ${parts()} von 25 Bauteilen">
-    <defs><filter id="gb" x="-60%" y="-30%" width="220%" height="160%"><feGaussianBlur stdDeviation="9"/></filter><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--line)" stroke-width="1.2"/></pattern></defs>
-    <g class="ghost">${ghost}</g><g class="glow" filter="url(#gb)">${glowS}</g>${planks}${br}<g class="lit">${lit}</g>
-    <g class="slab" role="button" aria-label="Fundament Würde"><rect x="10" y="${GB+6}" width="340" height="18" rx="3" fill="url(#hatch)" stroke="var(--line)"/><rect x="146" y="${GB+8}" width="68" height="14" fill="var(--bg)"/><text x="180" y="${GB+18.5}" text-anchor="middle">WÜRDE</text></g>
+  const slots=[0,1,2,3,4].map(i=>S.kern[i]||null),ns=nextStep(),R=slots.map((id,i)=>rodsFor(seedOf(id,i),i)),L=slots.map(id=>id?level(id):0);
+  let defs="",ghost="",glowS="",body="",nodes="",lbl="",hit="";
+  const grad=(gid,p,c1,c2)=>{defs+=`<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${p[2].toFixed(1)}" y2="${p[3].toFixed(1)}"><stop offset="0" style="stop-color:var(--c-${c1})"/><stop offset="1" style="stop-color:var(--c-${c2})"/></linearGradient>`;return `url(#${gid})`};
+  slots.forEach((id,i)=>{for(let k=L[i];k<5;k++){const rd=R[i][k],nx=(id&&ns.id===id&&k===L[i])||(!id&&!ns.id&&i===S.kern.length&&k===0);
+    ghost+=ln(ext(rd.a,rd.b,4),nx?"gh nx":"gh",nx&&id?`style="stroke:var(--c-${W[id].cat})"`:"")}});
+  for(let k=0;k<5;k++){
+    slots.forEach((id,i)=>{if(!id||k>=L[i])return;const rd=R[i][k],p=ext(rd.a,rd.b,k===0?5:8),c=W[id].cat;
+      body+=ln(p,"gap",`data-gap="${id}:${k}" style="stroke-width:${rd.w+4}"`)+ln(p,"rod",`data-seg="${id}:${k}" pathLength="100" style="stroke:var(--c-${c});stroke-width:${rd.w}"`);
+      glowS+=ln(p,"",`style="stroke:var(--c-${c})"`);nodes+=`<circle class="nd" cx="${rd.b[0].toFixed(1)}" cy="${rd.b[1].toFixed(1)}" r="${k===4?4.2:2.8}" ${k===4?`style="fill:var(--c-${c});stroke:var(--lit)"`:""}/>`});
+    /* Verbindungen zu Nachbarn: je höher beide stehen, desto dichter das Geflecht */
+    if(k>=1)for(let i=0;i<4;i++){const a=slots[i],b=slots[i+1];if(!a||!b||Math.min(L[i],L[i+1])<=k)continue;
+      const P=k%2?[R[i][k].b,R[i+1][k-1].b]:[R[i][k-1].b,R[i+1][k].b];const p=[P[0][0],P[0][1],P[1][0],P[1][1]],q=[p[0]-(p[2]-p[0])*.06,p[1]-(p[3]-p[1])*.06,p[2]+(p[2]-p[0])*.06,p[3]+(p[3]-p[1])*.06];
+      body+=ln(q,"gap pkgap",`style="stroke-width:7.5"`)+ln(q,"pk",`style="stroke:${grad(`pg${i}${k}`,q,W[a].cat,W[b].cat)}"`)}}
+  /* Streben aus Abwägungen: lange, dünne Stäbe quer durchs Gerüst */
+  braces().forEach(([a,b],n)=>{const i=slots.indexOf(a),j=slots.indexOf(b);if(i<0||j<0)return;const [p,q]=i<j?[i,j]:[j,i];const h=Math.max(1,Math.min(L[p],L[q]));
+    const e=ext(R[p][0].a,R[q][h-1].b,10);body+=ln(e,"gap brgap",`style="stroke-width:5.5"`)+ln(e,"br",`style="stroke:${grad(`bg${n}`,e,W[slots[p]].cat,W[slots[q]].cat)}"`)});
+  slots.forEach((id,i)=>{const row=i%2?GY+40:GY+22;
+    if(!id){lbl+=`<text class="lb free" x="${PX(i)}" y="${row}" text-anchor="middle">frei</text>`;hit+=`<rect class="hit" data-slot="${i}" x="${PX(i)-33}" y="20" width="66" height="${GY+30}" role="button" aria-label="Freier Platz, Werte finden"/>`;return}
+    const w=W[id],nm=SHORT[id]||w.n;lbl+=`<line class="ld" x1="${PX(i)}" y1="${GY+6}" x2="${PX(i)}" y2="${row-11}" style="stroke:var(--c-${w.cat})"/><text class="lb" x="${Math.min(352-nm.length*3.1,Math.max(8+nm.length*3.1,PX(i)))}" y="${row}" text-anchor="middle" style="fill:var(--c-${w.cat})">${nm}</text>`;
+    hit+=`<rect class="hit" data-pil="${id}" x="${PX(i)-33}" y="20" width="66" height="${GY+30}" role="button" tabindex="0" aria-label="${w.n}, Stufe ${L[i]} von 5"/>`});
+  return `<svg class="gsvg" viewBox="0 18 360 346" role="img" aria-label="Dein Wertegerüst mit ${parts()} von 25 Bauteilen">
+    <defs><filter id="gb" x="-60%" y="-30%" width="220%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>${defs}</defs>
+    <g class="ghost">${ghost}</g><g class="glow" filter="url(#gb)">${glowS}</g>${body}${nodes}
+    <g class="slab" role="button" aria-label="Fundament Würde">${ln([12,GY+2,348,GY+2],"base")}<text x="180" y="${GY+58}" text-anchor="middle">WÜRDE · FUNDAMENT</text></g>
     ${lbl}${hit}</svg>`}
+/* Eine einzelne Stütze für die Übersicht unter „Werte“ */
+function pillarSVG(id,i){const R=rodsFor(seedOf(id,i),i),l=id?level(id):0,c=id?W[id].cat:null;let g="";
+  R.forEach((rd,k)=>{const on=k<l;g+=`<line x1="${rd.a[0].toFixed(1)}" y1="${rd.a[1].toFixed(1)}" x2="${rd.b[0].toFixed(1)}" y2="${rd.b[1].toFixed(1)}" ${on?`stroke="var(--c-${c})" stroke-width="${rd.w*1.1}"`:`stroke="var(--ghost)" stroke-width="1.6" stroke-dasharray="2 5"`} stroke-linecap="round"/>`});
+  return `<svg class="psvg" viewBox="${PX(i)-46} 20 92 ${GY-14}" aria-hidden="true">${g}<line x1="${PX(i)-40}" y1="${GY+2}" x2="${PX(i)+40}" y2="${GY+2}" stroke="var(--lit)" stroke-width="4" stroke-linecap="round"/></svg>`}
+/* Kleines Gerüst für Logo und Momente; ohne eigene Stützen ein Beispiel */
+const SAMPLE=["mut","vertrauen","gerechtigkeit","genuegsamkeit","wahrhaftigkeit"],SAMPLEL=[2,4,5,3,3];
 function miniSVG(cls){const has=S.kern.length>0;let g="";
-  for(let i=0;i<5;i++){const id=S.kern[i];const l=id?level(id):(has?0:[2,3,5,3,2][i]);for(let k=0;k<5;k++){const on=k<l;g+=`<rect x="${4+i*5.4}" y="${23-(k+1)*4}" width="3.6" height="3.2" rx=".8" fill="${on?"var(--lit)":"none"}" ${on?"":`stroke="var(--ghost)" stroke-width=".6"`}/>`}}
-  return `<svg class="${cls||""}" viewBox="0 0 34 28" aria-hidden="true">${g}<rect x="2" y="23.6" width="30" height="2.4" rx="1" fill="var(--accent)"/></svg>`}
+  for(let k=0;k<5;k++)for(let i=0;i<5;i++){const id=has?S.kern[i]:SAMPLE[i];if(!id)continue;const l=has?level(id):SAMPLEL[i];if(k>=l)continue;const rd=rodsFor(seedOf(id,i),i)[k];
+    g+=`<line x1="${rd.a[0].toFixed(0)}" y1="${rd.a[1].toFixed(0)}" x2="${rd.b[0].toFixed(0)}" y2="${rd.b[1].toFixed(0)}" stroke="var(--c-${W[id].cat})" stroke-width="${rd.w*2.6}" stroke-linecap="round"/>`}
+  if(has&&!g)for(let i=0;i<5;i++)g+=`<line x1="${PX(i)}" y1="${GY}" x2="${PX(i)}" y2="${GY-60}" stroke="var(--ghost)" stroke-width="8" stroke-linecap="round" stroke-dasharray="6 14"/>`;
+  return `<svg class="${cls||""}" viewBox="10 20 340 300" aria-hidden="true">${g}<line x1="22" y1="${GY+6}" x2="338" y2="${GY+6}" stroke="var(--lit)" stroke-width="16" stroke-linecap="round"/></svg>`}
 
 /* ---------- Reiter ---------- */
 const TABS=[["geruest","Gerüst"],["imp","Impulse"],["ueben","Üben"],["werte","Werte"]];
@@ -1098,19 +1220,19 @@ function viewGeruest(){
     <p class="footcredit">Wertegerüst · © 2026 Carlo Maximilian Engeländer</p>
   </section>`}
 function pillarTap(id){const svg=document.querySelector(".gsvg");if(!svg)return;const w=W[id],l=level(id),n=nextFor(id);
-  const was=svg.dataset.sel===id;svg.dataset.sel=was?"":id;svg.querySelectorAll(".sg").forEach(r=>r.classList.toggle("on",!was&&r.dataset.seg.startsWith(id+":")));
+  const was=svg.dataset.sel===id;svg.dataset.sel=was?"":id;svg.querySelectorAll(".rod").forEach(r=>r.classList.toggle("on",!was&&r.dataset.seg.startsWith(id+":")));
   svg.classList.toggle("sel",!was);buzz([6,30,8]);
   if(was){$("#ginfo").innerHTML="";return}
-  const segs=[...svg.querySelectorAll(`.sg[data-seg^="${id}:"]`)];if(!calm())segs.forEach((s,i)=>s.animate([{opacity:1},{opacity:.45,offset:.35},{opacity:1}],{duration:650,delay:i*60,easing:"ease-out"}));
+  const segs=[...svg.querySelectorAll(`.rod[data-seg^="${id}:"]`)];if(!calm())segs.forEach((s,i)=>s.animate([{opacity:1},{opacity:.45,offset:.35},{opacity:1}],{duration:650,delay:i*60,easing:"ease-out"}));
   if(segs.length)lightUp(segs[segs.length-1]);
   $("#ginfo").innerHTML=`<div class="pinfo" ${cc(w.cat)}><div class="sh"><span class="label">${dot(w.cat)}${w.n}</span><span class="label">Stufe ${l} von 5</span></div>
    <ul class="steps5">${steps(id).map(([t,ok])=>`<li class="${ok?"ok":""}"><i></i>${t}</li>`).join("")}</ul>
    <div class="row">${n?`<button class="btn primary" ${actAttr(n)}>${n.wait?"Leitsatz ansehen":n.wert?"Leitsatz schreiben":n.probe?"Probe öffnen":n.ueb?"Übung ansehen":"Weiter"}</button>`:""}<button class="btn" data-wert="${id}">Stütze öffnen</button></div></div>`;
   const pi=$("#ginfo .pinfo");if(pi&&!calm())pi.animate([{opacity:0,transform:"translateY(6px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)"})}
 function playFresh(){if(!S.fresh.length)return;const list=S.fresh.slice();S.fresh=[];persist();if(calm())return;
-  list.forEach((key,i)=>{const r=document.querySelector(`.gsvg .sg[data-seg="${key}"]`);if(!r)return;r.style.transformBox="fill-box";
-    r.animate([{transform:"translateY(-30px)",opacity:0},{transform:"translateY(2px)",opacity:1,offset:.75},{transform:"none",opacity:1}],{duration:900,delay:300+i*220,easing:"cubic-bezier(.2,.8,.25,1)",fill:"backwards"});
-    setTimeout(()=>{lightUp(r,true);buzz([10,40,16])},300+i*220+650)})}
+  list.forEach((key,i)=>{const r=document.querySelector(`.gsvg .rod[data-seg="${key}"]`);if(!r)return;const d=250+i*260,gp=document.querySelector(`.gsvg [data-gap="${key}"]`);
+    [r,gp].forEach(x=>{if(!x)return;x.setAttribute("pathLength","100");x.style.strokeDasharray="100";x.animate([{strokeDashoffset:100},{strokeDashoffset:0}],{duration:850,delay:d,easing:"cubic-bezier(.5,0,.2,1)",fill:"backwards"}).onfinish=()=>{x.style.strokeDasharray=""}});
+    setTimeout(()=>{lightUp(r,true);buzz([10,40,16])},d+700)})}
 
 /* ---------- Bautagebuch, Einstellungen, Über ---------- */
 function journalFold(){
@@ -1133,7 +1255,7 @@ function aboutFold(){return `<details class="fold" id="aboutfold" ${S.aboutOpen|
   <p>Werte geraten oft in Spannung zueinander. Das ist kein Zeichen von Haltlosigkeit, sondern normal. Stabil wird ein Gerüst, wenn du deine Werte kennst, sie in schwierigen Lagen abwägst und sie im Alltag lebst. Darum gibt es Impulse zum Nachdenken, Belastungsproben zum Entscheiden und Übungen zum Tun.</p>
   <h3>So wächst eine Stütze</h3><p>Jede Stütze hat fünf Bauteile: gewählt, Leitsatz, geprüft, gelebt und bekräftigt. Bretter verbinden Nachbarn, die gleich hoch stehen. Streben entstehen, wenn du in einer Probe zwischen zwei deiner Stützen abgewogen hast.</p>
   <h3>Wie sicher ist ein Impuls?</h3><div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)}<span class="muted">${["Philosophie, Zeitzeugnis oder Denkmodell","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder sehr viele Studien"][l]}</span></div>`).join("")}</div>
-  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 17.10.2026, 22:25 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
+  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 18.10.2026, 08:12 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
   <div class="row"><button class="btn" id="shareapp">App weiterempfehlen</button></div>
   <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
   <div class="credit"><span class="label">Von wem</span><p>Das Wertegerüst ist ein privates Projekt von <b>Carlo Maximilian Engeländer</b>. Idee, Auswahl, Texte und Gestaltung stammen von ihm.</p><p class="muted small">© 2026 Carlo Maximilian Engeländer. Alle Rechte vorbehalten. Du darfst die App gern nutzen und den Link weitergeben, auch im Unterricht. Inhalte, Texte und Gestaltung dürfen aber nicht ohne Erlaubnis kopiert, verändert oder anderswo veröffentlicht werden.</p></div>
@@ -1147,13 +1269,17 @@ function settingsFold(){const sw=(id,on,label,sub)=>`<button class="setrow" data
   </div></details>`}
 
 /* ---------- Werte ---------- */
+function findCard(){const f=S.find&&S.find.v===2?S.find:null,n=f?Object.keys(f.a).length:0,done=f&&f.stage==="done";
+  if(done)return `<button class="findcard small" data-finder="1"><span class="rods" aria-hidden="true">${CATKEYS.map(k=>`<i ${cc(k)}></i>`).join("")}</span><span class="tx"><b>Werte neu finden</b><small>Sätze einschätzen, abwägen, auswählen</small></span><span class="arr">→</span></button>`;
+  return `<button class="findcard" data-finder="1"><span class="rods" aria-hidden="true">${CATKEYS.map(k=>`<i ${cc(k)}></i>`).join("")}</span><span class="tx"><b>${n?"Weiter beim Werte finden":"Werte finden"}</b><small>${n?`${n} von ${SAETZE.length} Sätzen eingeschätzt`:"Du schätzt alltägliche Sätze ein und wägst danach ab. Daraus ergeben sich deine Stützen. Etwa fünf Minuten."}</small></span><span class="arr">→</span></button>`}
 let wFilter="alle";
 function viewWerte(){
   const due=dueLeit();
   const list=WERTE.filter(w=>wFilter==="alle"||w.cat===wFilter),cnt={alle:WERTE.length};CATKEYS.forEach(k=>cnt[k]=WERTE.filter(w=>w.cat===k).length);
   return `<section class="view">
-    <header class="vh"><h1>Werte</h1><p>Wähle bis zu fünf Stützen für dein Gerüst. Nicht die, die gut klingen, sondern die, nach denen du wirklich leben willst.</p></header>
-    <div class="slots">${[0,1,2,3,4].map(i=>{const id=S.kern[i];if(!id)return `<button class="slot" data-gowlist="1"><span class="bars"></span><span class="sn">frei</span></button>`;const w=W[id],l=level(id);return `<button class="slot on" ${cc(w.cat)} data-wert="${id}"><span class="bars">${[0,1,2,3,4].map(k=>`<i class="${k<l?"on":""}"></i>`).join("")}</span><span class="sn">${shy(id)}</span></button>`}).join("")}</div>
+    <header class="vh"><h1>Werte</h1><p>Bis zu fünf Werte tragen dein Gerüst. Am leichtesten findest du sie Schritt für Schritt. Du kannst sie auch direkt aus der Liste wählen.</p></header>
+    ${findCard()}
+    <div class="slots">${[0,1,2,3,4].map(i=>{const id=S.kern[i];if(!id)return `<button class="slot" data-finder="1">${pillarSVG(null,i)}<span class="sn">frei</span></button>`;const w=W[id],l=level(id);return `<button class="slot on" ${cc(w.cat)} data-wert="${id}">${pillarSVG(id,i)}<span class="sn">${id==="zukunftsverantwortung"||id==="ehrfurcht"?SHORT[id]:shy(id)}</span></button>`}).join("")}</div>
     <p class="muted small fundline">Fundament in jedem Gerüst: <button class="linkbtn" data-wert="wuerde">die Würde jedes Menschen</button></p>
     ${due.length?due.map(festRow).join(""):""}
     <div class="sec" id="wlist"><div class="sh"><span class="label">Alle Werte</span><span class="label">${list.length}</span></div>${chips("wfilter",wFilter,cnt)}
@@ -1249,6 +1375,55 @@ function evSheet(b){
 function sheet(html,cat){const l=$("#layer");const fresh=!l.innerHTML;if(fresh)pushNav();l.innerHTML=`<div class="sheet${fresh?"":" swap"}" id="sh"><div class="panel" role="dialog" aria-modal="true" ${cat?cc(cat):""}><span class="grab" aria-hidden="true"></span><button class="close" id="shx" aria-label="Schließen">×</button>${html}</div></div>`;
   $("#sh").addEventListener("click",e=>{if(e.target.id==="sh"||e.target.id==="shx")closeSheet()})}
 function closeSheet(){const l=$("#layer"),s=$("#sh");if(!s||calm()){l.innerHTML="";return}s.classList.add("out");setTimeout(()=>{if(l.contains(s))l.innerHTML=""},260)}
+
+/* ---------- Werte finden: einschätzen, abwägen, auswählen ---------- */
+const FORDER=WERTE.filter(w=>!w.fund).map(w=>w.id);
+function F(){if(!S.find||S.find.v!==2)S.find={v:2,a:{},hist:[],stage:"sort"};return S.find}
+/* Aus den Antworten auf alltägliche Sätze wird für jeden Wert ein Gewicht. Werte, die in mehr Sätzen vorkommen, werden etwas abgefedert. */
+function fScores(){const f=F(),raw={},cap={};SAETZE.forEach((st,i)=>{const a=f.a[i];if(a==null)return;st.w.forEach((w,j)=>{const g=j?.6:1;raw[w]=(raw[w]||0)+a*g;cap[w]=(cap[w]||0)+2*g})});
+  const sc={};Object.keys(raw).forEach(w=>{if(raw[w]>0)sc[w]=raw[w]/Math.sqrt(cap[w])});return sc}
+function fWhy(id){const f=F();const i=SAETZE.findIndex((st,i)=>f.a[i]===2&&st.w[0]===id);const j=i>=0?i:SAETZE.findIndex((st,i)=>f.a[i]===2&&st.w.includes(id));return j>=0?SAETZE[j].t:""}
+const fCount=v=>Object.values(F().a).filter(x=>x===v).length;
+function fCands(){const sc=fScores();return Object.keys(sc).sort((a,b)=>(sc[b]-sc[a])||(FORDER.indexOf(a)-FORDER.indexOf(b))).slice(0,8)}
+function fStartDuel(){const f=F(),c=fCands();if(c.length<=5){f.stage="result";f.c=c;f.sc={};f.pick=c.slice();persist();return}
+  f.stage="duel";f.c=c;f.sc=Object.fromEntries(c.map(id=>[id,0]));f.round=1;f.rounds=c.length<=8?3:2;f.played=[];f.done=0;f.total=f.rounds*Math.floor(c.length/2);f.pairs=fPairs();f.pi=0;persist()}
+function fPairs(){const f=F();const s=f.c.slice().sort((a,b)=>(f.sc[b]-f.sc[a])||(hashStr(a+f.round)-hashStr(b+f.round)));const pairs=[],used=new Set(),key=(a,b)=>[a,b].sort().join("|");
+  for(let i=0;i<s.length;i++){if(used.has(s[i]))continue;let j=i+1;while(j<s.length&&(used.has(s[j])||f.played.includes(key(s[i],s[j]))))j++;
+    if(j>=s.length){j=i+1;while(j<s.length&&used.has(s[j]))j++}if(j>=s.length){f.sc[s[i]]+=.5;used.add(s[i]);continue}used.add(s[i]);used.add(s[j]);pairs.push([s[i],s[j]])}
+  return pairs}
+function fRank(){const f=F();return f.c.slice().sort((a,b)=>((f.sc[b]||0)-(f.sc[a]||0))||(FORDER.indexOf(a)-FORDER.indexOf(b)))}
+function fDuel(win){const f=F(),[a,b]=f.pairs[f.pi];if(win==="both"){f.sc[a]+=.5;f.sc[b]+=.5}else f.sc[win]+=1;f.played.push([a,b].sort().join("|"));f.pi++;f.done++;
+  if(f.pi>=f.pairs.length){f.round++;f.pairs=f.round<=f.rounds?fPairs():[];f.pi=0;if(!f.pairs.length){f.stage="result";f.pick=fRank().slice(0,5)}}persist()}
+function finderView(){const f=F(),steps=["Einschätzen","Abwägen","Auswählen"],si={sort:0,duel:1,result:2}[f.stage]||0;
+  const head=`<div class="fsteps">${steps.map((t,i)=>`<span class="${i===si?"on":i<si?"ok":""}"><i></i>${t}</span>`).join("")}</div>`;
+  if(f.stage==="sort"){const i=SAETZE.findIndex((_,k)=>f.a[k]==null);if(i<0){fStartDuel();return finderView()}const st=SAETZE[i],n=Object.keys(f.a).length,c2=fCount(2),w=W[st.w[0]];
+    return head+`<div class="fbar"><i style="width:${Math.round(n/SAETZE.length*100)}%"></i></div><p class="fq">Wie sehr stimmt das für dich?</p>
+     <div class="fcard" ${cc(w.cat)}><span class="rodmark" aria-hidden="true"></span><span class="label">Satz ${i+1} von ${SAETZE.length}</span><p class="fst">${st.t}</p></div>
+     <div class="fbtns"><button class="btn primary" data-frate="2">Stimmt</button><button class="btn" data-frate="1">Teils</button><button class="btn" data-frate="0">Eher nicht</button></div>
+     <div class="fmeta"><span class="label">${c2} × stimmt</span>${f.hist.length?`<button class="linkbtn" id="fundo">Zurück</button>`:""}</div>
+     ${n>=18&&fCands().length>=5?`<button class="linkbtn" id="fskip">Genug Sätze, weiter zum Abwägen</button>`:""}
+     <p class="muted small">Es gibt keine richtigen Antworten. Antworte so, wie du bist, nicht wie du gern wärst.</p>`}
+  if(f.stage==="duel"){const [a,b]=f.pairs[f.pi],A=W[a],B=W[b];
+    return head+`<div class="fbar"><i style="width:${Math.round(f.done/Math.max(1,f.total)*100)}%"></i></div><p class="fq">Angenommen, beides geht gerade nicht zusammen. Was wiegt für dich schwerer?</p>
+     <div class="fduel">${[A,B].map(w=>`<button class="fopt" ${cc(w.cat)} data-fduel="${w.id}"><span class="rodmark" aria-hidden="true"></span><b>${w.n}</b><span>${w.d}</span></button>`).join(`<span class="fvs" aria-hidden="true">oder</span>`)}</div>
+     <div class="fmeta"><span class="label">Abwägung ${f.done+1} von etwa ${f.total}</span><button class="linkbtn" data-fduel="both">Kann ich nicht entscheiden</button></div>`}
+  const rank=f.c&&f.c.length?fRank().slice(0,8):[];f.pick=(f.pick||[]).filter(id=>rank.includes(id));
+  return head+`<p class="fq">Diese Werte haben sich bei dir durchgesetzt. Du kannst noch tauschen, bis zu fünf bleiben.</p>
+   <div class="fres">${rank.map((id,i)=>{const w=W[id],on=f.pick.includes(id);return `<button class="fr ${on?"on":""}" ${cc(w.cat)} data-fpick="${id}" aria-pressed="${on}"><span class="rodmark" aria-hidden="true"></span><span class="tx"><b>${w.n}</b><small>${w.d}</small>${fWhy(id)?`<em class="why">Du hast gesagt: „${fWhy(id)}“</em>`:""}</span><span class="ck" aria-hidden="true"></span></button>`}).join("")}</div>
+   ${S.kern.length?`<p class="muted small">Deine bisherigen Stützen werden ersetzt. Deine Leitsätze bleiben gespeichert und tauchen wieder auf, wenn du einen Wert erneut wählst.</p>`:""}
+   <div class="row"><button class="btn primary" id="fapply" ${f.pick.length?"":"disabled"}>${f.pick.length} als Stützen übernehmen</button><button class="linkbtn" id="frestart">Neu beginnen</button></div>`}
+function finder(){const l=$("#layer");if(!$("#finder")){sheet(`<div id="finder" class="finder"></div>`);$("#sh").classList.add("fsheet")}
+  const box=$("#finder");box.innerHTML=finderView();const c=box.querySelector(".fcard,.fduel,.fres");if(c&&!calm())c.animate([{opacity:0,transform:"translateX(18px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)"})}
+function finderClick(t,d){const f=F();
+  if(d.finder){finder();return true}
+  if(d.frate){const id=SAETZE.findIndex((_,k)=>f.a[k]==null);if(id<0)return true;f.a[id]=+d.frate;f.hist.push(id);persist();buzz(+d.frate===2?[8,30,10]:6);if(+d.frate===2)lightUp(t);setTimeout(finder,calm()?0:140);return true}
+  if(t.id==="fundo"){const id=f.hist.pop();if(id!=null)delete f.a[id];persist();finder();return true}
+  if(t.id==="fskip"){fStartDuel();finder();return true}
+  if(d.fduel){if(d.fduel!=="both"){buzz([8,30,10]);lightUp(t);t.classList.add("won")}fDuel(d.fduel);setTimeout(finder,calm()?0:260);return true}
+  if(d.fpick){const id=d.fpick;if(f.pick.includes(id))f.pick=f.pick.filter(x=>x!==id);else if(f.pick.length<5)f.pick.push(id);else{toast("Höchstens fünf. Nimm zuerst einen heraus.");return true}persist();buzz(5);finder();return true}
+  if(t.id==="frestart"){S.find={v:2,a:{},hist:[],stage:"sort"};persist();finder();return true}
+  if(t.id==="fapply"){const rank=fRank();S.kern=rank.filter(id=>f.pick.includes(id)).slice(0,5);f.stage="done";buzz([10,50,10,50,18]);closeSheet();setTimeout(toBuild,calm()?0:260);return true}
+  return false}
 
 /* ---------- Teilen ---------- */
 const APP_URL="https://wurstgott.github.io/fernweh/wertegeruest/";
@@ -1393,9 +1568,9 @@ function dailyGoogle(){const p=dailyPlan(),tz=Intl.DateTimeFormat().resolvedOpti
 /* ---------- Willkommen ---------- */
 function welcome(){if(S.welcomed||shared||invited)return;S.welcomed=now();persist();
   sheet(`<div class="wel">${miniSVG("memb")}<div class="label">Willkommen</div><h2>Ein Gerüst aus deinen Werten</h2>
-   <p class="lead">Du wählst bis zu fünf Werte als Stützen. Jede wächst um ein Bauteil, wenn du einen Leitsatz formulierst, dich in einer Belastungsprobe entscheidest, eine Übung machst und deinen Leitsatz später bekräftigst.</p>
+   <p class="lead">Zuerst findest du in drei kurzen Schritten bis zu fünf Werte, die dich tragen. Sie werden die Stützen deines Gerüsts. Jede wächst um ein Bauteil, wenn du einen Leitsatz formulierst, dich in einer Belastungsprobe entscheidest, eine Übung machst und deinen Leitsatz später bekräftigst.</p>
    <p class="muted small">Es gibt keine richtigen Werte, die du übernehmen musst. Nur die Würde jedes Menschen ist als Fundament schon eingebaut. Alles bleibt auf deinem Gerät.</p>
-   <div class="row"><button class="btn primary" data-tabgo="werte">Erste Stütze wählen</button><button class="btn" id="shx2">Erst umsehen</button></div></div>`)}
+   <div class="row"><button class="btn primary" data-finder="1">Meine Werte finden</button><button class="btn" id="shx2">Erst umsehen</button></div></div>`)}
 
 /* ---------- Speichern: neue Bauteile erkennen ---------- */
 const lvSnap=()=>Object.fromEntries(S.kern.map(id=>[id,level(id)]));
@@ -1417,8 +1592,9 @@ function render(){
   checkMoments()}
 function openProbe(id){if($("#layer").innerHTML)$("#layer").innerHTML="";pcur=id;pFilter="alle";anim=true;tab="ueben";render();const el=$("#probe");if(el){el.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});setTimeout(()=>trace(el,`var(--c-${P[id].cat})`),350)}}
 document.addEventListener("click",e=>{
-  if(e.target.closest){const g=e.target.closest(".gsvg");if(g){const h=e.target.closest("[data-pil]");if(h){pillarTap(h.dataset.pil);return}const sl=e.target.closest("[data-slot]");if(sl){buzz(6);anim=true;tab="werte";render();window.scrollTo(0,0);return}if(e.target.closest(".slab")){buzz(6);valueSheet("wuerde");return}}}
+  if(e.target.closest){const g=e.target.closest(".gsvg");if(g){const h=e.target.closest("[data-pil]");if(h){pillarTap(h.dataset.pil);return}const sl=e.target.closest("[data-slot]");if(sl){buzz(6);if(!S.kern.length){finder();return}anim=true;tab="werte";render();window.scrollTo(0,0);return}if(e.target.closest(".slab")){buzz(6);valueSheet("wuerde");return}}}
   const t=e.target.closest("button,a");if(!t)return;const d=t.dataset;
+  if(finderClick(t,d))return;
   if(t.closest(".bite .links")&&!t.dataset.lit){t.dataset.lit=1;buzz([6,30,10]);trace(t,getComputedStyle(t).getPropertyValue("--c").trim()||null);
     setTimeout(()=>{t.click();delete t.dataset.lit},calm()?0:380);return}
   if(t.id==="go"){sessionReads++;if(maybeScrollHint())return;const b=pickImp();if(!b)return;buzz(10);lightUp(t.querySelector(".stack"));t.classList.add("pull");setTimeout(()=>requestAnimationFrame(()=>openImp(b.id)),calm()?0:420);return}
@@ -1487,7 +1663,7 @@ function fromHash(){const h=location.hash.slice(1);if(["imp","werte","ueben","ge
 if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
-const BUILD="17.10.2026, 22:25";
+const BUILD="18.10.2026, 08:12";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("wg-upd")}catch(e){}if(done===m[1])return;
