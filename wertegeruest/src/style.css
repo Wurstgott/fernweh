@@ -63,14 +63,13 @@ h1,h2,h3{margin:0;font-weight:400}
 .vh p{color:var(--muted);margin-top:10px;font-size:15.5px;max-width:34em}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
 .btn{position:relative;overflow:hidden;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:11px 16px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:border-color .3s,background-color .3s,transform .15s}
-.btn:active{transform:scale(.98)}
+.btn:not(.primary):active{background-color:var(--s2);transition-duration:0s}
 .btn.primary{background:var(--lit);color:var(--on-lit);border-color:var(--lit)}
 .btn[disabled]{opacity:.4;pointer-events:none}
 .btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent-ink)}
 .linkbtn{border:0;background:none;padding:4px 0;color:var(--muted);font-size:14.5px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 .mini{align-self:flex-start;border:0;background:none;padding:8px 0 0;color:var(--muted);font-size:13.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
 .mini::before{content:"";width:14px;height:1px;background:var(--muted)}
-.ripple{position:absolute;border-radius:50%;background:var(--lit);pointer-events:none}
 textarea,input[type=time]{width:100%;background:var(--s1);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;font-size:16px;line-height:1.5;resize:vertical;min-height:90px}
 input[type=time]{width:auto;min-height:0;padding:9px 12px;font-family:var(--f-mono);font-size:14px}
 textarea:focus,input:focus{outline:none;border-color:var(--muted)}
@@ -330,8 +329,9 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .tabs button[aria-current]{color:var(--ink)}
 .tabs button em{position:absolute;top:10px;margin-left:4px;font-style:normal;font-family:var(--f-mono);font-size:11px;color:var(--accent-ink)}
 .tabs button .bd{position:absolute;top:13px;margin-left:3px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
-.tabs .tbar{position:absolute;top:-1px;left:max(0px,calc(50% - 280px));width:min(100%,560px);height:1.5px;pointer-events:none}
-.tabs .tbar::before{content:"";position:absolute;top:0;left:calc(var(--i,0)*25% + 9%);width:7%;height:100%;background:var(--pol-warm);transition:left .5s var(--ease)}
+/* Reiterpunkt: ein kleiner, warmer Punkt unter dem aktiven Reiter, der beim Wechsel hinübergleitet (nur transform) */
+.tabs .tbar{position:absolute;bottom:calc(6px + env(safe-area-inset-bottom,0px));left:max(0px,calc(50% - 280px));width:min(100%,560px);height:5px;pointer-events:none}
+.tabs .tbar::before{content:"";position:absolute;top:0;left:0;width:25%;height:5px;background:radial-gradient(circle at 50% 50%,var(--pol-warm) 2.1px,transparent 2.6px);transform:translateX(calc(var(--i,0) * 100%));transition:transform .5s var(--ease)}
 
 /* Licht und Effekte */
 #fx{position:fixed;inset:0;pointer-events:none;z-index:70;overflow:hidden}
@@ -443,15 +443,15 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .panel .close::after,.linkbtn::after,.mini::after,.vchip::after,.chip::after,.tag::after,.fundlbl::after,.cdot::after,.mark::after,.logo::after,.pill#topline::after{content:"";position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
 .linkbtn,.mini,.vchip,.fundlbl,.mark,.logo,.cdot{position:relative}
 .chip,.tag{overflow:visible}
-.chip .ripple,.tag .ripple{display:none}
 .linkbtn::after{width:calc(100% + 8px)}
 .fundlbl{display:block;width:max-content;margin-inline:auto;padding:4px 8px}
 #topline::after{content:none}
 /* Einheitlicher, dezenter Druckzustand: eine leichte Fläche, sofort beim Drücken, langsam beim Loslassen */
 :is(.tabs button,.lg,.leit,.fr,.fopt,.setrow:not(.static),.fold summary,.vchip,.li,.go,.slot,.chip,.tag,.note,.draw,.next,.findcard,.opt:not([aria-disabled])){transition-property:background-color,border-color,color,opacity;transition-duration:.25s}
 :is(.tabs button,.lg,.leit,.fr,.fopt,.setrow:not(.static),.fold summary,.vchip,.li,.go,.slot,.chip,.tag,.note,.draw,.findcard,.opt:not([aria-disabled])):active{background-color:var(--s2);transition-duration:0s}
-.next:active{filter:brightness(1.06)}
-:root[data-theme="light"] .next:active{filter:brightness(.97)}
+.next:active{filter:brightness(.95);transition-duration:0s}
+:is(.linkbtn,.mini,.fundlbl,.panel .close){transition:opacity .25s}
+:is(.linkbtn,.mini,.fundlbl,.panel .close):active{opacity:.6;transition-duration:0s}
 /* Datum unter „Heute“ in normaler Schrift statt als Etikett */
 .sdate{font-size:13.5px;color:var(--muted)}
 /* Toast über einem Eingabefeld: nach oben unter die Kopfzeile */
@@ -482,3 +482,47 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .lhelp>p:first-child{font-family:var(--f-serif);font-weight:500;font-size:17px;line-height:1.35}
 .lhelp .linkbtn{align-self:flex-start}
 .udnote{margin:8px 0 18px}
+
+/* ---------- Klickbild: jede Klickfamilie antwortet anders, ruhig, matt und flach ---------- */
+/* Unsichtbarer Schalter für den Tick auf dem iPhone. Er bedeckt das ganze Element, zeigt nichts und hält keinen Fokus. */
+input.hap{-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;opacity:0;z-index:6;cursor:pointer;border-radius:inherit;background:none;outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+:is(.chip,.logo,.mark)>input.hap{inset:auto;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
+:disabled>input.hap,[aria-disabled="true"]>input.hap{display:none}
+.setrow{position:relative}
+/* Effekte dürfen nicht über den Bildschirmrand ragen, sonst ließe sich die Seite seitlich verschieben */
+.app{overflow-x:clip}
+/* Aktion: matte Welle vom Berührungspunkt, weicher Rand, kein Glanz */
+.wave{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:1}
+.wave i{position:absolute;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--wave,var(--lit)) 19%,transparent) 55%,transparent);opacity:0}
+:root[data-theme="light"] .wave i{background:radial-gradient(closest-side,color-mix(in srgb,var(--wave,var(--lit)) 12%,transparent) 55%,transparent)}
+.btn.primary{--wave:var(--on-lit)}
+.next{--wave:var(--pol-warm)}
+/* Auswahl: die Füllung läuft vom Fingerpunkt aus ein. --fill ist genau die Fläche des gewählten Zustands. */
+@property --fr{syntax:"<percentage>";inherits:false;initial-value:120%}
+.chip{--fill:color-mix(in srgb,var(--c,var(--lit)) 9%,transparent)}
+.lg{--fill:color-mix(in srgb,var(--c) 10%,transparent)}
+.fr{--fill:color-mix(in srgb,var(--c) 8%,var(--s1));--fill0:var(--s1)}
+.fr.on{background:var(--fill)}
+.fopt{--fill:color-mix(in srgb,var(--c) 12%,transparent);--fill0:var(--s1)}
+.opt{--fill:color-mix(in srgb,var(--c) 7%,transparent)}
+.fbtns .btn{--fill:var(--s2)}
+.fbtns .btn.primary{--fill:color-mix(in srgb,var(--on-lit) 12%,var(--lit));--fill0:var(--lit)}
+:is(.chip[aria-pressed="true"],.lg.on,.fr.on,.fopt.won,.opt.chosen,.fbtns .btn).fillin{background-color:transparent;background-image:radial-gradient(circle farthest-corner at var(--px,50%) var(--py,50%),var(--fill) calc(var(--fr) - 14%),var(--fill0,transparent) var(--fr));animation:fillin .46s cubic-bezier(.3,.7,.2,1) both}
+@keyframes fillin{from{--fr:0%}to{--fr:120%}}
+/* Erfolg: ein Haken zeichnet sich in der Meldung und in der gewählten Option einer Probe */
+.ck{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ck path{stroke-dasharray:21;stroke-dashoffset:0}
+@keyframes ckdraw{from{stroke-dashoffset:21}}
+.toast .ck{width:16px;height:16px;vertical-align:-3px;margin-right:7px;color:var(--accent-ink)}
+.toast.ok .ck path{animation:ckdraw .5s .12s cubic-bezier(.4,0,.2,1) both}
+.opt .ok{display:grid;place-items:center}
+.opt .ok .ck{width:10px;height:10px;stroke-width:3.4;color:var(--on-lit)}
+.opt.pick.drawn .ok .ck path{animation:ckdraw .45s .1s cubic-bezier(.4,0,.2,1) both}
+/* Schalter: der Knopf dehnt sich beim Drücken etwas in Richtung seines Wegs */
+.sw i{transition:transform .3s var(--ease),background-color .3s,width .22s var(--ease)}
+.setrow:not(.static):active .sw i{width:20px;transition-duration:.3s,.3s,.12s}
+.setrow[aria-checked="true"]:active .sw i{transform:translateX(12px)}
+/* Logo und Titel */
+.logo svg{transform-origin:50% 90%}
+.mline{position:absolute;left:0;right:0;bottom:-5px;height:1.5px;border-radius:1px;background:linear-gradient(90deg,var(--pol-kalt),var(--pol-warm));transform-origin:left center;transform:scaleX(0);pointer-events:none}
+@media (prefers-reduced-motion:reduce){.wave,.mline{display:none}.fillin{animation:none!important}}

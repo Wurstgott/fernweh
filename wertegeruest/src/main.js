@@ -8,7 +8,10 @@ try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw)
 S.cur=null;S.filter="alle";
 const I=Object.fromEntries(IMPULSE.map(b=>[b.id,b])),W=Object.fromEntries(WERTE.map(w=>[w.id,w])),P=Object.fromEntries(PROBEN.map(p=>[p.id,p])),U=Object.fromEntries(UEBUNGEN.map(u=>[u.id,u]));
 S.kern=(S.kern||[]).filter(id=>W[id]&&!W[id].fund).slice(0,5);
-S.settings=Object.assign({antiScroll:true,remindTime:"08:00",theme:"dunkel",haptik:true},S.settings||{});
+/* Einstellungen. „Vibration“ hieß früher „Haptik“ (settings.haptik); der alte Wert wird übernommen. */
+{const old=S.settings&&typeof S.settings==="object"&&!Array.isArray(S.settings)?S.settings:{};
+ S.settings=Object.assign({antiScroll:true,remindTime:"08:00",theme:"dunkel"},old);
+ if(typeof S.settings.vibration!=="boolean")S.settings.vibration=old.haptik!==false;delete S.settings.haptik}
 S.moments=S.moments||{};S.leit=S.leit||{};S.proben=S.proben||{};S.ueb=S.ueb||{};S.saved=S.saved||{};S.read=S.read||{};S.history=S.history||[];S.fresh=S.fresh||[];
 const CATKEYS=Object.keys(CATS);
 const cc=c=>`style="--c:var(--c-${c})"`;
@@ -20,14 +23,16 @@ const CHEV='<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4
    Die Dauer richtet sich nach der Textlänge (2 s + 45 ms je Zeichen, höchstens 5 s). Solange ein Moment offen ist,
    wartet der Toast und erscheint danach. Liegt er über einem sichtbaren Eingabefeld, rückt er nach oben. */
 let toastHeld=null,toastTimer=0;
-function toast(m){if(momentOpen){toastHeld=m;return}
+/* toast(html,true): Rückmeldung zu einem Erfolg; davor zeichnet sich ein Haken. */
+const typing=el=>!!el&&/TEXTAREA|INPUT/.test(el.tagName)&&!(el.classList&&el.classList.contains("hap"));
+function toast(m,ok){if(momentOpen){toastHeld=[m,ok];return}
   document.querySelectorAll(".toast").forEach(x=>x.remove());clearTimeout(toastTimer);
-  const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");t.innerHTML=m;document.body.appendChild(t);
+  const t=document.createElement("div");t.className="toast"+(ok?" ok":"");t.setAttribute("role","status");t.setAttribute("aria-live","polite");t.innerHTML=(ok?CK:"")+m;document.body.appendChild(t);
   const r=t.getBoundingClientRect(),hit=[...document.querySelectorAll("textarea,input:not([type=checkbox])")].some(f=>{const q=f.getBoundingClientRect();return q.height&&q.bottom>r.top-8&&q.top<r.bottom+8&&q.bottom>0&&q.top<innerHeight});
-  if(hit||(document.activeElement&&/TEXTAREA|INPUT/.test(document.activeElement.tagName)))t.classList.add("raise");
+  if(hit||typing(document.activeElement))t.classList.add("raise");
   const ms=Math.min(5000,2000+45*(t.textContent||"").length);
   toastTimer=setTimeout(()=>{t.classList.add("out");setTimeout(()=>t.remove(),320)},ms)}
-function releaseToast(){if(!toastHeld)return;const m=toastHeld;toastHeld=null;setTimeout(()=>toast(m),250)}
+function releaseToast(){if(!toastHeld)return;const [m,ok]=toastHeld;toastHeld=null;setTimeout(()=>toast(m,ok),250)}
 let anim=true,pendingGlow=false,momentOpen=false;
 const applyTheme=()=>{document.documentElement.dataset.theme=S.settings.theme==="hell"?"light":"dark";const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=S.settings.theme==="hell"?"#E1E6F1":"#1D2850"};
 applyTheme();
@@ -225,7 +230,7 @@ function viewGeruest(){
   </section>`}
 function pillarTap(id){const svg=document.querySelector(".gsvg");if(!svg)return;const w=W[id],l=level(id),n=nextFor(id);
   const was=svg.dataset.sel===id;svg.dataset.sel=was?"":id;svg.querySelectorAll(".rod").forEach(r=>r.classList.toggle("on",!was&&r.dataset.seg.startsWith(id+":")));
-  svg.classList.toggle("sel",!was);document.querySelectorAll(".glegend .lg").forEach(b=>b.classList.toggle("on",!was&&b.dataset.pil===id));if(!was)tap();
+  svg.classList.toggle("sel",!was);document.querySelectorAll(".glegend .lg").forEach(b=>b.classList.toggle("on",!was&&b.dataset.pil===id));
   if(was){$("#ginfo").innerHTML="";return}
   const segs=[...svg.querySelectorAll(`.rod[data-seg^="${id}:"]`)];if(!calm())segs.forEach((s,i)=>s.animate([{opacity:1},{opacity:.45,offset:.35},{opacity:1}],{duration:650,delay:i*60,easing:"ease-out"}));
   if(segs.length)lightUp(segs[segs.length-1]);
@@ -234,7 +239,7 @@ function pillarTap(id){const svg=document.querySelector(".gsvg");if(!svg)return;
    <div class="row">${n?`<button class="btn primary" ${actAttr(n)}>${n.wait?"Leitsatz ansehen":n.wert?"Leitsatz schreiben":n.probe?"Probe öffnen":n.ueb?"Übung ansehen":"Weiter"}</button>`:""}<button class="btn" data-wert="${id}">Stütze öffnen</button></div></div>`;
   const pi=$("#ginfo .pinfo");if(pi&&!calm())pi.animate([{opacity:0,transform:"translateY(6px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)"})}
 /* Neue Stäbe zeichnen sich nacheinander ein. freshUntil merkt sich, wann das letzte Aufleuchten endet,
-   damit ein Moment erst danach erscheint. Die Haptik dazu gibt es schon beim Tippen (tap("success")), nicht hier. */
+   damit ein Moment erst danach erscheint. Die Vibration dazu gibt es schon beim Tippen (buzz("ok")), nicht hier. */
 let freshUntil=0;
 function playFresh(){if(!S.fresh.length)return;const list=S.fresh.slice();S.fresh=[];persist();if(calm())return;
   freshUntil=now()+250+(list.length-1)*260+700+1400;
@@ -276,7 +281,7 @@ function aboutFold(){return `<details class="fold" id="aboutfold" ${S.aboutOpen|
 function settingsFold(){const sw=(id,on,label,sub)=>`<button class="setrow" data-setting="${id}" role="switch" aria-checked="${on}"><span><b>${label}</b><small>${sub}</small></span><span class="sw"><i></i></span></button>`;
   return `<details class="fold" id="setfold" ${S.setOpen?"open":""}><summary><span>Einstellungen</span>${CHEV}</summary><div class="fbody">
    ${sw("hell",S.settings.theme==="hell","Helle Ansicht","Statt der dunklen Ansicht eine helle, zum Beispiel für draußen.")}
-   ${sw("haptik",S.settings.haptik!==false,"Haptik","Ein kurzes Vibrieren, wenn du etwas auswählst oder ein Bauteil dazukommt.")}
+   ${sw("vibration",S.settings.vibration!==false,"Vibration","Ein kurzer Tick, wenn du einen Knopf antippst, etwas auswählst oder etwas abschließt.")}
    ${sw("antiScroll",S.settings.antiScroll,"Hinweis gegen Endlos-Lesen","Nach fünf Impulsen hintereinander schlägt die App vor, etwas zu prüfen oder auszuprobieren.")}
    <div class="setrow static"><span><b>Tägliche Erinnerung</b><small>Ein täglicher Termin in deinem eigenen Kalender. Die App selbst schickt keine Nachrichten und sammelt keine Daten.</small></span></div>
    <div class="row"><input type="time" id="rtime" value="${S.settings.remindTime}" aria-label="Uhrzeit"><button class="btn" id="dailyics">Apple-Kalender</button><a class="btn" id="dailyg" href="${dailyGoogle()}" target="_blank" rel="noopener">Google Kalender</a></div>
@@ -344,7 +349,7 @@ function probeCard(p){const v=S.proben[p.id],blind=pBlind===p.id&&v&&v.o!=null,d
   return `<article class="probe" ${cc(p.cat)} id="probe"><div class="meta"><span>${dot(p.cat)}${CATS[p.cat].n}</span><span>Belastungsprobe</span></div>
    <h2>${p.t}</h2>${blind?`<p class="phint muted small">Du hast diese Probe am ${dayFmt(v.t)} schon entschieden. Deine alte Antwort bleibt verborgen, bis du neu gewählt hast.</p>`:probeHint(p,v,done)}<p class="situ">${p.x}</p>
    <p class="label">${done?"Deine Entscheidung":"Was würdest du tun?"}</p>
-   <div class="opts ${done?"done":""}">${p.o.map((o,i)=>`<button class="opt ${done&&v.o===i?"pick":""}" data-pick="${p.id}:${i}" ${done?'aria-disabled="true"':""}><span class="ok" aria-hidden="true"></span><span class="ot">${o.t}${done?`<span class="vw">${o.w.map(id=>`<span class="vchip" ${cc(W[id].cat)} data-wert="${id}">${W[id].n}</span>`).join("")}</span>`:""}</span></button>`).join("")}</div>
+   <div class="opts ${done?"done":""}">${p.o.map((o,i)=>`<button class="opt ${done&&v.o===i?"pick":""}" data-pick="${p.id}:${i}" ${done?'aria-disabled="true"':""}><span class="ok" aria-hidden="true">${done&&v.o===i?CK:""}</span><span class="ot">${o.t}${done?`<span class="vw">${o.w.map(id=>`<span class="vchip" ${cc(W[id].cat)} data-wert="${id}">${W[id].n}</span>`).join("")}</span>`:""}</span></button>`).join("")}</div>
    ${done?`<div class="reveal">${compareHTML(p,v)}<span class="label">Was hier im Spiel ist</span><p>${p.h}</p><p class="ask">${p.f}</p>
      <label class="label" for="preason">Deine Begründung, nur für dich</label><textarea id="preason" placeholder="${v.again?"Was hat sich verändert, oder was ist geblieben?":"Warum hast du dich so entschieden?"}">${esc(v.r||"")}</textarea>
      <div class="wstone"><span class="label">Prüfstein Würde · freiwillig</span><p>Achtet deine Antwort die Würde aller Beteiligten? Wie begegnest du dabei dem Menschen, mit dem du nicht einverstanden bist?</p><textarea id="pwq" aria-label="Antwort zum Prüfstein Würde" placeholder="Ein Satz reicht.">${esc(v.wq||"")}</textarea></div>
@@ -385,9 +390,9 @@ function uebSheet(id){const e=U[id],v=S.ueb[id],w=W[e.w];
 function early(id){const e=U[id],v=S.ueb[id];return !!(e&&v&&v.status==="active"&&e.d>1&&dayIdx(v)+1<e.d)}
 function doneSheet(id){const e=U[id],v=S.ueb[id]||{},ea=early(id),mx=ea?Math.min(e.d,dayIdx(v)+1):0;
   sheet(`<div class="label">${ea?"Früher abschließen":"Geschafft"}</div><h2>${e.t}</h2>${ea?`<p class="lead">Die Übung ist auf ${e.d} Tage angelegt. An wie vielen Tagen hast du sie gemacht?</p><div class="chips" id="udays">${Array.from({length:mx+1},(_,k)=>`<button class="chip" data-udays="${k}" aria-pressed="false">${k===0?"Noch an keinem":k===1?"An einem Tag":`An ${k} Tagen`}</button>`).join("")}</div><p class="muted small udnote" id="udaysnote">Für das Bauteil zählt die Übung ab einem Tag. Die Zahl steht in deinem Bautagebuch.</p>`:""}${v.checks&&Object.keys(v.checks).length?`<div class="dcurve"><span class="label">Deine Zwischenstationen</span>${spark(v)}</div>`:""}<p class="lead">Wie war es? Deine Antwort bleibt auf diesem Gerät.</p><div class="chips" id="moods">${[["gut","Hat mir gutgetan"],["mix","Gemischt"],["nein","Eher nicht"]].map(([k,n])=>`<button class="chip" data-mood="${k}" aria-pressed="false">${n}</button>`).join("")}</div><label class="label" for="note">Was nimmst du mit?</label><textarea id="note" placeholder="Ein, zwei Sätze reichen."></textarea><div class="row"><button class="btn primary" id="savedone" data-id="${id}">Speichern</button></div>`,e.cat);
-  const ud=$("#udays");if(ud)ud.addEventListener("click",ev=>{const c=ev.target.closest("[data-udays]");if(!c)return;tap();ud.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));
+  const ud=$("#udays");if(ud)ud.addEventListener("click",ev=>{const c=ev.target.closest("[data-udays]");if(!c)return;ud.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));
     $("#udaysnote").textContent=c.dataset.udays==="0"?"Dann setzt diese Übung noch kein Bauteil. Du kannst sie auch weiterlaufen lassen und später abschließen.":"Danke für die ehrliche Zahl. Sie steht in deinem Bautagebuch."});
-  $("#moods").addEventListener("click",ev=>{const c=ev.target.closest("[data-mood]");if(!c)return;tap();$("#moods").querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c))})}
+  $("#moods").addEventListener("click",ev=>{const c=ev.target.closest("[data-mood]");if(!c)return;$("#moods").querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c))})}
 
 /* ---------- Vertiefen ---------- */
 const EVTXT=["Ein philosophischer Gedanke, ein Zeitzeugnis oder ein Denkmodell. Kein empirischer Befund, aber ein Denkanstoß.","Erste Studien deuten in diese Richtung, aber sie sind klein, neu oder widersprechen sich teilweise.","Mehrere gute Studien kommen zu einem ähnlichen Ergebnis. Die Größe des Effekts ist aber noch umstritten.","Viele Studien und Übersichtsarbeiten bestätigen den Befund. Daran zweifelt kaum noch jemand."];
@@ -412,7 +417,7 @@ function closeSheet(){const l=$("#layer"),s=$("#sh");if(!s||calm()){l.innerHTML=
    oben steht und der Finger nach unten geht. Ab 110 px Weg oder schnellem Wisch schließt das Blatt, sonst gleitet es zurück. */
 (()=>{let y0=0,t0=0,dy=0,drag=null,arm=null;
   const panelOf=e=>e.target.closest&&e.target.closest("#sh .panel");
-  document.addEventListener("touchstart",e=>{const p=panelOf(e);if(!p||e.touches.length>1||e.target.closest("textarea,input,.close"))return;
+  document.addEventListener("touchstart",e=>{const p=panelOf(e);if(!p||e.touches.length>1||e.target.closest("textarea,input:not(.hap),.close"))return;
     const head=e.touches[0].clientY-p.getBoundingClientRect().top<56;arm={p,head,x:e.touches[0].clientX};y0=e.touches[0].clientY;t0=now();dy=0},{passive:true});
   document.addEventListener("touchmove",e=>{if(!arm)return;const d=e.touches[0].clientY-y0,dx=e.touches[0].clientX-arm.x;
     if(!drag){if(Math.abs(d)<6)return;if(d<0||Math.abs(dx)>Math.abs(d)||(!arm.head&&arm.p.scrollTop>0)){arm=null;return}drag=arm.p;drag.style.transition="none";drag.style.animation="none"}
@@ -463,13 +468,13 @@ function finder(){const l=$("#layer");if(!$("#finder")){sheet(`<div id="finder" 
   const box=$("#finder");box.innerHTML=finderView();const c=box.querySelector(".fcard,.fduel,.fres");if(c&&!calm())c.animate([{opacity:0,transform:"translateX(18px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)"})}
 function finderClick(t,d){const f=F();
   if(d.finder){finder();return true}
-  if(d.frate){const id=SAETZE.findIndex((_,k)=>f.a[k]==null);if(id<0)return true;f.a[id]=+d.frate;f.hist.push(id);persist();tap();if(+d.frate===2)lightUp(t);setTimeout(finder,calm()?0:140);return true}
+  if(d.frate){const id=SAETZE.findIndex((_,k)=>f.a[k]==null);if(id<0)return true;f.a[id]=+d.frate;f.hist.push(id);persist();if(+d.frate===2)lightUp(t);setTimeout(finder,calm()?0:220);return true}
   if(t.id==="fundo"){const id=f.hist.pop();if(id!=null)delete f.a[id];persist();finder();return true}
   if(t.id==="fskip"){fStartDuel();finder();return true}
-  if(d.fduel){tap();if(d.fduel!=="both"){lightUp(t);t.classList.add("won")}fDuel(d.fduel);setTimeout(finder,calm()?0:260);return true}
-  if(d.fpick){const id=d.fpick;if(f.pick.includes(id))f.pick=f.pick.filter(x=>x!==id);else if(f.pick.length<5)f.pick.push(id);else{toast("Höchstens fünf. Nimm zuerst einen heraus.");return true}persist();tap();finder();return true}
+  if(d.fduel){if(d.fduel!=="both"){lightUp(t);t.classList.add("won")}fDuel(d.fduel);setTimeout(finder,calm()?0:260);return true}
+  if(d.fpick){const id=d.fpick;if(f.pick.includes(id))f.pick=f.pick.filter(x=>x!==id);else if(f.pick.length<5)f.pick.push(id);else{buzz("err");shake(t);toast("Höchstens fünf. Nimm zuerst einen heraus.");return true}persist();finder();return true}
   if(t.id==="frestart"){S.find={v:2,a:{},hist:[],stage:"sort"};persist();finder();return true}
-  if(t.id==="fapply"){const rank=fRank();S.kern=rank.filter(id=>f.pick.includes(id)).slice(0,5);f.stage="done";tap("success");closeSheet();setTimeout(toBuild,calm()?0:260);return true}
+  if(t.id==="fapply"){const rank=fRank();S.kern=rank.filter(id=>f.pick.includes(id)).slice(0,5);f.stage="done";buzz("ok");closeSheet();setTimeout(()=>{toBuild();toast(`${S.kern.length===1?"Deine Stütze steht":"Deine Stützen stehen"}.`,true)},calm()?0:260);return true}
   return false}
 
 /* ---------- Teilen ---------- */
@@ -486,21 +491,71 @@ function shareUeb(id){const e=U[id],v=S.ueb[id],st=v&&v.status==="active"?new Da
   shareOut(e.t,`Hast du Lust, mit mir eine kleine Übung zu machen? Sie heißt „${e.t}“: ${firstSentence(e.x)}\n\n${v&&v.status==="active"?"Ich habe am":"Ich fange am"} ${st.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})} ${v&&v.status==="active"?"angefangen":"an"}. ${e.d===1?"Es dauert nur einen Tag.":`Es dauert ${e.d} Tage.`} Zu zweit fällt es leichter, und wir können uns erzählen, wie es läuft. Die Anleitung steht im Wertegerüst, einer kostenlosen App ohne Anmeldung:`,APP_URL+"#u-"+id)}
 function shareApp(){shareOut("Wertegerüst","Ich habe eine kleine App entdeckt, mit der man sich klarer darüber wird, wofür man steht: das Wertegerüst. Man wählt fünf Werte als Stützen und baut sie mit kurzen Gedanken, kniffligen Entscheidungen und kleinen Übungen Schritt für Schritt aus. Sie ist kostenlos und braucht keine Anmeldung. Magst du sie mal ausprobieren?",APP_URL)}
 
-/* ---------- Licht & Vibration: nur als Antwort auf Berührung ---------- */
+/* ---------- Licht, Klickbild & Vibration: nur als Antwort auf Berührung ---------- */
 const calm=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
-/* Haptik: tap() für eine Auswahl, tap("success") nur wenn wirklich etwas entstanden ist (neues Bauteil, bekräftigt).
-   Immer genau ein Tick und immer direkt im Klick-Handler aufrufen, nie in setTimeout oder nach dem Rendern:
-   iOS spielt die Rückmeldung nur innerhalb der Nutzergeste. Keine Haptik bei Navigation (Reiter, Scrollen, Schließen).
-   Android: navigator.vibrate mit einem kurzen Impuls. iOS 18+: Umschalten eines unsichtbaren <input switch> über sein
-   Label löst den System-Tick aus. Ältere Systeme ohne beides bleiben einfach still. Unabhängig von „Bewegung reduzieren“;
-   S.settings.haptik===false schaltet sie ab. */
-let hapt=null;
-function iosTick(){try{if(!hapt){const l=document.createElement("label");l.setAttribute("aria-hidden","true");l.style.cssText="position:fixed;left:-99px;top:0;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none";
-    const i=document.createElement("input");i.type="checkbox";i.setAttribute("switch","");i.tabIndex=-1;l.appendChild(i);l.addEventListener("click",e=>e.stopPropagation());i.addEventListener("click",e=>e.stopPropagation());document.body.appendChild(l);hapt=l}
-  hapt.click()}catch(e){}}
-function tap(kind){if(S.settings.haptik===false)return;
-  if(typeof navigator.vibrate==="function"){try{navigator.vibrate(kind==="success"?18:8)}catch(e){}return}
-  iosTick()}
+const vibOn=()=>S.settings.vibration!==false;
+/* Klickfamilien. Jedes antippbare Element gehört bewusst zu genau einer:
+   Aktion (Knöpfe, große Karten): Tick und eine matte Welle vom Berührungspunkt.
+   Auswahl (Chips, Skalen, Abwägen, Legende, Optionen einer Probe): Tick, die Füllung läuft vom Finger aus ein.
+   Schalter (Einstellungen): Tick, der Knopf dehnt sich beim Drücken (CSS).  Logo und Titel: Tick, das kleine Gerüst federt.
+   Navigation (Listen, Reiter, Zurück, Aufklappen, Verweise, Links): kein Tick, nur leichtes Abdunkeln (CSS :active).
+   Erfolg und Fehler sind Ausgänge einer Aktion: buzz("ok") oder buzz("err") im Klick-Handler. Erfolg zeigt einen Haken
+   in der Meldung (toast(…,true)), Fehler eine kleine Seitwärtsbewegung (shake). */
+const FAM=[["logo","#home,#home2"],["sw",".setrow[role=switch]"],["sel",".chip,.fbtns .btn,.fopt,.fr,.lg:not(.free),.cdot,.opt"],["act",".btn,.next,.draw,.findcard,.li.daily"]];
+const HAPSEL=FAM.map(f=>f[1]).join(",");
+const PAT={sel:10,sw:10,logo:10,act:12,ok:[10,60,14],err:[24,60,24]};
+const famHost=t=>{const el=t&&t.closest&&t.closest(HAPSEL);return el&&el.tagName!=="A"&&!el.disabled&&el.getAttribute("aria-disabled")!=="true"?el:null};
+const famOf=el=>{for(const [k,s] of FAM)if(el.matches(s))return k;return null};
+/* Android: navigator.vibrate mit eigenem Muster je Situation, synchron am Ende desselben Klicks (Listener auf window,
+   läuft nach allen Handlern). Handler wählen mit buzz() Erfolg oder Fehler statt des Familienmusters. */
+let buzzKind=null;
+function buzz(k){buzzKind=k}
+function vib(k){if(!vibOn()||!PAT[k]||typeof navigator.vibrate!=="function")return;try{navigator.vibrate(PAT[k])}catch(e){}}
+/* iPhone: Safari vibriert nur, wenn ein Finger selbst einen <input type="checkbox" switch> umlegt; programmierte,
+   mehrfache oder verzögerte Ticks spielt iOS nicht ab. Darum liegt in jedem Element, das ticken soll, ein unsichtbarer
+   Schalter über der ganzen Fläche. Der Klick darauf läuft zum Element hoch, closest() findet dessen data-Attribute,
+   die Aktion läuft also genau einmal. Neu gezeichnete Elemente bekommen den Schalter über den MutationObserver.
+   Nicht in Links, ausgeblendet bei deaktivierten Knöpfen (CSS), für Screenreader und Tastatur unsichtbar. */
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+/* Bei ausgeschalteter Vibration bleibt nur der Schalter „Vibration“ selbst versorgt, damit das Einschalten tickt. */
+function armHaps(){const on=vibOn(),keep="[data-setting=vibration]";if(!on)document.querySelectorAll("input.hap").forEach(i=>{if(!i.parentElement.matches(keep))i.remove()});
+  document.querySelectorAll(on?HAPSEL:keep).forEach(el=>{if(el.tagName==="A"||el.querySelector(":scope>input.hap"))return;
+    const i=document.createElement("input");i.type="checkbox";i.setAttribute("switch","");i.className="hap";i.tabIndex=-1;i.setAttribute("aria-hidden","true");el.appendChild(i)})}
+if(IOS){armHaps();new MutationObserver(armHaps).observe(document.body,{childList:true,subtree:true})}
+const CK='<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+/* Welle: eine weiche, matte Scheibe breitet sich vom Finger aus und verblasst in 600 ms. Erst beim Loslassen,
+   damit Scrollen über große Karten ruhig bleibt; das sofortige Feedback beim Drücken gibt :active. */
+function wave(el,x,y){const r=el.getBoundingClientRect(),sz=2*Math.hypot(Math.max(x,r.width-x),Math.max(y,r.height-y));
+  const w=document.createElement("span"),i=document.createElement("i");w.className="wave";w.setAttribute("aria-hidden","true");
+  Object.assign(i.style,{left:x+"px",top:y+"px",width:sz+"px",height:sz+"px"});w.appendChild(i);el.appendChild(w);
+  i.animate([{transform:"translate(-50%,-50%) scale(.12)",opacity:1},{transform:"translate(-50%,-50%) scale(1)",opacity:0}],{duration:600,easing:"cubic-bezier(.2,.6,.3,1)",fill:"both"}).onfinish=()=>w.remove()}
+/* Füllung: Wird ein Element durch das Tippen ausgewählt, läuft seine Füllung vom Fingerpunkt aus ein (Radius --fr über
+   @property animiert). Wird das Element dabei neu gezeichnet, findet tapKey das neue wieder. */
+let tapMark=null;
+function tapKey(el){const a=[...el.attributes].filter(x=>x.name.startsWith("data-")&&x.name!=="data-lit").map(x=>`[${x.name}="${CSS.escape(x.value)}"]`).join("");
+  return a?el.tagName.toLowerCase()+"."+el.classList[0]+a:(el.id?"#"+CSS.escape(el.id):null)}
+const selNow=el=>el.getAttribute("aria-pressed")==="true"||["on","won","chosen"].some(c=>el.classList.contains(c))||el.matches(".fbtns .btn");
+function settleFill(src,x,y){let el=src.isConnected?src:null;if(!el&&tapMark&&tapMark.key){try{el=document.querySelector(tapMark.key)}catch(e){}}
+  if(!el||!selNow(el)||calm())return;el.style.setProperty("--px",x+"px");el.style.setProperty("--py",y+"px");el.classList.remove("fillin");void el.offsetWidth;el.classList.add("fillin")}
+document.addEventListener("pointerdown",e=>{const el=famHost(e.target);if(!el){tapMark=null;return}const r=el.getBoundingClientRect();
+  tapMark={el,key:tapKey(el),x:e.clientX-r.left,y:e.clientY-r.top,t:now()}},{passive:true,capture:true});
+/* Der unsichtbare Schalter soll keinen Fokus behalten (sonst gälte er als Eingabefeld). */
+document.addEventListener("click",e=>{if(e.target.classList&&e.target.classList.contains("hap"))e.target.blur()},true);
+addEventListener("click",()=>{buzzKind=null},true);
+addEventListener("click",e=>{const k=buzzKind;buzzKind=null;if(!e.isTrusted)return;const el=famHost(e.target);
+  const fam=el?famOf(el):(e.target.closest&&e.target.closest(".gsvg [data-pil]")?"sel":null);vib(k||fam);
+  if(!el||!fam)return;const m=tapMark&&tapMark.el===el&&now()-tapMark.t<1500?tapMark:null;let x,y;
+  if(m){x=m.x;y=m.y}else{const r=el.getBoundingClientRect();x=e.detail?e.clientX-r.left:r.width/2;y=e.detail?e.clientY-r.top:r.height/2}
+  if(fam==="act"&&el.isConnected&&!calm())wave(el,x,y);
+  if(fam==="sel")settleFill(el,x,y);tapMark=null});
+/* Fehler: eine kleine, einmalige Seitwärtsbewegung */
+function shake(el){if(calm()||!el)return;el.animate([{transform:"none"},{transform:"translateX(-4px)",offset:.2},{transform:"translateX(3px)",offset:.45},{transform:"translateX(-1.5px)",offset:.7},{transform:"none"}],{duration:360,easing:"ease-out"})}
+/* Logo und Titel: Das kleine Gerüst federt einmal in seiner Spannung nach, unter dem Titel zeichnet sich ein feiner Strich
+   vom kühlen zum warmen Ton und verblasst. */
+function logoMove(){if(calm())return;const s=$("#home svg");
+  if(s)s.animate([{transform:"rotate(0)"},{transform:"rotate(-5deg)",offset:.28},{transform:"rotate(2.5deg)",offset:.62},{transform:"rotate(0)"}],{duration:760,easing:"cubic-bezier(.3,.6,.3,1)"});
+  const m=$("#home2");if(!m)return;m.querySelectorAll(".mline").forEach(x=>x.remove());const l=document.createElement("span");l.className="mline";l.setAttribute("aria-hidden","true");m.appendChild(l);
+  l.animate([{transform:"scaleX(0)",opacity:1},{transform:"scaleX(1)",opacity:1,offset:.55},{transform:"scaleX(1)",opacity:0}],{duration:900,easing:"cubic-bezier(.4,.1,.2,1)",fill:"both"}).onfinish=()=>l.remove()}
 function fx(){let l=document.getElementById("fx");if(!l){l=document.createElement("div");l.id="fx";document.body.appendChild(l)}return l}
 /* weiches, mattes Licht hinter einem Element */
 function lightUp(el,strong){if(calm()||!el)return;const r=el.getBoundingClientRect(),sz=Math.max(r.width,r.height,40)*(strong?4.2:2.6);const d=document.createElement("span");d.className="lamp";
@@ -511,10 +566,6 @@ function trace(el,col){if(calm()||!el)return;const r=el.getBoundingClientRect(),
   const ns="http://www.w3.org/2000/svg",s=document.createElementNS(ns,"svg");s.setAttribute("class","trace");Object.assign(s.style,{left:(r.left-3)+"px",top:(r.top-3)+"px",width:(r.width+6)+"px",height:(r.height+6)+"px"});
   const q=document.createElementNS(ns,"rect");q.setAttribute("x",1);q.setAttribute("y",1);q.setAttribute("width",r.width+4);q.setAttribute("height",r.height+4);q.setAttribute("rx",rad+2);q.setAttribute("pathLength",100);q.style.stroke=col||"var(--lit)";s.appendChild(q);fx().appendChild(s);
   q.animate([{strokeDashoffset:100,opacity:1},{strokeDashoffset:0,opacity:1,offset:.6},{strokeDashoffset:0,opacity:0}],{duration:1100,easing:"cubic-bezier(.4,.1,.2,1)",fill:"both"}).onfinish=()=>s.remove()}
-function ripple(e,el){if(calm())return;const r=el.getBoundingClientRect(),s=Math.max(r.width,r.height)*2.2;const d=document.createElement("span");d.className="ripple";
-  Object.assign(d.style,{left:(e.clientX-r.left-s/2)+"px",top:(e.clientY-r.top-s/2)+"px",width:s+"px",height:s+"px"});el.appendChild(d);
-  d.animate([{transform:"scale(0)",opacity:.2},{transform:"scale(1)",opacity:0}],{duration:700,easing:"cubic-bezier(.2,.7,.2,1)"}).onfinish=()=>d.remove()}
-document.addEventListener("pointerdown",e=>{const el=e.target.closest(".btn,.chip,.opt,.li,.go,.next,.draw,.tag,.slot,.note");if(el&&!el.disabled&&!el.getAttribute("aria-disabled"))ripple(e,el)},{passive:true});
 
 /* ---------- Erinnerungen über den eigenen Kalender ---------- */
 const pad=n=>String(n).padStart(2,"0");
@@ -542,7 +593,7 @@ function downloadFile(name,text){const url=URL.createObjectURL(new Blob([text],{
 let shownDay=null;
 function refreshHome(){const logo=$("#home"),newDay=shownDay&&todayKey()!==shownDay;shownDay=todayKey();
   window.scrollTo({top:0,behavior:calm()?"auto":"smooth"});
-  if(!calm()){logo.animate([{transform:"scale(1)"},{transform:"scale(.88)",offset:.3},{transform:"scale(1)"}],{duration:650,easing:"cubic-bezier(.3,.7,.2,1)"});lightUp(logo)}
+  if(!calm())lightUp(logo);
   setTimeout(()=>{anim=true;render();const g=$(".gsvg .lit");if(g)lightUp(g);
     if(newDay){toast("Neuer Tag: Impuls und Probe des Tages sind frisch.");const d=document.querySelector(".today");if(d)setTimeout(()=>trace(d),300)}},calm()?0:300)}
 function goHome(){anim=true;S.cur=null;shared=null;tab="geruest";persist();render();window.scrollTo(0,0)}
@@ -608,7 +659,7 @@ document.addEventListener("pointerdown",()=>{lastTap=now()},{passive:true,captur
 const momentFits=()=>tab==="geruest"&&!S.cur&&!$("#layer").innerHTML&&!momentOpen;
 function checkMoments(){clearTimeout(momentTimer);if(!momentFits())return;const m=MOMENTS.find(m=>!S.moments[m.id]&&m.ok());if(!m)return;
   const t0=now(),wait=Math.max(900,freshUntil-t0+400);momentTimer=setTimeout(()=>{if(!momentFits()||lastTap>t0)return;showMoment(m)},wait)}
-function showMoment(m){S.moments[m.id]=now();persist();momentOpen=true;const d=document.createElement("div");d.className="moment";d.innerHTML=`<div class="mcard" role="dialog" aria-modal="true" aria-labelledby="mtitle">${miniSVG("memb")}<p class="label">Ein Moment</p><h2 id="mtitle">${m.t}</h2><p>${m.x}</p><button class="btn" id="mok">Weiter</button></div>`;
+function showMoment(m){S.moments[m.id]=now();persist();momentOpen=true;document.querySelectorAll(".toast").forEach(x=>{x.classList.add("out");setTimeout(()=>x.remove(),320)});const d=document.createElement("div");d.className="moment";d.innerHTML=`<div class="mcard" role="dialog" aria-modal="true" aria-labelledby="mtitle">${miniSVG("memb")}<p class="label">Ein Moment</p><h2 id="mtitle">${m.t}</h2><p>${m.x}</p><button class="btn" id="mok">Weiter</button></div>`;
   document.body.appendChild(d);setTimeout(()=>lightUp(d.querySelector(".memb"),true),200);
   const close=()=>{d.classList.add("out");momentOpen=false;setTimeout(()=>d.remove(),350);releaseToast()};d.addEventListener("click",e=>{if(e.target.closest("#mok")||e.target===d)close()})}
 
@@ -644,11 +695,12 @@ function save(){const cur=lvSnap(),old=S.lv||{},inc=[];Object.entries(cur).forEa
 if(!S.lv){S.lv=lvSnap();persist()}
 
 /* ---------- Rendern & Ereignisse ---------- */
+let logoHTML="";
 function render(){
   const v={geruest:viewGeruest,imp:viewImp,ueben:viewUeben,werte:viewWerte}[tab]();
   const M=$("#main");M.classList.remove("anim","quick");M.innerHTML=v;void M.offsetWidth;if(anim)M.classList.add("anim");if(anim==="quick")M.classList.add("quick");anim=false;renderTabs();
   $("#app").dataset.tab=tab;
-  $("#home").innerHTML=miniSVG();$("#topline").textContent=`${parts()} / 25`;
+  {const mh=miniSVG();if(mh!==logoHTML){logoHTML=mh;$("#home").innerHTML=mh}}$("#topline").textContent=`${parts()} / 25`;
   if(tab==="geruest")playFresh();
   if(pendingGlow){pendingGlow=false;const c=document.querySelector('.bite h2');if(c&&S.cur&&I[S.cur])setTimeout(()=>lightUp(c),700)}
   checkMoments()}
@@ -663,9 +715,9 @@ document.addEventListener("click",e=>{
   if(t.id==="next"){sessionReads++;if(maybeScrollHint())return;const b=pickImp();if(b)openImp(b.id);return}
   if(d.pick&&!t.getAttribute("aria-disabled")){const [pid,i]=d.pick.split(":");const p=P[pid];const old=S.proben[pid];
     if(pBlind===pid&&old&&old.o!=null){old.hist=(Array.isArray(old.hist)?old.hist:[]).concat([{o:old.o,t:old.t,r:old.r||""}]);old.r="";old.wq="";old.again=true}else if(old)old.again=false;
-    pBlind=null;S.proben[pid]=Object.assign(S.proben[pid]||{},{o:+i,t:now()});tap(gains()?"success":"");
-    t.classList.add("chosen");lightUp(t);setTimeout(()=>{save();render();const el=$("#probe");if(el){const pk=el.querySelector(".opt.pick");if(pk)trace(pk,`var(--c-${p.cat})`);const rv=el.querySelector(".reveal");if(rv)rv.scrollIntoView({block:"nearest",behavior:calm()?"auto":"smooth"})}},calm()?0:380);return}
-  if(d.psave){const v=S.proben[d.psave];if(v){v.r=$("#preason").value.trim();const wq=$("#pwq")?$("#pwq").value.trim():"";if(wq!==(v.wq||"")){v.wq=wq;v.wqt=now()}save();tap();toast(wq||v.r?"Gespeichert. Du findest es im Bautagebuch.":"Gespeichert.")}return}
+    pBlind=null;S.proben[pid]=Object.assign(S.proben[pid]||{},{o:+i,t:now()});buzz("ok");
+    t.classList.add("chosen");lightUp(t);setTimeout(()=>{save();render();const el=$("#probe");if(el){const pk=el.querySelector(".opt.pick");if(pk){pk.classList.add("drawn");trace(pk,`var(--c-${p.cat})`)}const rv=el.querySelector(".reveal");if(rv)rv.scrollIntoView({block:"nearest",behavior:calm()?"auto":"smooth"})}},calm()?0:380);return}
+  if(d.psave){const v=S.proben[d.psave];if(v){v.r=$("#preason").value.trim();const wq=$("#pwq")?$("#pwq").value.trim():"";if(wq!==(v.wq||"")){v.wq=wq;v.wqt=now()}save();buzz("ok");toast(wq||v.r?"Gespeichert. Du findest es im Bautagebuch.":"Gespeichert.",true)}return}
   if(d.blindgo){pBlind=d.blindgo;pHint=null;render();const el=$("#probe");if(el)el.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});return}
   if(d.previse){const v=S.proben[d.previse];if(v){v.o=null;save();render()}return}
   if(t.id==="pnext"){pBlind=null;pHint=null;const cur=pcur;pcur=null;S.pskip=(S.pskip||0)+1;persist();let p=currentProbe();if(p&&p.id===cur){pcur=null;S.pskip++;p=currentProbe()}anim=true;render();const el=$("#probe");if(el)el.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});return}
@@ -673,26 +725,28 @@ document.addEventListener("click",e=>{
   if(d.probeOpen){const id=d.probeOpen;pBlind=d.blind&&blindDue(id)?id:null;pHint=d.phint||null;openProbe(id);return}
   if(d.lbsp){const p=t.parentNode.querySelector(".lbsp");if(p){p.hidden=!p.hidden;t.textContent=p.hidden?"Beispiel ansehen":"Beispiel ausblenden"}return}
   if(d.fnote){const b=$("#fnb-"+d.fnote);if(b){b.hidden=false;t.hidden=true;const ta=b.querySelector("textarea");if(ta)ta.focus()}return}
-  if(d.affirm){const L=S.leit[d.affirm];const fn=$("#fn-"+d.affirm),nt=fn?fn.value.trim():"";if(nt)L.notes=(Array.isArray(L.notes)?L.notes:[]).concat([{t:now(),x:nt}]);L.n=(L.n||0)+1;L.next=now()+FIV[Math.min(L.n,FIV.length-1)]*DAY;tap("success");const card=t.closest(".fest");if(card)lightUp(card);toast(nt?"Bekräftigt. Deine Notiz steht im Bautagebuch.":"Bekräftigt. Die App fragt später wieder nach.");setTimeout(()=>{save();anim=true;render()},calm()?0:450);return}
-  if(d.leitsave){const id=d.leitsave,txt=$("#leittext").value.trim();if(!txt){toast("Schreib zuerst einen Satz.");return}const L=S.leit[id]||{n:0};const isNew=!L.t;L.t=txt;L.at=L.at||now();if(isNew||!L.next)L.next=now()+FIV[0]*DAY;S.leit[id]=L;tap(gains()?"success":"");closeSheet();toBuild();return}
-  if(d.kern){if(S.kern.length>=MAXKERN)return;S.kern.push(d.kern);tap("success");lightUp(t);closeSheet();setTimeout(toBuild,calm()?0:200);return}
-  if(d.unkern){S.kern=S.kern.filter(x=>x!==d.unkern);save();tap();valueSheet(d.unkern);render();return}
+  if(d.affirm){const L=S.leit[d.affirm];const fn=$("#fn-"+d.affirm),nt=fn?fn.value.trim():"";if(nt)L.notes=(Array.isArray(L.notes)?L.notes:[]).concat([{t:now(),x:nt}]);L.n=(L.n||0)+1;L.next=now()+FIV[Math.min(L.n,FIV.length-1)]*DAY;buzz("ok");const card=t.closest(".fest");if(card)lightUp(card);toast(nt?"Bekräftigt. Deine Notiz steht im Bautagebuch.":"Bekräftigt. Die App fragt später wieder nach.",true);setTimeout(()=>{save();anim=true;render()},calm()?0:450);return}
+  if(d.leitsave){const id=d.leitsave,txt=$("#leittext").value.trim();if(!txt){buzz("err");shake($("#leittext"));toast("Schreib zuerst einen Satz.");return}const L=S.leit[id]||{n:0};const isNew=!L.t;L.t=txt;L.at=L.at||now();if(isNew||!L.next)L.next=now()+FIV[0]*DAY;S.leit[id]=L;buzz("ok");closeSheet();toBuild();toast("Leitsatz gespeichert.",true);return}
+  if(d.kern){if(S.kern.length>=MAXKERN)return;S.kern.push(d.kern);buzz("ok");lightUp(t);closeSheet();const wn=W[d.kern].n;setTimeout(()=>{toBuild();toast(`${wn} ist jetzt eine Stütze.`,true)},calm()?0:200);return}
+  if(d.unkern){S.kern=S.kern.filter(x=>x!==d.unkern);save();valueSheet(d.unkern);render();return}
   if(d.wert){if(t.closest(".opt"))return;valueSheet(d.wert);return}
   if(d.gowlist){const l=$("#wlist");if(l)l.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});return}
   if(d.tabgo){if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab=d.tabgo;S.cur=null;render();window.scrollTo(0,0);return}
   if(d.ueb){uebSheet(d.ueb);return}
   if(d.ushare){shareUeb(d.ushare);return}
-  if(d.check){const v=S.ueb[d.check];v.checks=v.checks||{};v.checks[dayIdx(v)]=+d.val;save();tap();render();toast("Eingetragen.");return}
-  if(d.setting){if(d.setting==="hell"){S.settings.theme=S.settings.theme==="hell"?"dunkel":"hell";applyTheme()}else S.settings[d.setting]=!S.settings[d.setting];persist();tap();render();return}
+  if(d.check){const v=S.ueb[d.check];v.checks=v.checks||{};v.checks[dayIdx(v)]=+d.val;save();render();toast("Eingetragen.");return}
+  /* Schalter: nur der Zustand wechselt, ohne Neuzeichnen, damit der Knopf sichtbar hinübergleitet */
+  if(d.setting){let on;if(d.setting==="hell"){S.settings.theme=S.settings.theme==="hell"?"dunkel":"hell";applyTheme();on=S.settings.theme==="hell"}else{S.settings[d.setting]=S.settings[d.setting]===false;on=S.settings[d.setting]}
+    persist();t.setAttribute("aria-checked",on);if(d.setting==="vibration"&&IOS)armHaps();return}
   if(t.id==="dailyics"){dailyIcs();return}
   if(t.id==="shx2"){closeSheet();return}
   if(t.id==="nohint"){S.settings.antiScroll=false;persist();closeSheet();toast("Alles klar. Die Einstellung findest du unter „Gerüst“.");return}
-  if(t.id==="home"||t.id==="home2"){if(tab!=="geruest"||S.cur){goHome();return}refreshHome();return}
+  if(t.id==="home"||t.id==="home2"){if(tab!=="geruest"||S.cur){goHome();logoMove();return}logoMove();refreshHome();return}
   if(t.id==="back"){backToImp();return}
   if(t.id==="share"&&S.cur){shareImp(I[S.cur]);return}
   if(t.id==="shareapp"){shareApp();return}
   if(t.id==="explore"){shared=null;S.cur=null;try{history.replaceState(null,"",location.pathname)}catch(x){}goHome();return}
-  if(t.id==="save"&&S.cur){if(S.saved[S.cur])delete S.saved[S.cur];else{S.saved[S.cur]=now();toast("Gemerkt. Du findest es im Bautagebuch.")}persist();render();return}
+  if(t.id==="save"&&S.cur){if(S.saved[S.cur])delete S.saved[S.cur];else{S.saved[S.cur]=now();buzz("ok");toast("Gemerkt. Du findest es im Bautagebuch.",true)}persist();render();return}
   if(d.filter){if(S.filter===d.filter)return;S.filter=d.filter;persist();render();return}
   if(d.deep&&S.cur){const b=I[S.cur];trace(t,`var(--c-${b.cat})`);setTimeout(()=>{d.deep==="ev"?evSheet(b):deepSheet(b)},calm()?0:420);return}
   if(d.daily){const id=d.daily;if(t.classList.contains("go2"))return;t.classList.add("go2");lightUp(t);setTimeout(()=>openDaily(id,t),calm()?0:320);return}
@@ -701,7 +755,7 @@ document.addEventListener("click",e=>{
   if(d.ufilter){uFilter=d.ufilter;uMore=false;render();return}
   if(d.wfilter){wFilter=d.wfilter;render();return}
   if(t.id==="umore"){uMore=true;render();return}
-  if(d.accept){if(activeUeb().length>=MAXACT)return;S.ueb[d.accept]={status:"active",start:now()};tap();save();if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab="ueben";render();{const c=document.querySelector(`[data-done="${d.accept}"]`);const card=c&&c.closest(".exp");if(card){card.scrollIntoView({block:"center"});trace(card,`var(--c-${U[d.accept].cat})`)}}toast("Übung angenommen.");return}
+  if(d.accept){if(activeUeb().length>=MAXACT)return;S.ueb[d.accept]={status:"active",start:now()};save();if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab="ueben";render();{const c=document.querySelector(`[data-done="${d.accept}"]`);const card=c&&c.closest(".exp");if(card){card.scrollIntoView({block:"center"});trace(card,`var(--c-${U[d.accept].cat})`)}}toast("Übung angenommen.");return}
   if(t.id==="uother"){S.uskip=(S.uskip||0)+1;persist();render();return}
   if(d.drop){S.ueb[d.drop]={status:"dropped",start:S.ueb[d.drop].start,end:now()};save();render();return}
   if(d.remind){remindSheet(d.remind);return}
@@ -709,8 +763,8 @@ document.addEventListener("click",e=>{
   if(d.ics){const p=remindPlan(d.ics,remindMode);downloadFile(`wertegeruest-${d.ics}.ics`,icsFor(p));S.ueb[d.ics].remind=remindMode;persist();return}
   if(d.done){doneSheet(d.done);return}
   if(t.id==="savedone"){const id=t.dataset.id,m=document.querySelector('#moods [aria-pressed="true"]'),ud=$("#udays");let days;
-    if(ud){const c=ud.querySelector('[aria-pressed="true"]');if(!c){toast("Wähl zuerst, an wie vielen Tagen du die Übung gemacht hast.");return}days=+c.dataset.udays}
-    S.ueb[id]=Object.assign(S.ueb[id]||{start:now()},{status:"done",end:now(),mood:m?m.dataset.mood:null,note:$("#note").value.trim()});if(days!=null)S.ueb[id].days=days;else delete S.ueb[id].days;tap(gains()?"success":"");closeSheet();toBuild();return}
+    if(ud){const c=ud.querySelector('[aria-pressed="true"]');if(!c){buzz("err");shake(ud);toast("Wähl zuerst, an wie vielen Tagen du die Übung gemacht hast.");return}days=+c.dataset.udays}
+    S.ueb[id]=Object.assign(S.ueb[id]||{start:now()},{status:"done",end:now(),mood:m?m.dataset.mood:null,note:$("#note").value.trim()});if(days!=null)S.ueb[id].days=days;else delete S.ueb[id].days;buzz("ok");closeSheet();toBuild();toast(days===0?"Gespeichert. Die Notiz steht im Bautagebuch.":"Übung geschafft.",true);return}
   if(t.id==="reset"){confirmReset=true;render();return}
   if(t.id==="resetno"){confirmReset=false;render();return}
   if(t.id==="resetyes"){S={read:{},saved:{},kern:[],leit:{},proben:{},ueb:{},filter:"alle",history:[],cur:null,settings:S.settings,moments:{},welcomed:S.welcomed,fresh:[],lv:{}};persist();confirmReset=false;render();toast("Alles zurückgesetzt.");return}
@@ -720,7 +774,7 @@ function toBuild(){save();if(S.fresh.length){anim=false;tab="geruest";S.cur=null
 let lastSum=0;document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("summary"))lastSum=Date.now()},true);
 document.addEventListener("change",e=>{if(e.target.id==="rtime"){S.settings.remindTime=e.target.value||"08:00";persist();const g=$("#dailyg");if(g)g.href=dailyGoogle()}});
 document.addEventListener("toggle",e=>{const t=e.target;const map={jfold:"jOpen",aboutfold:"aboutOpen",uebfold:"uebOpen",prfold:"prOpen",setfold:"setOpen",wqfold:"wqOpen"};if(map[t.id]){S[map[t.id]]=t.open;persist()}if(t.classList&&t.classList.contains("fold")&&t.open&&Date.now()-lastSum<600){const b=t.querySelector(".fbody");if(b&&!calm())b.animate([{opacity:0,transform:"translateY(-4px)"},{opacity:1,transform:"none"}],{duration:380,easing:"cubic-bezier(.2,.8,.2,1)"})}},true);
-document.addEventListener("keydown",e=>{if(e.target.closest&&e.target.closest("textarea,input"))return;
+document.addEventListener("keydown",e=>{if(e.target.closest&&e.target.closest("textarea,input:not(.hap)"))return;
   if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.pil){e.preventDefault();pillarTap(e.target.dataset.pil);return}
   if(e.key==="Escape"){if($("#layer").innerHTML)closeSheet();else if(tab==="imp"&&S.cur)backToImp();return}
   if(tab==="imp"&&e.key==="ArrowRight"&&!$("#layer").innerHTML){e.preventDefault();const b=pickImp();if(b)openImp(b.id)}
@@ -736,6 +790,6 @@ const BUILD="__BUILD__";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("wg-upd")}catch(e){}if(done===m[1])return;
-    const go=()=>{if($("#layer").innerHTML||momentOpen||document.activeElement&&/TEXTAREA|INPUT/.test(document.activeElement.tagName)){setTimeout(go,4000);return}try{sessionStorage.setItem("wg-upd",m[1])}catch(e){}location.reload()};go()}).catch(()=>{})}
+    const go=()=>{if($("#layer").innerHTML||momentOpen||typing(document.activeElement)){setTimeout(go,4000);return}try{sessionStorage.setItem("wg-upd",m[1])}catch(e){}location.reload()};go()}).catch(()=>{})}
 setTimeout(checkUpdate,1500);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate()});setTimeout(welcome,700);
 })();
