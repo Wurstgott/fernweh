@@ -663,7 +663,7 @@ nav.tabs button[aria-current="page"]::after{display:none}
     <button class="logo" id="home" aria-label="Zum Kompass"><span></span></button>
     <button class="mark" id="home2" aria-label="Glückskompass, zum Kompass">Glücks<i>kompass</i></button>
     <div class="pill" id="topline" aria-live="polite"></div>
-    <p class="tagline">Was die Forschung über ein gutes Leben weiß</p>
+    <p class="tagline">Glücksforschung zum Ausprobieren</p>
     <div class="rose" id="rose" aria-hidden="true"></div>
   </header>
   <main id="main"></main>
@@ -1803,7 +1803,7 @@ function viewWay(){
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${EVSHORT[l]}</span></div>`).join("")}</div>
       <p>Daneben steht, welche Art Befund es ist. Ein <b>Experiment</b> spricht für Ursache und Wirkung. Eine <b>Beobachtung</b> zeigt einen Zusammenhang, aber nicht, was was verursacht. Eine <b>Übersicht</b> fasst viele Studien zusammen. Eine <b>Idee</b> ist ein Denkanstoß ohne eigene Studie.</p>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 18.10.2026, 17:29 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 18.10.2026, 17:34 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -2234,7 +2234,7 @@ if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
 /* Selbst-Aktualisierung: Wenn auf GitHub eine neuere Version liegt, lädt die App sie still nach (wichtig für die Version auf dem Home-Bildschirm). */
-const BUILD="18.10.2026, 17:29";
+const BUILD="18.10.2026, 17:34";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;
