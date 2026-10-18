@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,500..900,100;1,9..144,500..800,100&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&family=Figtree:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: eine ruhige App-Spalte wie ein Feldnotizbuch, unten fest die vier Bereiche. Ein Kompass aus fünf Farben als Herzstück. */
-:root{--tx:32%;
+:root{--tx:32%;--mark:#B86E14;
   --paper:#EEF0E9;--card:#FBFBF7;--ink:#1C2624;--muted:#5D6A65;--line:#D4DAD0;--soft:#E3E7DE;
   --accent:#D98E22;--accent-soft:#F6E3C2;--on-accent:#1C2624;
   --c-ich:#D98E22;--c-wir:#CF6352;--c-welt:#4A8659;--c-sein:#4A73A0;--c-zeit:#8667AE;
@@ -23,12 +23,12 @@
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --r:14px;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tx:0%;
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tx:0%;--mark:#E9AE5C;
   --paper:#111715;--card:#1A2220;--ink:#E6ECE5;--muted:#9AA8A1;--line:#2B3633;--soft:#222C29;
   --accent:#F0AE47;--accent-soft:#3A2F1C;--on-accent:#1A1408;
   --c-ich:#F0AE47;--c-wir:#E78574;--c-welt:#79B988;--c-sein:#7FA5D3;--c-zeit:#B096D6;
   --ok:#79B988;--warn:#E78574;color-scheme:dark}}
-:root[data-theme="dark"]{--tx:0%;
+:root[data-theme="dark"]{--tx:0%;--mark:#E9AE5C;
   --paper:#111715;--card:#1A2220;--ink:#E6ECE5;--muted:#9AA8A1;--line:#2B3633;--soft:#222C29;
   --accent:#F0AE47;--accent-soft:#3A2F1C;--on-accent:#1A1408;
   --c-ich:#F0AE47;--c-wir:#E78574;--c-welt:#79B988;--c-sein:#7FA5D3;--c-zeit:#B096D6;
@@ -581,7 +581,7 @@ input[type="time"]{font:inherit;font-family:var(--f-mono);font-size:15px;border:
 @keyframes foldIn{from{opacity:0;transform:translateY(-4px)}}
 body:has(.moment) .app *{animation-play-state:paused}
 /* Lesbarer Text in Farbe: im hellen Modus dunklere Variante der Akzent- und Richtungsfarben */
-.mark i{color:color-mix(in srgb,var(--accent),#000 var(--tx))}
+.mark i{color:var(--mark)}
 .daily .dk,.daily .dstate,.pinfo b,.tap:hover .more,.tap:active .more{color:color-mix(in srgb,var(--c),#000 var(--tx))}
 .ccat{color:color-mix(in srgb,var(--nc,var(--accent)),#000 var(--tx))}
 .src a{color:color-mix(in srgb,var(--accent),#000 var(--tx))}
@@ -1828,7 +1828,7 @@ function viewWay(){
       <p>Jedes Häppchen zeigt, wie belastbar die Erkenntnis ist:</p>
       <div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)} <span class="muted">· ${EVSHORT[l]}</span></div>`).join("")}</div>
       <p>Daneben steht, welche Art Befund es ist. Ein <b>Experiment</b> spricht für Ursache und Wirkung. Eine <b>Beobachtung</b> zeigt einen Zusammenhang, aber nicht, was was verursacht. Eine <b>Übersicht</b> fasst viele Studien zusammen. Eine <b>Idee</b> ist ein Denkanstoß ohne eigene Studie.</p>
-      <p>Stand der Recherche: Oktober 2026. App-Version vom 18.10.2026, 17:42 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
+      <p>Stand der Recherche: Oktober 2026. App-Version vom 19.10.2026, 00:54 Uhr. Die Quellen sind verlinkt, damit du selbst nachlesen kannst. Die App ersetzt keine Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111.</p>
       <p class="muted" style="font-size:14px">Alles, was du hier liest, markierst und notierst, bleibt nur in diesem Browser auf diesem Gerät.</p>
       <div class="row"><button class="btn ghost" id="shareapp">App weiterempfehlen</button></div>
       <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn ghost" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
@@ -2259,7 +2259,7 @@ if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
 /* Selbst-Aktualisierung: Wenn auf GitHub eine neuere Version liegt, lädt die App sie still nach (wichtig für die Version auf dem Home-Bildschirm). */
-const BUILD="18.10.2026, 17:42";
+const BUILD="19.10.2026, 00:54";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("gk-upd")}catch(e){}if(done===m[1])return;
