@@ -411,6 +411,31 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .slot .psvg{width:100%;height:84px;display:block}
 .slot{min-height:0;justify-content:flex-start;padding-top:8px}
 .lead+.muted{margin-top:12px}
+/* Tensegrity-Wolke */
+.gsvg .cb{stroke:var(--lit);stroke-width:.9;opacity:.38}
+.gsvg .ft{stroke:var(--lit);stroke-width:.9;opacity:.45;stroke-dasharray:none}
+.gsvg .ft.gh{stroke:var(--ghost);stroke-dasharray:2 5;opacity:1}
+.gsvg .br{stroke-width:2.4;stroke-dasharray:none;opacity:.95}
+.gsvg .hitl{stroke:transparent;stroke-width:16;cursor:pointer}
+.gsvg .nd{r:2.2;stroke-width:1.2}
+.gsvg.sel .cb{opacity:.15}
+.gsvg .glow line{stroke-width:9;opacity:.35}
+.fundlbl{text-align:center;font-family:var(--f-mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-top:-2px;cursor:pointer}
+.glegend{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:16px}
+.lg{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:7px;border:1px solid var(--line);border-radius:10px;background:none;padding:10px 4px 9px;cursor:pointer;min-width:0;transition:border-color .4s,background-color .4s}
+.lg .nm{font-size:11px;font-weight:600;color:var(--c);line-height:1.2;text-align:center;overflow-wrap:normal;word-break:normal;hyphens:manual}
+.lg .pips{display:flex;gap:3px}
+.lg .pips i{width:6px;height:6px;border-radius:50%;border:1px solid color-mix(in srgb,var(--c) 55%,transparent)}
+.lg .pips i.on{background:var(--c);border-color:var(--c)}
+.lg.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,transparent)}
+.lg.free{border-style:dashed;border-color:var(--ghost)}
+.lg.free .nm{color:var(--faint);font-family:var(--f-mono);font-weight:400;font-size:10px;letter-spacing:.1em}
+.lg .sw0{width:30px;height:6px}
+.slot .psvg{height:70px}
+.gsvg.sel .rod:not(.on){opacity:.16!important}
+.gsvg.sel .glow{opacity:.3}
+.steps5 li i{width:18px;height:4px;border-radius:2px;border:0;background:var(--ghost);transform:rotate(-24deg)}
+.steps5 li.ok i{background:var(--c,var(--lit))}
 
 </style>
 
@@ -1090,59 +1115,57 @@ const isWordBreak=id=>{const b=HY[id].split("-")[1];return b[0]===b[0].toLowerCa
 const two=id=>{const n=W[id].n;if(n.length<=9||!HY[id])return [n];const [a,b]=HY[id].split("-");return [a+(isWordBreak(id)?"-":""),b]};
 const shy=id=>HY[id]&&W[id].n.length>9?HY[id].replace("-",isWordBreak(id)?"&shy;":" "):W[id].n;
 
-/* Großes Gerüst: bunte Stäbe, die sich wie in einer Rauminstallation kreuzen und verbinden */
-const GY=300,PX=i=>48+i*66;
-const SHORT={zukunftsverantwortung:"Verantwortung",ehrfurcht:"Ehrfurcht",naturverbundenheit:"Naturverbunden",verantwortlichkeit:"Verantwortlich"};
+/* Das Gerüst als Tensegrity: Stäbe, die sich nicht stützen, sondern von Spannung gehalten werden.
+   Jedes Bauteil ist ein Stab. Zusammen bilden sie eine Wolke, die umso runder und dichter wird, je mehr gebaut ist.
+   Seile zwischen benachbarten Stabenden halten alles zusammen; geklärte Spannungen aus Belastungsproben werden zu farbigen Spannseilen. */
+const CX=180,CY=146,RX=136,RY=112,BASE=292,GA=137.508*Math.PI/180;
+const SHORT={zukunftsverantwortung:"Verantwortung",ehrfurcht:"Ehrfurcht"};
 const rnd=(seed,k)=>(hashStr(seed+"#"+k)%1000)/1000;
-const lerp=(p,q,t)=>[p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t];
-/* Fünf Stäbe pro Stütze: Ständer, Verlängerung, Strebe, zweiter Ständer, Krone. Die Lage hängt vom Wert ab, so wird jedes Gerüst ein wenig anders. */
-function rodsFor(seed,i){const bx=PX(i),r=k=>rnd(seed,k);
-  const P0=[bx-4+r(1)*8,GY],A=[bx+(r(2)-.5)*24,GY-112-r(3)*16];
-  const B0=lerp(P0,A,.42+r(4)*.16),B=[bx+(r(5)-.5)*38,GY-176-r(6)*16];
-  const side=r(7)>.5?1:-1,C0=[bx+side*(21+r(8)*8),GY],C1=lerp(B0,B,.6);
-  const D0=lerp(P0,A,.8),D=[bx-side*(9+r(9)*13),GY-226-r(10)*14];
-  const E0=lerp(B0,B,.82),E=[bx+(r(11)-.5)*22,GY-262-r(12)*10];
-  return [{a:P0,b:A,w:7},{a:B0,b:B,w:6},{a:C0,b:C1,w:4.6},{a:D0,b:D,w:5.4},{a:E0,b:E,w:5}]}
-function ext(a,b,e){const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1;return [a[0],a[1],b[0]+dx/L*e,b[1]+dy/L*e]}
+function ext(a,b,e){const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1;return [a[0]-dx/L*e,a[1]-dy/L*e,b[0]+dx/L*e,b[1]+dy/L*e]}
 const ln=(p,cls,extra)=>`<line class="${cls}" x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${p[2].toFixed(1)}" y2="${p[3].toFixed(1)}" ${extra||""}/>`;
-const seedOf=(id,i)=>id||"frei"+i;
+/* Stab n (0 bis 24): Bauteil k der Stütze i liegt auf Platz n = k*5+i. Der goldene Winkel verteilt die Stäbe so, dass die Wolke in jedem Baustand ausgewogen ist. */
+function rod(n,seed){const j=k=>rnd(seed||"plan",n*7+k);
+  const t1=Math.PI/2+n*GA+(j(1)-.5)*.18,span=(118+j(2)*26)*Math.PI/180,t2=t1+span,r1=.8+j(3)*.2,r2=.8+j(4)*.2;
+  const a=[CX+RX*r1*Math.cos(t1),CY+RY*r1*Math.sin(t1)],b=[CX+RX*r2*Math.cos(t2),CY+RY*r2*Math.sin(t2)];
+  const z=Math.sin(t1+span/2);return {a,b,z,w:5.2+z*1.6}}
+const slotsNow=()=>[0,1,2,3,4].map(i=>S.kern[i]||null);
+function builtRods(slots){const out=[];slots.forEach((id,i)=>{if(!id)return;const l=level(id);for(let k=0;k<l;k++)out.push(Object.assign(rod(k*5+i,id),{id,k,i,cat:W[id].cat}))});return out.sort((p,q)=>p.z-q.z)}
+function cables(rods){const pts=[];rods.forEach((r,ri)=>{pts.push([r.a,ri]);pts.push([r.b,ri])});const set=new Set(),out=[];
+  pts.forEach(([p,ri],pi)=>{pts.map(([q,rj],qi)=>[Math.hypot(p[0]-q[0],p[1]-q[1]),qi,rj]).filter(x=>x[2]!==ri).sort((x,y)=>x[0]-y[0]).slice(0,2).forEach(([d,qi])=>{const k=Math.min(pi,qi)+"|"+Math.max(pi,qi);if(!set.has(k)&&d<120){set.add(k);out.push([p,pts[qi][0]])}})});return out}
 function geruestSVG(){
-  const slots=[0,1,2,3,4].map(i=>S.kern[i]||null),ns=nextStep(),R=slots.map((id,i)=>rodsFor(seedOf(id,i),i)),L=slots.map(id=>id?level(id):0);
-  let defs="",ghost="",glowS="",body="",nodes="",lbl="",hit="";
+  const slots=slotsNow(),ns=nextStep(),rods=builtRods(slots);let defs="",ghost="",glowS="",body="",nodes="",net="",ties="";
   const grad=(gid,p,c1,c2)=>{defs+=`<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${p[2].toFixed(1)}" y2="${p[3].toFixed(1)}"><stop offset="0" style="stop-color:var(--c-${c1})"/><stop offset="1" style="stop-color:var(--c-${c2})"/></linearGradient>`;return `url(#${gid})`};
-  slots.forEach((id,i)=>{for(let k=L[i];k<5;k++){const rd=R[i][k],nx=(id&&ns.id===id&&k===L[i])||(!id&&!ns.id&&i===S.kern.length&&k===0);
-    ghost+=ln(ext(rd.a,rd.b,4),nx?"gh nx":"gh",nx&&id?`style="stroke:var(--c-${W[id].cat})"`:"")}});
-  for(let k=0;k<5;k++){
-    slots.forEach((id,i)=>{if(!id||k>=L[i])return;const rd=R[i][k],p=ext(rd.a,rd.b,k===0?5:8),c=W[id].cat;
-      body+=ln(p,"gap",`data-gap="${id}:${k}" style="stroke-width:${rd.w+4}"`)+ln(p,"rod",`data-seg="${id}:${k}" pathLength="100" style="stroke:var(--c-${c});stroke-width:${rd.w}"`);
-      glowS+=ln(p,"",`style="stroke:var(--c-${c})"`);nodes+=`<circle class="nd" cx="${rd.b[0].toFixed(1)}" cy="${rd.b[1].toFixed(1)}" r="${k===4?4.2:2.8}" ${k===4?`style="fill:var(--c-${c});stroke:var(--lit)"`:""}/>`});
-    /* Verbindungen zu Nachbarn: je höher beide stehen, desto dichter das Geflecht */
-    if(k>=1)for(let i=0;i<4;i++){const a=slots[i],b=slots[i+1];if(!a||!b||Math.min(L[i],L[i+1])<=k)continue;
-      const P=k%2?[R[i][k].b,R[i+1][k-1].b]:[R[i][k-1].b,R[i+1][k].b];const p=[P[0][0],P[0][1],P[1][0],P[1][1]],q=[p[0]-(p[2]-p[0])*.06,p[1]-(p[3]-p[1])*.06,p[2]+(p[2]-p[0])*.06,p[3]+(p[3]-p[1])*.06];
-      body+=ln(q,"gap pkgap",`style="stroke-width:7.5"`)+ln(q,"pk",`style="stroke:${grad(`pg${i}${k}`,q,W[a].cat,W[b].cat)}"`)}}
-  /* Streben aus Abwägungen: lange, dünne Stäbe quer durchs Gerüst */
-  braces().forEach(([a,b],n)=>{const i=slots.indexOf(a),j=slots.indexOf(b);if(i<0||j<0)return;const [p,q]=i<j?[i,j]:[j,i];const h=Math.max(1,Math.min(L[p],L[q]));
-    const e=ext(R[p][0].a,R[q][h-1].b,10);body+=ln(e,"gap brgap",`style="stroke-width:5.5"`)+ln(e,"br",`style="stroke:${grad(`bg${n}`,e,W[slots[p]].cat,W[slots[q]].cat)}"`)});
-  slots.forEach((id,i)=>{const row=i%2?GY+40:GY+22;
-    if(!id){lbl+=`<text class="lb free" x="${PX(i)}" y="${row}" text-anchor="middle">frei</text>`;hit+=`<rect class="hit" data-slot="${i}" x="${PX(i)-33}" y="20" width="66" height="${GY+30}" role="button" aria-label="Freier Platz, Werte finden"/>`;return}
-    const w=W[id],nm=SHORT[id]||w.n;lbl+=`<line class="ld" x1="${PX(i)}" y1="${GY+6}" x2="${PX(i)}" y2="${row-11}" style="stroke:var(--c-${w.cat})"/><text class="lb" x="${Math.min(352-nm.length*3.1,Math.max(8+nm.length*3.1,PX(i)))}" y="${row}" text-anchor="middle" style="fill:var(--c-${w.cat})">${nm}</text>`;
-    hit+=`<rect class="hit" data-pil="${id}" x="${PX(i)-33}" y="20" width="66" height="${GY+30}" role="button" tabindex="0" aria-label="${w.n}, Stufe ${L[i]} von 5"/>`});
-  return `<svg class="gsvg" viewBox="0 18 360 346" role="img" aria-label="Dein Wertegerüst mit ${parts()} von 25 Bauteilen">
-    <defs><filter id="gb" x="-60%" y="-30%" width="220%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>${defs}</defs>
-    <g class="ghost">${ghost}</g><g class="glow" filter="url(#gb)">${glowS}</g>${body}${nodes}
-    <g class="slab" role="button" aria-label="Fundament Würde">${ln([12,GY+2,348,GY+2],"base")}<text x="180" y="${GY+58}" text-anchor="middle">WÜRDE · FUNDAMENT</text></g>
-    ${lbl}${hit}</svg>`}
-/* Eine einzelne Stütze für die Übersicht unter „Werte“ */
-function pillarSVG(id,i){const R=rodsFor(seedOf(id,i),i),l=id?level(id):0,c=id?W[id].cat:null;let g="";
-  R.forEach((rd,k)=>{const on=k<l;g+=`<line x1="${rd.a[0].toFixed(1)}" y1="${rd.a[1].toFixed(1)}" x2="${rd.b[0].toFixed(1)}" y2="${rd.b[1].toFixed(1)}" ${on?`stroke="var(--c-${c})" stroke-width="${rd.w*1.1}"`:`stroke="var(--ghost)" stroke-width="1.6" stroke-dasharray="2 5"`} stroke-linecap="round"/>`});
-  return `<svg class="psvg" viewBox="${PX(i)-46} 20 92 ${GY-14}" aria-hidden="true">${g}<line x1="${PX(i)-40}" y1="${GY+2}" x2="${PX(i)+40}" y2="${GY+2}" stroke="var(--lit)" stroke-width="4" stroke-linecap="round"/></svg>`}
-/* Kleines Gerüst für Logo und Momente; ohne eigene Stützen ein Beispiel */
-const SAMPLE=["mut","vertrauen","gerechtigkeit","genuegsamkeit","wahrhaftigkeit"],SAMPLEL=[2,4,5,3,3];
-function miniSVG(cls){const has=S.kern.length>0;let g="";
-  for(let k=0;k<5;k++)for(let i=0;i<5;i++){const id=has?S.kern[i]:SAMPLE[i];if(!id)continue;const l=has?level(id):SAMPLEL[i];if(k>=l)continue;const rd=rodsFor(seedOf(id,i),i)[k];
-    g+=`<line x1="${rd.a[0].toFixed(0)}" y1="${rd.a[1].toFixed(0)}" x2="${rd.b[0].toFixed(0)}" y2="${rd.b[1].toFixed(0)}" stroke="var(--c-${W[id].cat})" stroke-width="${rd.w*2.6}" stroke-linecap="round"/>`}
-  if(has&&!g)for(let i=0;i<5;i++)g+=`<line x1="${PX(i)}" y1="${GY}" x2="${PX(i)}" y2="${GY-60}" stroke="var(--ghost)" stroke-width="8" stroke-linecap="round" stroke-dasharray="6 14"/>`;
-  return `<svg class="${cls||""}" viewBox="10 20 340 300" aria-hidden="true">${g}<line x1="22" y1="${GY+6}" x2="338" y2="${GY+6}" stroke="var(--lit)" stroke-width="16" stroke-linecap="round"/></svg>`}
+  /* Bauplan: alle 25 Plätze fein angedeutet, der nächste schimmert */
+  for(let n=0;n<25;n++){const i=n%5,k=Math.floor(n/5),id=slots[i];if(id&&k<level(id))continue;const r=rod(n,id);
+    const nx=(id&&ns.id===id&&k===level(id))||(!id&&!ns.id&&i===S.kern.length&&k===0);ghost+=ln(ext(r.a,r.b,2),nx?"gh nx":"gh",nx&&id?`style="stroke:var(--c-${W[id].cat})"`:"")}
+  cables(rods).forEach(([p,q])=>{net+=ln([p[0],p[1],q[0],q[1]],"cb")});
+  braces().forEach(([x,y],m)=>{const A=rods.filter(r=>r.id===x),B=rods.filter(r=>r.id===y);if(!A.length||!B.length)return;let best=null;
+    A.forEach(r=>B.forEach(s2=>[[r.a,s2.b],[r.b,s2.a],[r.a,s2.a],[r.b,s2.b]].forEach(([p,q])=>{const d=Math.hypot(p[0]-q[0],p[1]-q[1]);if(!best||d<best[0])best=[d,p,q]})));
+    const pq=[best[1][0],best[1][1],best[2][0],best[2][1]];ties+=ln(pq,"br",`data-br="${x}|${y}" style="stroke:${grad("bg"+m,pq,W[x].cat,W[y].cat)}"`)});
+  rods.forEach(r=>{const p=ext(r.a,r.b,4),key=r.id+":"+r.k,op=(.78+r.z*.22).toFixed(2);
+    body+=ln(p,"gap",`data-gap="${key}" style="stroke-width:${(r.w+3.5).toFixed(1)}"`)+ln(p,"rod",`data-seg="${key}" pathLength="100" style="stroke:var(--c-${r.cat});stroke-width:${r.w.toFixed(1)};opacity:${op}"`)+ln(p,"hitl",`data-pil="${r.id}"`);
+    glowS+=ln(p,"",`style="stroke:var(--c-${r.cat})"`);nodes+=[r.a,r.b].map(q=>`<circle class="nd" cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="2.2"/>`).join("")});
+  /* Die Wolke ruht über dem Fundament, gehalten von drei Seilen zu den untersten Punkten */
+  let feet="";const low=rods.flatMap(r=>[r.a,r.b]).sort((p,q)=>q[1]-p[1]).slice(0,3);low.forEach((p,i)=>{feet+=ln([p[0],p[1],[110,180,250][i],BASE],"ft")});
+  if(!rods.length)[110,180,250].forEach(x=>{feet+=ln([x,CY+RY*.9,x,BASE],"ft gh")});
+  const legend=`<div class="glegend">${slots.map((id,i)=>{if(!id)return `<button class="lg free" data-finder="1"><span class="sw0"></span><span class="nm">frei</span></button>`;const w=W[id],l=level(id);
+    return `<button class="lg" ${cc(w.cat)} data-pil="${id}" aria-label="${w.n}, Stufe ${l} von 5"><span class="nm">${id==="zukunftsverantwortung"||id==="ehrfurcht"?SHORT[id]:shy(id)}</span><span class="pips">${[0,1,2,3,4].map(k=>`<i class="${k<l?"on":""}"></i>`).join("")}</span></button>`}).join("")}</div>`;
+  return `<svg class="gsvg" viewBox="0 6 360 300" role="img" aria-label="Dein Wertegerüst mit ${parts()} von 25 Bauteilen">
+    <defs><filter id="gb" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>${defs}</defs>
+    <g class="ghost">${ghost}</g><g class="glow" filter="url(#gb)">${glowS}</g>${feet}${net}${body}${ties}${nodes}
+    <g class="slab" role="button" aria-label="Fundament Würde">${ln([40,BASE,320,BASE],"base")}<rect class="hit" x="30" y="${BASE-10}" width="300" height="24"/></g>
+    </svg><div class="fundlbl" data-wurde="1">Würde · Fundament</div>${legend}`}
+/* Eine einzelne Stütze innerhalb der Wolke, für die Übersicht unter „Werte“ */
+function pillarSVG(id,i){let g="";for(let k=0;k<5;k++){const r=rod(k*5+i,id),on=id&&k<level(id);
+    g+=`<line x1="${r.a[0].toFixed(0)}" y1="${r.a[1].toFixed(0)}" x2="${r.b[0].toFixed(0)}" y2="${r.b[1].toFixed(0)}" ${on?`stroke="var(--c-${W[id].cat})" stroke-width="14"`:`stroke="var(--ghost)" stroke-width="5" stroke-dasharray="6 14"`} stroke-linecap="round"/>`}
+  return `<svg class="psvg" viewBox="30 20 300 260" aria-hidden="true">${g}</svg>`}
+/* Kleine Wolke für Logo und Momente; ohne eigene Stützen ein Beispiel */
+const SAMPLE=["mut","vertrauen","gerechtigkeit","genuegsamkeit","wahrhaftigkeit"],SAMPLEL=[3,4,5,3,4];
+function miniSVG(cls){const has=S.kern.length>0;let g="";const list=[];
+  for(let i=0;i<5;i++){const id=has?S.kern[i]:SAMPLE[i];if(!id)continue;const l=has?level(id):SAMPLEL[i];for(let k=0;k<l;k++)list.push(Object.assign(rod(k*5+i,id),{cat:W[id].cat}))}
+  list.sort((p,q)=>p.z-q.z).forEach(r=>{g+=`<line x1="${r.a[0].toFixed(0)}" y1="${r.a[1].toFixed(0)}" x2="${r.b[0].toFixed(0)}" y2="${r.b[1].toFixed(0)}" stroke="var(--c-${r.cat})" stroke-width="20" stroke-linecap="round"/>`});
+  if(!list.length)for(let n=0;n<10;n++){const r=rod(n);g+=`<line x1="${r.a[0].toFixed(0)}" y1="${r.a[1].toFixed(0)}" x2="${r.b[0].toFixed(0)}" y2="${r.b[1].toFixed(0)}" stroke="var(--ghost)" stroke-width="8" stroke-linecap="round" stroke-dasharray="10 16"/>`}
+  return `<svg class="${cls||""}" viewBox="30 18 300 290" aria-hidden="true">${g}<line x1="70" y1="292" x2="290" y2="292" stroke="var(--lit)" stroke-width="18" stroke-linecap="round"/></svg>`}
 
 /* ---------- Reiter ---------- */
 const TABS=[["geruest","Gerüst"],["imp","Impulse"],["ueben","Üben"],["werte","Werte"]];
@@ -1221,7 +1244,7 @@ function viewGeruest(){
   </section>`}
 function pillarTap(id){const svg=document.querySelector(".gsvg");if(!svg)return;const w=W[id],l=level(id),n=nextFor(id);
   const was=svg.dataset.sel===id;svg.dataset.sel=was?"":id;svg.querySelectorAll(".rod").forEach(r=>r.classList.toggle("on",!was&&r.dataset.seg.startsWith(id+":")));
-  svg.classList.toggle("sel",!was);buzz([6,30,8]);
+  svg.classList.toggle("sel",!was);document.querySelectorAll(".glegend .lg").forEach(b=>b.classList.toggle("on",!was&&b.dataset.pil===id));buzz([6,30,8]);
   if(was){$("#ginfo").innerHTML="";return}
   const segs=[...svg.querySelectorAll(`.rod[data-seg^="${id}:"]`)];if(!calm())segs.forEach((s,i)=>s.animate([{opacity:1},{opacity:.45,offset:.35},{opacity:1}],{duration:650,delay:i*60,easing:"ease-out"}));
   if(segs.length)lightUp(segs[segs.length-1]);
@@ -1253,9 +1276,9 @@ let confirmReset=false;
 function aboutFold(){return `<details class="fold" id="aboutfold" ${S.aboutOpen||confirmReset?"open":""}><summary><span>Über diese App</span><span class="label">Haltung · Quellen</span>${CHEV}</summary><div class="fbody about">
   <p>Das Wertegerüst hilft dir, dir Schritt für Schritt klar zu werden, wofür du stehst. Es gibt keine richtigen Werte, die du übernehmen musst. Nur die Würde jedes Menschen ist als Fundament schon eingebaut, weil sie für alle gilt, auch für Menschen, deren Taten du entschieden ablehnst.</p>
   <p>Werte geraten oft in Spannung zueinander. Das ist kein Zeichen von Haltlosigkeit, sondern normal. Stabil wird ein Gerüst, wenn du deine Werte kennst, sie in schwierigen Lagen abwägst und sie im Alltag lebst. Darum gibt es Impulse zum Nachdenken, Belastungsproben zum Entscheiden und Übungen zum Tun.</p>
-  <h3>So wächst eine Stütze</h3><p>Jede Stütze hat fünf Bauteile: gewählt, Leitsatz, geprüft, gelebt und bekräftigt. Bretter verbinden Nachbarn, die gleich hoch stehen. Streben entstehen, wenn du in einer Probe zwischen zwei deiner Stützen abgewogen hast.</p>
+  <h3>So wächst eine Stütze</h3><p>Jede Stütze hat fünf Bauteile: gewählt, Leitsatz, geprüft, gelebt und bekräftigt. Die Stäbe berühren sich kaum. Wie bei einer Tensegrity-Skulptur hält Spannung das Ganze zusammen: feine Seile verbinden benachbarte Stabenden, und wenn du in einer Belastungsprobe zwischen zwei deiner Werte abgewogen hast, kommt ein farbiges Spannseil dazu. Werte dürfen also in Spannung zueinander stehen. Gerade das macht das Gerüst stabil.</p>
   <h3>Wie sicher ist ein Impuls?</h3><div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)}<span class="muted">${["Philosophie, Zeitzeugnis oder Denkmodell","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder sehr viele Studien"][l]}</span></div>`).join("")}</div>
-  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 18.10.2026, 08:12 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
+  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 18.10.2026, 08:34 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
   <div class="row"><button class="btn" id="shareapp">App weiterempfehlen</button></div>
   <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
   <div class="credit"><span class="label">Von wem</span><p>Das Wertegerüst ist ein privates Projekt von <b>Carlo Maximilian Engeländer</b>. Idee, Auswahl, Texte und Gestaltung stammen von ihm.</p><p class="muted small">© 2026 Carlo Maximilian Engeländer. Alle Rechte vorbehalten. Du darfst die App gern nutzen und den Link weitergeben, auch im Unterricht. Inhalte, Texte und Gestaltung dürfen aber nicht ohne Erlaubnis kopiert, verändert oder anderswo veröffentlicht werden.</p></div>
@@ -1535,7 +1558,7 @@ function checkRow(id){const e=U[id],v=S.ueb[id];if(!(e.d>=3))return "";const di=
 
 /* ---------- Momente: selten und nüchtern ---------- */
 const MOMENTS=[
- {id:"kern1",t:"Die erste Stütze",x:"Sie steht jetzt in deinem Gerüst. Mit jedem Bauteil wird sie höher.",ok:()=>S.kern.length>=1},
+ {id:"kern1",t:"Die erste Stütze",x:"Sie steht jetzt in deinem Gerüst. Mit jedem Bauteil kommt ein Stab dazu.",ok:()=>S.kern.length>=1},
  {id:"leit1",t:"Der erste Leitsatz",x:"Die App fragt in ein paar Tagen nach, ob du noch dazu stehst.",ok:()=>S.kern.some(hasLeit)},
  {id:"probe1",t:"Die erste Entscheidung",x:"Deine Wahl zählt für die Werte, die sie stärkt.",ok:()=>nPrDone()>=1},
  {id:"kern5",t:"Fünf Stützen",x:"Dein Gerüst hat jetzt alle Stützen. Ab jetzt geht es darum, sie zu festigen.",ok:()=>S.kern.length>=5},
@@ -1592,7 +1615,7 @@ function render(){
   checkMoments()}
 function openProbe(id){if($("#layer").innerHTML)$("#layer").innerHTML="";pcur=id;pFilter="alle";anim=true;tab="ueben";render();const el=$("#probe");if(el){el.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});setTimeout(()=>trace(el,`var(--c-${P[id].cat})`),350)}}
 document.addEventListener("click",e=>{
-  if(e.target.closest){const g=e.target.closest(".gsvg");if(g){const h=e.target.closest("[data-pil]");if(h){pillarTap(h.dataset.pil);return}const sl=e.target.closest("[data-slot]");if(sl){buzz(6);if(!S.kern.length){finder();return}anim=true;tab="werte";render();window.scrollTo(0,0);return}if(e.target.closest(".slab")){buzz(6);valueSheet("wuerde");return}}}
+  if(e.target.closest){const lg=e.target.closest(".glegend [data-pil]");if(lg){pillarTap(lg.dataset.pil);return}if(e.target.closest("[data-wurde]")){buzz(6);valueSheet("wuerde");return}const g=e.target.closest(".gsvg");if(g){const h=e.target.closest("[data-pil]");if(h){pillarTap(h.dataset.pil);return}const sl=e.target.closest("[data-slot]");if(sl){buzz(6);if(!S.kern.length){finder();return}anim=true;tab="werte";render();window.scrollTo(0,0);return}if(e.target.closest(".slab")){buzz(6);valueSheet("wuerde");return}}}
   const t=e.target.closest("button,a");if(!t)return;const d=t.dataset;
   if(finderClick(t,d))return;
   if(t.closest(".bite .links")&&!t.dataset.lit){t.dataset.lit=1;buzz([6,30,10]);trace(t,getComputedStyle(t).getPropertyValue("--c").trim()||null);
@@ -1663,7 +1686,7 @@ function fromHash(){const h=location.hash.slice(1);if(["imp","werte","ueben","ge
 if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
-const BUILD="18.10.2026, 08:12";
+const BUILD="18.10.2026, 08:34";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("wg-upd")}catch(e){}if(done===m[1])return;
