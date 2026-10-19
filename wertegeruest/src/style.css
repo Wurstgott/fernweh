@@ -591,3 +591,6 @@ input.hap{-webkit-appearance:none;appearance:none;position:absolute;inset:0;widt
 .pfoffer{border:1px solid var(--hair);border-radius:10px;padding:12px 14px;margin:0 0 14px;display:flex;flex-direction:column;gap:8px}
 .pfoffer p{font-size:14px;line-height:1.5;color:var(--muted)}
 .pfoffer .row{margin:0;align-items:center;column-gap:16px}
+
+/* Freier Platz: Vorschläge sind Aktionen, nicht abgewählte Ergebnisse, darum voll sichtbar */
+.fr[data-kern]{opacity:1}

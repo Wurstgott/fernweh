@@ -175,7 +175,7 @@ function geruestSVG(){
   /* Die Wolke ruht über dem Fundament, gehalten von drei Seilen zu den untersten Punkten */
   let feet="";const low=rods.flatMap(r=>[r.a,r.b]).sort((p,q)=>q[1]-p[1]).slice(0,3).sort((p,q)=>p[0]-q[0]);low.forEach((p,i)=>{feet+=ln([p[0],p[1],[110,180,250][i],BASE],"ft")});
   if(!rods.length)[110,180,250].forEach(x=>{feet+=ln([x,CY+RY*.9,x,BASE],"ft gh")});
-  const legend=`<div class="glegend">${slots.map((id,i)=>{if(!id)return `<button class="lg free" data-finder="1"><span class="sw0"></span><span class="nm">frei</span></button>`;const w=W[id],l=level(id);
+  const legend=`<div class="glegend">${slots.map((id,i)=>{if(!id)return `<button class="lg free" data-addslot="1"><span class="sw0"></span><span class="nm">frei</span></button>`;const w=W[id],l=level(id);
     return `<button class="lg" ${cc(w.cat)} data-pil="${id}" aria-label="${w.n}, Stufe ${l} von 5"><span class="nm">${shy(id)}</span><span class="pips">${[0,1,2,3,4].map(k=>`<i class="${k<l?"on":""}"></i>`).join("")}</span></button>`}).join("")}</div>`;
   hits+=rhit([40,BASE,320,BASE],'data-wurde="1" data-fund="1"');
   return `<div class="gbox"><svg class="gsvg" viewBox="0 6 360 300" role="img" aria-label="Dein Wertegerüst mit ${parts()} von 25 Bauteilen">
@@ -387,7 +387,7 @@ function viewWerte(){
   return `<section class="view">
     <header class="vh"><h1>Werte</h1><p>Bis zu fünf Werte tragen dein Gerüst. Am leichtesten findest du sie Schritt für Schritt. Du kannst sie auch direkt aus der Liste wählen.</p></header>
     ${findCard()}
-    <div class="slots">${[0,1,2,3,4].map(i=>{const id=S.kern[i];if(!id)return `<button class="slot" data-finder="1">${pillarSVG(null,i)}<span class="sn">frei</span></button>`;const w=W[id],l=level(id);return `<button class="slot on" ${cc(w.cat)} data-wert="${id}">${pillarSVG(id,i)}<span class="sn">${shy(id)}</span></button>`}).join("")}</div>
+    <div class="slots">${[0,1,2,3,4].map(i=>{const id=S.kern[i];if(!id)return `<button class="slot" data-addslot="1">${pillarSVG(null,i)}<span class="sn">frei</span></button>`;const w=W[id],l=level(id);return `<button class="slot on" ${cc(w.cat)} data-wert="${id}">${pillarSVG(id,i)}<span class="sn">${shy(id)}</span></button>`}).join("")}</div>
     <p class="muted small fundline">Fundament in jedem Gerüst: <button class="linkbtn" data-wert="wuerde">die Würde jedes Menschen</button></p>
     ${due.length?due.map(festRow).join(""):""}
     <div class="sec" id="wlist"><div class="sh"><span class="label">Alle Werte</span><span class="label">${list.length}</span></div>${chips("wfilter",wFilter,cnt)}
@@ -630,6 +630,18 @@ function finderView(){const f=F(),steps=["Einschätzen","Abwägen","Auswählen"]
    <div class="row"><button class="btn primary" id="fapply" ${f.pick.length?"":"disabled"}>${f.pick.length} als Stützen übernehmen</button>${f.dh&&f.dh.length?`<button class="linkbtn" id="fdback">Zurück zum Abwägen</button>`:""}<button class="linkbtn" id="frestart">Neu beginnen</button></div>`}
 function finder(still){const l=$("#layer");if(!$("#finder")){sheet(`<div id="finder" class="finder"></div>`);$("#sh").classList.add("fsheet")}
   const box=$("#finder");box.innerHTML=finderView();const c=box.querySelector(".fcard,.fduel,.fres");if(c&&!still&&!calm())c.animate([{opacity:0,transform:"translateX(18px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)"})}
+/* Freier Platz: eine einzelne Stütze ergänzen, ohne das Werte-Finden neu zu beginnen und ohne die anderen Stützen zu ersetzen.
+   Vorschläge kommen aus dem eigenen Werte-Finden; ohne Ergebnis je ein Wert aus den Bereichen, die noch fehlen. */
+function addSheet(){if(!S.kern.length){finder();return}if(S.kern.length>=MAXKERN)return;
+  const f=S.find&&S.find.v===2&&S.find.c&&S.find.sc?S.find:null,free=id=>W[id]&&!W[id].fund&&!S.kern.includes(id);
+  let sug=f?fRank().filter(free).slice(0,5):[];
+  if(!sug.length){const have=new Set(S.kern.map(id=>W[id].cat));sug=CATKEYS.filter(k=>!have.has(k)).map(k=>WERTE.find(w=>w.cat===k&&free(w.id))).filter(Boolean).map(w=>w.id).slice(0,5)}
+  if(!sug.length)sug=WERTE.filter(w=>free(w.id)).slice(0,5).map(w=>w.id);
+  sheet(`<div class="label">Freier Platz · ${S.kern.length+1} von 5</div><h2>Eine Stütze ergänzen</h2>
+    <p class="lead">Wähle einen Wert, der dir noch fehlt. Deine anderen Stützen bleiben, wie sie sind.</p>
+    <p class="label" style="margin-top:18px">${f?"Aus deinem Werte-Finden":"Vorschläge aus Bereichen, die dir noch fehlen"}</p>
+    <div class="fres">${sug.map(id=>{const w=W[id],why=f?fWhy(id):"";return `<button class="fr" ${cc(w.cat)} data-kern="${id}"><span class="rodmark" aria-hidden="true"></span><span class="tx"><b>${w.n}</b><small>${w.d}</small>${why?`<em class="why">Du hast gesagt: „${why}“</em>`:""}</span></button>`}).join("")}</div>
+    <div class="row"><button class="btn" data-tabgo="werte">Alle Werte ansehen</button><button class="linkbtn" data-finder="1">Werte neu finden</button></div>`)}
 function finderClick(t,d){if(!(d.finder||d.frate||d.fduel||d.fpick||/^f(undo|skip|restart|apply|fwd|dback)$/.test(t.id)))return false;const f=F();
   if(d.finder){finder();return true}
   /* Einschätzen. Im Rückblick hebt erneutes Antippen der markierten Antwort sie auf; der Satz bleibt stehen. */
@@ -673,7 +685,7 @@ const vibOn=()=>S.settings.vibration!==false;
    Navigation (Listen, Reiter, Zurück, Aufklappen, Verweise, Links): kein Tick, nur leichtes Abdunkeln (CSS :active).
    Erfolg und Fehler sind Ausgänge einer Aktion: buzz("ok") oder buzz("err") im Klick-Handler. Erfolg zeigt einen Haken
    in der Meldung (toast(…,true)), Fehler eine kleine Seitwärtsbewegung (shake). */
-const FAM=[["logo","#home,#home2"],["rod",".rhit"],["sw",".setrow[role=switch]"],["sel",".chip,.fbtns .btn,.fopt,.fr,.lg:not(.free),.cdot,.opt,.wq .q"],["act",".btn,.next,.draw,.findcard,.li.daily,.ubtn"]];
+const FAM=[["logo","#home,#home2"],["rod",".rhit"],["sw",".setrow[role=switch]"],["sel",".chip,.fbtns .btn,.fopt,.fr,.lg:not(.free),.cdot,.opt,.wq .q"],["act",".btn,.next,.draw,.findcard,.li.daily,.ubtn,.lg.free"]];
 const HAPSEL=FAM.map(f=>f[1]).join(",");
 const PAT={rod:10,sel:10,sw:10,logo:10,act:12,ok:[10,60,14],err:[24,60,24]};
 const famHost=t=>{const el=t&&t.closest&&t.closest(HAPSEL);return el&&el.tagName!=="A"&&!el.disabled&&el.getAttribute("aria-disabled")!=="true"?el:null};
@@ -890,6 +902,7 @@ document.addEventListener("click",e=>{
   if(e.target.closest){const rh=e.target.closest(".rhit");if(rh){if(rh.dataset.fund){resonate(null);valueSheet("wuerde")}else pillarTap(nearRod(e)||rh.dataset.pil);return}const lg=e.target.closest(".glegend [data-pil]");if(lg){pillarTap(lg.dataset.pil);return}if(e.target.closest("[data-wurde]")){valueSheet("wuerde");return}const g=e.target.closest(".gsvg");if(g){const h=e.target.closest("[data-pil]");if(h){pillarTap(h.dataset.pil);return}const sl=e.target.closest("[data-slot]");if(sl){if(!S.kern.length){finder();return}anim=true;tab="werte";render();window.scrollTo(0,0);return}if(e.target.closest(".slab")){valueSheet("wuerde");return}}}
   const t=e.target.closest("button,a");if(!t)return;const d=t.dataset;
   if(t.classList.contains("ubtn")){doUndo();return}
+  if(d.addslot){addSheet();return}
   if(finderClick(t,d))return;
   if(t.closest(".bite .links")&&!t.dataset.lit){t.dataset.lit=1;trace(t,getComputedStyle(t).getPropertyValue("--c").trim()||null);
     setTimeout(()=>{t.click();delete t.dataset.lit},calm()?0:380);return}
