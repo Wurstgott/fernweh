@@ -323,20 +323,48 @@ function viewWerte(){
       <div class="list">${list.map(w=>`<button class="li wli" data-wert="${w.id}" ${cc(w.cat)}>${dot(w.cat)}<span class="tx"><b>${w.n}</b><small>${w.d}</small></span>${w.fund?`<span class="pill">Fundament</span>`:S.kern.includes(w.id)?`<span class="pill on">Stütze</span>`:""}</button>`).join("")}</div></div>
     <details class="fold" id="wqfold" ${S.wqOpen?"open":""}><summary><span>Was ist ein Wertequadrat?</span>${CHEV}</summary><div class="fbody about">
       <p>Jeder Wert braucht eine Schwester, um gut zu bleiben. Ehrlichkeit ohne Taktgefühl wird verletzend, Taktgefühl ohne Ehrlichkeit wird zur Schönfärberei.</p>
-      <p>Das Wertequadrat zeigt oben einen Wert und seine Schwester, unten jeweils ihr Zuviel. Wer zu einem Zuviel neigt, wächst am besten in Richtung der Schwester des eigenen Werts.</p>
+      <p>Das Wertequadrat zeigt oben einen Wert und seine Schwester, unten jeweils ihr Zuviel. Wer zum Zuviel eines Werts neigt, wächst am besten in Richtung seiner Schwester. Wer zum Zuviel der Schwester neigt, wächst in Richtung des Werts.</p>
       <p class="muted small">Das Modell stammt von Paul Helwig und wurde von Friedemann Schulz von Thun bekannt gemacht. Es hilft besonders, wenn du dich zwischen zwei Werten hin- und hergerissen fühlst. Diese Ambivalenz ist kein Fehler, sondern ein Zeichen, dass beide etwas Richtiges wollen.</p>
     </div></details>
   </section>`}
-function wqHTML(w){
-  return `<div class="wq" ${cc(w.cat)}><svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="30" y1="32" x2="70" y2="68" vector-effect="non-scaling-stroke"/><line x1="70" y1="32" x2="30" y2="68" vector-effect="non-scaling-stroke"/></svg>
-    <div class="q top"><small>Wert</small><b>${w.n}</b></div><div class="q top"><small>Schwester</small><b>${w.s}</b></div>
-    <div class="q bot"><small>Zuviel davon</small><b>${w.zv}</b></div><div class="q bot"><small>Zuviel davon</small><b>${w.zs}</b></div></div>
-    <p class="muted small">Wer zu ${w.zv} neigt, wächst in Richtung ${w.s}. Wer zu ${w.zs} neigt, wächst in Richtung ${w.n}.</p>`}
+/* Wertequadrat: Jeder der vier Begriffe lässt sich antippen und erklärt sich selbst und seinen Platz im Quadrat.
+   Oben stehen Wert und Schwester, darunter ihr jeweiliges Zuviel. Die Diagonalen verbinden ein Zuviel mit der Richtung,
+   in die man von dort wächst (zv → Schwester, zs → Wert). */
+/* Begriffe wie „Blinde Gefolgschaft“ beginnen mit einem Adjektiv; mitten im Satz wird es kleingeschrieben. */
+const mid=t=>/^[A-ZÄÖÜ][a-zäöüß]+(e|er|es|en|em) [A-ZÄÖÜ]/.test(t)?t[0].toLowerCase()+t.slice(1):t;
+const WQROLE={w:"Wert",s:"Schwester",zv:"Zuviel davon",zs:"Zuviel davon"};
+function wqHTML(w){const q=(r,t)=>`<button class="q ${r==="w"||r==="s"?"top":"bot"}" data-wq="${w.id}" data-role="${r}" aria-pressed="false" aria-controls="wqi-${w.id}"><small>${w.fund&&r==="zv"?"Ohne Klarheit":WQROLE[r]}</small><b>${t}</b></button>`;
+  return `<div class="wq" ${cc(w.cat)} data-on=""><svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none"><line class="d1" x1="30" y1="32" x2="70" y2="68" vector-effect="non-scaling-stroke"/><line class="d2" x1="70" y1="32" x2="30" y2="68" vector-effect="non-scaling-stroke"/></svg>
+    ${q("w",w.n)}${q("s",w.s)}${q("zv",w.zv)}${q("zs",w.zs)}</div>
+    <div class="wqinfo" id="wqi-${w.id}" aria-live="polite">${wqDefault(w)}</div>`}
+/* Die Satzschablonen nennen die Begriffe nur im Nominativ, nach einem Doppelpunkt oder nach „mehr“. So passen sie zu jedem Begriff,
+   auch zu Mehrwortbegriffen, Zählwörtern und Plural („Ausreden“), ohne dass Kasus oder Artikel falsch werden. */
+const wqDefault=w=>`<p class="muted small">${w.fund
+  ?`Würde gilt für jeden Menschen und lässt sich nicht übertreiben. Wer sie aber so betont, dass Unrecht nicht mehr benannt wird, landet in der Verharmlosung. Wer dort landet, braucht mehr ${mid(w.s)}. ${w.s} ohne Achtung vor der Würde kippt ins Zuviel: ${mid(w.zs)}. Wer dort landet, braucht den Blick zurück auf die Würde des Menschen.`
+  :`${w.n} ohne ${mid(w.s)} kippt ins Zuviel: ${mid(w.zv)}. Wer dort landet, braucht mehr ${mid(w.s)}. ${w.s} ohne ${w.n} kippt ins Zuviel: ${mid(w.zs)}. Wer dort landet, braucht mehr ${w.n}.`} Tippe auf einen Begriff, um mehr zu erfahren.</p>`;
+function wqInfo(w,r){const Q=(typeof QUAD!=="undefined"&&QUAD[w.id])||{},x=Q[r]||{};let name,lab,def,rel,sign="",ask;
+  if(r==="w"){name=w.n;lab=w.fund?"Wert · Fundament":"Wert";def=w.d;ask=w.f;
+    rel=w.fund?`Die Würde selbst lässt sich nicht übertreiben. Übertreiben lässt sich aber, wie man sie betont: Wer nur noch die Würde eines Menschen sieht und sein Unrecht nicht mehr benennt, verharmlost. Darum braucht Würde als Gegengewicht ${mid(w.s)}.`
+      :`${w.n} braucht als Gegengewicht ${mid(w.s)}. Beide wollen etwas Richtiges. Fehlt das Gegengewicht, kippt ${w.n} leicht ins Zuviel: ${mid(w.zv)}.`}
+  else if(r==="s"){name=w.s;lab=`Schwester von ${w.n}`;def=x.d;ask=x.f;
+    rel=w.fund?`${w.s} steht nicht gegen die Würde, sondern folgt aus ihr: Weil jeder Mensch zählt, zählt auch, was ihm angetan wird. Fehlt aber die Achtung vor der Würde dessen, der Unrecht getan hat, kippt ${mid(w.s)} leicht ins Zuviel: ${mid(w.zs)}.`
+      :`${w.s} steht nicht gegen ${w.n}. Beide wollen etwas Richtiges und halten sich gegenseitig im Gleichgewicht. Fehlt ${w.n}, kippt ${mid(w.s)} leicht ins Zuviel: ${mid(w.zs)}.`}
+  else if(r==="zv"){name=w.zv;lab=w.fund?"Würde ohne Klarheit":`Zuviel von ${w.n}`;def=x.d;ask=x.f;sign=x.a;
+    rel=w.fund?`Dieses Zuviel entsteht, wenn die Würde eines Menschen betont wird, ohne sein Unrecht klar zu benennen. Der Weg heraus führt schräg hinüber zu mehr ${mid(w.s)}. Wer nur das Gegenteil sucht, landet leicht beim anderen Zuviel: ${mid(w.zs)}.`
+      :`Dieses Zuviel entsteht, wenn ${w.n} ohne ${mid(w.s)} gelebt wird. Der Weg heraus führt schräg hinüber zu mehr ${mid(w.s)}. Wer nur das Gegenteil sucht, landet leicht beim anderen Zuviel: ${mid(w.zs)}.`}
+  else{name=w.zs;lab=`Zuviel von ${mid(w.s)}`;def=x.d;ask=x.f;sign=x.a;
+    rel=w.fund?`Dieses Zuviel entsteht, wenn ${mid(w.s)} die Würde des Menschen vergisst. Der Weg heraus führt schräg hinüber zur Würde: Du lehnst die Tat entschieden ab und erkennst den Menschen trotzdem als Menschen an. Wer nur das Gegenteil sucht, landet leicht beim anderen Zuviel: ${mid(w.zv)}.`
+      :`Dieses Zuviel entsteht, wenn ${mid(w.s)} ohne ${w.n} gelebt wird. Der Weg heraus führt schräg hinüber zu mehr ${w.n}. Wer nur das Gegenteil sucht, landet leicht beim anderen Zuviel: ${mid(w.zv)}.`}
+  return `<div class="wqcard" data-role="${r}"><div class="label">${lab}</div><h4>${name}</h4>${def?`<p>${def}</p>`:""}<p class="muted">${rel}</p>
+    ${sign?`<div class="wqsign"><span class="label">Woran du es merkst</span><p>${sign}</p></div>`:""}${ask?`<p class="ask">${ask}</p>`:""}</div>`}
+function wqTap(t){const box=t.closest(".wq"),id=t.dataset.wq,r=t.dataset.role,w=W[id],info=document.getElementById("wqi-"+id);if(!box||!w||!info)return;
+  const was=box.dataset.on===r;box.dataset.on=was?"":r;box.querySelectorAll(".q").forEach(b=>b.setAttribute("aria-pressed",String(!was&&b.dataset.role===r)));
+  info.innerHTML=was?wqDefault(w):wqInfo(w,r);if(!was&&!calm())info.firstElementChild.animate([{opacity:0},{opacity:1}],{duration:220,easing:"ease-out"})}
 function valueSheet(id){const w=W[id],isK=S.kern.includes(id),L=S.leit[id]||{};
   const imps=IMPULSE.filter(b=>b.w===id).slice(0,2),prs=PROBEN.filter(p=>p.o.some(o=>o.w.includes(id))).slice(0,2),ues=UEBUNGEN.filter(u=>u.w===id).slice(0,2);
   const status=isK?`<h3>Bauteile dieser Stütze</h3><ul class="steps5" ${cc(w.cat)}>${steps(id).map(([t,ok])=>`<li class="${ok?"ok":""}"><i></i>${t}</li>`).join("")}</ul>`:"";
   const bsp=typeof LEITBSP!=="undefined"&&LEITBSP[id];
-  const help=`<div class="lhelp"><p>${w.f}</p><p class="muted small">Denk auch an die Schwester von ${w.n}: ${w.s}. Ohne sie kann ${w.n} zu ${w.zv} werden.</p>${bsp?`<button class="linkbtn" data-lbsp="${id}">Beispiel ansehen</button><p class="lbsp muted small" hidden>Ein Beispiel, nicht zum Abschreiben: „${bsp}“ Dein eigener Satz darf ganz anders klingen.</p>`:""}</div>`;
+  const help=`<div class="lhelp"><p>${w.f}</p><p class="muted small">Denk auch an die Schwester von ${w.n}: ${w.s}. Ohne sie kann ${w.n} zu ${mid(w.zv)} werden.</p>${bsp?`<button class="linkbtn" data-lbsp="${id}">Beispiel ansehen</button><p class="lbsp muted small" hidden>Ein Beispiel, nicht zum Abschreiben: „${bsp}“ Dein eigener Satz darf ganz anders klingen.</p>`:""}</div>`;
   const leit=isK?`<h3>Dein Leitsatz</h3>${L.t?"":help}<div class="leitbox"><textarea id="leittext" placeholder="Ich stehe dafür ein, dass …">${esc(L.t||"")}</textarea><div class="row"><button class="btn primary" data-leitsave="${id}">Leitsatz speichern</button></div><p class="muted small">Ein guter Leitsatz ist konkret und gilt auch dann, wenn er dich etwas kostet. Die App fragt in wachsenden Abständen nach, ob du noch dazu stehst.</p></div>`:"";
   const btn=w.fund?`<div class="fundnote">Die Würde jedes Menschen ist das Fundament deines Gerüsts. Sie gilt für jeden, auch für Menschen, deren Taten du entschieden ablehnst. Deshalb ist sie in jedem Gerüst schon eingebaut.</div>`:
     `<div class="row">${isK?`<button class="btn" data-unkern="${id}">Nicht mehr als Stütze</button>`:`<button class="btn primary" data-kern="${id}" ${S.kern.length>=MAXKERN?"disabled":""}>Als Stütze wählen</button>`}</div>${!isK&&S.kern.length>=MAXKERN?`<p class="muted small">Du hast schon fünf Stützen. Nimm zuerst eine heraus, wenn du diese wählen möchtest.</p>`:""}`;
@@ -519,7 +547,7 @@ const vibOn=()=>S.settings.vibration!==false;
    Navigation (Listen, Reiter, Zurück, Aufklappen, Verweise, Links): kein Tick, nur leichtes Abdunkeln (CSS :active).
    Erfolg und Fehler sind Ausgänge einer Aktion: buzz("ok") oder buzz("err") im Klick-Handler. Erfolg zeigt einen Haken
    in der Meldung (toast(…,true)), Fehler eine kleine Seitwärtsbewegung (shake). */
-const FAM=[["logo","#home,#home2"],["rod",".rhit"],["sw",".setrow[role=switch]"],["sel",".chip,.fbtns .btn,.fopt,.fr,.lg:not(.free),.cdot,.opt"],["act",".btn,.next,.draw,.findcard,.li.daily"]];
+const FAM=[["logo","#home,#home2"],["rod",".rhit"],["sw",".setrow[role=switch]"],["sel",".chip,.fbtns .btn,.fopt,.fr,.lg:not(.free),.cdot,.opt,.wq .q"],["act",".btn,.next,.draw,.findcard,.li.daily"]];
 const HAPSEL=FAM.map(f=>f[1]).join(",");
 const PAT={rod:10,sel:10,sw:10,logo:10,act:12,ok:[10,60,14],err:[24,60,24]};
 const famHost=t=>{const el=t&&t.closest&&t.closest(HAPSEL);return el&&el.tagName!=="A"&&!el.disabled&&el.getAttribute("aria-disabled")!=="true"?el:null};
@@ -741,6 +769,7 @@ document.addEventListener("click",e=>{
   if(t.id==="pnext"){pBlind=null;pHint=null;const cur=pcur;pcur=null;S.pskip=(S.pskip||0)+1;persist();let p=currentProbe();if(p&&p.id===cur){pcur=null;S.pskip++;p=currentProbe()}anim=true;render();const el=$("#probe");if(el)el.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});return}
   if(d.pshare){shareProbe(P[d.pshare]);return}
   if(d.probeOpen){const id=d.probeOpen;pBlind=d.blind&&blindDue(id)?id:null;pHint=d.phint||null;openProbe(id);return}
+  if(d.wq){wqTap(t);return}
   if(d.lbsp){const p=t.parentNode.querySelector(".lbsp");if(p){p.hidden=!p.hidden;t.textContent=p.hidden?"Beispiel ansehen":"Beispiel ausblenden"}return}
   if(d.fnote){const b=$("#fnb-"+d.fnote);if(b){b.hidden=false;t.hidden=true;const ta=b.querySelector("textarea");if(ta)ta.focus()}return}
   if(d.affirm){const L=S.leit[d.affirm];const fn=$("#fn-"+d.affirm),nt=fn?fn.value.trim():"";if(nt)L.notes=(Array.isArray(L.notes)?L.notes:[]).concat([{t:now(),x:nt}]);L.n=(L.n||0)+1;L.next=now()+FIV[Math.min(L.n,FIV.length-1)]*DAY;buzz("ok");const card=t.closest(".fest");if(card)lightUp(card);toast(nt?"Bekräftigt. Deine Notiz steht im Bautagebuch.":"Bekräftigt. Die App fragt später wieder nach.",true);setTimeout(()=>{save();anim=true;render()},calm()?0:450);return}
