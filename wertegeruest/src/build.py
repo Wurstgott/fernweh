@@ -2,7 +2,7 @@ import datetime,zoneinfo,os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 R=lambda f:open(f).read()
 stamp=datetime.datetime.now(zoneinfo.ZoneInfo('Europe/Berlin')).strftime('%d.%m.%Y, %H:%M')
-page=R('shell.html').replace('/*CSS*/',R('style.css')).replace('/*DATA*/',R('werte.js')+'\n'+R('impulse.js')+'\n'+R('ueben.js')).replace('/*MAIN*/',R('main.js')).replace('__BUILD__',stamp)
+page=R('shell.html').replace('/*CSS*/',R('style.css')).replace('/*DATA*/',R('werte.js')+'\n'+R('impulse.js')+'\n'+R('ueben.js')+'\n'+R('personal.js')).replace('/*MAIN*/',R('main.js')).replace('__BUILD__',stamp)
 open('artifact.html','w').write(page)
 U='https://wurstgott.github.io/fernweh/wertegeruest/'
 D='Ein stabiles Gerüst aus eigenen Werten, Schritt für Schritt.'

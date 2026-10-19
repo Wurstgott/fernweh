@@ -562,3 +562,32 @@ input.hap{-webkit-appearance:none;appearance:none;position:absolute;inset:0;widt
 .wqcard .ask{font-size:16.5px;margin-top:2px}
 .wqsign{display:flex;flex-direction:column;gap:3px}
 
+
+/* Rückgängig: dieselbe Meldung, rechts ein Textknopf mit voller Tippfläche. Andere Meldungen rücken darüber (stackToasts). */
+.toast{transition:top .3s var(--ease),bottom .3s var(--ease)}
+.toast.undo{display:flex;align-items:center;gap:4px;text-align:left;padding:4px 4px 4px 16px}
+.toast.undo .um{flex:1;min-width:0;padding:7px 0;text-wrap:pretty}
+.ubtn{position:relative;overflow:hidden;flex:none;min-height:44px;min-width:44px;padding:0 12px;border:0;border-radius:8px;background:none;color:var(--accent-ink);font:inherit;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ubtn:active{background-color:var(--s2)}
+/* Auswahl, die sich wieder abwählen lässt */
+.opts.done .opt.pick{cursor:pointer}
+.opt.pick .vchip{z-index:7}
+.fbtns .btn[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.fbtns .btn:not(.primary)[aria-pressed="true"]{background-color:var(--s2)}
+.fopt.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent)}
+.fnav{display:inline-flex;gap:18px;align-items:center}
+.fmeta .linkbtn[aria-pressed="true"]{color:var(--ink);text-decoration-color:currentColor}
+.cdot[aria-pressed="true"] i{background:var(--lit);border-color:var(--lit)}
+.cdot[aria-pressed="true"] span{color:var(--ink)}
+
+.wqcard .wqless{font-size:14.5px;line-height:1.4;color:var(--c);font-weight:600;margin-top:-2px}
+
+/* Beispiele anpassen: Check in den Einstellungen und Angebot in der Probe */
+.chips.wrap{flex-wrap:wrap;overflow:visible;margin:0;padding:2px 0 4px}
+.pfbox{display:flex;flex-direction:column;gap:18px;margin-top:12px}
+.pfq{display:flex;flex-direction:column;gap:8px}
+.pfl{font-weight:600;font-size:15px}
+.pfbox .row{margin-top:-4px}
+.pfoffer{border:1px solid var(--hair);border-radius:10px;padding:12px 14px;margin:0 0 14px;display:flex;flex-direction:column;gap:8px}
+.pfoffer p{font-size:14px;line-height:1.5;color:var(--muted)}
+.pfoffer .row{margin:0;align-items:center;column-gap:16px}

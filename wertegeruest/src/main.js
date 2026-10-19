@@ -8,6 +8,14 @@ try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw)
 S.cur=null;S.filter="alle";
 const I=Object.fromEntries(IMPULSE.map(b=>[b.id,b])),W=Object.fromEntries(WERTE.map(w=>[w.id,w])),P=Object.fromEntries(PROBEN.map(p=>[p.id,p])),U=Object.fromEntries(UEBUNGEN.map(u=>[u.id,u]));
 S.kern=(S.kern||[]).filter(id=>W[id]&&!W[id].fund).slice(0,5);
+/* Persönliche Beispiele (personal.js). Das Profil liegt optional in S.profil ({v,phase,nah,gruppe}); S.pfAsk merkt sich das
+   Angebot in der Probe. Angezeigt wird immer die angepasste Fassung, ohne Profil mit neutralen Familienrollen.
+   Geteilt und in den Kalender exportiert wird die neutrale Fassung (Profil null). Werte und Reihenfolge der Optionen bleiben gleich. */
+const PRO=()=>S.profil&&typeof S.profil==="object"?S.profil:null;
+const pv=(p,pr)=>p&&typeof personalisiereProbe==="function"?personalisiereProbe(p,pr===undefined?PRO():pr):p;
+const ptl=p=>pv(p).t;
+const uv=u=>u&&typeof personalisiereUebung==="function"?personalisiereUebung(u,PRO()):u;
+const wb=w=>typeof personalisiereWert==="function"?personalisiereWert(w,PRO()).b:w.b;
 /* Einstellungen. „Vibration“ hieß früher „Haptik“ (settings.haptik); der alte Wert wird übernommen. */
 {const old=S.settings&&typeof S.settings==="object"&&!Array.isArray(S.settings)?S.settings:{};
  S.settings=Object.assign({antiScroll:true,remindTime:"08:00",theme:"dunkel"},old);
@@ -25,21 +33,56 @@ const CHEV='<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4
 let toastHeld=null,toastTimer=0;
 /* toast(html,true): Rückmeldung zu einem Erfolg; davor zeichnet sich ein Haken. */
 const typing=el=>!!el&&/TEXTAREA|INPUT/.test(el.tagName)&&!(el.classList&&el.classList.contains("hap"));
+/* Liegt die Meldung über einem sichtbaren Eingabefeld? */
+const covers=t=>{const r=t.getBoundingClientRect();return [...document.querySelectorAll("textarea,input:not([type=checkbox])")].filter(f=>!f.closest(".sheet.out")).some(f=>{const q=f.getBoundingClientRect();return q.height&&q.bottom>r.top-8&&q.top<r.bottom+8&&q.bottom>0&&q.top<innerHeight})};
 function toast(m,ok){if(momentOpen){toastHeld=[m,ok];return}
-  document.querySelectorAll(".toast").forEach(x=>x.remove());clearTimeout(toastTimer);
+  document.querySelectorAll(".toast:not(.undo)").forEach(x=>x.remove());clearTimeout(toastTimer);
   const t=document.createElement("div");t.className="toast"+(ok?" ok":"");t.setAttribute("role","status");t.setAttribute("aria-live","polite");t.innerHTML=(ok?CK:"")+m;document.body.appendChild(t);
-  const r=t.getBoundingClientRect(),hit=[...document.querySelectorAll("textarea,input:not([type=checkbox])")].some(f=>{const q=f.getBoundingClientRect();return q.height&&q.bottom>r.top-8&&q.top<r.bottom+8&&q.bottom>0&&q.top<innerHeight});
-  if(hit||typing(document.activeElement))t.classList.add("raise");
+  if(covers(t)||typing(document.activeElement))t.classList.add("raise");stackToasts();
   const ms=Math.min(5000,2000+45*(t.textContent||"").length);
   toastTimer=setTimeout(()=>{t.classList.add("out");setTimeout(()=>t.remove(),320)},ms)}
 function releaseToast(){if(!toastHeld)return;const [m,ok]=toastHeld;toastHeld=null;setTimeout(()=>toast(m,ok),250)}
+/* Rückgängig: Vor jeder Aktion, die den Speicherstand ändert und dabei ein Fenster schließt oder die Ansicht wechselt,
+   merkt sich snap() eine tiefe Kopie des Speicherstands (dazu Reiter und Probenzustand). undoToast() zeigt die Meldung
+   mit dem Textknopf „Rückgängig“ sechs Sekunden lang. Eine neue Aktion ersetzt das Angebot. Rückgängig setzt den Stand
+   zurück, speichert, zeichnet neu und öffnet bei Bedarf das Fenster wieder (o.reopen; o.after läuft nach dem Neuzeichnen).
+   Die Meldung liegt an der üblichen Stelle; andere Meldungen rücken darüber, statt sie zu verdecken. Während ein Moment
+   offen ist, wartet das Angebot und erscheint danach mit voller Zeit. */
+const UNDO_MS=6000;let undoState=null,undoTimer=0;
+const snap=()=>({s:JSON.stringify(S),tab,pcur,pBlind,pHint});
+function undoToast(m,ok,sn,o){clearTimeout(undoTimer);undoState=Object.assign({m,ok,sn},o||{});if(momentOpen){document.querySelectorAll(".toast.undo").forEach(x=>x.remove());return}showUndo()}
+function showUndo(){const u=undoState;if(!u)return;document.querySelectorAll(".toast.undo").forEach(x=>x.remove());
+  const t=document.createElement("div");t.className="toast undo"+(u.ok?" ok":"");t.setAttribute("role","status");t.setAttribute("aria-live","polite");
+  t.innerHTML=`<span class="um">${u.ok?CK:""}${u.m}</span><button class="ubtn" type="button">Rückgängig</button>`;document.body.appendChild(t);stackToasts();
+  clearTimeout(undoTimer);undoTimer=setTimeout(endUndo,UNDO_MS)}
+function endUndo(){clearTimeout(undoTimer);undoState=null;document.querySelectorAll(".toast.undo").forEach(x=>{x.classList.add("out");setTimeout(()=>{x.remove();stackToasts()},320)});stackToasts()}
+/* Stapeln: Die Rückgängig-Meldung bleibt an ihrem Platz (oben, wenn sie sonst ein Eingabefeld verdecken würde).
+   Eine andere Meldung am selben Rand rückt um ihre Höhe weiter nach innen. */
+function stackToasts(){const u=document.querySelector(".toast.undo:not(.out)");
+  if(u){u.classList.remove("raise");if(covers(u)||typing(document.activeElement))u.classList.add("raise")}
+  document.querySelectorAll(".toast:not(.undo)").forEach(t=>{t.style.top="";t.style.bottom="";if(!u||t.classList.contains("raise")!==u.classList.contains("raise"))return;const r=u.getBoundingClientRect();
+    if(u.classList.contains("raise"))t.style.top=(r.bottom+8)+"px";else t.style.bottom=(innerHeight-r.top+8)+"px"})}
+/* Beginnt man zu schreiben, rückt die Rückgängig-Meldung aus dem Weg (nur bei Textfeldern, nie beim Antippen der Meldung selbst). */
+document.addEventListener("focusin",e=>{if(typing(e.target)&&document.querySelector(".toast.undo:not(.out)"))stackToasts()});
+function doUndo(){const u=undoState;if(!u)return;endUndo();
+  /* Reine Ansichts-Einstellungen (aufgeklappte Bereiche, Einstellungen) bleiben, wie sie gerade sind. */
+  const keep={settings:S.settings};["jOpen","aboutOpen","uebOpen","prOpen","setOpen","wqOpen"].forEach(k=>{if(k in S)keep[k]=S[k]});
+  S=Object.assign(JSON.parse(u.sn.s),keep);tab=u.sn.tab;pcur=u.sn.pcur;pBlind=u.sn.pBlind;pHint=u.sn.pHint;confirmReset=false;
+  clearTimeout(momentTimer);persist();applyTheme();
+  if(!u.reopen&&$("#layer").innerHTML)$("#layer").innerHTML="";
+  anim=false;render();if(u.reopen)u.reopen();if(u.after)u.after();toast("Rückgängig gemacht.")}
 let anim=true,pendingGlow=false,momentOpen=false;
 const applyTheme=()=>{document.documentElement.dataset.theme=S.settings.theme==="hell"?"light":"dark";const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=S.settings.theme==="hell"?"#E1E6F1":"#1D2850"};
 applyTheme();
 
 /* ---------- Das Gerüst: Stützen, Stufen, Streben ---------- */
 const MAXKERN=5,FIV=[2,7,21,60,150];
-function tested(id){return Object.entries(S.proben).some(([pid,v])=>{const p=P[pid];return p&&v&&v.o!=null&&p.o[v.o]&&p.o[v.o].w.includes(id)})}
+/* Werte einer Probe-Option. Entscheidungen von vor der Textprüfung (19.10.2026) behalten die Werte, mit denen sie getroffen wurden,
+   damit niemand Bauteile verliert. Eine neue Entscheidung nutzt die aktuellen Werte. */
+const OW_ALT={"chatwitz":[["zivilcourage","wuerde"],["gewaltfreiheit","loyalitaet"],["gelassenheit","toleranz"]],"flugreise":[["folgerichtigkeit","zukunftsverantwortung"],["zuwendung","verlaesslichkeit"],["beteiligung","teilen"]],"vater":[["vergebung","selbstachtung"],["gelassenheit","freiheit"],["selbstachtung","verantwortlichkeit"]],"reparieren":[["sorgfalt","zukunftsverantwortung"],["mass","verantwortlichkeit"],["teilen","genuegsamkeit"]],"billigshirt":[["weitherzigkeit","folgerichtigkeit"],["freiheit","zuwendung"],["disziplin","genuegsamkeit"]]};
+if(!S.owMig){Object.keys(OW_ALT).forEach(pid=>{const v=S.proben&&S.proben[pid];if(v&&v.o!=null&&!v.ow)v.ow=OW_ALT[pid]});S.owMig=1;persist()}
+const pw=(pid,v,i)=>(v&&v.ow&&v.ow[i])||(P[pid]&&P[pid].o[i]?P[pid].o[i].w:[]);
+function tested(id){return Object.entries(S.proben).some(([pid,v])=>{const p=P[pid];return p&&v&&v.o!=null&&p.o[v.o]&&pw(pid,v,v.o).includes(id)})}
 /* Übungen, die nur das Gerüst selbst betreffen, zählen nicht als „im Alltag gelebt“. Bei früher abgeschlossenen
    mehrtägigen Übungen steht in v.days, an wie vielen Tagen man sie gemacht hat; ab einem Tag zählt sie. */
 const META=["werteinventur","leitsatz"];
@@ -49,8 +92,8 @@ function affirmed(id){return !!(S.leit[id]&&S.leit[id].n>=2)}
 function steps(id){return [["Als Stütze gewählt",S.kern.includes(id)],["Leitsatz formuliert",hasLeit(id)],["In einer Belastungsprobe geprüft",tested(id)],["In einer Übung gelebt",lived(id)],["Leitsatz zweimal bekräftigt",affirmed(id)]]}
 function level(id){if(!S.kern.includes(id))return 0;return steps(id).filter(s=>s[1]).length}
 function dueLeit(){return S.kern.filter(id=>hasLeit(id)&&(S.leit[id].next||0)<=now())}
-function tally(){const c={};Object.entries(S.proben).forEach(([pid,v])=>{const p=P[pid];if(p&&v&&v.o!=null&&p.o[v.o])p.o[v.o].w.forEach(w=>c[w]=(c[w]||0)+1)});return c}
-function braces(){const set=new Set();Object.entries(S.proben).forEach(([pid,v])=>{const p=P[pid];if(!p||!v||v.o==null)return;const A=p.o[v.o].w,B=p.o.filter((_,i)=>i!==v.o).flatMap(o=>o.w);
+function tally(){const c={};Object.entries(S.proben).forEach(([pid,v])=>{const p=P[pid];if(p&&v&&v.o!=null&&p.o[v.o])pw(pid,v,v.o).forEach(w=>c[w]=(c[w]||0)+1)});return c}
+function braces(){const set=new Set();Object.entries(S.proben).forEach(([pid,v])=>{const p=P[pid];if(!p||!v||v.o==null)return;const A=pw(pid,v,v.o),B=p.o.map((_,i)=>i).filter(i=>i!==v.o).flatMap(i=>pw(pid,v,i));
   A.forEach(a=>B.forEach(b=>{if(a!==b&&S.kern.includes(a)&&S.kern.includes(b))set.add([a,b].sort().join("|"))}))});return [...set].map(k=>k.split("|"))}
 const parts=()=>S.kern.reduce((a,id)=>a+level(id),0);
 function stabWord(s){if(!S.kern.length)return "Bauplan";if(s<8)return "Im Aufbau";if(s<16)return "Trägt schon";if(s<25)return "Stabil";return "Steht fest"}
@@ -68,9 +111,9 @@ function probeFor(id){const has=p=>p.o.some(o=>o.w.includes(id));
 function nextFor(id){const w=W[id];let soft=null;
   if(!hasLeit(id))return {t:`Formuliere einen Leitsatz für ${w.n}.`,wert:id};
   if(!tested(id)){const f=probeFor(id);
-    if(f&&!f.revisit&&!f.other)return f.blind?{t:`Prüfe ${w.n} noch einmal in der Probe „${f.p.t}“, ohne deine alte Antwort zu sehen.`,probe:f.p.id,blind:true}:{t:`Prüfe ${w.n} in einer Belastungsprobe.`,probe:f.p.id};
+    if(f&&!f.revisit&&!f.other)return f.blind?{t:`Prüfe ${w.n} noch einmal in der Probe „${ptl(f.p)}“, ohne deine alte Antwort zu sehen.`,probe:f.p.id,blind:true}:{t:`Prüfe ${w.n} in einer Belastungsprobe.`,probe:f.p.id};
     /* Kein offener Weg: ein weicher Schritt, der andere Stützen nicht blockiert */
-    soft=f?{t:f.other?`Zu ${w.n} gibt es noch keine eigene Probe. Probier eine aus demselben Bereich.`:`Denk die Probe „${f.p.t}“ noch einmal durch.`,probe:f.p.id,hint:id,soft:true}:{t:"Sieh dir die Belastungsproben an.",tabgo:"ueben",soft:true}}
+    soft=f?{t:f.other?`Zu ${w.n} gibt es noch keine eigene Probe. Probier eine aus demselben Bereich.`:`Denk die Probe „${ptl(f.p)}“ noch einmal durch.`,probe:f.p.id,hint:id,soft:true}:{t:"Sieh dir die Belastungsproben an.",tabgo:"ueben",soft:true}}
   if(!lived(id)){const rel=u=>!META.includes(u.id)&&(u.w===id||u.cat===w.cat),st=u=>S.ueb[u.id]&&S.ueb[u.id].status;
     const act=activeUeb().find(x=>rel(U[x]));if(act)return {t:`Schließ die Übung „${U[act].t}“ ab.`,tabgo:"ueben"};
     const u=UEBUNGEN.find(u=>rel(u)&&u.w===id&&!st(u))||UEBUNGEN.find(u=>rel(u)&&!st(u))||UEBUNGEN.find(u=>rel(u));
@@ -81,7 +124,7 @@ function nextFor(id){const w=W[id];let soft=null;
   if(!affirmed(id)){const L=S.leit[id];return {t:`Bekräftige deinen Leitsatz für ${w.n}, wenn die App nachfragt${L&&L.next>now()?`, voraussichtlich am ${fmtDate(L.next)}`:""}.`,wert:id,wait:true}}
   return null}
 function blindOffer(){const p=PROBEN.filter(p=>blindDue(p.id)).sort((a,b)=>S.proben[a.id].t-S.proben[b.id].t)[0];
-  return p?{t:`Vor einiger Zeit hast du die Probe „${p.t}“ entschieden. Wenn du magst, entscheide sie noch einmal, ohne deine alte Antwort zu sehen.`,probe:p.id,blind:true,id:null}:null}
+  return p?{t:`Vor einiger Zeit hast du die Probe „${ptl(p)}“ entschieden. Wenn du magst, entscheide sie noch einmal, ohne deine alte Antwort zu sehen.`,probe:p.id,blind:true,id:null}:null}
 function nextStep(){
   if(!S.kern.length)return {t:"Finde heraus, welche Werte dich tragen. Es dauert etwa fünf Minuten.",finder:true,id:null};
   let wait=null,soft=null;
@@ -237,7 +280,7 @@ function viewGeruest(){
     <div class="sec"><div class="sh"><span class="label">Heute</span><span class="sdate">${new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}</span></div>
       <div class="list today">
         <button class="li daily" data-daily="${db.id}"><span class="k">Impuls</span><span class="tx"><b class="dt">${db.t}</b><small>${CATS[db.cat].n}</small></span><span class="aside">${S.read[db.id]?"gelesen":"→"}</span></button>
-        <button class="li" data-probe-open="${dp.id}" ${blindDue(dp.id)?`data-blind="1"`:""}><span class="k">Probe</span><span class="tx"><b>${dp.t}</b><small>${blindDue(dp.id)?"Länger her. Noch einmal entscheiden?":decided(dp.id)?"entschieden":"Was würdest du tun?"}</small></span><span class="aside">→</span></button>
+        <button class="li" data-probe-open="${dp.id}" ${blindDue(dp.id)?`data-blind="1"`:""}><span class="k">Probe</span><span class="tx"><b>${ptl(dp)}</b><small>${blindDue(dp.id)?"Länger her. Noch einmal entscheiden?":decided(dp.id)?"entschieden":"Was würdest du tun?"}</small></span><span class="aside">→</span></button>
         ${sp?`<div class="special"><p>${sp.t}</p><div class="links">${sp.b&&I[sp.b]?`<button class="tag" data-open="${sp.b}">${dot(I[sp.b].cat)}${I[sp.b].t}</button>`:""}${sp.u&&U[sp.u]?`<button class="tag" data-ueb="${sp.u}">${dot(U[sp.u].cat)}Übung: ${U[sp.u].t}</button>`:""}</div></div>`:""}
       </div></div>
     ${leits.length?`<div class="sec"><div class="sh"><span class="label">Deine Leitsätze</span></div><div class="leits">${leits.map(id=>`<button class="leit" ${cc(W[id].cat)} data-wert="${id}"><small>${dot(W[id].cat)}${W[id].n}${S.leit[id].n?` · ${S.leit[id].n}× bekräftigt`:""}</small><q>${esc(S.leit[id].t)}</q></button>`).join("")}</div></div>`:""}
@@ -271,9 +314,9 @@ function journalFold(){
   const t=tally(),top=Object.entries(t).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const optT=(p,o)=>p.o[o]?p.o[o].t:"";
   const journal=[...done.filter(([,v])=>v.note||v.mood||v.days!=null).map(([id,v])=>({id,t:v.end,c:U[id].cat,title:U[id].t,sub:[v.mood?{gut:"Hat mir gutgetan",mix:"Gemischt",nein:"Eher nicht"}[v.mood]:"Übung",v.days!=null?`an ${v.days} von ${U[id].d} Tagen`:""].filter(Boolean).join(" · "),note:v.note})),
-    ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&v.r).map(([id,v])=>({id,t:v.t,c:P[id].cat,title:P[id].t,sub:"Belastungsprobe",note:v.r})),
-    ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&v.wq).map(([id,v])=>({id,t:v.wqt||v.t,c:"miteinander",title:P[id].t,sub:"Prüfstein Würde",note:v.wq})),
-    ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&Array.isArray(v.hist)&&v.hist.length&&v.o!=null).map(([id,v])=>{const h=v.hist[v.hist.length-1];return {id,t:v.t,c:P[id].cat,title:P[id].t,sub:"Erneut entschieden",note:`Damals: ${optT(P[id],h.o)} Heute: ${optT(P[id],v.o)}`}}),
+    ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&v.r).map(([id,v])=>({id,t:v.t,c:P[id].cat,title:ptl(P[id]),sub:"Belastungsprobe",note:v.r})),
+    ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&v.wq).map(([id,v])=>({id,t:v.wqt||v.t,c:"miteinander",title:ptl(P[id]),sub:"Prüfstein Würde",note:v.wq})),
+    ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&Array.isArray(v.hist)&&v.hist.length&&v.o!=null).map(([id,v])=>{const h=v.hist[v.hist.length-1];const q=pv(P[id]);return {id,t:v.t,c:q.cat,title:q.t,sub:"Erneut entschieden",note:`Damals: ${optT(q,h.o)} Heute: ${optT(q,v.o)}`}}),
     ...Object.entries(S.leit).filter(([id,L])=>W[id]&&L&&Array.isArray(L.notes)).flatMap(([id,L])=>L.notes.map(x=>({id,t:x.t,c:W[id].cat,title:`Leitsatz für ${W[id].n}`,sub:"Festigen",note:x.x})))].sort((a,b)=>b.t-a.t);
   const saved=Object.keys(S.saved).filter(id=>I[id]);const got=MOMENTS.filter(m=>S.moments[m.id]);
   return `<details class="fold" id="jfold" ${S.jOpen?"open":""}><summary><span>Bautagebuch</span>${CHEV}</summary><div class="fbody">
@@ -303,7 +346,33 @@ function settingsFold(){const sw=(id,on,label,sub)=>`<button class="setrow" data
    ${sw("antiScroll",S.settings.antiScroll,"Hinweis gegen Endlos-Lesen","Nach fünf Impulsen hintereinander schlägt die App vor, etwas zu prüfen oder auszuprobieren.")}
    <div class="setrow static"><span><b>Tägliche Erinnerung</b><small>Ein täglicher Termin in deinem eigenen Kalender. Die App selbst schickt keine Nachrichten und sammelt keine Daten.</small></span></div>
    <div class="row"><input type="time" id="rtime" value="${S.settings.remindTime}" aria-label="Uhrzeit"><button class="btn" id="dailyics">Apple-Kalender</button><a class="btn" id="dailyg" href="${dailyGoogle()}" target="_blank" rel="noopener">Google Kalender</a></div>
+   <h3 id="pfhead">Beispiele anpassen</h3>
+   <p class="muted small">Damit die Beispiele in Proben und Übungen zu deinem Leben passen. Jede Frage ist freiwillig. Deine Angaben bleiben auf diesem Gerät.</p>
+   ${pfForm()}
   </div></details>`}
+/* Der kurze Check: drei freiwillige Fragen als Chips. Antippen wählt, erneutes Antippen hebt die Wahl auf.
+   Bei der Lebensphase gilt eine Antwort, sonst beliebig viele. Bei den nahen Menschen erscheint nur das Paar
+   aus Schule, Studium oder Arbeit, das zur Lebensphase passt (und was schon gewählt ist). */
+function pfForm(){const pr=PRO()||{},ph=pr.phase||null,nah=pr.nah||[],gr=pr.gruppe||[];
+  if(typeof PERSONAL_FRAGEN==="undefined")return "";
+  const chip=(q,v,t,on)=>`<button class="chip" data-pf="${q}:${v}" aria-pressed="${on}">${t}</button>`;
+  const q=(f,body)=>`<div class="pfq" role="group" aria-label="${f.frage}"><p class="pfl">${f.frage}</p><div class="chips wrap">${body}</div><p class="muted small">${f.hinweis}</p></div>`;
+  const [F1,F2,F3]=PERSONAL_FRAGEN;
+  const roles=F2.gruppen.flatMap(g=>g.nachPhase?g.optionen.filter(id=>(g.nachPhase[ph]||g.nachPhase._).includes(id)||nah.includes(id)):g.optionen);
+  return `<div class="pfbox">${q(F1,F1.optionen.map(o=>chip("phase",o.v,o.t,ph===o.v)).join(""))}
+    ${q(F2,roles.map(id=>chip("nah",id,ROLLEN[id].label,nah.includes(id))).join(""))}
+    ${q(F3,F3.optionen.map(o=>chip("gruppe",o.v,o.t,gr.includes(o.v))).join(""))}
+    ${PRO()?`<div class="row"><button class="linkbtn" id="pfdel">Angaben löschen</button></div>`:""}</div>`}
+/* Sanftes Angebot, einmal beim ersten Öffnen einer Probe mit einem nahen Menschen. „Später“ fragt frühestens
+   nach einer Woche wieder, „Nicht mehr fragen“ nie mehr. Wer den Check einmal benutzt hat, wird nicht mehr gefragt. */
+const PF_LATER=7*DAY;
+function pfOffer(p){if(typeof hatPersonRolle!=="function"||!hatPersonRolle(p.id)||PRO())return "";const a=S.pfAsk;
+  if(a&&(a.nie||now()-(a.t||0)<PF_LATER))return "";
+  return `<div class="pfoffer"><p>Hier geht es um einen Menschen, der dir nahesteht. Magst du solche Beispiele an dein Leben anpassen? Es sind drei kurze Fragen, und alles bleibt auf deinem Gerät.</p>
+   <div class="row"><button class="btn" id="pfgo">Anpassen</button><button class="linkbtn" id="pflater">Später</button><button class="linkbtn" id="pfnie">Nicht mehr fragen</button></div></div>`}
+function pfSheet(){sheet(`<div class="label">Beispiele anpassen</div><h2>Drei kurze Fragen</h2><p class="lead">Damit die Beispiele zu deinem Leben passen. Jede Frage ist freiwillig. Du kannst alles später in den Einstellungen ändern oder löschen.</p>${pfForm()}<div class="row"><button class="btn primary" id="pfdone">Fertig</button></div>`)}
+/* Nach jeder Änderung: Ansicht neu zeichnen (die Probe darunter zeigt sofort die angepasste Fassung) und den Check im Blatt erneuern. */
+function pfRefresh(){render();const b=document.querySelector("#layer .pfbox");if(b)b.outerHTML=pfForm()}
 
 /* ---------- Werte ---------- */
 function findCard(){const f=S.find&&S.find.v===2?S.find:null,n=f?Object.keys(f.a).length:0,done=f&&f.stage==="done";
@@ -382,7 +451,7 @@ function wqInfo(w,r){const Q=(typeof QUAD!=="undefined"&&QUAD[w.id])||{},x=Q[r]|
   else{name=w.zs;lab=wqLab(w,"zs");def=x.d;ask=x.f;sign=x.a;
     rel=w.fund?`Entmenschlichung entsteht, wenn ${mid(w.s)} die Würde des Menschen vergisst. Der Weg heraus führt schräg hinüber zurück zur Würde: Du lehnst die Tat entschieden ab und erkennst den Menschen trotzdem als Menschen an. Wer nur das Gegenteil sucht, landet leicht in der Verharmlosung.`
       :`Dieses Zuviel entsteht, wenn ${mid(w.s)} ohne ${w.n} gelebt wird. Der Weg heraus führt schräg hinüber zu mehr ${w.n}. Wer nur das Gegenteil sucht, landet leicht beim anderen Zuviel: ${mid(w.zv)}.`}
-  return `<div class="wqcard" data-role="${r}"><div class="label">${lab}</div><h4>${name}</h4>${def?`<p>${def}</p>`:""}<p class="muted">${rel}</p>
+  return `<div class="wqcard" data-role="${r}"><div class="label">${lab}</div><h4>${name}</h4>${r==="zv"||r==="zs"?`<p class="wqless">${w.fund?(r==="zv"?`Hier fehlt ${mid(w.s)}.`:`Hier fehlt die Achtung vor der Würde.`):`Zu viel ${mid(r==="zv"?w.n:w.s)} ist zugleich zu wenig ${mid(r==="zv"?w.s:w.n)}.`}</p>`:""}${def?`<p>${def}</p>`:""}<p class="muted">${rel}</p>
     ${sign?`<div class="wqsign"><span class="label">Woran du es merkst</span><p>${sign}</p></div>`:""}${ask?`<p class="ask">${ask}</p>`:""}</div>`}
 function wqTap(t){const box=t.closest(".wq"),id=t.dataset.wq,r=t.dataset.role,w=W[id],info=document.getElementById("wqi-"+id);if(!box||!w||!info)return;
   const was=box.dataset.on===r;box.dataset.on=was?"":r;box.querySelectorAll(".q").forEach(b=>b.setAttribute("aria-pressed",String(!was&&b.dataset.role===r)));
@@ -391,7 +460,7 @@ function valueSheet(id){const w=W[id],isK=S.kern.includes(id),L=S.leit[id]||{};
   const imps=IMPULSE.filter(b=>b.w===id).slice(0,2),prs=PROBEN.filter(p=>p.o.some(o=>o.w.includes(id))).slice(0,2),ues=UEBUNGEN.filter(u=>u.w===id).slice(0,2);
   const status=isK?`<h3>Bauteile dieser Stütze</h3><ul class="steps5" ${cc(w.cat)}>${steps(id).map(([t,ok])=>`<li class="${ok?"ok":""}"><i></i>${t}</li>`).join("")}</ul>`:"";
   const bsp=typeof LEITBSP!=="undefined"&&LEITBSP[id];
-  const help=`<div class="lhelp"><p>${w.f}</p><p class="muted small">Denk auch an die Schwester von ${w.n}: ${w.s}. Ohne sie kann ${w.n} zu ${mid(w.zv)} werden.</p>${bsp?`<button class="linkbtn" data-lbsp="${id}">Beispiel ansehen</button><p class="lbsp muted small" hidden>Ein Beispiel, nicht zum Abschreiben: „${bsp}“ Dein eigener Satz darf ganz anders klingen.</p>`:""}</div>`;
+  const help=`<div class="lhelp"><p>${w.f}</p><p class="muted small">Denk auch an die Schwester von ${w.n}: ${w.s}. Ohne sie kippt ${w.n} leicht ins Zuviel: ${mid(w.zv)}.</p>${bsp?`<button class="linkbtn" data-lbsp="${id}">Beispiel ansehen</button><p class="lbsp muted small" hidden>Ein Beispiel, nicht zum Abschreiben: „${bsp}“ Dein eigener Satz darf ganz anders klingen.</p>`:""}</div>`;
   const leit=isK?`<h3>Dein Leitsatz</h3>${L.t?"":help}<div class="leitbox"><textarea id="leittext" placeholder="Ich stehe dafür ein, dass …">${esc(L.t||"")}</textarea><div class="row"><button class="btn primary" data-leitsave="${id}">Leitsatz speichern</button></div><p class="muted small">Ein guter Leitsatz ist konkret und gilt auch dann, wenn er dich etwas kostet. Die App fragt in wachsenden Abständen nach, ob du noch dazu stehst.</p></div>`:"";
   const btn=w.fund?`<div class="fundnote">Die Würde jedes Menschen ist das Fundament deines Gerüsts. Sie gilt für jeden, auch für Menschen, deren Taten du entschieden ablehnst. Deshalb ist sie in jedem Gerüst schon eingebaut.</div>`:
     `<div class="row">${isK?`<button class="btn" data-unkern="${id}">Nicht mehr als Stütze</button>`:`<button class="btn primary" data-kern="${id}" ${S.kern.length>=MAXKERN?"disabled":""}>Als Stütze wählen</button>`}</div>${!isK&&S.kern.length>=MAXKERN?`<p class="muted small">Du hast schon fünf Stützen. Nimm zuerst eine heraus, wenn du diese wählen möchtest.</p>`:""}`;
@@ -399,9 +468,9 @@ function valueSheet(id){const w=W[id],isK=S.kern.includes(id),L=S.leit[id]||{};
    ${btn}${status}${leit}
    <h3>Im Wertequadrat</h3>${wqHTML(w)}
    <h3>Frage an dich</h3><p class="ask">${w.f}</p>
-   <p class="muted small">Zum Beispiel: ${w.b}</p>
+   <p class="muted small">So kann ${w.n} im Alltag aussehen: ${wb(w)}</p>
    ${imps.length?`<h3>Gedanken dazu</h3>${imps.map(b=>goBtn("open",b.id,b.cat,EV[b.ev],b.t)).join("")}`:""}
-   ${prs.length?`<h3>Auf die Probe stellen</h3>${prs.map(p=>goBtn("probe-open",p.id,p.cat,S.proben[p.id]&&S.proben[p.id].o!=null?"Belastungsprobe · entschieden":"Belastungsprobe",p.t)).join("")}`:""}
+   ${prs.length?`<h3>Auf die Probe stellen</h3>${prs.map(p=>goBtn("probe-open",p.id,p.cat,S.proben[p.id]&&S.proben[p.id].o!=null?"Belastungsprobe · entschieden":"Belastungsprobe",ptl(p))).join("")}`:""}
    ${ues.length?`<h3>Im Alltag leben</h3>${ues.map(u=>goBtn("ueb",u.id,u.cat,"Übung · "+(u.d===1?"heute":u.d+" Tage"),u.t)).join("")}`:""}
   </div>`,w.cat);wqMount()}
 
@@ -418,11 +487,11 @@ function probeHint(p,v,done){const id=pHint;if(!id||!W[id]||!S.kern.includes(id)
   return ""}
 function compareHTML(p,v){if(!Array.isArray(v.hist)||!v.hist.length||!v.again)return "";const h=v.hist[v.hist.length-1],a=p.o[h.o],b=p.o[v.o];if(!a||!b)return "";
   return `<div class="compare"><span class="label">Damals und heute</span>${h.o===v.o?`<p>Am ${dayFmt(h.t)} hast du genauso entschieden: „${a.t}“</p>`:`<p>Am ${dayFmt(h.t)} hast du „${a.t}“ gewählt. Heute hast du „${b.t}“ gewählt.</p>`}${h.r?`<p class="muted small">Deine Begründung damals: ${esc(h.r)}</p>`:""}</div>`}
-function probeCard(p){const v=S.proben[p.id],blind=pBlind===p.id&&v&&v.o!=null,done=v&&v.o!=null&&!blind;
+function probeCard(p){p=pv(p);const v=S.proben[p.id],blind=pBlind===p.id&&v&&v.o!=null,done=v&&v.o!=null&&!blind;
   return `<article class="probe" ${cc(p.cat)} id="probe"><div class="meta"><span>${dot(p.cat)}${CATS[p.cat].n}</span><span>Belastungsprobe</span></div>
-   <h2>${p.t}</h2>${blind?`<p class="phint muted small">Du hast diese Probe am ${dayFmt(v.t)} schon entschieden. Deine alte Antwort bleibt verborgen, bis du neu gewählt hast.</p>`:probeHint(p,v,done)}<p class="situ">${p.x}</p>
+   <h2>${p.t}</h2>${blind?`<p class="phint muted small">Du hast diese Probe am ${dayFmt(v.t)} schon entschieden. Deine alte Antwort bleibt verborgen, bis du neu gewählt hast.</p>`:probeHint(p,v,done)}${pfOffer(p)}<p class="situ">${p.x}</p>
    <p class="label">${done?"Deine Entscheidung":"Was würdest du tun?"}</p>
-   <div class="opts ${done?"done":""}">${p.o.map((o,i)=>`<button class="opt ${done&&v.o===i?"pick":""}" data-pick="${p.id}:${i}" ${done?'aria-disabled="true"':""}><span class="ok" aria-hidden="true">${done&&v.o===i?CK:""}</span><span class="ot">${o.t}${done?`<span class="vw">${o.w.map(id=>`<span class="vchip" ${cc(W[id].cat)} data-wert="${id}">${W[id].n}</span>`).join("")}</span>`:""}</span></button>`).join("")}</div>
+   <div class="opts ${done?"done":""}">${p.o.map((o,i)=>`<button class="opt ${done&&v.o===i?"pick":""}" data-pick="${p.id}:${i}" ${done?(v.o===i?'aria-pressed="true"':'aria-disabled="true"'):""}><span class="ok" aria-hidden="true">${done&&v.o===i?CK:""}</span><span class="ot">${o.t}${done?`<span class="vw">${(done?pw(p.id,v,i):o.w).map(id=>`<span class="vchip" ${cc(W[id].cat)} data-wert="${id}">${W[id].n}</span>`).join("")}</span>`:""}</span></button>`).join("")}</div>
    ${done?`<div class="reveal">${compareHTML(p,v)}<span class="label">Was hier im Spiel ist</span><p>${p.h}</p><p class="ask">${p.f}</p>
      <label class="label" for="preason">Deine Begründung, nur für dich</label><textarea id="preason" placeholder="${v.again?"Was hat sich verändert, oder was ist geblieben?":"Warum hast du dich so entschieden?"}">${esc(v.r||"")}</textarea>
      <div class="wstone"><span class="label">Prüfstein Würde · freiwillig</span><p>Achtet deine Antwort die Würde aller Beteiligten? Wie begegnest du dabei dem Menschen, mit dem du nicht einverstanden bist?</p><textarea id="pwq" aria-label="Antwort zum Prüfstein Würde" placeholder="Ein Satz reicht.">${esc(v.wq||"")}</textarea></div>
@@ -431,12 +500,21 @@ function probeCard(p){const v=S.proben[p.id],blind=pBlind===p.id&&v&&v.o!=null,d
      :`<div class="row"><button class="linkbtn" id="pnext">Andere Probe</button></div>`}
    <button class="mini" data-pshare="${p.id}">Mit jemandem besprechen</button>
   </article>`}
+/* Abwählen: Der Eintrag kehrt genau in den Zustand vor dieser Wahl zurück (prev), samt Begründung, Vergleich und Verlauf.
+   Ältere Einträge ohne prev: Eine blinde Wiederholung fällt auf die frühere Wahl zurück, sonst entfällt der Eintrag.
+   Momente, die erst durch diese Wahl erreicht wurden, werden wieder offen. Spannseile, Bauteile und Bautagebuch leiten sich aus S.proben ab. */
+function unpick(pid){const v=S.proben[pid];if(!v||v.o==null)return;delete v.ow;const since=v.t||0;
+  if(v.prev&&typeof v.prev==="object")S.proben[pid]=v.prev;
+  else if(v.again&&Array.isArray(v.hist)&&v.hist.length){const h=v.hist.pop();Object.assign(v,{o:h.o,t:h.t,r:h.r||"",again:false})}
+  else delete S.proben[pid];
+  pruneMoments(since)}
+const scrollProbe=()=>{const el=$("#probe");if(el)el.scrollIntoView({block:"nearest",behavior:"auto"})};
 const MAXACT=3;
 const activeUeb=()=>Object.entries(S.ueb).filter(([,v])=>v&&v.status==="active").map(([id])=>id).filter(id=>U[id]);
 function suggestUeb(){const free=UEBUNGEN.filter(u=>!S.ueb[u.id]);if(!free.length)return null;
   const kc=new Set(S.kern.map(id=>W[id].cat)),kw=new Set(S.kern);const pref=free.filter(u=>kw.has(u.w)),pref2=free.filter(u=>kc.has(u.cat));
   const list=pref.length?pref:pref2.length?pref2:free;return list[(Math.floor(now()/DAY)+(S.uskip||0))%list.length]}
-function uebCard(e,mode){const v=S.ueb[e.id];let extra="";
+function uebCard(e,mode){e=uv(e);const v=S.ueb[e.id];let extra="";
   if(mode==="active"){const total=e.d,el=Math.min(total,Math.floor((now()-v.start)/DAY)),left=Math.max(0,total-el);
     extra=`<div class="prog"><div class="meter"><span style="width:${Math.max(4,Math.round(el/total*100))}%"></span></div><span class="label">${left?`Noch ${left} Tag${left>1?"e":""} · bis ${fmtDate(v.start+total*DAY)}`:"Zeit ist um. Wie lief es?"}</span></div>
     <div class="row"><button class="btn primary" data-done="${e.id}">${early(e.id)?"Früher abschließen":"Geschafft"}</button><button class="btn" data-remind="${e.id}">Erinnern</button><button class="btn" data-ueb="${e.id}">Anleitung</button><button class="linkbtn" data-drop="${e.id}">Abbrechen</button></div>${checkRow(e.id)}<button class="mini" data-ushare="${e.id}">Mit jemandem machen</button>`}
@@ -452,20 +530,26 @@ function viewUeben(){
   if(sug)h+=`<div class="sec"><div class="sh"><span class="label">Vorschlag für dich</span></div>${uebCard(sug,"suggest")}</div>`;
   const ul=UEBUNGEN.filter(u=>uFilter==="alle"||u.cat===uFilter),lim=uMore?ul.length:6;
   h+=`<details class="fold" id="uebfold" ${S.uebOpen?"open":""}><summary><span>Alle Übungen</span><span class="label">${UEBUNGEN.length}</span>${CHEV}</summary><div class="fbody">${chips("ufilter",uFilter,uc)}<div class="list">${ul.slice(0,lim).map(u=>{const v=S.ueb[u.id];const st=v?(v.status==="active"?"läuft":v.status==="done"?"geschafft":"abgebrochen"):(u.d===1?"heute":u.d+" Tage");return `<button class="li" data-ueb="${u.id}">${dot(u.cat)}<span class="tx"><b>${u.t}</b></span><span class="aside">${st}</span></button>`}).join("")}</div>${ul.length>lim?`<button class="linkbtn" id="umore">${ul.length-lim} weitere anzeigen</button>`:""}</div></details>`;
-  h+=`<details class="fold" id="prfold" ${S.prOpen?"open":""}><summary><span>Alle Belastungsproben</span><span class="label">${nDone} / ${PROBEN.length}</span>${CHEV}</summary><div class="fbody"><div class="list">${PROBEN.map(x=>`<button class="li" data-probe-open="${x.id}">${dot(x.cat)}<span class="tx"><b>${x.t}</b></span><span class="aside">${S.proben[x.id]&&S.proben[x.id].o!=null?"entschieden":"offen"}</span></button>`).join("")}</div></div></details>`;
+  h+=`<details class="fold" id="prfold" ${S.prOpen?"open":""}><summary><span>Alle Belastungsproben</span><span class="label">${nDone} / ${PROBEN.length}</span>${CHEV}</summary><div class="fbody"><div class="list">${PROBEN.map(x=>`<button class="li" data-probe-open="${x.id}">${dot(x.cat)}<span class="tx"><b>${ptl(x)}</b></span><span class="aside">${S.proben[x.id]&&S.proben[x.id].o!=null?"entschieden":"offen"}</span></button>`).join("")}</div></div></details>`;
   return h+`</section>`}
-function uebSheet(id){const e=U[id],v=S.ueb[id],w=W[e.w];
+function uebSheet(id){const e=uv(U[id]),v=S.ueb[id],w=W[e.w];
   sheet(`${invited===id?`<div class="gift"><span class="label">Eine Einladung</span><p>Jemand möchte diese Übung gemeinsam mit dir machen. Sie stammt aus dem Wertegerüst, einer kostenlosen App ohne Anmeldung.</p></div>`:""}<div class="label">${dot(e.cat)}${CATS[e.cat].n} · ${e.d===1?"Heute":e.d+" Tage"}</div><h2>${e.t}</h2><p class="lead">${e.x}</p><h3>So gehst du vor</h3><ol class="howto">${e.s.map(s=>`<li>${s}</li>`).join("")}</ol>
   <h3>Welcher Wert dahintersteht</h3>${goBtn("wert",w.id,w.cat,S.kern.includes(w.id)?"Deine Stütze":"Wert",w.n)}
   <div class="row">${!v||v.status==="dropped"?`<button class="btn primary" data-accept="${id}" ${activeUeb().length>=MAXACT?"disabled":""}>Annehmen</button>`:v.status==="active"?`<button class="btn primary" data-done="${id}">${early(id)?"Früher abschließen":"Geschafft"}</button>`:`<span class="label">Geschafft am ${fmtDate(v.end)}</span><button class="btn" data-accept="${id}" ${activeUeb().length>=MAXACT?"disabled":""}>Noch einmal</button>`}</div><button class="mini" data-ushare="${id}">Mit jemandem machen</button>`,e.cat)}
 /* Mehrtägige Übung vor ihrem Ende abschließen: Dann fragt die App, an wie vielen Tagen man sie gemacht hat.
    Zur Wahl stehen nur Zahlen bis zur Zahl der Kalendertage seit dem Start. Ab einem Tag zählt die Übung als gelebt. */
 function early(id){const e=U[id],v=S.ueb[id];return !!(e&&v&&v.status==="active"&&e.d>1&&dayIdx(v)+1<e.d)}
-function doneSheet(id){const e=U[id],v=S.ueb[id]||{},ea=early(id),mx=ea?Math.min(e.d,dayIdx(v)+1):0;
+/* pre: Werte, mit denen das Blatt nach „Rückgängig“ wieder gefüllt wird (Stimmung, Notiz, Tage) */
+function doneSheet(id,pre){const e=U[id],v=S.ueb[id]||{},ea=early(id),mx=ea?Math.min(e.d,dayIdx(v)+1):0;
   sheet(`<div class="label">${ea?"Früher abschließen":"Geschafft"}</div><h2>${e.t}</h2>${ea?`<p class="lead">Die Übung ist auf ${e.d} Tage angelegt. An wie vielen Tagen hast du sie gemacht?</p><div class="chips" id="udays">${Array.from({length:mx+1},(_,k)=>`<button class="chip" data-udays="${k}" aria-pressed="false">${k===0?"Noch an keinem":k===1?"An einem Tag":`An ${k} Tagen`}</button>`).join("")}</div><p class="muted small udnote" id="udaysnote">Für das Bauteil zählt die Übung ab einem Tag. Die Zahl steht in deinem Bautagebuch.</p>`:""}${v.checks&&Object.keys(v.checks).length?`<div class="dcurve"><span class="label">Deine Zwischenstationen</span>${spark(v)}</div>`:""}<p class="lead">Wie war es? Deine Antwort bleibt auf diesem Gerät.</p><div class="chips" id="moods">${[["gut","Hat mir gutgetan"],["mix","Gemischt"],["nein","Eher nicht"]].map(([k,n])=>`<button class="chip" data-mood="${k}" aria-pressed="false">${n}</button>`).join("")}</div><label class="label" for="note">Was nimmst du mit?</label><textarea id="note" placeholder="Ein, zwei Sätze reichen."></textarea><div class="row"><button class="btn primary" id="savedone" data-id="${id}">Speichern</button></div>`,e.cat);
-  const ud=$("#udays");if(ud)ud.addEventListener("click",ev=>{const c=ev.target.closest("[data-udays]");if(!c)return;ud.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));
-    $("#udaysnote").textContent=c.dataset.udays==="0"?"Dann setzt diese Übung noch kein Bauteil. Du kannst sie auch weiterlaufen lassen und später abschließen.":"Danke für die ehrliche Zahl. Sie steht in deinem Bautagebuch."});
-  $("#moods").addEventListener("click",ev=>{const c=ev.target.closest("[data-mood]");if(!c)return;$("#moods").querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c))})}
+  /* Tage und Stimmung: Antippen wählt, erneutes Antippen der gewählten Antwort hebt die Wahl auf */
+  const ud=$("#udays"),UDN=$("#udaysnote")?$("#udaysnote").textContent:"";
+  const setDays=c=>{ud.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));
+    $("#udaysnote").textContent=!c?UDN:c.dataset.udays==="0"?"Dann setzt diese Übung noch kein Bauteil. Du kannst sie auch weiterlaufen lassen und später abschließen.":"Danke für die ehrliche Zahl. Sie steht in deinem Bautagebuch."};
+  if(ud)ud.addEventListener("click",ev=>{const c=ev.target.closest("[data-udays]");if(!c)return;setDays(c.getAttribute("aria-pressed")==="true"?null:c)});
+  const setMood=c=>$("#moods").querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));
+  $("#moods").addEventListener("click",ev=>{const c=ev.target.closest("[data-mood]");if(!c)return;setMood(c.getAttribute("aria-pressed")==="true"?null:c)});
+  if(pre){if(ud&&pre.days!=null){const c=ud.querySelector(`[data-udays="${pre.days}"]`);if(c)setDays(c)}if(pre.mood)setMood($(`#moods [data-mood="${pre.mood}"]`));if(pre.note)$("#note").value=pre.note}}
 
 /* ---------- Vertiefen ---------- */
 const EVTXT=["Ein philosophischer Gedanke, ein Zeitzeugnis oder ein Denkmodell. Kein empirischer Befund, aber ein Denkanstoß.","Erste Studien deuten in diese Richtung, aber sie sind klein, neu oder widersprechen sich teilweise.","Mehrere gute Studien kommen zu einem ähnlichen Ergebnis. Die Größe des Effekts ist aber noch umstritten.","Viele Studien und Übersichtsarbeiten bestätigen den Befund. Daran zweifelt kaum noch jemand."];
@@ -474,7 +558,7 @@ function deepSheet(b){const w=W[b.w],u=U[b.ue];const pr=PROBEN.find(p=>!S.proben
   const rel=IMPULSE.filter(o=>o.cat===b.cat&&o.id!==b.id&&!S.read[o.id]);const more=(rel.length?rel:IMPULSE.filter(o=>o.cat===b.cat&&o.id!==b.id)).slice(0,2);
   sheet(`<div class="deep"><div class="label">Für dich</div><h2>${b.t}</h2><p class="ask">${b.tip}</p>
   ${w?`<h3>Der Wert dazu</h3>${goBtn("wert",w.id,w.cat,S.kern.includes(w.id)?"Deine Stütze":"Wert",w.n)}`:""}
-  ${pr?`<h3>Auf die Probe stellen</h3>${goBtn("probe-open",pr.id,pr.cat,"Belastungsprobe",pr.t)}`:""}
+  ${pr?`<h3>Auf die Probe stellen</h3>${goBtn("probe-open",pr.id,pr.cat,"Belastungsprobe",ptl(pr))}`:""}
   ${u?`<h3>Im Alltag leben</h3>${goBtn("ueb",u.id,u.cat,(S.ueb[u.id]&&S.ueb[u.id].status==="active")?"Läuft gerade":"Übung · "+(u.d===1?"heute":u.d+" Tage"),u.t)}`:""}
   <h3>Weiter im Bereich ${CATS[b.cat].n}</h3>${more.map(o=>goBtn("open",o.id,o.cat,EV[o.ev],o.t)).join("")}</div>`,b.cat)}
 function evSheet(b){
@@ -485,7 +569,7 @@ function evSheet(b){
 function sheet(html,cat){const l=$("#layer");const fresh=!l.innerHTML;if(fresh)pushNav();l.innerHTML=`<div class="sheet${fresh?"":" swap"}" id="sh"><div class="panel" role="dialog" aria-modal="true" ${cat?cc(cat):""}><span class="grab" aria-hidden="true"></span><button class="close" id="shx" aria-label="Schließen">×</button>${html}</div></div>`;
   $("#sh").addEventListener("click",e=>{if(e.target.id==="sh"||e.target.id==="shx")closeSheet()})}
 /* Schließen: erst nach dem Ausblenden ist #layer leer; danach prüfen, ob ein Moment fällig ist. */
-function closeSheet(){const l=$("#layer"),s=$("#sh");if(!s||calm()){l.innerHTML="";checkMoments();return}s.classList.add("out");setTimeout(()=>{if(l.contains(s)){l.innerHTML="";checkMoments()}},260)}
+function closeSheet(){const l=$("#layer"),s=$("#sh");if(l.contains(document.activeElement))document.activeElement.blur();if(!s||calm()){l.innerHTML="";checkMoments();return}s.classList.add("out");setTimeout(()=>{if(l.contains(s)){l.innerHTML="";checkMoments()}},260)}
 /* Blatt am Griff nach unten ziehen: Der Kopfbereich (obere 56 px) zieht immer, der übrige Inhalt nur, wenn er ganz
    oben steht und der Finger nach unten geht. Ab 110 px Weg oder schnellem Wisch schließt das Blatt, sonst gleitet es zurück. */
 (()=>{let y0=0,t0=0,dy=0,drag=null,arm=null;
@@ -510,44 +594,57 @@ function fScores(){const f=F(),raw={},cap={};SAETZE.forEach((st,i)=>{const a=f.a
 function fWhy(id){const f=F();const i=SAETZE.findIndex((st,i)=>f.a[i]===2&&st.w[0]===id);const j=i>=0?i:SAETZE.findIndex((st,i)=>f.a[i]===2&&st.w.includes(id));return j>=0?SAETZE[j].t:""}
 const fCount=v=>Object.values(F().a).filter(x=>x===v).length;
 function fCands(){const sc=fScores();return Object.keys(sc).sort((a,b)=>(sc[b]-sc[a])||(FORDER.indexOf(a)-FORDER.indexOf(b))).slice(0,8)}
-function fStartDuel(){const f=F(),c=fCands();if(c.length<=5){f.stage="result";f.c=c;f.sc={};f.pick=c.slice();persist();return}
+/* Rückblick beim Einschätzen: f.rev ist der Satz, zu dem man mit „Zurück“ gegangen ist (seine Antwort bleibt und ist markiert),
+   f.fwd die Sätze dahinter, die schon beantwortet sind. fSettle() schließt den Rückblick ab. */
+function fSettle(){const f=F();if(f.rev!=null&&f.a[f.rev]!=null)f.hist.push(f.rev);while(f.fwd&&f.fwd.length)f.hist.push(f.fwd.pop());f.rev=null;f.fwd=[]}
+function fStartDuel(){fSettle();const f=F(),c=fCands();f.dh=[];f.drev=null;if(c.length<=5){f.stage="result";f.c=c;f.sc={};f.pick=c.slice();persist();return}
   f.stage="duel";f.c=c;f.sc=Object.fromEntries(c.map(id=>[id,0]));f.round=1;f.rounds=c.length<=8?3:2;f.played=[];f.done=0;f.total=f.rounds*Math.floor(c.length/2);f.pairs=fPairs();f.pi=0;persist()}
 function fPairs(){const f=F();const s=f.c.slice().sort((a,b)=>(f.sc[b]-f.sc[a])||(hashStr(a+f.round)-hashStr(b+f.round)));const pairs=[],used=new Set(),key=(a,b)=>[a,b].sort().join("|");
   for(let i=0;i<s.length;i++){if(used.has(s[i]))continue;let j=i+1;while(j<s.length&&(used.has(s[j])||f.played.includes(key(s[i],s[j]))))j++;
     if(j>=s.length){j=i+1;while(j<s.length&&used.has(s[j]))j++}if(j>=s.length){f.sc[s[i]]+=.5;used.add(s[i]);continue}used.add(s[i]);used.add(s[j]);pairs.push([s[i],s[j]])}
   return pairs}
 function fRank(){const f=F();return f.c.slice().sort((a,b)=>((f.sc[b]||0)-(f.sc[a]||0))||(FORDER.indexOf(a)-FORDER.indexOf(b)))}
-function fDuel(win){const f=F(),[a,b]=f.pairs[f.pi];if(win==="both"){f.sc[a]+=.5;f.sc[b]+=.5}else f.sc[win]+=1;f.played.push([a,b].sort().join("|"));f.pi++;f.done++;
+/* Jede Abwägung merkt sich den Stand davor (f.dh). „Zurück“ stellt ihn her und markiert die damalige Wahl (f.drev). */
+const DKEYS=["sc","played","pi","done","round","pairs","stage","pick"];
+function fDuel(win){const f=F(),[a,b]=f.pairs[f.pi];const st={win};DKEYS.forEach(k=>{if(f[k]!==undefined)st[k]=JSON.parse(JSON.stringify(f[k]))});f.dh=(f.dh||[]).concat([st]);f.drev=null;if(win==="both"){f.sc[a]+=.5;f.sc[b]+=.5}else f.sc[win]+=1;f.played.push([a,b].sort().join("|"));f.pi++;f.done++;
   if(f.pi>=f.pairs.length){f.round++;f.pairs=f.round<=f.rounds?fPairs():[];f.pi=0;if(!f.pairs.length){f.stage="result";f.pick=fRank().slice(0,5)}}persist()}
 function finderView(){const f=F(),steps=["Einschätzen","Abwägen","Auswählen"],si={sort:0,duel:1,result:2}[f.stage]||0;
   const head=`<div class="fsteps">${steps.map((t,i)=>`<span class="${i===si?"on":i<si?"ok":""}"><i></i>${t}</span>`).join("")}</div>`;
-  if(f.stage==="sort"){const i=SAETZE.findIndex((_,k)=>f.a[k]==null);if(i<0){fStartDuel();return finderView()}const st=SAETZE[i],n=Object.keys(f.a).length,c2=fCount(2),w=W[st.w[0]];
+  if(f.stage==="sort"){const rv=f.rev!=null&&SAETZE[f.rev]?f.rev:null,i=rv!=null?rv:SAETZE.findIndex((_,k)=>f.a[k]==null);if(i<0){fStartDuel();return finderView()}const st=SAETZE[i],n=Object.keys(f.a).length,c2=fCount(2),w=W[st.w[0]],cur=f.a[i];
     return head+`<div class="fbar"><i style="width:${Math.round(n/SAETZE.length*100)}%"></i></div><p class="fq">Wie sehr stimmt das für dich?</p>
      <div class="fcard" ${cc(w.cat)}><span class="rodmark" aria-hidden="true"></span><span class="label">Satz ${i+1} von ${SAETZE.length}</span><p class="fst">${st.t}</p></div>
-     <div class="fbtns"><button class="btn primary" data-frate="2">Stimmt</button><button class="btn" data-frate="1">Teils</button><button class="btn" data-frate="0">Eher nicht</button></div>
-     <div class="fmeta"><span class="label">${c2} × stimmt</span>${f.hist.length?`<button class="linkbtn" id="fundo">Zurück</button>`:""}</div>
+     <div class="fbtns">${[[2,"Stimmt"],[1,"Teils"],[0,"Eher nicht"]].map(([k,t])=>`<button class="btn${k===2?" primary":""}" data-frate="${k}" aria-pressed="${cur===k}">${t}</button>`).join("")}</div>
+     <div class="fmeta"><span class="label">${c2} × stimmt</span><span class="fnav">${f.hist.length?`<button class="linkbtn" id="fundo">Zurück</button>`:""}${rv!=null&&cur!=null?`<button class="linkbtn" id="ffwd">Weiter</button>`:""}</span></div>
      ${n>=Math.ceil(SAETZE.length/2)&&fCands().length>=5?`<button class="linkbtn" id="fskip">Genug Sätze, weiter zum Abwägen</button>`:""}
      <p class="muted small">Es gibt keine richtigen Antworten. Antworte so, wie du bist, nicht wie du gern wärst.</p>`}
   if(f.stage==="duel"){const [a,b]=f.pairs[f.pi],A=W[a],B=W[b];
     return head+`<div class="fbar"><i style="width:${Math.round(f.done/Math.max(1,f.total)*100)}%"></i></div><p class="fq">Angenommen, beides geht gerade nicht zusammen. Was wiegt für dich schwerer?</p>
-     <div class="fduel">${[A,B].map(w=>`<button class="fopt" ${cc(w.cat)} data-fduel="${w.id}"><span class="rodmark" aria-hidden="true"></span><b>${w.n}</b><span>${w.d}</span></button>`).join(`<span class="fvs" aria-hidden="true">oder</span>`)}</div>
-     <div class="fmeta"><span class="label">Abwägung ${f.done+1} von etwa ${f.total}</span><button class="linkbtn" data-fduel="both">Kann ich nicht entscheiden</button></div>`}
+     <div class="fduel">${[A,B].map(w=>`<button class="fopt${f.drev===w.id?" on":""}" ${cc(w.cat)} data-fduel="${w.id}" aria-pressed="${f.drev===w.id}"><span class="rodmark" aria-hidden="true"></span><b>${w.n}</b><span>${w.d}</span></button>`).join(`<span class="fvs" aria-hidden="true">oder</span>`)}</div>
+     <div class="fmeta"><span class="label">Abwägung ${f.done+1} von etwa ${f.total}</span><span class="fnav">${f.dh&&f.dh.length?`<button class="linkbtn" id="fdback">Zurück</button>`:""}<button class="linkbtn" data-fduel="both" aria-pressed="${f.drev==="both"}">Kann ich nicht entscheiden</button></span></div>`}
   const rank=f.c&&f.c.length?fRank().slice(0,8):[];f.pick=(f.pick||[]).filter(id=>rank.includes(id));
   return head+`<p class="fq">Diese Werte haben sich bei dir durchgesetzt. Du kannst noch tauschen, bis zu fünf bleiben.</p>
    <div class="fres">${rank.map((id,i)=>{const w=W[id],on=f.pick.includes(id);return `<button class="fr ${on?"on":""}" ${cc(w.cat)} data-fpick="${id}" aria-pressed="${on}"><span class="rodmark" aria-hidden="true"></span><span class="tx"><b>${w.n}</b><small>${w.d}</small>${fWhy(id)?`<em class="why">Du hast gesagt: „${fWhy(id)}“</em>`:""}</span><span class="ck" aria-hidden="true"></span></button>`}).join("")}</div>
    ${S.kern.length?`<p class="muted small">Deine bisherigen Stützen werden ersetzt. Deine Leitsätze bleiben gespeichert und tauchen wieder auf, wenn du einen Wert erneut wählst.</p>`:""}
-   <div class="row"><button class="btn primary" id="fapply" ${f.pick.length?"":"disabled"}>${f.pick.length} als Stützen übernehmen</button><button class="linkbtn" id="frestart">Neu beginnen</button></div>`}
-function finder(){const l=$("#layer");if(!$("#finder")){sheet(`<div id="finder" class="finder"></div>`);$("#sh").classList.add("fsheet")}
-  const box=$("#finder");box.innerHTML=finderView();const c=box.querySelector(".fcard,.fduel,.fres");if(c&&!calm())c.animate([{opacity:0,transform:"translateX(18px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)"})}
-function finderClick(t,d){const f=F();
+   <div class="row"><button class="btn primary" id="fapply" ${f.pick.length?"":"disabled"}>${f.pick.length} als Stützen übernehmen</button>${f.dh&&f.dh.length?`<button class="linkbtn" id="fdback">Zurück zum Abwägen</button>`:""}<button class="linkbtn" id="frestart">Neu beginnen</button></div>`}
+function finder(still){const l=$("#layer");if(!$("#finder")){sheet(`<div id="finder" class="finder"></div>`);$("#sh").classList.add("fsheet")}
+  const box=$("#finder");box.innerHTML=finderView();const c=box.querySelector(".fcard,.fduel,.fres");if(c&&!still&&!calm())c.animate([{opacity:0,transform:"translateX(18px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)"})}
+function finderClick(t,d){if(!(d.finder||d.frate||d.fduel||d.fpick||/^f(undo|skip|restart|apply|fwd|dback)$/.test(t.id)))return false;const f=F();
   if(d.finder){finder();return true}
-  if(d.frate){const id=SAETZE.findIndex((_,k)=>f.a[k]==null);if(id<0)return true;f.a[id]=+d.frate;f.hist.push(id);persist();if(+d.frate===2)lightUp(t);setTimeout(finder,calm()?0:220);return true}
-  if(t.id==="fundo"){const id=f.hist.pop();if(id!=null)delete f.a[id];persist();finder();return true}
+  /* Einschätzen. Im Rückblick hebt erneutes Antippen der markierten Antwort sie auf; der Satz bleibt stehen. */
+  if(d.frate){const v=+d.frate,rv=f.rev!=null&&SAETZE[f.rev]?f.rev:null;
+    if(rv!=null&&f.a[rv]===v){delete f.a[rv];persist();finder(true);return true}
+    const id=rv!=null?rv:SAETZE.findIndex((_,k)=>f.a[k]==null);if(id<0)return true;f.a[id]=v;f.hist.push(id);f.rev=rv!=null&&f.fwd&&f.fwd.length?f.fwd.pop():null;
+    persist();t.setAttribute("aria-pressed","true");if(v===2)lightUp(t);setTimeout(finder,calm()?0:220);return true}
+  if(t.id==="fundo"){const id=f.hist.pop();if(id!=null){if(f.rev!=null&&f.a[f.rev]!=null)(f.fwd=f.fwd||[]).push(f.rev);f.rev=id}persist();finder();return true}
+  if(t.id==="ffwd"){if(f.rev!=null){f.hist.push(f.rev);f.rev=f.fwd&&f.fwd.length?f.fwd.pop():null}persist();finder();return true}
+  if(t.id==="fdback"){const st=(f.dh||[]).pop();if(st){DKEYS.forEach(k=>{if(k in st)f[k]=st[k];else delete f[k]});f.drev=st.win}persist();finder();return true}
   if(t.id==="fskip"){fStartDuel();finder();return true}
-  if(d.fduel){if(d.fduel!=="both"){lightUp(t);t.classList.add("won")}fDuel(d.fduel);setTimeout(finder,calm()?0:260);return true}
+  /* Abwägen. Nach „Zurück“ ist die damalige Wahl markiert; erneutes Antippen hebt sie auf, die Abwägung bleibt offen. */
+  if(d.fduel){if(f.drev!=null&&f.drev===d.fduel){f.drev=null;persist();finder(true);return true}
+    if(d.fduel!=="both"){lightUp(t);t.classList.add("won")}fDuel(d.fduel);setTimeout(finder,calm()?0:260);return true}
   if(d.fpick){const id=d.fpick;if(f.pick.includes(id))f.pick=f.pick.filter(x=>x!==id);else if(f.pick.length<5)f.pick.push(id);else{buzz("err");shake(t);toast("Höchstens fünf. Nimm zuerst einen heraus.");return true}persist();finder();return true}
-  if(t.id==="frestart"){S.find={v:2,a:{},hist:[],stage:"sort"};persist();finder();return true}
-  if(t.id==="fapply"){const rank=fRank();S.kern=rank.filter(id=>f.pick.includes(id)).slice(0,5);f.stage="done";buzz("ok");closeSheet();setTimeout(()=>{toBuild();toast(`${S.kern.length===1?"Deine Stütze steht":"Deine Stützen stehen"}.`,true)},calm()?0:260);return true}
+  if(t.id==="frestart"){const sn=snap();S.find={v:2,a:{},hist:[],stage:"sort"};persist();finder();undoToast("Deine Antworten sind gelöscht.",false,sn,{reopen:()=>finder()});return true}
+  if(t.id==="fapply"){const sn=snap(),rank=fRank();S.kern=rank.filter(id=>f.pick.includes(id)).slice(0,5);f.stage="done";buzz("ok");closeSheet();setTimeout(()=>{toBuild();undoToast(`${S.kern.length===1?"Deine Stütze steht":"Deine Stützen stehen"}.`,true,sn,{reopen:()=>finder()})},calm()?0:260);return true}
   return false}
 
 /* ---------- Teilen ---------- */
@@ -574,7 +671,7 @@ const vibOn=()=>S.settings.vibration!==false;
    Navigation (Listen, Reiter, Zurück, Aufklappen, Verweise, Links): kein Tick, nur leichtes Abdunkeln (CSS :active).
    Erfolg und Fehler sind Ausgänge einer Aktion: buzz("ok") oder buzz("err") im Klick-Handler. Erfolg zeigt einen Haken
    in der Meldung (toast(…,true)), Fehler eine kleine Seitwärtsbewegung (shake). */
-const FAM=[["logo","#home,#home2"],["rod",".rhit"],["sw",".setrow[role=switch]"],["sel",".chip,.fbtns .btn,.fopt,.fr,.lg:not(.free),.cdot,.opt,.wq .q"],["act",".btn,.next,.draw,.findcard,.li.daily"]];
+const FAM=[["logo","#home,#home2"],["rod",".rhit"],["sw",".setrow[role=switch]"],["sel",".chip,.fbtns .btn,.fopt,.fr,.lg:not(.free),.cdot,.opt,.wq .q"],["act",".btn,.next,.draw,.findcard,.li.daily,.ubtn"]];
 const HAPSEL=FAM.map(f=>f[1]).join(",");
 const PAT={rod:10,sel:10,sw:10,logo:10,act:12,ok:[10,60,14],err:[24,60,24]};
 const famHost=t=>{const el=t&&t.closest&&t.closest(HAPSEL);return el&&el.tagName!=="A"&&!el.disabled&&el.getAttribute("aria-disabled")!=="true"?el:null};
@@ -607,7 +704,7 @@ function wave(el,x,y){const r=el.getBoundingClientRect(),sz=2*Math.hypot(Math.ma
 let tapMark=null;
 function tapKey(el){const a=[...el.attributes].filter(x=>x.name.startsWith("data-")&&x.name!=="data-lit").map(x=>`[${x.name}="${CSS.escape(x.value)}"]`).join("");
   return a?el.tagName.toLowerCase()+"."+el.classList[0]+a:(el.id?"#"+CSS.escape(el.id):null)}
-const selNow=el=>el.getAttribute("aria-pressed")==="true"||["on","won","chosen"].some(c=>el.classList.contains(c))||el.matches(".fbtns .btn");
+const selNow=el=>el.getAttribute("aria-pressed")==="true"||["on","won","chosen"].some(c=>el.classList.contains(c));
 function settleFill(src,x,y){let el=src.isConnected?src:null;if(!el&&tapMark&&tapMark.key){try{el=document.querySelector(tapMark.key)}catch(e){}}
   if(!el||!selNow(el)||calm())return;el.style.setProperty("--px",x+"px");el.style.setProperty("--py",y+"px");el.classList.remove("fillin");void el.offsetWidth;el.classList.add("fillin")}
 document.addEventListener("pointerdown",e=>{const el=famHost(e.target);if(!el){tapMark=null;return}const r=el.getBoundingClientRect();
@@ -708,8 +805,9 @@ const dayIdx=v=>Math.floor((new Date().setHours(0,0,0,0)-new Date(v.start).setHo
 function spark(v){const c=v.checks||{},ks=Object.keys(c).map(Number).sort((a,b)=>a-b);if(!ks.length)return "";const w=120,h=28,mx=Math.max(...ks,1);
   const pts=ks.map(k=>[ks.length>1?4+(k/mx)*(w-8):w/2,h-4-(c[k]-1)/4*(h-8)]);
   return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-label="Verlauf deiner Zwischenstationen">${pts.length>1?`<polyline points="${pts.map(p=>p.join(",")).join(" ")}"/>`:""}${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="2.6"/>`).join("")}</svg>`}
-function checkRow(id){const e=U[id],v=S.ueb[id];if(!(e.d>=3))return "";const di=dayIdx(v),has=v.checks&&v.checks[di]!=null;
-  return `<div class="check"><div class="sh"><span class="label">Tag ${Math.min(e.d,di+1)} von ${e.d} · ${has?"heute eingetragen":"Wie läuft's?"}</span>${spark(v)}</div>${has?"":`<div class="cdots">${CHECKW.map((w,i)=>`<button class="cdot" data-check="${id}" data-val="${i+1}"><i></i><span>${w}</span></button>`).join("")}</div>`}</div>`}
+/* Die Stufen bleiben nach dem Eintragen sichtbar; die gewählte ist markiert und lässt sich durch erneutes Antippen löschen. */
+function checkRow(id){const e=U[id],v=S.ueb[id];if(!(e.d>=3))return "";const di=dayIdx(v),cur=v.checks&&v.checks[di]!=null?v.checks[di]:null;
+  return `<div class="check"><div class="sh"><span class="label">Tag ${Math.min(e.d,di+1)} von ${e.d} · ${cur!=null?"heute eingetragen":"Wie läuft's?"}</span>${spark(v)}</div><div class="cdots">${CHECKW.map((w,i)=>`<button class="cdot" data-check="${id}" data-val="${i+1}" aria-pressed="${cur===i+1}"><i></i><span>${w}</span></button>`).join("")}</div></div>`}
 
 /* ---------- Momente: selten und nüchtern ---------- */
 const MOMENTS=[
@@ -731,10 +829,12 @@ let momentTimer=0,lastTap=0;
 document.addEventListener("pointerdown",()=>{lastTap=now()},{passive:true,capture:true});
 const momentFits=()=>tab==="geruest"&&!S.cur&&!$("#layer").innerHTML&&!momentOpen;
 function checkMoments(){clearTimeout(momentTimer);if(!momentFits())return;const m=MOMENTS.find(m=>!S.moments[m.id]&&m.ok());if(!m)return;
-  const t0=now(),wait=Math.max(900,freshUntil-t0+400);momentTimer=setTimeout(()=>{if(!momentFits()||lastTap>t0)return;showMoment(m)},wait)}
-function showMoment(m){S.moments[m.id]=now();persist();momentOpen=true;document.querySelectorAll(".toast").forEach(x=>{x.classList.add("out");setTimeout(()=>x.remove(),320)});const d=document.createElement("div");d.className="moment";d.innerHTML=`<div class="mcard" role="dialog" aria-modal="true" aria-labelledby="mtitle">${miniSVG("memb")}<p class="label">Ein Moment</p><h2 id="mtitle">${m.t}</h2><p>${m.x}</p><button class="btn" id="mok">Weiter</button></div>`;
+  const t0=now(),wait=Math.max(900,freshUntil-t0+400);momentTimer=setTimeout(()=>{if(!momentFits()||lastTap>t0||S.moments[m.id]||!m.ok())return;showMoment(m)},wait)}
+/* Momente, die seit since erreicht wurden und deren Bedingung nicht mehr gilt (etwa nach dem Abwählen einer Entscheidung), werden wieder offen. */
+function pruneMoments(since){MOMENTS.forEach(m=>{if(S.moments[m.id]&&S.moments[m.id]>=since&&!m.ok())delete S.moments[m.id]})}
+function showMoment(m){S.moments[m.id]=now();persist();momentOpen=true;clearTimeout(undoTimer);document.querySelectorAll(".toast").forEach(x=>{x.classList.add("out");setTimeout(()=>x.remove(),320)});const d=document.createElement("div");d.className="moment";d.innerHTML=`<div class="mcard" role="dialog" aria-modal="true" aria-labelledby="mtitle">${miniSVG("memb")}<p class="label">Ein Moment</p><h2 id="mtitle">${m.t}</h2><p>${m.x}</p><button class="btn" id="mok">Weiter</button></div>`;
   document.body.appendChild(d);setTimeout(()=>lightUp(d.querySelector(".memb"),true),200);
-  const close=()=>{d.classList.add("out");momentOpen=false;setTimeout(()=>d.remove(),350);releaseToast()};d.addEventListener("click",e=>{if(e.target.closest("#mok")||e.target===d)close()})}
+  const close=()=>{d.classList.add("out");momentOpen=false;setTimeout(()=>d.remove(),350);releaseToast();if(undoState)setTimeout(showUndo,250)};d.addEventListener("click",e=>{if(e.target.closest("#mok")||e.target===d)close()})}
 
 /* ---------- Gegen endloses Lesen ---------- */
 let sessionReads=0,scrollHinted=false;
@@ -761,10 +861,16 @@ const lvSnap=()=>Object.fromEntries(S.kern.map(id=>[id,level(id)]));
 /* true, wenn seit dem letzten save() ein Bauteil dazugekommen ist; nur für die Stärke der Haptik */
 const gains=()=>{const o=S.lv||{};return S.kern.some(id=>level(id)>(o[id]||0))};
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-function save(){const cur=lvSnap(),old=S.lv||{},inc=[];Object.entries(cur).forEach(([id,l])=>{for(let k=(old[id]||0);k<l;k++)inc.push(id+":"+k)});
-  S.lv=cur;if(inc.length){S.fresh=[...S.fresh.filter(x=>!inc.includes(x)),...inc];const last=inc[inc.length-1].split(":");
-    setTimeout(()=>{if(tab!=="geruest")toast(`<b>Neues Bauteil</b> · ${W[last[0]].n} steht jetzt auf Stufe ${+last[1]+1}`);renderTabs()},500)}
-  persist()}
+/* save(true) zeigt die Meldung „Neues Bauteil“ nicht selbst, sondern gibt ihren Text zurück (für eine Meldung mit Rückgängig).
+   save("restore") nach dem Abwählen: Bauteile, die dadurch zurückkehren, gab es schon; sie gelten nicht als neu.
+   Bauteile, die es nicht mehr gibt (abgewählt, zurückgenommen), verschwinden aus S.fresh. */
+const nbText=key=>{const [id,k]=key.split(":");return `<b>Neues Bauteil</b> · ${W[id].n} steht jetzt auf Stufe ${+k+1}`};
+const partExists=key=>{const [id,k]=key.split(":");return S.kern.includes(id)&&+k<level(id)};
+function save(silent){const cur=lvSnap(),old=S.lv||{},inc=[];Object.entries(cur).forEach(([id,l])=>{for(let k=(old[id]||0);k<l;k++)inc.push(id+":"+k)});
+  S.lv=cur;S.fresh=S.fresh.filter(partExists);let msg="";
+  if(inc.length&&silent!=="restore"){S.fresh=[...S.fresh.filter(x=>!inc.includes(x)),...inc];const last=inc[inc.length-1];if(tab!=="geruest")msg=nbText(last);
+    setTimeout(()=>{if(!silent&&tab!=="geruest"&&partExists(last))toast(nbText(last));renderTabs()},500)}
+  persist();return silent?msg:undefined}
 if(!S.lv){S.lv=lvSnap();persist()}
 
 /* ---------- Rendern & Ereignisse ---------- */
@@ -781,67 +887,93 @@ function openProbe(id){if($("#layer").innerHTML)$("#layer").innerHTML="";pcur=id
 document.addEventListener("click",e=>{
   if(e.target.closest){const rh=e.target.closest(".rhit");if(rh){if(rh.dataset.fund){resonate(null);valueSheet("wuerde")}else pillarTap(nearRod(e)||rh.dataset.pil);return}const lg=e.target.closest(".glegend [data-pil]");if(lg){pillarTap(lg.dataset.pil);return}if(e.target.closest("[data-wurde]")){valueSheet("wuerde");return}const g=e.target.closest(".gsvg");if(g){const h=e.target.closest("[data-pil]");if(h){pillarTap(h.dataset.pil);return}const sl=e.target.closest("[data-slot]");if(sl){if(!S.kern.length){finder();return}anim=true;tab="werte";render();window.scrollTo(0,0);return}if(e.target.closest(".slab")){valueSheet("wuerde");return}}}
   const t=e.target.closest("button,a");if(!t)return;const d=t.dataset;
+  if(t.classList.contains("ubtn")){doUndo();return}
   if(finderClick(t,d))return;
   if(t.closest(".bite .links")&&!t.dataset.lit){t.dataset.lit=1;trace(t,getComputedStyle(t).getPropertyValue("--c").trim()||null);
     setTimeout(()=>{t.click();delete t.dataset.lit},calm()?0:380);return}
   if(t.id==="go"){sessionReads++;if(maybeScrollHint())return;const b=pickImp();if(!b)return;lightUp(t.querySelector(".stack"));t.classList.add("pull");setTimeout(()=>requestAnimationFrame(()=>openImp(b.id)),calm()?0:420);return}
   if(t.id==="next"){sessionReads++;if(maybeScrollHint())return;const b=pickImp();if(b)openImp(b.id);return}
-  if(d.pick&&!t.getAttribute("aria-disabled")){const [pid,i]=d.pick.split(":");const p=P[pid];const old=S.proben[pid];
-    if(pBlind===pid&&old&&old.o!=null){old.hist=(Array.isArray(old.hist)?old.hist:[]).concat([{o:old.o,t:old.t,r:old.r||""}]);old.r="";old.wq="";old.again=true}else if(old)old.again=false;
-    pBlind=null;S.proben[pid]=Object.assign(S.proben[pid]||{},{o:+i,t:now()});buzz("ok");
-    t.classList.add("chosen");lightUp(t);setTimeout(()=>{save();render();const el=$("#probe");if(el){const pk=el.querySelector(".opt.pick");if(pk){pk.classList.add("drawn");trace(pk,`var(--c-${p.cat})`)}const rv=el.querySelector(".reveal");if(rv)rv.scrollIntoView({block:"nearest",behavior:calm()?"auto":"smooth"})}},calm()?0:380);return}
+  /* Wert-Chips in einer entschiedenen Option öffnen den Wert, ohne die Wahl zu berühren */
+  {const vc=e.target.closest(".opt .vchip");if(vc){valueSheet(vc.dataset.wert);return}}
+  if(d.pick){const [pid,i]=d.pick.split(":");const p=P[pid];const old=S.proben[pid],blindNow=pBlind===pid&&old&&old.o!=null;
+    /* Erneutes Antippen der gewählten Option hebt die Entscheidung auf */
+    if(!blindNow&&old&&old.o===+i){const sn=snap();unpick(pid);save("restore");render();undoToast("Deine Entscheidung ist aufgehoben.",false,sn,{after:scrollProbe});return}
+    if(t.getAttribute("aria-disabled"))return;
+    const sn=snap(),prev=old?JSON.parse(JSON.stringify(old)):null;
+    if(blindNow){old.hist=(Array.isArray(old.hist)?old.hist:[]).concat([{o:old.o,t:old.t,r:old.r||""}]);old.r="";old.wq="";old.again=true}else if(old)old.again=false;
+    pBlind=null;S.proben[pid]=Object.assign(S.proben[pid]||{},{o:+i,t:now(),prev});delete S.proben[pid].ow;buzz("ok");
+    t.classList.add("chosen");lightUp(t);setTimeout(()=>{const nb=save(true);render();const el=$("#probe");if(el){const pk=el.querySelector(".opt.pick");if(pk){pk.classList.add("drawn");trace(pk,`var(--c-${p.cat})`)}const rv=el.querySelector(".reveal");if(rv)rv.scrollIntoView({block:"nearest",behavior:calm()?"auto":"smooth"})}
+      undoToast(nb||"Deine Entscheidung ist gespeichert.",true,sn,{after:scrollProbe})},calm()?0:380);return}
   if(d.psave){const v=S.proben[d.psave];if(v){v.r=$("#preason").value.trim();const wq=$("#pwq")?$("#pwq").value.trim():"";if(wq!==(v.wq||"")){v.wq=wq;v.wqt=now()}save();buzz("ok");toast(wq||v.r?"Gespeichert. Du findest es im Bautagebuch.":"Gespeichert.",true)}return}
   if(d.blindgo){pBlind=d.blindgo;pHint=null;render();const el=$("#probe");if(el)el.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});return}
-  if(d.previse){const v=S.proben[d.previse];if(v){v.o=null;save();render()}return}
+  if(d.previse){const v=S.proben[d.previse];if(v&&v.o!=null){const sn=snap(),since=v.t||0;v.o=null;delete v.ow;pruneMoments(since);save();render();undoToast("Du kannst jetzt neu entscheiden.",false,sn,{after:scrollProbe})}return}
   if(t.id==="pnext"){pBlind=null;pHint=null;const cur=pcur;pcur=null;S.pskip=(S.pskip||0)+1;persist();let p=currentProbe();if(p&&p.id===cur){pcur=null;S.pskip++;p=currentProbe()}anim=true;render();const el=$("#probe");if(el)el.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});return}
-  if(d.pshare){shareProbe(P[d.pshare]);return}
+  if(d.pshare){shareProbe(pv(P[d.pshare],null));return}
   if(d.probeOpen){const id=d.probeOpen;pBlind=d.blind&&blindDue(id)?id:null;pHint=d.phint||null;openProbe(id);return}
   if(d.wq){wqTap(t);return}
+  if(d.pf){const [q,v]=d.pf.split(":"),p=S.profil=Object.assign({v:1,phase:null,nah:[],gruppe:[]},PRO()||{});
+    if(q==="phase")p.phase=p.phase===v?null:v;else{const a=Array.isArray(p[q])?p[q]:[];p[q]=a.includes(v)?a.filter(x=>x!==v):a.concat([v])}
+    S.pfAsk={t:now(),nie:true};persist();pfRefresh();return}
+  if(t.id==="pfdel"){const sn=snap(),inSheet=!!document.querySelector("#layer .pfbox");delete S.profil;persist();pfRefresh();
+    undoToast("Deine Angaben sind gelöscht.",false,sn,inSheet?{reopen:pfSheet}:null);return}
+  if(t.id==="pfgo"){S.pfAsk={t:now(),nie:false};persist();pfSheet();return}
+  if(t.id==="pfdone"){closeSheet();render();return}
+  if(t.id==="pflater"){S.pfAsk={t:now(),nie:false};persist();render();return}
+  if(t.id==="pfnie"){const sn=snap();S.pfAsk={t:now(),nie:true};persist();render();undoToast("Die App fragt nicht mehr. Die Fragen findest du in den Einstellungen.",false,sn);return}
   if(d.lbsp){const p=t.parentNode.querySelector(".lbsp");if(p){p.hidden=!p.hidden;t.textContent=p.hidden?"Beispiel ansehen":"Beispiel ausblenden"}return}
   if(d.fnote){const b=$("#fnb-"+d.fnote);if(b){b.hidden=false;t.hidden=true;const ta=b.querySelector("textarea");if(ta)ta.focus()}return}
-  if(d.affirm){const L=S.leit[d.affirm];const fn=$("#fn-"+d.affirm),nt=fn?fn.value.trim():"";if(nt)L.notes=(Array.isArray(L.notes)?L.notes:[]).concat([{t:now(),x:nt}]);L.n=(L.n||0)+1;L.next=now()+FIV[Math.min(L.n,FIV.length-1)]*DAY;buzz("ok");const card=t.closest(".fest");if(card)lightUp(card);toast(nt?"Bekräftigt. Deine Notiz steht im Bautagebuch.":"Bekräftigt. Die App fragt später wieder nach.",true);setTimeout(()=>{save();anim=true;render()},calm()?0:450);return}
-  if(d.leitsave){const id=d.leitsave,txt=$("#leittext").value.trim();if(!txt){buzz("err");shake($("#leittext"));toast("Schreib zuerst einen Satz.");return}const L=S.leit[id]||{n:0};const isNew=!L.t;L.t=txt;L.at=L.at||now();if(isNew||!L.next)L.next=now()+FIV[0]*DAY;S.leit[id]=L;buzz("ok");closeSheet();toBuild();toast("Leitsatz gespeichert.",true);return}
-  if(d.kern){if(S.kern.length>=MAXKERN)return;S.kern.push(d.kern);buzz("ok");lightUp(t);closeSheet();const wn=W[d.kern].n;setTimeout(()=>{toBuild();toast(`${wn} ist jetzt eine Stütze.`,true)},calm()?0:200);return}
-  if(d.unkern){S.kern=S.kern.filter(x=>x!==d.unkern);save();valueSheet(d.unkern);render();return}
+  if(d.affirm){const id=d.affirm,sn=snap(),L=S.leit[id];const fn=$("#fn-"+id),nt=fn?fn.value.trim():"";if(nt)L.notes=(Array.isArray(L.notes)?L.notes:[]).concat([{t:now(),x:nt}]);L.n=(L.n||0)+1;L.next=now()+FIV[Math.min(L.n,FIV.length-1)]*DAY;buzz("ok");const card=t.closest(".fest");if(card)lightUp(card);
+    const msg=nt?"Bekräftigt. Deine Notiz steht im Bautagebuch.":"Bekräftigt. Die App fragt später wieder nach.";
+    /* Rückgängig: Die Karte kommt wieder, die Notiz steht wieder im Feld */
+    const back=()=>{if(!nt)return;const b=$("#fnb-"+id),q=document.querySelector(`[data-fnote="${id}"]`);if(b){b.hidden=false;if(q)q.hidden=true;const ta=b.querySelector("textarea");if(ta)ta.value=nt}};
+    setTimeout(()=>{const nb=save(true);anim=true;render();undoToast(nb||msg,true,sn,{after:back})},calm()?0:450);return}
+  if(d.leitsave){const id=d.leitsave,txt=$("#leittext").value.trim();if(!txt){buzz("err");shake($("#leittext"));toast("Schreib zuerst einen Satz.");return}const sn=snap(),L=S.leit[id]||{n:0};const isNew=!L.t;L.t=txt;L.at=L.at||now();if(isNew||!L.next)L.next=now()+FIV[0]*DAY;S.leit[id]=L;buzz("ok");closeSheet();toBuild();
+    undoToast("Leitsatz gespeichert.",true,sn,{reopen:()=>{valueSheet(id);const ta=$("#leittext");if(ta)ta.value=txt}});return}
+  if(d.kern){if(S.kern.length>=MAXKERN)return;const id=d.kern,sn=snap();S.kern.push(id);buzz("ok");lightUp(t);closeSheet();const wn=W[id].n;setTimeout(()=>{toBuild();undoToast(`${wn} ist jetzt eine Stütze.`,true,sn,{reopen:()=>valueSheet(id)})},calm()?0:200);return}
+  if(d.unkern){const id=d.unkern,sn=snap();S.kern=S.kern.filter(x=>x!==id);save();valueSheet(id);render();undoToast(`${W[id].n} ist keine Stütze mehr.`,false,sn,{reopen:()=>valueSheet(id)});return}
   if(d.wert){if(t.closest(".opt"))return;valueSheet(d.wert);return}
   if(d.gowlist){const l=$("#wlist");if(l)l.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});return}
   if(d.tabgo){if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab=d.tabgo;S.cur=null;render();window.scrollTo(0,0);return}
   if(d.ueb){uebSheet(d.ueb);return}
   if(d.ushare){shareUeb(d.ushare);return}
-  if(d.check){const v=S.ueb[d.check];v.checks=v.checks||{};v.checks[dayIdx(v)]=+d.val;save();render();toast("Eingetragen.");return}
+  /* Zwischenstation: dieselbe Stufe noch einmal antippen löscht den Eintrag von heute */
+  if(d.check){const v=S.ueb[d.check],k=dayIdx(v);v.checks=v.checks||{};const off=v.checks[k]===+d.val;if(off)delete v.checks[k];else v.checks[k]=+d.val;save();render();toast(off?"Der Eintrag von heute ist gelöscht.":"Eingetragen.");return}
   /* Schalter: nur der Zustand wechselt, ohne Neuzeichnen, damit der Knopf sichtbar hinübergleitet */
   if(d.setting){let on;if(d.setting==="hell"){S.settings.theme=S.settings.theme==="hell"?"dunkel":"hell";applyTheme();on=S.settings.theme==="hell"}else{S.settings[d.setting]=S.settings[d.setting]===false;on=S.settings[d.setting]}
     persist();t.setAttribute("aria-checked",on);if(d.setting==="vibration"&&IOS)armHaps();return}
   if(t.id==="dailyics"){dailyIcs();return}
   if(t.id==="shx2"){closeSheet();return}
-  if(t.id==="nohint"){S.settings.antiScroll=false;persist();closeSheet();toast("Alles klar. Die Einstellung findest du unter „Gerüst“.");return}
+  if(t.id==="nohint"){const sn=snap();S.settings.antiScroll=false;persist();closeSheet();undoToast("Alles klar. Die Einstellung findest du unter „Gerüst“.",false,sn,{after:()=>{S.settings.antiScroll=true;persist()}});return}
   if(t.id==="home"||t.id==="home2"){if(tab!=="geruest"||S.cur){goHome();logoMove();return}logoMove();refreshHome();return}
   if(t.id==="back"){backToImp();return}
   if(t.id==="share"&&S.cur){shareImp(I[S.cur]);return}
   if(t.id==="shareapp"){shareApp();return}
   if(t.id==="explore"){shared=null;S.cur=null;try{history.replaceState(null,"",location.pathname)}catch(x){}goHome();return}
-  if(t.id==="save"&&S.cur){if(S.saved[S.cur])delete S.saved[S.cur];else{S.saved[S.cur]=now();buzz("ok");toast("Gemerkt. Du findest es im Bautagebuch.",true)}persist();render();return}
-  if(d.filter){if(S.filter===d.filter)return;S.filter=d.filter;persist();render();return}
+  if(t.id==="save"&&S.cur){const sn=snap(),on=!S.saved[S.cur];if(on){S.saved[S.cur]=now();buzz("ok")}else delete S.saved[S.cur];persist();render();undoToast(on?"Gemerkt. Du findest es im Bautagebuch.":"Nicht mehr gemerkt.",on,sn);return}
+  /* Filter: ein gewählter Bereich wird durch erneutes Antippen abgewählt, dann gilt wieder „Alle“. „Alle“ selbst bleibt gewählt. */
+  if(d.filter){const nf=S.filter===d.filter?"alle":d.filter;if(nf===S.filter)return;S.filter=nf;persist();render();return}
   if(d.deep&&S.cur){const b=I[S.cur];trace(t,`var(--c-${b.cat})`);setTimeout(()=>{d.deep==="ev"?evSheet(b):deepSheet(b)},calm()?0:420);return}
   if(d.daily){const id=d.daily;if(t.classList.contains("go2"))return;t.classList.add("go2");lightUp(t);setTimeout(()=>openDaily(id,t),calm()?0:320);return}
   if(d.open){if($("#layer").innerHTML)$("#layer").innerHTML="";openImp(d.open);return}
-  if(d.pfilter){pFilter=d.pfilter;pcur=null;pBlind=null;pHint=null;S.pskip=0;render();return}
-  if(d.ufilter){uFilter=d.ufilter;uMore=false;render();return}
-  if(d.wfilter){wFilter=d.wfilter;render();return}
+  if(d.pfilter){const nf=pFilter===d.pfilter?"alle":d.pfilter;if(nf===pFilter)return;pFilter=nf;pcur=null;pBlind=null;pHint=null;S.pskip=0;render();return}
+  if(d.ufilter){const nf=uFilter===d.ufilter?"alle":d.ufilter;if(nf===uFilter)return;uFilter=nf;uMore=false;render();return}
+  if(d.wfilter){const nf=wFilter===d.wfilter?"alle":d.wfilter;if(nf===wFilter)return;wFilter=nf;render();return}
   if(t.id==="umore"){uMore=true;render();return}
-  if(d.accept){if(activeUeb().length>=MAXACT)return;S.ueb[d.accept]={status:"active",start:now()};save();if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab="ueben";render();{const c=document.querySelector(`[data-done="${d.accept}"]`);const card=c&&c.closest(".exp");if(card){card.scrollIntoView({block:"center"});trace(card,`var(--c-${U[d.accept].cat})`)}}toast("Übung angenommen.");return}
+  if(d.accept){if(activeUeb().length>=MAXACT)return;const sn=snap(),aid=d.accept,fromSheet=!!$("#layer").innerHTML;S.ueb[d.accept]={status:"active",start:now()};save();if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab="ueben";render();{const c=document.querySelector(`[data-done="${d.accept}"]`);const card=c&&c.closest(".exp");if(card){card.scrollIntoView({block:"center"});trace(card,`var(--c-${U[d.accept].cat})`)}}undoToast("Übung angenommen.",false,sn,fromSheet?{reopen:()=>uebSheet(aid)}:null);return}
   if(t.id==="uother"){S.uskip=(S.uskip||0)+1;persist();render();return}
-  if(d.drop){S.ueb[d.drop]={status:"dropped",start:S.ueb[d.drop].start,end:now()};save();render();return}
+  if(d.drop){const sn=snap();S.ueb[d.drop]={status:"dropped",start:S.ueb[d.drop].start,end:now()};save();render();undoToast("Die Übung ist abgebrochen.",false,sn);return}
   if(d.remind){remindSheet(d.remind);return}
   if(d.rmode){remindMode=d.rmode;remindSheet(d.id);return}
   if(d.ics){const p=remindPlan(d.ics,remindMode);downloadFile(`wertegeruest-${d.ics}.ics`,icsFor(p));S.ueb[d.ics].remind=remindMode;persist();return}
   if(d.done){doneSheet(d.done);return}
   if(t.id==="savedone"){const id=t.dataset.id,m=document.querySelector('#moods [aria-pressed="true"]'),ud=$("#udays");let days;
     if(ud){const c=ud.querySelector('[aria-pressed="true"]');if(!c){buzz("err");shake(ud);toast("Wähl zuerst, an wie vielen Tagen du die Übung gemacht hast.");return}days=+c.dataset.udays}
-    S.ueb[id]=Object.assign(S.ueb[id]||{start:now()},{status:"done",end:now(),mood:m?m.dataset.mood:null,note:$("#note").value.trim()});if(days!=null)S.ueb[id].days=days;else delete S.ueb[id].days;buzz("ok");closeSheet();toBuild();toast(days===0?"Gespeichert. Die Notiz steht im Bautagebuch.":"Übung geschafft.",true);return}
+    const sn=snap(),pre={mood:m?m.dataset.mood:null,note:$("#note").value.trim(),days};
+    S.ueb[id]=Object.assign(S.ueb[id]||{start:now()},{status:"done",end:now(),mood:pre.mood,note:pre.note});if(days!=null)S.ueb[id].days=days;else delete S.ueb[id].days;buzz("ok");closeSheet();toBuild();
+    undoToast(days===0?"Gespeichert. Die Notiz steht im Bautagebuch.":"Übung geschafft.",true,sn,{reopen:()=>doneSheet(id,pre)});return}
   if(t.id==="reset"){confirmReset=true;render();return}
   if(t.id==="resetno"){confirmReset=false;render();return}
-  if(t.id==="resetyes"){S={read:{},saved:{},kern:[],leit:{},proben:{},ueb:{},filter:"alle",history:[],cur:null,settings:S.settings,moments:{},welcomed:S.welcomed,fresh:[],lv:{}};persist();confirmReset=false;render();toast("Alles zurückgesetzt.");return}
+  if(t.id==="resetyes"){const sn=snap();S={read:{},saved:{},kern:[],leit:{},proben:{},ueb:{},filter:"alle",history:[],cur:null,settings:S.settings,moments:{},welcomed:S.welcomed,fresh:[],lv:{},owMig:1};persist();confirmReset=false;render();undoToast("Alles zurückgesetzt.",false,sn);return}
 });
 /* Nach einem Bauschritt: zum Gerüst, damit man das neue Teil einrasten sieht */
 function toBuild(){save();if(S.fresh.length){anim=false;tab="geruest";S.cur=null;render();window.scrollTo({top:0,behavior:"auto"})}else render()}
