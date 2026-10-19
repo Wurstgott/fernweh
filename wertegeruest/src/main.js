@@ -328,32 +328,59 @@ function viewWerte(){
     </div></details>
   </section>`}
 /* Wertequadrat: Jeder der vier Begriffe lässt sich antippen und erklärt sich selbst und seinen Platz im Quadrat.
-   Oben stehen Wert und Schwester, darunter ihr jeweiliges Zuviel. Die Diagonalen verbinden ein Zuviel mit der Richtung,
-   in die man von dort wächst (zv → Schwester, zs → Wert). */
+   Oben stehen Wert und Schwesterwert im Gleichgewicht (Doppelstrich). Senkrecht kippt jeder ohne sein Gegengewicht
+   in sein Zuviel (gestrichelt). Schräg führt ein Pfeil vom Zuviel zum Gegengewicht gegenüber, also zum Weg heraus
+   (zv → Schwesterwert, zs → Wert). Pfeile stehen nur für den Weg heraus, damit keine Linie eine falsche Ursache nahelegt. */
 /* Begriffe wie „Blinde Gefolgschaft“ beginnen mit einem Adjektiv; mitten im Satz wird es kleingeschrieben. */
 const mid=t=>/^[A-ZÄÖÜ][a-zäöüß]+(e|er|es|en|em) [A-ZÄÖÜ]/.test(t)?t[0].toLowerCase()+t.slice(1):t;
-const WQROLE={w:"Wert",s:"Schwester",zv:"Zuviel davon",zs:"Zuviel davon"};
-function wqHTML(w){const q=(r,t)=>`<button class="q ${r==="w"||r==="s"?"top":"bot"}" data-wq="${w.id}" data-role="${r}" aria-pressed="false" aria-controls="wqi-${w.id}"><small>${w.fund&&r==="zv"?"Ohne Klarheit":WQROLE[r]}</small><b>${t}</b></button>`;
-  return `<div class="wq" ${cc(w.cat)} data-on=""><svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none"><line class="d1" x1="30" y1="32" x2="70" y2="68" vector-effect="non-scaling-stroke"/><line class="d2" x1="70" y1="32" x2="30" y2="68" vector-effect="non-scaling-stroke"/></svg>
-    ${q("w",w.n)}${q("s",w.s)}${q("zv",w.zv)}${q("zs",w.zs)}</div>
+/* Feldbeschriftungen, spiegelbildlich. Die Würde hat kein Zuviel, darum heißt es dort „Würde ohne Klarheit“ und „Klarheit ohne Würde“. */
+const wqLab=(w,r)=>w.fund?{w:"Fundament",s:"Schwesterwert",zv:"Würde ohne Klarheit",zs:"Klarheit ohne Würde"}[r]
+  :{w:"Wert",s:"Schwesterwert",zv:`Zuviel von ${mid(w.n)}`,zs:`Zuviel von ${mid(w.s)}`}[r];
+/* Weiche Trennstellen in sehr langen Wörtern, damit nichts abgeschnitten wird, auch wo der Browser nicht selbst trennt. */
+const WQSEG=/(bereitschaft|fähigkeit|verantwortung|verbundenheit|überschätzung|gefälligkeit|verleugnung|optimierung|losigkeit|lichkeit|lichung|losung|gefolgschaft|zweifel|sichtigkeit|haftigkeit|samkeit|zwang|eifer)/g;
+const wqHy=t=>t.split(" ").map(x=>x.length>11?x.replace(WQSEG,(s,_,i)=>i>2?"&shy;"+s:s):x).join(" ");
+const WQKEY=`<div class="wqkey" aria-hidden="true"><span><svg viewBox="0 0 20 12" class="bal"><path d="M3 4H17M3 8H17"/></svg>Gleichgewicht</span><span><svg viewBox="0 0 20 12" class="v"><path d="M10 0V12"/></svg>kippt ab</span><span><svg viewBox="0 0 20 12" class="d"><path d="M3 11L17 1M11 1.2H17V6.5"/></svg>Weg heraus</span></div>`;
+function wqHTML(w){const q=(r,t)=>`<button class="q ${r==="w"||r==="s"?"top":"bot"}" data-wq="${w.id}" data-role="${r}" aria-pressed="false" aria-controls="wqi-${w.id}"><small>${wqHy(wqLab(w,r))}</small><b>${wqHy(t)}</b></button>`;
+  return `<div class="wq" ${cc(w.cat)} data-on=""><svg aria-hidden="true" focusable="false"></svg>
+    ${q("w",w.n)}${q("s",w.s)}${q("zv",w.zv)}${q("zs",w.zs)}</div>${WQKEY}
     <div class="wqinfo" id="wqi-${w.id}" aria-live="polite">${wqDefault(w)}</div>`}
+/* Zeichnet die Linien in Pixeln nach den tatsächlichen Kästchen (offset* ist unabhängig von der Einblend-Animation des Blatts).
+   Ein ResizeObserver zeichnet neu, wenn Schrift, Breite oder Zeilenumbruch sich ändern. */
+function wqDraw(box){const svg=box&&box.querySelector("svg");if(!svg)return;const q={};
+  box.querySelectorAll(".q").forEach(b=>q[b.dataset.role]={x:b.offsetLeft,y:b.offsetTop,w:b.offsetWidth,h:b.offsetHeight});
+  const BW=box.clientWidth,BH=box.clientHeight;if(!BW||!BH||!q.w||!q.s||!q.zv||!q.zs)return;
+  const f=n=>Math.round(n*2)/2,P=(...a)=>a.map(([x,y],i)=>(i?"L":"M")+f(x)+" "+f(y)).join(""),g=5;
+  const head=(x1,y1,x2,y2)=>{const a=Math.atan2(y2-y1,x2-x1),L=7,s=.5;return P([x2-L*Math.cos(a-s),y2-L*Math.sin(a-s)],[x2,y2],[x2-L*Math.cos(a+s),y2-L*Math.sin(a+s)])};
+  const arrow=(x1,y1,x2,y2)=>P([x1,y1],[x2,y2])+head(x1,y1,x2,y2);
+  const yb=q.w.y+q.w.h/2,xa=q.w.x+q.w.w+g,xb=q.s.x-g,cx=r=>q[r].x+q[r].w/2;
+  const dv=[q.zv.x+q.zv.w*.84,q.zv.y-g,q.s.x+q.s.w*.16,q.s.y+q.s.h+g],ds=[q.zs.x+q.zs.w*.16,q.zs.y-g,q.w.x+q.w.w*.84,q.w.y+q.w.h+g];
+  svg.setAttribute("viewBox",`0 0 ${BW} ${BH}`);
+  svg.innerHTML=`<g class="bal"><path d="${P([xa,yb-2.5],[xb,yb-2.5])+P([xa,yb+2.5],[xb,yb+2.5])}"/></g>`
+    +`<g class="v vw"><path d="${P([cx("w"),q.w.y+q.w.h+g],[cx("zv"),q.zv.y-g])}"/></g><g class="v vs"><path d="${P([cx("s"),q.s.y+q.s.h+g],[cx("zs"),q.zs.y-g])}"/></g>`
+    +`<g class="d dv"><path d="${arrow(...dv)}"/></g><g class="d ds"><path d="${arrow(...ds)}"/></g>`}
+let wqRO=null;const wqBoxes=new Set();
+function wqMount(){document.querySelectorAll(".wq").forEach(box=>{wqDraw(box);if(wqBoxes.has(box))return;wqBoxes.add(box);
+    if(typeof ResizeObserver==="function"){if(!wqRO)wqRO=new ResizeObserver(es=>es.forEach(e=>wqDraw(e.target)));wqRO.observe(box)}});
+  wqBoxes.forEach(box=>{if(!box.isConnected){wqBoxes.delete(box);if(wqRO)wqRO.unobserve(box)}});
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>wqBoxes.forEach(wqDraw)).catch(()=>{})}
+addEventListener("resize",()=>wqBoxes.forEach(wqDraw));
 /* Die Satzschablonen nennen die Begriffe nur im Nominativ, nach einem Doppelpunkt oder nach „mehr“. So passen sie zu jedem Begriff,
    auch zu Mehrwortbegriffen, Zählwörtern und Plural („Ausreden“), ohne dass Kasus oder Artikel falsch werden. */
 const wqDefault=w=>`<p class="muted small">${w.fund
-  ?`Würde gilt für jeden Menschen und lässt sich nicht übertreiben. Wer sie aber so betont, dass Unrecht nicht mehr benannt wird, landet in der Verharmlosung. Wer dort landet, braucht mehr ${mid(w.s)}. ${w.s} ohne Achtung vor der Würde kippt ins Zuviel: ${mid(w.zs)}. Wer dort landet, braucht den Blick zurück auf die Würde des Menschen.`
-  :`${w.n} ohne ${mid(w.s)} kippt ins Zuviel: ${mid(w.zv)}. Wer dort landet, braucht mehr ${mid(w.s)}. ${w.s} ohne ${w.n} kippt ins Zuviel: ${mid(w.zs)}. Wer dort landet, braucht mehr ${w.n}.`} Tippe auf einen Begriff, um mehr zu erfahren.</p>`;
+  ?`Würde gilt für jeden Menschen und lässt sich nicht übertreiben. Wer sie aber betont, ohne Unrecht klar zu benennen, kippt in die Verharmlosung. Der Weg heraus führt zu mehr ${mid(w.s)}. ${w.s} ohne Achtung vor der Würde kippt in die Entmenschlichung. Der Weg heraus führt zurück zur Würde des Menschen.`
+  :`${w.n} ohne ${mid(w.s)} kippt ins Zuviel: ${mid(w.zv)}. Der Weg heraus führt zu mehr ${mid(w.s)}. ${w.s} ohne ${w.n} kippt ins Zuviel: ${mid(w.zs)}. Der Weg heraus führt zu mehr ${w.n}.`} Tippe auf einen Begriff, um mehr zu erfahren.</p>`;
 function wqInfo(w,r){const Q=(typeof QUAD!=="undefined"&&QUAD[w.id])||{},x=Q[r]||{};let name,lab,def,rel,sign="",ask;
-  if(r==="w"){name=w.n;lab=w.fund?"Wert · Fundament":"Wert";def=w.d;ask=w.f;
-    rel=w.fund?`Die Würde selbst lässt sich nicht übertreiben. Übertreiben lässt sich aber, wie man sie betont: Wer nur noch die Würde eines Menschen sieht und sein Unrecht nicht mehr benennt, verharmlost. Darum braucht Würde als Gegengewicht ${mid(w.s)}.`
-      :`${w.n} braucht als Gegengewicht ${mid(w.s)}. Beide wollen etwas Richtiges. Fehlt das Gegengewicht, kippt ${w.n} leicht ins Zuviel: ${mid(w.zv)}.`}
-  else if(r==="s"){name=w.s;lab=`Schwester von ${w.n}`;def=x.d;ask=x.f;
-    rel=w.fund?`${w.s} steht nicht gegen die Würde, sondern folgt aus ihr: Weil jeder Mensch zählt, zählt auch, was ihm angetan wird. Fehlt aber die Achtung vor der Würde dessen, der Unrecht getan hat, kippt ${mid(w.s)} leicht ins Zuviel: ${mid(w.zs)}.`
-      :`${w.s} steht nicht gegen ${w.n}. Beide wollen etwas Richtiges und halten sich gegenseitig im Gleichgewicht. Fehlt ${w.n}, kippt ${mid(w.s)} leicht ins Zuviel: ${mid(w.zs)}.`}
-  else if(r==="zv"){name=w.zv;lab=w.fund?"Würde ohne Klarheit":`Zuviel von ${w.n}`;def=x.d;ask=x.f;sign=x.a;
-    rel=w.fund?`Dieses Zuviel entsteht, wenn die Würde eines Menschen betont wird, ohne sein Unrecht klar zu benennen. Der Weg heraus führt schräg hinüber zu mehr ${mid(w.s)}. Wer nur das Gegenteil sucht, landet leicht beim anderen Zuviel: ${mid(w.zs)}.`
+  if(r==="w"){name=w.n;lab=w.fund?"Fundament":"Wert";def=w.d;ask=w.f;
+    rel=w.fund?`Die Würde selbst lässt sich nicht übertreiben. Einseitig werden kann aber, wie man sie betont: Wer nur noch die Würde eines Menschen sieht und sein Unrecht nicht mehr benennt, kippt in die Verharmlosung. Darum braucht Würde als Gegengewicht ${mid(w.s)}. Beide halten sich im Gleichgewicht.`
+      :`${w.n} braucht als Gegengewicht ${mid(w.s)}. Beide wollen etwas Richtiges und halten sich im Gleichgewicht. Fehlt das Gegengewicht, kippt ${w.n} leicht ins Zuviel: ${mid(w.zv)}.`}
+  else if(r==="s"){name=w.s;lab=`Schwesterwert von ${w.n}`;def=x.d;ask=x.f;
+    rel=w.fund?`${w.s} steht nicht gegen die Würde, sondern folgt aus ihr: Weil jeder Mensch zählt, zählt auch, was ihm angetan wird. Beide halten sich im Gleichgewicht. Fehlt aber die Achtung vor der Würde dessen, der Unrecht getan hat, kippt ${mid(w.s)} in die Entmenschlichung.`
+      :`${w.s} steht nicht gegen ${w.n}. Beide wollen etwas Richtiges und halten sich im Gleichgewicht. Fehlt ${w.n}, kippt ${mid(w.s)} leicht ins Zuviel: ${mid(w.zs)}.`}
+  else if(r==="zv"){name=w.zv;lab=wqLab(w,"zv");def=x.d;ask=x.f;sign=x.a;
+    rel=w.fund?`Verharmlosung entsteht, wenn die Würde eines Menschen betont wird, ohne sein Unrecht klar zu benennen. Der Weg heraus führt schräg hinüber zu mehr ${mid(w.s)}. Wer nur das Gegenteil sucht, landet leicht in der Entmenschlichung.`
       :`Dieses Zuviel entsteht, wenn ${w.n} ohne ${mid(w.s)} gelebt wird. Der Weg heraus führt schräg hinüber zu mehr ${mid(w.s)}. Wer nur das Gegenteil sucht, landet leicht beim anderen Zuviel: ${mid(w.zs)}.`}
-  else{name=w.zs;lab=`Zuviel von ${mid(w.s)}`;def=x.d;ask=x.f;sign=x.a;
-    rel=w.fund?`Dieses Zuviel entsteht, wenn ${mid(w.s)} die Würde des Menschen vergisst. Der Weg heraus führt schräg hinüber zur Würde: Du lehnst die Tat entschieden ab und erkennst den Menschen trotzdem als Menschen an. Wer nur das Gegenteil sucht, landet leicht beim anderen Zuviel: ${mid(w.zv)}.`
+  else{name=w.zs;lab=wqLab(w,"zs");def=x.d;ask=x.f;sign=x.a;
+    rel=w.fund?`Entmenschlichung entsteht, wenn ${mid(w.s)} die Würde des Menschen vergisst. Der Weg heraus führt schräg hinüber zurück zur Würde: Du lehnst die Tat entschieden ab und erkennst den Menschen trotzdem als Menschen an. Wer nur das Gegenteil sucht, landet leicht in der Verharmlosung.`
       :`Dieses Zuviel entsteht, wenn ${mid(w.s)} ohne ${w.n} gelebt wird. Der Weg heraus führt schräg hinüber zu mehr ${w.n}. Wer nur das Gegenteil sucht, landet leicht beim anderen Zuviel: ${mid(w.zv)}.`}
   return `<div class="wqcard" data-role="${r}"><div class="label">${lab}</div><h4>${name}</h4>${def?`<p>${def}</p>`:""}<p class="muted">${rel}</p>
     ${sign?`<div class="wqsign"><span class="label">Woran du es merkst</span><p>${sign}</p></div>`:""}${ask?`<p class="ask">${ask}</p>`:""}</div>`}
@@ -376,7 +403,7 @@ function valueSheet(id){const w=W[id],isK=S.kern.includes(id),L=S.leit[id]||{};
    ${imps.length?`<h3>Gedanken dazu</h3>${imps.map(b=>goBtn("open",b.id,b.cat,EV[b.ev],b.t)).join("")}`:""}
    ${prs.length?`<h3>Auf die Probe stellen</h3>${prs.map(p=>goBtn("probe-open",p.id,p.cat,S.proben[p.id]&&S.proben[p.id].o!=null?"Belastungsprobe · entschieden":"Belastungsprobe",p.t)).join("")}`:""}
    ${ues.length?`<h3>Im Alltag leben</h3>${ues.map(u=>goBtn("ueb",u.id,u.cat,"Übung · "+(u.d===1?"heute":u.d+" Tage"),u.t)).join("")}`:""}
-  </div>`,w.cat)}
+  </div>`,w.cat);wqMount()}
 
 /* ---------- Üben: Belastungsproben und Übungen ---------- */
 let pFilter="alle",pcur=null,uFilter="alle",uMore=false;

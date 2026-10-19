@@ -297,16 +297,30 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .evscale div{border:1px solid var(--hair);border-radius:10px;padding:10px 12px;opacity:.6}
 .evscale div.on{opacity:1;border-color:var(--line);background:var(--s2)}
 .evscale p{font-size:14px;margin-top:4px}
-.wq{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:36px 10px}
-.wq svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.wq svg line{stroke:var(--ghost);stroke-width:1;stroke-dasharray:3 4}
-.wq .q{position:relative;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0;background:var(--sheet)}
-.wq .q small{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+/* Wertequadrat: Die Linien zeichnet wqDraw() in Pixeln nach den Kästchen. Oben ein Doppelstrich für das Gleichgewicht,
+   senkrecht gestrichelt das Kippen ins Zuviel, schräg ein Pfeil als Weg heraus. Pfeile gibt es nur für den Weg heraus. */
+.wq{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:50px 24px}
+.wq svg{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.wq svg g{transition:opacity .3s}
+.wq svg path{fill:none;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;transition:stroke .3s,stroke-width .3s}
+.wq svg .bal path{stroke:color-mix(in srgb,var(--c) 45%,var(--ghost))}
+.wq svg .v path{stroke:var(--ghost);stroke-dasharray:3 4}
+.wq svg .d path{stroke:color-mix(in srgb,var(--c) 35%,var(--ghost))}
+.wq .q{position:relative;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0;min-height:44px;background:var(--sheet)}
+.wq .q small{font-family:var(--f-mono);font-size:11px;line-height:1.35;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wq .q small,.wq .q b{-webkit-hyphens:manual;hyphens:manual;overflow-wrap:break-word}
+@media (max-width:360px){.wq .q{padding:10px 6px}.wq .q b{font-size:13.5px}}
 .wq .q b{font-weight:600;font-size:15px;line-height:1.25}
 .wq .q.top{border:1px solid color-mix(in srgb,var(--c) 55%,var(--line))}
 .wq .q.bot{border:1px dashed var(--ghost)}
 .wq .q.bot b{color:var(--muted);font-weight:500}
-.wq+p{margin-top:12px}
+.wqkey{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px;margin-top:12px;font-size:12px;line-height:1.4;color:var(--muted)}
+.wqkey span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.wqkey svg{width:20px;height:12px;flex:none;overflow:visible}
+.wqkey path{fill:none;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}
+.wqkey .bal path{stroke:color-mix(in srgb,var(--c) 70%,var(--ghost))}
+.wqkey .v path{stroke:var(--muted);stroke-dasharray:3 3}
+.wqkey .d path{stroke:color-mix(in srgb,var(--c) 70%,var(--ghost))}
 .fundnote{border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));border-radius:10px;padding:13px 14px;font-size:15px;margin-top:6px}
 .leitbox textarea{font-family:var(--f-serif);font-weight:500;font-size:18px;line-height:1.35;min-height:100px}
 .leitbox .row{margin-top:10px}
@@ -534,15 +548,17 @@ input.hap{-webkit-appearance:none;appearance:none;position:absolute;inset:0;widt
 .gsvg .rod,.gsvg .gap,.gsvg .base{transform-box:fill-box;transform-origin:center}
 
 /* Wertequadrat zum Antippen */
-.wq .q{font:inherit;color:inherit;text-align:left;cursor:pointer;overflow:hidden;transition:border-color .3s,background-color .3s}
-.wq .q.top{text-align:center;align-items:center}
+.wq .q{font:inherit;color:inherit;text-align:center;align-items:center;cursor:pointer;overflow:hidden;transition:border-color .3s,background-color .3s,opacity .3s}
 .wq .q[aria-pressed="true"]{border-style:solid;border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--sheet))}
 .wq .q.bot[aria-pressed="true"] b{color:var(--ink)}
-.wq svg line{transition:stroke .3s,opacity .3s}
-.wq[data-on="zv"] svg .d2,.wq[data-on="zs"] svg .d1{stroke:var(--c);stroke-dasharray:none;opacity:.8}
-.wq[data-on="w"] .q[data-role="s"],.wq[data-on="s"] .q[data-role="w"]{border-style:dashed}
+/* Angetippt: Es leuchten genau die Beziehungen, die die Erklärung beschreibt. Alles andere tritt zurück. */
+.wq:not([data-on=""]) svg g{opacity:.28}
+.wq[data-on="w"] svg :is(.bal,.vw),.wq[data-on="s"] svg :is(.bal,.vs),.wq[data-on="zv"] svg :is(.vw,.dv),.wq[data-on="zs"] svg :is(.vs,.ds){opacity:1}
+.wq[data-on="w"] svg :is(.bal,.vw) path,.wq[data-on="s"] svg :is(.bal,.vs) path,.wq[data-on="zv"] svg :is(.vw,.dv) path,.wq[data-on="zs"] svg :is(.vs,.ds) path{stroke:var(--c);stroke-width:1.75}
+.wq[data-on="w"] .q[data-role="zs"],.wq[data-on="s"] .q[data-role="zv"],.wq[data-on="zv"] .q[data-role="zs"],.wq[data-on="zs"] .q[data-role="zv"]{opacity:.72}
 .wqinfo{margin-top:12px}
 .wqcard{display:flex;flex-direction:column;gap:8px;border-left:2px solid var(--c);padding:2px 0 2px 14px}
 .wqcard h4{margin:0;font-family:var(--f-serif);font-weight:700;font-size:20px;line-height:1.2;letter-spacing:-.01em}
 .wqcard .ask{font-size:16.5px;margin-top:2px}
 .wqsign{display:flex;flex-direction:column;gap:3px}
+
