@@ -526,3 +526,9 @@ input.hap{-webkit-appearance:none;appearance:none;position:absolute;inset:0;widt
 .logo svg{transform-origin:50% 90%}
 .mline{position:absolute;left:0;right:0;bottom:-5px;height:1.5px;border-radius:1px;background:linear-gradient(90deg,var(--pol-kalt),var(--pol-warm));transform-origin:left center;transform:scaleX(0);pointer-events:none}
 @media (prefers-reduced-motion:reduce){.wave,.mline{display:none}.fillin{animation:none!important}}
+
+/* Tippstreifen über den Stäben und dem Fundament (tragen den iPhone-Schalter) und Resonanz */
+.gbox{position:relative;container-type:inline-size}
+.rhits{position:absolute;inset:0;pointer-events:none;overflow:clip}
+.rhit{position:absolute;height:44px;transform-origin:0 22px;pointer-events:auto;cursor:pointer;border-radius:22px;-webkit-tap-highlight-color:transparent}
+.gsvg .rod,.gsvg .gap,.gsvg .base{transform-box:fill-box;transform-origin:center}

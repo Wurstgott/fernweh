@@ -541,6 +541,12 @@ input.hap{-webkit-appearance:none;appearance:none;position:absolute;inset:0;widt
 .mline{position:absolute;left:0;right:0;bottom:-5px;height:1.5px;border-radius:1px;background:linear-gradient(90deg,var(--pol-kalt),var(--pol-warm));transform-origin:left center;transform:scaleX(0);pointer-events:none}
 @media (prefers-reduced-motion:reduce){.wave,.mline{display:none}.fillin{animation:none!important}}
 
+/* Tippstreifen über den Stäben und dem Fundament (tragen den iPhone-Schalter) und Resonanz */
+.gbox{position:relative;container-type:inline-size}
+.rhits{position:absolute;inset:0;pointer-events:none;overflow:clip}
+.rhit{position:absolute;height:44px;transform-origin:0 22px;pointer-events:auto;cursor:pointer;border-radius:22px;-webkit-tap-highlight-color:transparent}
+.gsvg .rod,.gsvg .gap,.gsvg .base{transform-box:fill-box;transform-origin:center}
+
 </style>
 
 </head><body><div class="app" id="app">
@@ -1359,7 +1365,7 @@ function builtRods(slots){const out=[];slots.forEach((id,i)=>{if(!id)return;cons
 function cables(rods){const pts=[];rods.forEach((r,ri)=>{pts.push([r.a,ri]);pts.push([r.b,ri])});const set=new Set(),out=[];
   pts.forEach(([p,ri],pi)=>{pts.map(([q,rj],qi)=>[Math.hypot(p[0]-q[0],p[1]-q[1]),qi,rj]).filter(x=>x[2]!==ri).sort((x,y)=>x[0]-y[0]).slice(0,2).forEach(([d,qi])=>{const k=Math.min(pi,qi)+"|"+Math.max(pi,qi);if(!set.has(k)&&d<120){set.add(k);out.push([p,pts[qi][0]])}})});return out}
 function geruestSVG(){
-  const slots=slotsNow(),ns=nextStep(),rods=builtRods(slots);let defs="",ghost="",glowS="",body="",nodes="",net="",ties="";
+  const slots=slotsNow(),ns=nextStep(),rods=builtRods(slots);let defs="",ghost="",glowS="",body="",nodes="",net="",ties="",hits="";
   const grad=(gid,p,c1,c2)=>{defs+=`<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${p[2].toFixed(1)}" y2="${p[3].toFixed(1)}"><stop offset="0" style="stop-color:var(--c-${c1})"/><stop offset="1" style="stop-color:var(--c-${c2})"/></linearGradient>`;return `url(#${gid})`};
   /* Bauplan: alle 25 Plätze fein angedeutet, der nächste schimmert */
   for(let n=0;n<25;n++){const i=n%5,k=Math.floor(n/5),id=slots[i];if(id&&k<level(id))continue;const r=rod(n,id);
@@ -1370,17 +1376,37 @@ function geruestSVG(){
     const pq=[best[1][0],best[1][1],best[2][0],best[2][1]];ties+=ln(pq,"br",`data-br="${x}|${y}" style="stroke:${grad("bg"+m,pq,W[x].cat,W[y].cat)}"`)});
   rods.forEach(r=>{const p=ext(r.a,r.b,4),key=r.id+":"+r.k,op=(.78+r.z*.22).toFixed(2);
     body+=ln(p,"gap",`data-gap="${key}" style="stroke-width:${(r.w+3.5).toFixed(1)}"`)+ln(p,"rod",`data-seg="${key}" pathLength="100" style="stroke:var(--c-${r.cat});stroke-width:${r.w.toFixed(1)};opacity:${op}"`)+ln(p,"hitl",`data-pil="${r.id}"`);
-    glowS+=ln(p,"",`style="stroke:var(--c-${r.cat})"`);nodes+=[r.a,r.b].map(q=>`<circle class="nd" cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="2.2"/>`).join("")});
+    glowS+=ln(p,"",`style="stroke:var(--c-${r.cat})"`);hits+=rhit(p,`data-pil="${r.id}"`);nodes+=[r.a,r.b].map(q=>`<circle class="nd" cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="2.2"/>`).join("")});
   /* Die Wolke ruht über dem Fundament, gehalten von drei Seilen zu den untersten Punkten */
   let feet="";const low=rods.flatMap(r=>[r.a,r.b]).sort((p,q)=>q[1]-p[1]).slice(0,3);low.forEach((p,i)=>{feet+=ln([p[0],p[1],[110,180,250][i],BASE],"ft")});
   if(!rods.length)[110,180,250].forEach(x=>{feet+=ln([x,CY+RY*.9,x,BASE],"ft gh")});
   const legend=`<div class="glegend">${slots.map((id,i)=>{if(!id)return `<button class="lg free" data-finder="1"><span class="sw0"></span><span class="nm">frei</span></button>`;const w=W[id],l=level(id);
     return `<button class="lg" ${cc(w.cat)} data-pil="${id}" aria-label="${w.n}, Stufe ${l} von 5"><span class="nm">${shy(id)}</span><span class="pips">${[0,1,2,3,4].map(k=>`<i class="${k<l?"on":""}"></i>`).join("")}</span></button>`}).join("")}</div>`;
-  return `<svg class="gsvg" viewBox="0 6 360 300" role="img" aria-label="Dein Wertegerüst mit ${parts()} von 25 Bauteilen">
+  hits+=rhit([40,BASE,320,BASE],'data-wurde="1" data-fund="1"');
+  return `<div class="gbox"><svg class="gsvg" viewBox="0 6 360 300" role="img" aria-label="Dein Wertegerüst mit ${parts()} von 25 Bauteilen">
     <defs><filter id="gb" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>${defs}</defs>
     <g class="ghost">${ghost}</g><g class="glow" filter="url(#gb)">${glowS}</g>${feet}${net}${body}${ties}${nodes}
     <g class="slab" role="button" aria-label="Fundament Würde">${ln([40,BASE,320,BASE],"base")}<rect class="hit" x="30" y="${BASE-22}" width="300" height="44"/></g>
-    </svg><div class="fundlbl" data-wurde="1">Würde · Fundament</div>${legend}`}
+    </svg><div class="rhits" aria-hidden="true">${hits}</div></div><div class="fundlbl" data-wurde="1">Würde · Fundament</div>${legend}`}
+/* Tippstreifen über einem Stab: liegt in Viewbox-Einheiten (1 Einheit = 100cqw/360) genau auf dem Stab, 44 px hoch.
+   Als echtes HTML-Element kann er den unsichtbaren Schalter für die iPhone-Vibration tragen. */
+function rhit(p,data){const L=Math.hypot(p[2]-p[0],p[3]-p[1]),a=Math.atan2(p[3]-p[1],p[2]-p[0])*180/Math.PI,u=v=>`calc(${v.toFixed(2)}*100cqw/360)`;
+  return `<span class="rhit" ${data} style="left:${u(p[0])};top:calc(${u(p[1]-6)} - 22px);width:${u(L)};transform:rotate(${a.toFixed(2)}deg)"></span>`}
+/* Wo sich Stäbe kreuzen, überlappen ihre Tippstreifen. Darum zählt der Stab, der dem Finger am nächsten liegt. */
+function nearRod(e){const svg=document.querySelector(".gsvg");if(!svg||!e.detail||!svg.getScreenCTM)return null;
+  const q=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());let best=null,bd=1e9;
+  svg.querySelectorAll(".rod").forEach(l=>{const x1=+l.getAttribute("x1"),y1=+l.getAttribute("y1"),x2=+l.getAttribute("x2"),y2=+l.getAttribute("y2"),dx=x2-x1,dy=y2-y1;
+    const t=Math.max(0,Math.min(1,((q.x-x1)*dx+(q.y-y1)*dy)/(dx*dx+dy*dy||1))),d=Math.hypot(q.x-x1-t*dx,q.y-y1-t*dy);if(d<bd){bd=d;best=l.dataset.seg.split(":")[0]}});return best}
+/* Resonanz: Ein angetippter Stab schwingt einmal kurz und gedämpft nach, wie eine gezupfte Saite unter Spannung,
+   und die Seile an seinen Enden leuchten einmal leise auf. Ohne Stab (id=null) antworten Fundament und Halteseile. */
+function resonate(id){if(calm())return;const svg=document.querySelector(".gsvg");if(!svg)return;
+  const segs=id?[...svg.querySelectorAll(`.rod[data-seg^="${id}:"],.gap[data-gap^="${id}:"]`)]:[...svg.querySelectorAll(".slab .base")];
+  const sw=[{transform:"rotate(0)"},{transform:"rotate(1.1deg)",offset:.16},{transform:"rotate(-.75deg)",offset:.38},{transform:"rotate(.4deg)",offset:.6},{transform:"rotate(-.15deg)",offset:.8},{transform:"rotate(0)"}];
+  segs.forEach(s=>s.animate(id?sw:[{transform:"translateY(0)"},{transform:"translateY(1.2px)",offset:.2},{transform:"translateY(-.6px)",offset:.5},{transform:"translateY(0)"}],{duration:id?620:520,easing:"ease-out"}));
+  const ends=[];segs.filter(s=>s.classList.contains("rod")||!id).forEach(s=>{const x1=+s.getAttribute("x1"),y1=+s.getAttribute("y1"),x2=+s.getAttribute("x2"),y2=+s.getAttribute("y2");ends.push([x1,y1],[x2,y2])});
+  const near=(x,y)=>ends.some(([a,b])=>Math.hypot(a-x,b-y)<(id?7:3)||(!id&&Math.abs(b-y)<1));
+  svg.querySelectorAll(id?".cb":".ft").forEach(c=>{const x1=+c.getAttribute("x1"),y1=+c.getAttribute("y1"),x2=+c.getAttribute("x2"),y2=+c.getAttribute("y2");
+    if(!near(x1,y1)&&!near(x2,y2))return;const o=+getComputedStyle(c).opacity;c.animate([{opacity:o},{opacity:Math.min(1,o+.45),offset:.3},{opacity:o}],{duration:700,easing:"ease-out"})})}
 /* Eine einzelne Stütze innerhalb der Wolke, für die Übersicht unter „Werte“ */
 function pillarSVG(id,i){let g="";for(let k=0;k<5;k++){const r=rod(k*5+i,id),on=id&&k<level(id);
     g+=`<line x1="${r.a[0].toFixed(0)}" y1="${r.a[1].toFixed(0)}" x2="${r.b[0].toFixed(0)}" y2="${r.b[1].toFixed(0)}" ${on?`stroke="var(--c-${W[id].cat})" stroke-width="14"`:`stroke="var(--ghost)" stroke-width="5" stroke-dasharray="6 14"`} stroke-linecap="round"/>`}
@@ -1471,10 +1497,10 @@ function viewGeruest(){
     <p class="footcredit">Wertegerüst · © 2026 Carlo Maximilian Engeländer</p>
   </section>`}
 function pillarTap(id){const svg=document.querySelector(".gsvg");if(!svg)return;const w=W[id],l=level(id),n=nextFor(id);
-  const was=svg.dataset.sel===id;svg.dataset.sel=was?"":id;svg.querySelectorAll(".rod").forEach(r=>r.classList.toggle("on",!was&&r.dataset.seg.startsWith(id+":")));
+  const was=svg.dataset.sel===id;if(was)resonate(id);svg.dataset.sel=was?"":id;svg.querySelectorAll(".rod").forEach(r=>r.classList.toggle("on",!was&&r.dataset.seg.startsWith(id+":")));
   svg.classList.toggle("sel",!was);document.querySelectorAll(".glegend .lg").forEach(b=>b.classList.toggle("on",!was&&b.dataset.pil===id));
   if(was){$("#ginfo").innerHTML="";return}
-  const segs=[...svg.querySelectorAll(`.rod[data-seg^="${id}:"]`)];if(!calm())segs.forEach((s,i)=>s.animate([{opacity:1},{opacity:.45,offset:.35},{opacity:1}],{duration:650,delay:i*60,easing:"ease-out"}));
+  const segs=[...svg.querySelectorAll(`.rod[data-seg^="${id}:"]`)];resonate(id);
   if(segs.length)lightUp(segs[segs.length-1]);
   $("#ginfo").innerHTML=`<div class="pinfo" ${cc(w.cat)}><div class="sh"><span class="label">${dot(w.cat)}${w.n}</span><span class="label">Stufe ${l} von 5</span></div>
    <ul class="steps5">${steps(id).map(([t,ok])=>`<li class="${ok?"ok":""}"><i></i>${t}</li>`).join("")}</ul>
@@ -1515,7 +1541,7 @@ function aboutFold(){return `<details class="fold" id="aboutfold" ${S.aboutOpen|
   <p>Werte geraten oft in Spannung zueinander. Das ist kein Zeichen von Haltlosigkeit, sondern normal. Stabil wird ein Gerüst, wenn du deine Werte kennst, sie in schwierigen Lagen abwägst und sie im Alltag lebst. Darum gibt es Impulse zum Nachdenken, Belastungsproben zum Entscheiden und Übungen zum Tun.</p>
   <h3>So wächst eine Stütze</h3><p>Jede Stütze hat fünf Bauteile: gewählt, Leitsatz, geprüft, gelebt und bekräftigt. Die Stäbe berühren sich kaum. Wie bei einer Tensegrity-Skulptur hält Spannung das Ganze zusammen: feine Seile verbinden benachbarte Stabenden, und wenn du in einer Belastungsprobe zwischen zwei deiner Werte abgewogen hast, kommt ein farbiges Spannseil dazu. Werte dürfen also in Spannung zueinander stehen. Gerade das macht das Gerüst stabil.</p>
   <h3>Wie sicher ist ein Impuls?</h3><div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)}<span class="muted">${["Philosophie, Zeitzeugnis oder Denkmodell","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder sehr viele Studien"][l]}</span></div>`).join("")}</div>
-  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 19.10.2026, 01:54 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
+  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 19.10.2026, 10:50 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
   <div class="row"><button class="btn" id="shareapp">App weiterempfehlen</button></div>
   <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
   <div class="credit"><span class="label">Von wem</span><p>Das Wertegerüst ist ein privates Projekt von <b>Carlo Maximilian Engeländer</b>. Idee, Auswahl, Texte und Gestaltung stammen von ihm.</p><p class="muted small">© 2026 Carlo Maximilian Engeländer. Alle Rechte vorbehalten. Du darfst die App gern nutzen und den Link weitergeben, auch im Unterricht. Inhalte, Texte und Gestaltung dürfen aber nicht ohne Erlaubnis kopiert, verändert oder anderswo veröffentlicht werden.</p></div>
@@ -1743,9 +1769,9 @@ const vibOn=()=>S.settings.vibration!==false;
    Navigation (Listen, Reiter, Zurück, Aufklappen, Verweise, Links): kein Tick, nur leichtes Abdunkeln (CSS :active).
    Erfolg und Fehler sind Ausgänge einer Aktion: buzz("ok") oder buzz("err") im Klick-Handler. Erfolg zeigt einen Haken
    in der Meldung (toast(…,true)), Fehler eine kleine Seitwärtsbewegung (shake). */
-const FAM=[["logo","#home,#home2"],["sw",".setrow[role=switch]"],["sel",".chip,.fbtns .btn,.fopt,.fr,.lg:not(.free),.cdot,.opt"],["act",".btn,.next,.draw,.findcard,.li.daily"]];
+const FAM=[["logo","#home,#home2"],["rod",".rhit"],["sw",".setrow[role=switch]"],["sel",".chip,.fbtns .btn,.fopt,.fr,.lg:not(.free),.cdot,.opt"],["act",".btn,.next,.draw,.findcard,.li.daily"]];
 const HAPSEL=FAM.map(f=>f[1]).join(",");
-const PAT={sel:10,sw:10,logo:10,act:12,ok:[10,60,14],err:[24,60,24]};
+const PAT={rod:10,sel:10,sw:10,logo:10,act:12,ok:[10,60,14],err:[24,60,24]};
 const famHost=t=>{const el=t&&t.closest&&t.closest(HAPSEL);return el&&el.tagName!=="A"&&!el.disabled&&el.getAttribute("aria-disabled")!=="true"?el:null};
 const famOf=el=>{for(const [k,s] of FAM)if(el.matches(s))return k;return null};
 /* Android: navigator.vibrate mit eigenem Muster je Situation, synchron am Ende desselben Klicks (Listener auf window,
@@ -1948,7 +1974,7 @@ function render(){
   checkMoments()}
 function openProbe(id){if($("#layer").innerHTML)$("#layer").innerHTML="";pcur=id;pFilter="alle";anim=true;tab="ueben";render();const el=$("#probe");if(el){el.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});setTimeout(()=>trace(el,`var(--c-${P[id].cat})`),350)}}
 document.addEventListener("click",e=>{
-  if(e.target.closest){const lg=e.target.closest(".glegend [data-pil]");if(lg){pillarTap(lg.dataset.pil);return}if(e.target.closest("[data-wurde]")){valueSheet("wuerde");return}const g=e.target.closest(".gsvg");if(g){const h=e.target.closest("[data-pil]");if(h){pillarTap(h.dataset.pil);return}const sl=e.target.closest("[data-slot]");if(sl){if(!S.kern.length){finder();return}anim=true;tab="werte";render();window.scrollTo(0,0);return}if(e.target.closest(".slab")){valueSheet("wuerde");return}}}
+  if(e.target.closest){const rh=e.target.closest(".rhit");if(rh){if(rh.dataset.fund){resonate(null);valueSheet("wuerde")}else pillarTap(nearRod(e)||rh.dataset.pil);return}const lg=e.target.closest(".glegend [data-pil]");if(lg){pillarTap(lg.dataset.pil);return}if(e.target.closest("[data-wurde]")){valueSheet("wuerde");return}const g=e.target.closest(".gsvg");if(g){const h=e.target.closest("[data-pil]");if(h){pillarTap(h.dataset.pil);return}const sl=e.target.closest("[data-slot]");if(sl){if(!S.kern.length){finder();return}anim=true;tab="werte";render();window.scrollTo(0,0);return}if(e.target.closest(".slab")){valueSheet("wuerde");return}}}
   const t=e.target.closest("button,a");if(!t)return;const d=t.dataset;
   if(finderClick(t,d))return;
   if(t.closest(".bite .links")&&!t.dataset.lit){t.dataset.lit=1;trace(t,getComputedStyle(t).getPropertyValue("--c").trim()||null);
@@ -2028,7 +2054,7 @@ function fromHash(){const h=location.hash.slice(1);if(["imp","werte","ueben","ge
 if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
-const BUILD="19.10.2026, 01:54";
+const BUILD="19.10.2026, 10:50";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("wg-upd")}catch(e){}if(done===m[1])return;
