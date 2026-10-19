@@ -204,7 +204,9 @@ function resonate(id){if(calm())return;const svg=document.querySelector(".gsvg")
 function pillarSVG(id,i){let g="";for(let k=0;k<5;k++){const r=rod(k*5+i,id),on=id&&k<level(id);
     g+=`<line x1="${r.a[0].toFixed(0)}" y1="${r.a[1].toFixed(0)}" x2="${r.b[0].toFixed(0)}" y2="${r.b[1].toFixed(0)}" ${on?`stroke="var(--c-${W[id].cat})" stroke-width="14"`:`stroke="var(--ghost)" stroke-width="5" stroke-dasharray="6 14"`} stroke-linecap="round"/>`}
   return `<svg class="psvg" viewBox="30 20 300 260" aria-hidden="true">${g}</svg>`}
-/* Kleine Wolke für Logo und Momente; ohne eigene Stützen ein Beispiel */
+/* Zeichen in der Kopfzeile: drei Stäbe, die sich nicht berühren, über der Würde. Farben folgen hell/dunkel. */
+const LOGO=`<svg viewBox="112 115 800 800" aria-hidden="true" stroke-linecap="round"><line x1="540" y1="187" x2="627" y2="456" stroke="var(--c-selbst)" stroke-width="126"/><line x1="764" y1="674" x2="488" y2="615" stroke="var(--c-naehe)" stroke-width="126"/><line x1="230" y1="624" x2="419" y2="415" stroke="var(--c-miteinander)" stroke-width="126"/><line x1="222" y1="863" x2="802" y2="863" stroke="var(--logo-w)" stroke-width="86"/></svg>`;
+/* Kleine Wolke für Willkommen und Momente; ohne eigene Stützen ein Beispiel */
 const SAMPLE=["mut","vertrauen","gerechtigkeit","genuegsamkeit","wahrhaftigkeit"],SAMPLEL=[3,4,5,3,4];
 function miniSVG(cls){const has=S.kern.length>0;let g="";const list=[];
   for(let i=0;i<5;i++){const id=has?S.kern[i]:SAMPLE[i];if(!id)continue;const l=has?level(id):SAMPLEL[i];for(let k=0;k<l;k++)list.push(Object.assign(rod(k*5+i,id),{cat:W[id].cat}))}
@@ -879,7 +881,7 @@ function render(){
   const v={geruest:viewGeruest,imp:viewImp,ueben:viewUeben,werte:viewWerte}[tab]();
   const M=$("#main");M.classList.remove("anim","quick");M.innerHTML=v;void M.offsetWidth;if(anim)M.classList.add("anim");if(anim==="quick")M.classList.add("quick");anim=false;renderTabs();
   $("#app").dataset.tab=tab;
-  {const mh=miniSVG();if(mh!==logoHTML){logoHTML=mh;$("#home").innerHTML=mh}}$("#topline").textContent=`${parts()} / 25`;
+  if(!logoHTML){logoHTML=LOGO;$("#home").innerHTML=LOGO}$("#topline").textContent=`${parts()} / 25`;
   if(tab==="geruest")playFresh();
   if(pendingGlow){pendingGlow=false;const c=document.querySelector('.bite h2');if(c&&S.cur&&I[S.cur])setTimeout(()=>lightUp(c),700)}
   checkMoments()}

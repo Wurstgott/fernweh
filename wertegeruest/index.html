@@ -21,7 +21,7 @@
   --ink:#F1EDE6;--muted:#B6B7CD;--faint:#A0A3BD;
   --lit:#F1E6D2;--ghost:#4C5378;--accent:#EED3A8;--accent-ink:#EDD7B5;
   --on-lit:#22223A;
-  --pol-kalt:#93A6DE;--pol-warm:#D9AE96;--waerme:rgba(236,180,120,.2);
+  --pol-kalt:#93A6DE;--pol-warm:#D9AE96;--logo-w:#D9AE96;--waerme:rgba(236,180,120,.2);
   --c-selbst:#F4B650;--c-naehe:#F58BA0;--c-miteinander:#76B5F8;--c-welt:#56CFA2;--c-urteil:#C3A7FA;
   --f-ui:"Work Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-serif:"Bricolage Grotesque","Work Sans",ui-sans-serif,system-ui,sans-serif;
@@ -36,7 +36,7 @@
   --s1:var(--card);--s2:rgba(60,56,90,.07);--line:rgba(45,40,70,.15);--hair:rgba(45,40,70,.09);
   --ink:#1B1E2E;--muted:#535870;--faint:#62667C;
   --lit:#262A45;--ghost:#BEBBC6;--accent:#262A45;--accent-ink:#6A4F2E;--on-lit:#F6F1E8;
-  --pol-kalt:#5D74B3;--pol-warm:#9A6F5A;--waerme:rgba(196,140,80,.16);
+  --pol-kalt:#5D74B3;--pol-warm:#9A6F5A;--logo-w:#B98A70;--waerme:rgba(196,140,80,.16);
   --c-selbst:#8F5A00;--c-naehe:#B8304A;--c-miteinander:#2462C0;--c-welt:#0E7651;--c-urteil:#7146CC;
   --card:rgba(255,255,255,.7);--gapc:#EBECF1;--scrim:rgba(40,36,56,.32);--shade:rgba(40,36,56,.12);
   color-scheme:light;
@@ -2018,7 +2018,9 @@ function resonate(id){if(calm())return;const svg=document.querySelector(".gsvg")
 function pillarSVG(id,i){let g="";for(let k=0;k<5;k++){const r=rod(k*5+i,id),on=id&&k<level(id);
     g+=`<line x1="${r.a[0].toFixed(0)}" y1="${r.a[1].toFixed(0)}" x2="${r.b[0].toFixed(0)}" y2="${r.b[1].toFixed(0)}" ${on?`stroke="var(--c-${W[id].cat})" stroke-width="14"`:`stroke="var(--ghost)" stroke-width="5" stroke-dasharray="6 14"`} stroke-linecap="round"/>`}
   return `<svg class="psvg" viewBox="30 20 300 260" aria-hidden="true">${g}</svg>`}
-/* Kleine Wolke für Logo und Momente; ohne eigene Stützen ein Beispiel */
+/* Zeichen in der Kopfzeile: drei Stäbe, die sich nicht berühren, über der Würde. Farben folgen hell/dunkel. */
+const LOGO=`<svg viewBox="112 115 800 800" aria-hidden="true" stroke-linecap="round"><line x1="540" y1="187" x2="627" y2="456" stroke="var(--c-selbst)" stroke-width="126"/><line x1="764" y1="674" x2="488" y2="615" stroke="var(--c-naehe)" stroke-width="126"/><line x1="230" y1="624" x2="419" y2="415" stroke="var(--c-miteinander)" stroke-width="126"/><line x1="222" y1="863" x2="802" y2="863" stroke="var(--logo-w)" stroke-width="86"/></svg>`;
+/* Kleine Wolke für Willkommen und Momente; ohne eigene Stützen ein Beispiel */
 const SAMPLE=["mut","vertrauen","gerechtigkeit","genuegsamkeit","wahrhaftigkeit"],SAMPLEL=[3,4,5,3,4];
 function miniSVG(cls){const has=S.kern.length>0;let g="";const list=[];
   for(let i=0;i<5;i++){const id=has?S.kern[i]:SAMPLE[i];if(!id)continue;const l=has?level(id):SAMPLEL[i];for(let k=0;k<l;k++)list.push(Object.assign(rod(k*5+i,id),{cat:W[id].cat}))}
@@ -2148,7 +2150,7 @@ function aboutFold(){return `<details class="fold" id="aboutfold" ${S.aboutOpen|
   <p>Werte geraten oft in Spannung zueinander. Das ist kein Zeichen von Haltlosigkeit, sondern normal. Stabil wird ein Gerüst, wenn du deine Werte kennst, sie in schwierigen Lagen abwägst und sie im Alltag lebst. Darum gibt es Impulse zum Nachdenken, Belastungsproben zum Entscheiden und Übungen zum Tun.</p>
   <h3>So wächst eine Stütze</h3><p>Jede Stütze hat fünf Bauteile: gewählt, Leitsatz, geprüft, gelebt und bekräftigt. Die Stäbe berühren sich kaum. Wie bei einer Tensegrity-Skulptur hält Spannung das Ganze zusammen: feine Seile verbinden benachbarte Stabenden, und wenn du in einer Belastungsprobe zwischen zwei deiner Werte abgewogen hast, kommt ein farbiges Spannseil dazu. Werte dürfen also in Spannung zueinander stehen. Gerade das macht das Gerüst stabil.</p>
   <h3>Wie sicher ist ein Impuls?</h3><div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)}<span class="muted">${["Philosophie, Zeitzeugnis oder Denkmodell","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder sehr viele Studien"][l]}</span></div>`).join("")}</div>
-  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 19.10.2026, 17:49 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
+  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 19.10.2026, 18:10 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
   <div class="row"><button class="btn" id="shareapp">App weiterempfehlen</button></div>
   <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
   <div class="credit"><span class="label">Von wem</span><p>Das Wertegerüst ist ein privates Projekt von <b>Carlo Maximilian Engeländer</b>. Idee, Auswahl, Texte und Gestaltung stammen von ihm.</p><p class="muted small">© 2026 Carlo Maximilian Engeländer. Alle Rechte vorbehalten. Du darfst die App gern nutzen und den Link weitergeben, auch im Unterricht. Inhalte, Texte und Gestaltung dürfen aber nicht ohne Erlaubnis kopiert, verändert oder anderswo veröffentlicht werden.</p></div>
@@ -2693,7 +2695,7 @@ function render(){
   const v={geruest:viewGeruest,imp:viewImp,ueben:viewUeben,werte:viewWerte}[tab]();
   const M=$("#main");M.classList.remove("anim","quick");M.innerHTML=v;void M.offsetWidth;if(anim)M.classList.add("anim");if(anim==="quick")M.classList.add("quick");anim=false;renderTabs();
   $("#app").dataset.tab=tab;
-  {const mh=miniSVG();if(mh!==logoHTML){logoHTML=mh;$("#home").innerHTML=mh}}$("#topline").textContent=`${parts()} / 25`;
+  if(!logoHTML){logoHTML=LOGO;$("#home").innerHTML=LOGO}$("#topline").textContent=`${parts()} / 25`;
   if(tab==="geruest")playFresh();
   if(pendingGlow){pendingGlow=false;const c=document.querySelector('.bite h2');if(c&&S.cur&&I[S.cur])setTimeout(()=>lightUp(c),700)}
   checkMoments()}
@@ -2806,7 +2808,7 @@ function fromHash(){const h=location.hash.slice(1);if(["imp","werte","ueben","ge
 if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
-const BUILD="19.10.2026, 17:49";
+const BUILD="19.10.2026, 18:10";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("wg-upd")}catch(e){}if(done===m[1])return;

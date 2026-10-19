@@ -7,7 +7,7 @@
   --ink:#F1EDE6;--muted:#B6B7CD;--faint:#A0A3BD;
   --lit:#F1E6D2;--ghost:#4C5378;--accent:#EED3A8;--accent-ink:#EDD7B5;
   --on-lit:#22223A;
-  --pol-kalt:#93A6DE;--pol-warm:#D9AE96;--waerme:rgba(236,180,120,.2);
+  --pol-kalt:#93A6DE;--pol-warm:#D9AE96;--logo-w:#D9AE96;--waerme:rgba(236,180,120,.2);
   --c-selbst:#F4B650;--c-naehe:#F58BA0;--c-miteinander:#76B5F8;--c-welt:#56CFA2;--c-urteil:#C3A7FA;
   --f-ui:"Work Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-serif:"Bricolage Grotesque","Work Sans",ui-sans-serif,system-ui,sans-serif;
@@ -22,7 +22,7 @@
   --s1:var(--card);--s2:rgba(60,56,90,.07);--line:rgba(45,40,70,.15);--hair:rgba(45,40,70,.09);
   --ink:#1B1E2E;--muted:#535870;--faint:#62667C;
   --lit:#262A45;--ghost:#BEBBC6;--accent:#262A45;--accent-ink:#6A4F2E;--on-lit:#F6F1E8;
-  --pol-kalt:#5D74B3;--pol-warm:#9A6F5A;--waerme:rgba(196,140,80,.16);
+  --pol-kalt:#5D74B3;--pol-warm:#9A6F5A;--logo-w:#B98A70;--waerme:rgba(196,140,80,.16);
   --c-selbst:#8F5A00;--c-naehe:#B8304A;--c-miteinander:#2462C0;--c-welt:#0E7651;--c-urteil:#7146CC;
   --card:rgba(255,255,255,.7);--gapc:#EBECF1;--scrim:rgba(40,36,56,.32);--shade:rgba(40,36,56,.12);
   color-scheme:light;
