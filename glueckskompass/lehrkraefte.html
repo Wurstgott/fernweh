@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Glückskompass für Lehrkräfte</title>
+<meta name="description" content="Handreichung zum Glückskompass: Haltung, Datenschutz, Stundenideen, Diskussionsfragen und Hinweise zu sensiblen Themen.">
+<meta name="author" content="Carlo Maximilian Engeländer">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<style>
+@font-face{font-family:"Fraunces";src:url("fonts/fraunces.woff") format("woff");font-weight:500 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Literata";src:url("fonts/literata.woff") format("woff");font-weight:400 500;font-style:normal;font-display:swap}
+@font-face{font-family:"Literata";src:url("fonts/literata-italic.woff") format("woff");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Figtree";src:url("fonts/figtree.woff") format("woff");font-weight:500 700;font-style:normal;font-display:swap}
+:root{
+  --paper:#EEF0E9;--card:#FBFBF7;--ink:#1C2624;--muted:#5D6A65;--line:#D4DAD0;--soft:#E3E7DE;
+  --accent:#D98E22;--accent-soft:#F6E3C2;--link:#8A5208;
+  --c-ich:#D98E22;--c-wir:#CF6352;--c-welt:#4A8659;--c-sein:#4A73A0;--c-zeit:#8667AE;--warn:#B5523F;
+  --f-display:"Fraunces",Georgia,"Times New Roman",serif;
+  --f-body:"Literata",Georgia,"Times New Roman",serif;
+  --f-ui:"Figtree",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#111715;--card:#1A2220;--ink:#E6ECE5;--muted:#9AA8A1;--line:#2B3633;--soft:#222C29;
+  --accent:#F0AE47;--accent-soft:#3A2F1C;--link:#F0AE47;
+  --c-ich:#F0AE47;--c-wir:#E78574;--c-welt:#79B988;--c-sein:#7FA5D3;--c-zeit:#B096D6;--warn:#E78574;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#111715;--card:#1A2220;--ink:#E6ECE5;--muted:#9AA8A1;--line:#2B3633;--soft:#222C29;
+  --accent:#F0AE47;--accent-soft:#3A2F1C;--link:#F0AE47;
+  --c-ich:#F0AE47;--c-wir:#E78574;--c-welt:#79B988;--c-sein:#7FA5D3;--c-zeit:#B096D6;--warn:#E78574;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55}
+main{max-width:46rem;margin:0 auto;padding:28px 16px 64px}
+a{color:var(--link);text-underline-offset:3px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,7vw,40px);letter-spacing:-.02em;line-height:1.1;margin:6px 0 10px;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:650;font-size:24px;letter-spacing:-.01em;line-height:1.2;margin:44px 0 10px;text-wrap:balance}
+h3{font-family:var(--f-ui);font-weight:700;font-size:17px;margin:0 0 4px}
+p,li{text-wrap:pretty}
+ul,ol{padding-left:1.3em}
+li{margin:4px 0}
+.label{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.lead{font-size:19px;color:var(--ink)}
+.back{font-family:var(--f-ui);font-weight:600;font-size:15px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 8px;margin:16px 0}
+.help{border-left:4px solid var(--warn)}
+.stunde{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c,var(--accent));border-radius:14px;padding:18px 18px 10px;margin:18px 0;break-inside:avoid}
+.stunde .ziel{margin:6px 0 10px}
+.ablauf{width:100%;border-collapse:collapse;font-size:16px;margin:6px 0 10px}
+.ablauf td{border-top:1px solid var(--line);padding:7px 8px 7px 0;vertical-align:top}
+.ablauf td:first-child{font-family:var(--f-mono);font-size:13px;color:var(--muted);white-space:nowrap;width:5.5em;padding-top:9px}
+.mat{font-size:15.5px}
+.mat li{margin:3px 0}
+code{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);background:var(--soft);border-radius:5px;padding:1px 5px;white-space:nowrap}
+.ev{font-family:var(--f-ui);font-size:13px;color:var(--muted)}
+.tel{font-family:var(--f-ui);font-weight:700;white-space:nowrap}
+.small{font-size:15px;color:var(--muted)}
+footer{margin-top:48px;border-top:1px solid var(--line);padding-top:14px;font-size:14px;color:var(--muted)}
+@media print{
+  :root,:root[data-theme="dark"]{--paper:#fff;--card:#fff;--ink:#000;--muted:#444;--line:#bbb;--soft:#eee;--link:#000;color-scheme:light}
+  body{font-size:11pt;line-height:1.45;background:#fff;color:#000}
+  main{max-width:none;padding:0}
+  .back,.noprint{display:none}
+  h2{margin-top:22pt;break-after:avoid}
+  .stunde,.box{break-inside:avoid;border-color:#bbb}
+  a{color:#000;text-decoration:none}
+  @page{margin:16mm 16mm 18mm}
+}
+</style>
+</head>
+<body>
+<main>
+<p class="back noprint"><a href="index.html">← Zurück zur App</a></p>
+<div class="label">Glückskompass · Handreichung</div>
+<h1>Für Lehrkräfte</h1>
+<p class="lead">Der Glückskompass zeigt in kurzen Häppchen, was die Glücksforschung weiß und wie sicher sie es weiß. Diese Seite hilft, die App im Unterricht ab Klasse 8 oder 9 zu nutzen, etwa in Ethik, Religion, Biologie, Sozialkunde oder in Klassenleitungsstunden.</p>
+<p class="small">Stand: Oktober 2026. Die Seite lässt sich ausdrucken.</p>
+
+<h2>Zweck und Haltung</h2>
+<p>Die App verspricht kein Glück. Sie will zeigen, was Studien über ein gutes Leben herausgefunden haben, und dazu einladen, manches selbst auszuprobieren. Dahinter steht eine einfache Haltung: gut mit sich selbst umgehen, anderen Gutes tun und die Welt schonen.</p>
+<p>Wichtig ist die Ehrlichkeit über Belege. Jedes Häppchen nennt seine Quelle, eine Beweisstufe (Gut belegt, Solide, Vorläufig, Denkanstoß) und die Art des Befunds (Experiment, Beobachtung, Übersicht, Idee). Unter jedem Häppchen steht außerdem, was an der Studie schwach ist. Gerade diese Einschränkungen eignen sich gut für den Unterricht.</p>
+<p>Die App besteht aus vier Bereichen:</p>
+<ul>
+<li><b>Häppchen:</b> kurze Befunde mit Quelle, Einordnung und einem Gedanken zum Mitnehmen.</li>
+<li><b>Experimente:</b> kleine Selbstversuche über einen bis 30 Tage. Man schätzt vorher, wie es sich anfühlen wird, und vergleicht danach. Wo ein Experiment ein Erwachsenenleben voraussetzt, gibt es eine Fassung für Schülerinnen und Schüler. Wer beim ersten Öffnen „Ich gehe zur Schule“ wählt oder unter „Dein Weg“ den Schulmodus einschaltet, sieht diese Fassung zuerst, und der Kompass zeigt etwas öfter Häppchen zu Schule, Freundschaft und Handy. Über die Links auf dieser Seite steht die Schulfassung immer vorne.</li>
+<li><b>Begriffe:</b> ein kleines Quiz mit Wiederholung, darin auch Fragen zum Lesen von Belegen: Ist das ein Experiment, eine Beobachtung oder eine Übersicht?</li>
+<li><b>Dein Weg:</b> Tagebuch, gemerkte Häppchen und Einstellungen.</li>
+</ul>
+
+<h2>Datenschutz</h2>
+<div class="box">
+<p>Es gibt keine Anmeldung, kein Konto und keine Werbung. Alles, was jemand liest, markiert oder notiert, bleibt im Browser auf dem eigenen Gerät. Die App schickt diese Daten nirgendwohin. Lehrkräfte können deshalb auch nichts einsehen, und das ist so gewollt.</p>
+<p>Daraus folgt für den Unterricht: Bitten Sie nicht darum, Notizen oder Tagebucheinträge vorzuzeigen. Wer etwas teilen möchte, tut das freiwillig und mündlich. Die App braucht kein eigenes Gerät pro Person. Häppchen lassen sich auch vorlesen, an die Wand werfen oder ausdrucken.</p>
+</div>
+
+<h2>Stundenideen</h2>
+<p>Die Ideen sind für 45 Minuten gedacht und lassen sich kürzen. Ein Link öffnet das Häppchen oder Experiment direkt in der App. Die Kennung in Grau hilft beim Wiederfinden.</p>
+
+<section class="stunde" style="--c:var(--c-welt)"><div class="label">Stunde 1</div><h3>Wie sicher ist das? Belege lesen</h3><p class="ziel"><b>Ziel:</b> Die Schülerinnen und Schüler unterscheiden Experiment, Beobachtung und Übersicht und erklären, warum ein Zusammenhang noch keine Ursache ist.</p><table class="ablauf"><tbody><tr><td>0–5 min</td><td>Einstieg: Eine Schlagzeile an die Tafel, etwa „Wer mit anderen isst, ist glücklicher“. Frage: Heißt das, gemeinsames Essen macht glücklich?</td></tr><tr><td>5–15 min</td><td>Kurz erklären: Experiment (Zufall teilt zu), Beobachtung (nur gemessen), Übersicht (viele Studien zusammen). Beispiel Lottogewinn als natürliches Experiment.</td></tr><tr><td>15–30 min</td><td>In Gruppen je zwei Häppchen lesen, ohne die Einstufung zu zeigen. Aufgabe: Welche Art Befund? Was ist die größte Schwäche? Wie sicher würdet ihr es einstufen?</td></tr><tr><td>30–40 min</td><td>Vergleich mit der Einstufung der App. Wo lagen die Gruppen anders, und warum?</td></tr><tr><td>40–45 min</td><td>Abschluss mit dem Fall Power Posing: Was lernen wir aus einem Befund, der sich nicht wiederholen ließ?</td></tr></tbody></table><p class="label">Häppchen</p><ul class="mat"><li><a href="index.html#lh-dining">Wer mit anderen isst, ist zufriedener</a> <code>dining</code> <span class="ev">· Solide · Beobachtung</span></li><li><a href="index.html#lh-lottery">Lottogewinne: zufriedener, aber nicht fröhlicher</a> <code>lottery</code> <span class="ev">· Solide · Experiment</span></li><li><a href="index.html#lh-powerpose">Nicht alles hält: Power Posing</a> <code>powerpose</code> <span class="ev">· Solide · Experiment</span></li><li><a href="index.html#lh-smile">Lächeln hebt die Stimmung, ein bisschen</a> <code>smile</code> <span class="ev">· Solide · Experiment</span></li><li><a href="index.html#lh-pruefungsangst">Prüfungssorgen aufschreiben: ein Befund mit Fragezeichen</a> <code>pruefungsangst</code> <span class="ev">· Vorläufig · Experiment</span></li><li><a href="index.html#lh-deactivate">Facebook weg: kleiner, aber echter Effekt</a> <code>deactivate</code> <span class="ev">· Solide · Experiment</span></li></ul><p class="small">Im Bereich Begriffe enthält das Quiz Fragen dazu, etwa „Drittvariable“, „Kontrollgruppe“ und „Erwartungseffekt“. Es eignet sich als Hausaufgabe.</p></section>
+<section class="stunde" style="--c:var(--c-zeit)"><div class="label">Stunde 2</div><h3>Handy, Feed und Wohlbefinden</h3><p class="ziel"><b>Ziel:</b> Die Schülerinnen und Schüler beschreiben, was Studien über soziale Medien zeigen und wo Fachleute uneinig sind, und finden eine eigene Regel für sich.</p><table class="ablauf"><tbody><tr><td>0–5 min</td><td>Einstieg: Schätzfrage. Wie viele Minuten warst du gestern am Handy? Nur aufschreiben, nicht vorlesen.</td></tr><tr><td>5–25 min</td><td>Vier Gruppen lesen je ein Häppchen und beantworten: Was wurde untersucht, bei wem, mit welchem Ergebnis? Was sagt die Studie nicht?</td></tr><tr><td>25–38 min</td><td>Gruppen stellen vor. Gemeinsam ein Tafelbild: Worüber sind sich die Studien einig, wo widersprechen sie sich?</td></tr><tr><td>38–45 min</td><td>Jede und jeder überlegt still, ob eines der Experimente passt. Mitmachen ist freiwillig.</td></tr></tbody></table><p class="label">Häppchen</p><ul class="mat"><li><a href="index.html#lh-kartoffel">Bildschirmzeit und Kartoffeln</a> <code>kartoffel</code> <span class="ev">· Solide · Beobachtung</span></li><li><a href="index.html#lh-zeitfenster">Soziale Medien wirken nicht in jedem Alter gleich</a> <code>zeitfenster</code> <span class="ev">· Solide · Beobachtung</span></li><li><a href="index.html#lh-phonerules">Handyverbot in der Schule allein reicht nicht</a> <code>phonerules</code> <span class="ev">· Vorläufig · Beobachtung</span></li><li><a href="index.html#lh-koerperbild">Weniger Feed, ein freundlicherer Blick auf den eigenen Körper</a> <code>koerperbild</code> <span class="ev">· Vorläufig · Experiment</span></li><li><a href="index.html#lh-spielzeit">Beim Zocken zählt das Warum mehr als das Wie-lange</a> <code>spielzeit</code> <span class="ev">· Solide · Beobachtung</span></li><li><a href="index.html#lh-whr26">Soziale Medien: Es kommt auf das Wie an</a> <code>whr26</code> <span class="ev">· Solide · Beobachtung</span></li></ul><p class="label">Experimente</p><ul class="mat"><li><a href="index.html#lx-feedfasten">Feed-Fasten</a> <code>feedfasten</code> <span class="ev">· 14 Tage</span></li><li><a href="index.html#lx-handy">Das Handy schläft draußen</a> <code>handy</code> <span class="ev">· 7 Tage</span></li><li><a href="index.html#lx-vergleich">Vergleichsfasten</a> <code>vergleich</code> <span class="ev">· 1 Tag</span></li></ul><p class="small">Achten Sie darauf, dass die Stunde nicht in Handy-Schelte kippt. Die Befunde sind gemischt, und genau das ist der Lerngegenstand.</p></section>
+<section class="stunde" style="--c:var(--c-wir)"><div class="label">Stunde 3</div><h3>Freundschaft, Zugehörigkeit und Mobbing</h3><p class="ziel"><b>Ziel:</b> Die Schülerinnen und Schüler erkennen, wie wichtig enge Beziehungen und das Gefühl der Zugehörigkeit sind, und kennen Wege, bei Mobbing Hilfe zu holen.</p><table class="ablauf"><tbody><tr><td>0–8 min</td><td>Einstieg mit dem Häppchen zu Fremden im Zug: Was erwarten wir von Gesprächen, und wie laufen sie wirklich?</td></tr><tr><td>8–25 min</td><td>Partnerarbeit mit je einem Häppchen. Leitfrage: Was davon könnte man an unserer Schule beobachten?</td></tr><tr><td>25–35 min</td><td>Häppchen zu Mobbing gemeinsam lesen. Sammeln: Was können Mitschülerinnen und Mitschüler tun? An wen kann man sich an dieser Schule wenden?</td></tr><tr><td>35–45 min</td><td>Ausblick auf die Experimente. Wer möchte, probiert eines in der nächsten Woche aus.</td></tr></tbody></table><p class="label">Häppchen</p><ul class="mat"><li><a href="index.html#lh-strangers">Im Zug mit Fremden reden</a> <code>strangers</code> <span class="ev">· Solide · Experiment</span></li><li><a href="index.html#lh-teenfriends">Eine enge Freundschaft wiegt mehr als Beliebtheit</a> <code>teenfriends</code> <span class="ev">· Vorläufig · Beobachtung</span></li><li><a href="index.html#lh-belonging">Zur Schule dazugehören</a> <code>belonging</code> <span class="ev">· Solide · Übersicht</span></li><li><a href="index.html#lh-deeptalk">Tiefe Gespräche mit Fremden gehen besser als gedacht</a> <code>deeptalk</code> <span class="ev">· Solide · Experiment</span></li><li><a href="index.html#lh-kindness">Freundlichkeit kommt besser an, als wir denken</a> <code>kindness</code> <span class="ev">· Solide · Experiment</span></li><li><a href="index.html#lh-mobbing">Gegen Mobbing kann eine Schule etwas tun</a> <code>mobbing</code> <span class="ev">· Solide · Übersicht</span></li></ul><p class="label">Experimente</p><ul class="mat"><li><a href="index.html#lx-tiefefrage">Die echte Frage</a> <code>tiefefrage</code> <span class="ev">· 7 Tage</span></li><li><a href="index.html#lx-freundlich">Unerwartete Freundlichkeit</a> <code>freundlich</code> <span class="ev">· 7 Tage · mit Fassung für Schüler:innen</span></li><li><a href="index.html#lx-zuhoeren">Eine Woche richtig zuhören</a> <code>zuhoeren</code> <span class="ev">· 7 Tage</span></li></ul><p class="small">Nennen Sie bei Mobbing die Ansprechpersonen Ihrer Schule mit Namen und die Nummer gegen Kummer 116 111.</p></section>
+<section class="stunde" style="--c:var(--c-ich)"><div class="label">Stunde 4</div><h3>Gefühle verstehen und regulieren</h3><p class="ziel"><b>Ziel:</b> Die Schülerinnen und Schüler unterscheiden Strategien im Umgang mit Gefühlen und wissen, dass schwierige Gefühle zum Leben gehören.</p><table class="ablauf"><tbody><tr><td>0–5 min</td><td>Einstieg: Was tut ihr, wenn ihr euch über etwas ärgert? Antworten anonym auf Zettel sammeln.</td></tr><tr><td>5–20 min</td><td>Häppchen zur Neubewertung lesen. Die Zettel gemeinsam ordnen: Neubewerten, Ablenken, Unterdrücken, Grübeln.</td></tr><tr><td>20–35 min</td><td>Zwei weitere Häppchen in Gruppen: Gefühle annehmen und Liebeskummer. Frage: Warum sagen wir unsere Gefühle oft schlechter voraus, als sie dann sind?</td></tr><tr><td>35–45 min</td><td>Übung im Stillen: Eine kleine ärgerliche Situation aus der Woche so beschreiben, wie es eine gute Freundin täte. Nichts davon wird vorgelesen.</td></tr></tbody></table><p class="label">Häppchen</p><ul class="mat"><li><a href="index.html#lh-umdeuten">Eine Lage anders sehen hilft mehr als Gefühle wegdrücken</a> <code>umdeuten</code> <span class="ev">· Solide · Übersicht</span></li><li><a href="index.html#lh-acceptance">Schlechte Gefühle annehmen hilft</a> <code>acceptance</code> <span class="ev">· Solide · Beobachtung</span></li><li><a href="index.html#lh-liebeskummer">Liebeskummer ist meist leichter als befürchtet</a> <code>liebeskummer</code> <span class="ev">· Vorläufig · Beobachtung</span></li><li><a href="index.html#lh-forecast">Wir sind schlecht im Vorhersagen unserer Gefühle</a> <code>forecast</code> <span class="ev">· Gut belegt · Übersicht</span></li><li><a href="index.html#lh-selfcompassion">Selbstmitgefühl statt Selbstkritik</a> <code>selfcompassion</code> <span class="ev">· Gut belegt · Übersicht</span></li></ul><p class="label">Experimente</p><ul class="mat"><li><a href="index.html#lx-freundesbrief">Ein Brief wie an einen Freund</a> <code>freundesbrief</code> <span class="ev">· 3 Tage</span></li><li><a href="index.html#lx-dreigute">Drei gute Dinge</a> <code>dreigute</code> <span class="ev">· 7 Tage</span></li></ul><p class="small">Die Stunde ist keine Therapie. Wenn jemand sichtbar belastet ist, sprechen Sie ihn oder sie nach der Stunde allein an.</p></section>
+<section class="stunde" style="--c:var(--c-sein)"><div class="label">Stunde 5</div><h3>Genug haben: Geld, Konsum, Werbung</h3><p class="ziel"><b>Ziel:</b> Die Schülerinnen und Schüler beschreiben, wie Geld, Werbung und Vergleiche mit dem Wohlbefinden zusammenhängen, und prüfen eigene Kaufwünsche.</p><table class="ablauf"><tbody><tr><td>0–5 min</td><td>Einstieg: Jede und jeder schreibt drei Dinge auf, die sie oder er gern hätte.</td></tr><tr><td>5–20 min</td><td>Häppchen zu Einkommen und hedonischer Anpassung. Frage: Warum verfliegt die Freude über ein neues Handy?</td></tr><tr><td>20–35 min</td><td>Gruppen lesen je ein Häppchen zu Werbung, Lootboxen oder Bezahlen mit Karte und stellen die Kernaussage und ihre Schwäche vor.</td></tr><tr><td>35–45 min</td><td>Zurück zu den drei Wünschen: Welcher käme auf eine Wunschliste mit 30 Tagen Wartezeit?</td></tr></tbody></table><p class="label">Häppchen</p><ul class="mat"><li><a href="index.html#lh-income">Mehr Geld hilft, aber anders als gedacht</a> <code>income</code> <span class="ev">· Gut belegt · Beobachtung</span></li><li><a href="index.html#lh-adapt">Die hedonische Tretmühle</a> <code>adapt</code> <span class="ev">· Gut belegt · Übersicht</span></li><li><a href="index.html#lh-materialism">Materialismus geht mit weniger Wohlbefinden einher</a> <code>materialism</code> <span class="ev">· Gut belegt · Übersicht</span></li><li><a href="index.html#lh-advertising">Mehr Werbung, weniger Zufriedenheit</a> <code>advertising</code> <span class="ev">· Vorläufig · Beobachtung</span></li><li><a href="index.html#lh-lootbox">Lootboxen und Glücksspiel</a> <code>lootbox</code> <span class="ev">· Solide · Übersicht</span></li><li><a href="index.html#lh-bargeld">Karte oder Bargeld</a> <code>bargeld</code> <span class="ev">· Solide · Übersicht</span></li><li><a href="index.html#lh-experiences">Erlebnisse statt Dinge</a> <code>experiences</code> <span class="ev">· Solide · Beobachtung</span></li></ul><p class="label">Experimente</p><ul class="mat"><li><a href="index.html#lx-warteliste">Wunschliste mit Wartezeit</a> <code>warteliste</code> <span class="ev">· 30 Tage · mit Fassung für Schüler:innen</span></li><li><a href="index.html#lx-kaufpause">Kaufpause</a> <code>kaufpause</code> <span class="ev">· 7 Tage · mit Fassung für Schüler:innen</span></li><li><a href="index.html#lx-werbefrei">Zwei Wochen werbefrei</a> <code>werbefrei</code> <span class="ev">· 14 Tage · mit Fassung für Schüler:innen</span></li></ul><p class="small">Achten Sie auf unterschiedliche finanzielle Lagen in der Klasse. Es geht um Mechanismen, nicht darum, wer was besitzt.</p></section>
+<section class="stunde" style="--c:var(--c-welt)"><div class="label">Stunde 6</div><h3>Ein Selbstversuch als kleine Studie</h3><p class="ziel"><b>Ziel:</b> Die Schülerinnen und Schüler planen einen Selbstversuch, vergleichen Erwartung und Erlebnis und verstehen, warum ein einzelner Versuch kein Beweis ist.</p><table class="ablauf"><tbody><tr><td>0–10 min</td><td>Ein Experiment für eine Woche auswählen, freiwillig und für alle gleich oder frei wählbar. In der App den Plan ausfüllen: Ausgangswert, Wann und wo, Wenn-dann-Plan, Schätzung.</td></tr><tr><td>10–20 min</td><td>Gemeinsam besprechen: Was würde eine richtige Studie anders machen? Stichworte Kontrollgruppe, Zufall, Erwartungseffekt.</td></tr><tr><td>20–25 min</td><td>Vereinbaren, wann ausgewertet wird. Eine Woche später:</td></tr><tr><td>25–40 min</td><td>Auswertung: Wer möchte, erzählt, ob es besser oder schlechter war als erwartet. Sammeln, was außer dem Experiment die Woche beeinflusst haben könnte.</td></tr><tr><td>40–45 min</td><td>Fazit: Was lässt sich aus vielen einzelnen Selbstversuchen schließen und was nicht?</td></tr></tbody></table><p class="label">Häppchen</p><ul class="mat"><li><a href="index.html#lh-three_good">Drei gute Dinge am Abend</a> <code>three_good</code> <span class="ev">· Vorläufig · Experiment</span></li><li><a href="index.html#lh-nature">Zwei Stunden Natur pro Woche</a> <code>nature</code> <span class="ev">· Solide · Beobachtung</span></li></ul><p class="label">Experimente</p><ul class="mat"><li><a href="index.html#lx-dreigute">Drei gute Dinge</a> <code>dreigute</code> <span class="ev">· 7 Tage</span></li><li><a href="index.html#lx-natur120">120 Minuten Grün</a> <code>natur120</code> <span class="ev">· 7 Tage</span></li><li><a href="index.html#lx-handy">Das Handy schläft draußen</a> <code>handy</code> <span class="ev">· 7 Tage</span></li><li><a href="index.html#lx-umweg">Eine Woche Umwege</a> <code>umweg</code> <span class="ev">· 7 Tage</span></li></ul><p class="small">Die Auswertung zeigt in der App Ausgangswert und Ergebnis nebeneinander und weist auf den Erwartungseffekt hin. Ergebnisse werden nicht eingesammelt.</p></section>
+
+<h2>Diskussionsfragen</h2>
+<ul>
+<li>Woran erkennt man, ob eine Studie eine Ursache zeigt oder nur einen Zusammenhang?</li>
+<li>Ein Befund gilt im Durchschnitt. Was heißt das für einen einzelnen Menschen, zum Beispiel für dich?</li>
+<li>Warum ist es wichtig, dass Studien wiederholt werden? Was sagt es, wenn eine Wiederholung scheitert?</li>
+<li>Wer wurde in der Studie untersucht? Würde das Ergebnis auch für Jugendliche in Deutschland gelten?</li>
+<li>Ist Glück dasselbe wie Zufriedenheit oder ein sinnvolles Leben? Was ist dir wichtiger?</li>
+<li>Wer ist verantwortlich für Wohlbefinden: jede und jeder selbst, die Familie, die Schule, die Politik?</li>
+<li>Welche Schlagzeile über Glück oder Handys hast du zuletzt gelesen? Was müsste man über die Studie dahinter wissen?</li>
+<li>Was spricht dafür, auch eine schwache Studie zu lesen, und was dagegen?</li>
+</ul>
+
+<h2>Sensible Themen</h2>
+<div class="box help">
+<p>Einige Häppchen berühren Themen, die für einzelne Jugendliche gerade sehr nah sein können: Einsamkeit, Depression, Mobbing, Trennung, Körperbild, Prüfungsangst. Einige Hinweise:</p>
+<ul>
+<li>Sprechen Sie über Befunde und Studien, nicht über persönliche Erfahrungen. Niemand sollte vor der Klasse von sich erzählen müssen.</li>
+<li>Kündigen Sie schwere Themen vorher an und lassen Sie zu, dass sich jemand zurückhält.</li>
+<li>Experimente sind freiwillig und werden nicht benotet. Das Experiment „Vier Abende Schreiben“ über belastende Erfahrungen eignet sich nicht als Aufgabe für die ganze Klasse.</li>
+<li>Bei Mobbing gilt: Wer es erlebt oder beobachtet, braucht eine erwachsene Ansprechperson. Nennen Sie Vertrauenslehrkraft, Schulsozialarbeit und Schulpsychologie mit Namen.</li>
+<li>Wenn Sie Hinweise auf eine Krise, Selbstverletzung oder Suizidgedanken bemerken, sprechen Sie die Person allein und ruhig an und holen Sie nach den Regeln Ihrer Schule Unterstützung. Bei akuter Gefahr gilt der Notruf <span class="tel">112</span>.</li>
+</ul>
+<p>Hilfe, die Sie nennen können, kostenlos und anonym:</p>
+<ul>
+<li><b>Nummer gegen Kummer</b> für Kinder und Jugendliche: <a class="tel" href="tel:116111">116 111</a></li>
+<li><b>Telefonseelsorge</b>, rund um die Uhr: <a class="tel" href="tel:08001110111">0800 111 0 111</a></li>
+<li><b>krisenchat</b> für junge Menschen unter 25, rund um die Uhr per WhatsApp oder SMS: <a href="https://krisenchat.de">krisenchat.de</a></li>
+</ul>
+</div>
+
+<h2>Grenzen der App</h2>
+<ul>
+<li>Die App ersetzt keine Therapie, keine Beratung und keinen Unterricht über psychische Gesundheit.</li>
+<li>Glücksforschung beschreibt Durchschnitte. Ein gut belegter Befund heißt nicht, dass er für jede Person gilt.</li>
+<li>Viele Studien stammen aus den USA und Europa und wurden mit Erwachsenen oder Studierenden gemacht. Für Jugendliche gibt es oft weniger Daten.</li>
+<li>Die Auswahl der Häppchen hat eine Person getroffen. Sie ist sorgfältig, aber nicht vollständig, und die Einstufungen sind Einschätzungen.</li>
+<li>Forschung verändert sich. Befunde können sich in Wiederholungen als schwächer herausstellen. Die App zeigt einige Beispiele dafür ausdrücklich.</li>
+<li>Ein Selbstversuch mit einer Person beweist nichts. Er kann aber zeigen, was einem selbst guttut, und ist ein guter Anlass, über Erwartungen zu sprechen.</li>
+</ul>
+
+<footer>
+<p>Der Glückskompass ist ein privates Projekt von Carlo Maximilian Engeländer. Diese Handreichung darf für den eigenen Unterricht ausgedruckt und genutzt werden. © 2026 Carlo Maximilian Engeländer.</p>
+<p class="noprint"><a href="index.html">Zur App</a></p>
+</footer>
+</main>
+</body>
+</html>
