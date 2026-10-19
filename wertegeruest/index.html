@@ -1397,12 +1397,10 @@ function nearRod(e){const svg=document.querySelector(".gsvg");if(!svg||!e.detail
   const q=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());let best=null,bd=1e9;
   svg.querySelectorAll(".rod").forEach(l=>{const x1=+l.getAttribute("x1"),y1=+l.getAttribute("y1"),x2=+l.getAttribute("x2"),y2=+l.getAttribute("y2"),dx=x2-x1,dy=y2-y1;
     const t=Math.max(0,Math.min(1,((q.x-x1)*dx+(q.y-y1)*dy)/(dx*dx+dy*dy||1))),d=Math.hypot(q.x-x1-t*dx,q.y-y1-t*dy);if(d<bd){bd=d;best=l.dataset.seg.split(":")[0]}});return best}
-/* Resonanz: Ein angetippter Stab schwingt einmal kurz und gedämpft nach, wie eine gezupfte Saite unter Spannung,
-   und die Seile an seinen Enden leuchten einmal leise auf. Ohne Stab (id=null) antworten Fundament und Halteseile. */
+/* Resonanz: Beim angetippten Stab leuchten die Seile an seinen Enden einmal leise auf; der Stab selbst bleibt ruhig. Ohne Stab (id=null) antworten Fundament und Halteseile. */
 function resonate(id){if(calm())return;const svg=document.querySelector(".gsvg");if(!svg)return;
   const segs=id?[...svg.querySelectorAll(`.rod[data-seg^="${id}:"],.gap[data-gap^="${id}:"]`)]:[...svg.querySelectorAll(".slab .base")];
-  const sw=[{transform:"rotate(0)"},{transform:"rotate(1.1deg)",offset:.16},{transform:"rotate(-.75deg)",offset:.38},{transform:"rotate(.4deg)",offset:.6},{transform:"rotate(-.15deg)",offset:.8},{transform:"rotate(0)"}];
-  segs.forEach(s=>s.animate(id?sw:[{transform:"translateY(0)"},{transform:"translateY(1.2px)",offset:.2},{transform:"translateY(-.6px)",offset:.5},{transform:"translateY(0)"}],{duration:id?620:520,easing:"ease-out"}));
+  if(!id)segs.forEach(s=>s.animate([{transform:"translateY(0)"},{transform:"translateY(1.2px)",offset:.2},{transform:"translateY(-.6px)",offset:.5},{transform:"translateY(0)"}],{duration:520,easing:"ease-out"}));
   const ends=[];segs.filter(s=>s.classList.contains("rod")||!id).forEach(s=>{const x1=+s.getAttribute("x1"),y1=+s.getAttribute("y1"),x2=+s.getAttribute("x2"),y2=+s.getAttribute("y2");ends.push([x1,y1],[x2,y2])});
   const near=(x,y)=>ends.some(([a,b])=>Math.hypot(a-x,b-y)<(id?7:3)||(!id&&Math.abs(b-y)<1));
   svg.querySelectorAll(id?".cb":".ft").forEach(c=>{const x1=+c.getAttribute("x1"),y1=+c.getAttribute("y1"),x2=+c.getAttribute("x2"),y2=+c.getAttribute("y2");
@@ -1541,7 +1539,7 @@ function aboutFold(){return `<details class="fold" id="aboutfold" ${S.aboutOpen|
   <p>Werte geraten oft in Spannung zueinander. Das ist kein Zeichen von Haltlosigkeit, sondern normal. Stabil wird ein Gerüst, wenn du deine Werte kennst, sie in schwierigen Lagen abwägst und sie im Alltag lebst. Darum gibt es Impulse zum Nachdenken, Belastungsproben zum Entscheiden und Übungen zum Tun.</p>
   <h3>So wächst eine Stütze</h3><p>Jede Stütze hat fünf Bauteile: gewählt, Leitsatz, geprüft, gelebt und bekräftigt. Die Stäbe berühren sich kaum. Wie bei einer Tensegrity-Skulptur hält Spannung das Ganze zusammen: feine Seile verbinden benachbarte Stabenden, und wenn du in einer Belastungsprobe zwischen zwei deiner Werte abgewogen hast, kommt ein farbiges Spannseil dazu. Werte dürfen also in Spannung zueinander stehen. Gerade das macht das Gerüst stabil.</p>
   <h3>Wie sicher ist ein Impuls?</h3><div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)}<span class="muted">${["Philosophie, Zeitzeugnis oder Denkmodell","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder sehr viele Studien"][l]}</span></div>`).join("")}</div>
-  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 19.10.2026, 10:50 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
+  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 19.10.2026, 10:53 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
   <div class="row"><button class="btn" id="shareapp">App weiterempfehlen</button></div>
   <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
   <div class="credit"><span class="label">Von wem</span><p>Das Wertegerüst ist ein privates Projekt von <b>Carlo Maximilian Engeländer</b>. Idee, Auswahl, Texte und Gestaltung stammen von ihm.</p><p class="muted small">© 2026 Carlo Maximilian Engeländer. Alle Rechte vorbehalten. Du darfst die App gern nutzen und den Link weitergeben, auch im Unterricht. Inhalte, Texte und Gestaltung dürfen aber nicht ohne Erlaubnis kopiert, verändert oder anderswo veröffentlicht werden.</p></div>
@@ -2054,7 +2052,7 @@ function fromHash(){const h=location.hash.slice(1);if(["imp","werte","ueben","ge
 if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
-const BUILD="19.10.2026, 10:50";
+const BUILD="19.10.2026, 10:53";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("wg-upd")}catch(e){}if(done===m[1])return;

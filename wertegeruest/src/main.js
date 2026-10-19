@@ -149,12 +149,10 @@ function nearRod(e){const svg=document.querySelector(".gsvg");if(!svg||!e.detail
   const q=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());let best=null,bd=1e9;
   svg.querySelectorAll(".rod").forEach(l=>{const x1=+l.getAttribute("x1"),y1=+l.getAttribute("y1"),x2=+l.getAttribute("x2"),y2=+l.getAttribute("y2"),dx=x2-x1,dy=y2-y1;
     const t=Math.max(0,Math.min(1,((q.x-x1)*dx+(q.y-y1)*dy)/(dx*dx+dy*dy||1))),d=Math.hypot(q.x-x1-t*dx,q.y-y1-t*dy);if(d<bd){bd=d;best=l.dataset.seg.split(":")[0]}});return best}
-/* Resonanz: Ein angetippter Stab schwingt einmal kurz und gedämpft nach, wie eine gezupfte Saite unter Spannung,
-   und die Seile an seinen Enden leuchten einmal leise auf. Ohne Stab (id=null) antworten Fundament und Halteseile. */
+/* Resonanz: Beim angetippten Stab leuchten die Seile an seinen Enden einmal leise auf; der Stab selbst bleibt ruhig. Ohne Stab (id=null) antworten Fundament und Halteseile. */
 function resonate(id){if(calm())return;const svg=document.querySelector(".gsvg");if(!svg)return;
   const segs=id?[...svg.querySelectorAll(`.rod[data-seg^="${id}:"],.gap[data-gap^="${id}:"]`)]:[...svg.querySelectorAll(".slab .base")];
-  const sw=[{transform:"rotate(0)"},{transform:"rotate(1.1deg)",offset:.16},{transform:"rotate(-.75deg)",offset:.38},{transform:"rotate(.4deg)",offset:.6},{transform:"rotate(-.15deg)",offset:.8},{transform:"rotate(0)"}];
-  segs.forEach(s=>s.animate(id?sw:[{transform:"translateY(0)"},{transform:"translateY(1.2px)",offset:.2},{transform:"translateY(-.6px)",offset:.5},{transform:"translateY(0)"}],{duration:id?620:520,easing:"ease-out"}));
+  if(!id)segs.forEach(s=>s.animate([{transform:"translateY(0)"},{transform:"translateY(1.2px)",offset:.2},{transform:"translateY(-.6px)",offset:.5},{transform:"translateY(0)"}],{duration:520,easing:"ease-out"}));
   const ends=[];segs.filter(s=>s.classList.contains("rod")||!id).forEach(s=>{const x1=+s.getAttribute("x1"),y1=+s.getAttribute("y1"),x2=+s.getAttribute("x2"),y2=+s.getAttribute("y2");ends.push([x1,y1],[x2,y2])});
   const near=(x,y)=>ends.some(([a,b])=>Math.hypot(a-x,b-y)<(id?7:3)||(!id&&Math.abs(b-y)<1));
   svg.querySelectorAll(id?".cb":".ft").forEach(c=>{const x1=+c.getAttribute("x1"),y1=+c.getAttribute("y1"),x2=+c.getAttribute("x2"),y2=+c.getAttribute("y2");
