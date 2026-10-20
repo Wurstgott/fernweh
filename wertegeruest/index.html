@@ -1347,9 +1347,9 @@ const IMPULSE=[
  src:"Asch (1956), Psychological Monographs",u:SCH("Asch 1956 studies of independence and conformity a minority of one against a unanimous majority")},
 {id:"empoerung",cat:"urteil",ev:2,w:"gelassenheit",ue:"kipause",
  t:"Empörung wird belohnt",
- x:"Eine Auswertung von Millionen Tweets zeigte: Wer für einen empörten Beitrag viele Likes bekam, schrieb danach häufiger empörte Beiträge. Soziale Medien trainieren uns so zu mehr Empörung, als wir von uns aus zeigen würden.",
+ x:"Eine Auswertung von Millionen Tweets zeigte: Wer für einen empörten Beitrag viele Likes bekam, schrieb danach häufiger empörte Beiträge. Soziale Medien trainieren uns so zu mehr Empörung, als wir von uns aus zeigen würden. Empörung an sich ist nicht falsch. Sie zeigt, dass dir etwas wichtig ist, und hat oft geholfen, echtes Unrecht zu beenden. Sinnvoll ist sie, wenn sie sich gegen eine Tat richtet, in einem vernünftigen Verhältnis zu ihr steht und zu etwas führt, das hilft. Zu viel wird es, wenn sie den Menschen herabsetzt, wenn sie größer ist als der Anlass oder wenn sie vor allem Zustimmung bringen soll.",
  c:"Große Datenanalyse plus Experimente. Die Plattformen haben sich seither verändert, das Prinzip gilt weiter.",
- tip:"Bevor du dich online empörst, warte eine Stunde. Schreib dann, was du wirklich sagen willst.",
+ tip:"Bevor du dich online empörst, warte eine Stunde. Frag dich dann: Gegen welche Tat richtet sich meine Empörung, und was soll sie bewirken? Schreib nur das.",
  src:"Brady, McLoughlin, Doan & Crockett (2021), Science Advances",u:SCH("Brady McLoughlin Doan Crockett 2021 how social learning amplifies moral outrage expression in online social networks")},
 {id:"harmonie",cat:"urteil",ev:0,w:"toleranz",ue:"gegenseite",
  t:"Harmonie heißt nicht, alles Störende zu beseitigen",
@@ -2378,7 +2378,7 @@ function aboutFold(){return `<details class="fold" id="aboutfold" ${S.aboutOpen|
   <p>Werte geraten oft in Spannung zueinander. Das ist kein Zeichen von Haltlosigkeit, sondern normal. Stabil wird ein Gerüst, wenn du deine Werte kennst, sie in schwierigen Lagen abwägst und sie im Alltag lebst. Darum gibt es Impulse zum Nachdenken, Belastungsproben zum Entscheiden und Übungen zum Tun.</p>
   <h3>So wächst eine Stütze</h3><p>Jede Stütze hat fünf Bauteile: gewählt, Leitsatz, geprüft, gelebt und bekräftigt. Die Stäbe berühren sich kaum. Wie bei einer Tensegrity-Skulptur hält Spannung das Ganze zusammen: feine Seile verbinden benachbarte Stabenden, und wenn du in einer Belastungsprobe zwischen zwei deiner Werte abgewogen hast, kommt ein farbiges Spannseil dazu. Werte dürfen also in Spannung zueinander stehen. Gerade das macht das Gerüst stabil.</p>
   <h3>Wie sicher ist ein Impuls?</h3><div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)}<span class="muted">${["Philosophie, Zeitzeugnis oder Denkmodell","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder sehr viele Studien"][l]}</span></div>`).join("")}</div>
-  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 20.10.2026, 13:07 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
+  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 20.10.2026, 13:41 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
   <div class="row"><button class="btn" id="shareapp">App weiterempfehlen</button></div>
   <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
   <div class="credit"><span class="label">Von wem</span><p>Das Wertegerüst ist ein privates Projekt von <b>Carlo Maximilian Engeländer</b>. Idee, Auswahl, Texte und Gestaltung stammen von ihm.</p><p class="muted small">© 2026 Carlo Maximilian Engeländer. Alle Rechte vorbehalten. Du darfst die App gern nutzen und den Link weitergeben, auch im Unterricht. Inhalte, Texte und Gestaltung dürfen aber nicht ohne Erlaubnis kopiert, verändert oder anderswo veröffentlicht werden.</p></div>
@@ -3145,7 +3145,7 @@ function fromHash(){const h=location.hash.slice(1);if(["imp","werte","ueben","ge
 if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
-const BUILD="20.10.2026, 13:07";
+const BUILD="20.10.2026, 13:41";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("wg-upd")}catch(e){}if(done===m[1])return;
