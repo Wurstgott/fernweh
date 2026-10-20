@@ -95,8 +95,8 @@ const META=["werteinventur","leitsatz"];
    von damals sind in lw/lc festgehalten, damit spätere Textänderungen in ueben.js kein Bauteil entziehen.
    EINMAL: mit einer einmaligen Handlung geschafft. GELEG: „Keine Gelegenheit“ verkleinert die Zahl der nötigen Tage.
    FREIWERT: Der Wert der Übung ist die gewählte Stütze. */
-const EINMAL=new Set(["ehrlichesfeedback","entschuldigung","stolperstein","begegnung","reparatur","anpacken","weitergeben","vergebungsbrief"]);
-const GELEG=new Set(["wenndann","neinsagen","widerspruch","grenzewuerde","grenzechat","eigeneworte","verstehen"]);
+const EINMAL=new Set(["ehrlichesfeedback","entschuldigung","stolperstein","begegnung","reparatur","anpacken","weitergeben","vergebungsbrief","wessenstimme","vorschuss","mitreden","werhatsgemacht"]);
+const GELEG=new Set(["wenndann","neinsagen","widerspruch","grenzewuerde","grenzechat","eigeneworte","verstehen","dreifragen","offensagen","zusagen","hinsehen"]);
 const FREIWERT=new Set(["wenndann","werttag"]);
 const LOGW=[["ja","Gemacht"],["keine","Keine Gelegenheit"],["nein","Diesmal nicht"]];
 const runsOf=uid=>{const v=S.ueb[uid];return v&&typeof v==="object"?[...(Array.isArray(v.runs)?v.runs:[]),v]:[]};
