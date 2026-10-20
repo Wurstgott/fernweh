@@ -18,7 +18,7 @@ const uv=u=>u&&typeof personalisiereUebung==="function"?personalisiereUebung(u,P
 const wb=w=>typeof personalisiereWert==="function"?personalisiereWert(w,PRO()).b:w.b;
 /* Einstellungen. „Vibration“ hieß früher „Haptik“ (settings.haptik); der alte Wert wird übernommen. */
 {const old=S.settings&&typeof S.settings==="object"&&!Array.isArray(S.settings)?S.settings:{};
- S.settings=Object.assign({antiScroll:true,remindTime:"08:00",theme:"dunkel"},old);
+ S.settings=Object.assign({antiScroll:true,remindTime:"08:00",theme:"dunkel",uebTime:"19:00"},old);
  if(typeof S.settings.vibration!=="boolean")S.settings.vibration=old.haptik!==false;delete S.settings.haptik}
 S.moments=S.moments||{};S.leit=S.leit||{};S.proben=S.proben||{};S.ueb=S.ueb||{};S.saved=S.saved||{};S.read=S.read||{};S.history=S.history||[];S.fresh=S.fresh||[];
 const CATKEYS=Object.keys(CATS);
@@ -67,7 +67,9 @@ document.addEventListener("focusin",e=>{if(typing(e.target)&&document.querySelec
 function doUndo(){const u=undoState;if(!u)return;endUndo();
   /* Reine Ansichts-Einstellungen (aufgeklappte Bereiche, Einstellungen) bleiben, wie sie gerade sind. */
   const keep={settings:S.settings};["jOpen","aboutOpen","uebOpen","prOpen","setOpen","wqOpen"].forEach(k=>{if(k in S)keep[k]=S[k]});
-  S=Object.assign(JSON.parse(u.sn.s),keep);tab=u.sn.tab;pcur=u.sn.pcur;pBlind=u.sn.pBlind;pHint=u.sn.pHint;confirmReset=false;
+  const was=S;S=Object.assign(JSON.parse(u.sn.s),keep);
+  /* Pläne auf laufenden Karten werden beim Tippen gespeichert und sind keine Aktion: Rückgängig lässt sie, wie sie sind. */
+  Object.keys(S.ueb||{}).forEach(uid=>{const a=S.ueb[uid],b=was.ueb&&was.ueb[uid];if(a&&b&&a.status==="active"&&a.start===b.start&&typeof b.plan==="string")a.plan=b.plan});tab=u.sn.tab;pcur=u.sn.pcur;pBlind=u.sn.pBlind;pHint=u.sn.pHint;confirmReset=false;
   clearTimeout(momentTimer);persist();applyTheme();
   if(!u.reopen&&$("#layer").innerHTML)$("#layer").innerHTML="";
   anim=false;render();if(u.reopen)u.reopen();if(u.after)u.after();toast("Rückgängig gemacht.")}
@@ -86,10 +88,38 @@ function tested(id){return Object.entries(S.proben).some(([pid,v])=>{const p=P[p
 /* Übungen, die nur das Gerüst selbst betreffen, zählen nicht als „im Alltag gelebt“. Bei früher abgeschlossenen
    mehrtägigen Übungen steht in v.days, an wie vielen Tagen man sie gemacht hat; ab einem Tag zählt sie. */
 const META=["werteinventur","leitsatz"];
-function lived(id){const w=W[id];return Object.entries(S.ueb).some(([uid,v])=>v&&v.status==="done"&&U[uid]&&!META.includes(uid)&&(v.days==null||v.days>=1)&&(U[uid].w===id||U[uid].cat===w.cat))}
+/* Begleitung der Übungen (Stand 20.10.2026). Ein Eintrag S.ueb[uid] ist der aktuelle Durchgang; frühere Durchgänge liegen
+   unverändert in S.ueb[uid].runs. Neue Durchgänge tragen v:2, die beim Annehmen gewählte Stütze (fuer, null = ohne Stütze),
+   den Plan (plan), die Tageseinträge (log: Tag → "ja" | "keine" | "nein") und beim Abschluss ok (zählt als gelebt).
+   Alte Durchgänge ohne v:2 zählen weiter nach der alten Regel (Wert oder Bereich der Übung, ab einem Tag); Wert und Bereich
+   von damals sind in lw/lc festgehalten, damit spätere Textänderungen in ueben.js kein Bauteil entziehen.
+   EINMAL: mit einer einmaligen Handlung geschafft. GELEG: „Keine Gelegenheit“ verkleinert die Zahl der nötigen Tage.
+   FREIWERT: Der Wert der Übung ist die gewählte Stütze. */
+const EINMAL=new Set(["ehrlichesfeedback","entschuldigung","stolperstein","begegnung","reparatur","anpacken","weitergeben","vergebungsbrief"]);
+const GELEG=new Set(["wenndann","neinsagen","widerspruch","grenzewuerde","grenzechat","eigeneworte","verstehen"]);
+const FREIWERT=new Set(["wenndann","werttag"]);
+const LOGW=[["ja","Gemacht"],["keine","Keine Gelegenheit"],["nein","Diesmal nicht"]];
+const runsOf=uid=>{const v=S.ueb[uid];return v&&typeof v==="object"?[...(Array.isArray(v.runs)?v.runs:[]),v]:[]};
+const nJa=r=>r&&r.log?Object.values(r.log).filter(x=>x==="ja").length:0;
+/* Tage, ab denen eine mehrtägige Übung als geschafft gilt: rund 70 % der Dauer, mindestens 1 */
+function needDays(uid,r){const e=U[uid];if(!e||e.d<=1||EINMAL.has(uid)||(r&&r.alt))return 1;let n=e.d;
+  if(GELEG.has(uid)&&r&&r.log)n=Math.max(1,n-Object.values(r.log).filter(x=>x==="keine").length);return Math.max(1,Math.round(n*.7))}
+function runCounts(uid,r){if(!r||r.status!=="done"||META.includes(uid))return false;return r.v===2?!!r.ok:(r.days==null||r.days>=1)}
+function runFor(uid,r,id){if(r.v===2)return r.fuer===id;const e=U[uid],w=r.lw||(e&&e.w),c=r.lc||(e&&e.cat);return w===id||(!!W[id]&&c===W[id].cat)}
+function livedCount(id){let n=0;Object.keys(S.ueb).forEach(uid=>runsOf(uid).forEach(r=>{if(runCounts(uid,r)&&runFor(uid,r,id))n++}));return n}
+function lived(id){return livedCount(id)>0}
+/* Vorschlag für die Stütze: der Wert der Übung, sonst eine Stütze aus demselben Bereich; bei FREIWERT sonst die erste Stütze. */
+function defFuer(uid,hint){const u=U[uid];if(!u||META.includes(uid)||!S.kern.length)return null;if(hint&&S.kern.includes(hint))return hint;
+  /* Zuerst eine Stütze, die noch nicht gelebt ist (wichtig bei „Noch einmal“), sonst dieselbe Reihenfolge ohne diese Bedingung */
+  const pick=f=>{if(S.kern.includes(u.w)&&f(u.w))return u.w;return S.kern.find(k=>W[k].cat===u.cat&&f(k))||S.kern.find(k=>W[u.w]&&W[k].cat===W[u.w].cat&&f(k))||(FREIWERT.has(uid)?S.kern.find(f):null)};
+  return pick(k=>!lived(k))||pick(()=>true)||null}
+/* Umzug alter Speicherstände: alte Abschlüsse merken sich Wert und Bereich; laufende alte Übungen bekommen die vorgeschlagene Stütze. */
+if(!S.uebMig){Object.keys(S.ueb).forEach(uid=>{const v=S.ueb[uid];if(!v||typeof v!=="object")return;
+  runsOf(uid).forEach(r=>{if(r.v!==2&&U[uid]){if(!r.lw)r.lw=U[uid].w;if(!r.lc)r.lc=U[uid].cat}});
+  if(v.status==="active"&&v.v!==2){v.v=2;v.fuer=defFuer(uid);v.alt=1;if(v.checks&&!v.log){v.log={};Object.keys(v.checks).forEach(k=>v.log[k]="ja")}}});S.uebMig=1;persist()}
 function hasLeit(id){return !!(S.leit[id]&&S.leit[id].t)}
 function affirmed(id){return !!(S.leit[id]&&S.leit[id].n>=2)}
-function steps(id){return [["Als Stütze gewählt",S.kern.includes(id)],["Leitsatz formuliert",hasLeit(id)],["In einer Belastungsprobe geprüft",tested(id)],["In einer Übung gelebt",lived(id)],["Leitsatz zweimal bekräftigt",affirmed(id)]]}
+function steps(id){const nl=livedCount(id);return [["Als Stütze gewählt",S.kern.includes(id)],["Leitsatz formuliert",hasLeit(id)],["In einer Belastungsprobe geprüft",tested(id)],[nl>1?`In ${nl} Übungen gelebt`:"In einer Übung gelebt",nl>0],["Leitsatz zweimal bekräftigt",affirmed(id)]]}
 function level(id){if(!S.kern.includes(id))return 0;return steps(id).filter(s=>s[1]).length}
 function dueLeit(){return S.kern.filter(id=>hasLeit(id)&&(S.leit[id].next||0)<=now())}
 function tally(){const c={};Object.entries(S.proben).forEach(([pid,v])=>{const p=P[pid];if(p&&v&&v.o!=null&&p.o[v.o])pw(pid,v,v.o).forEach(w=>c[w]=(c[w]||0)+1)});return c}
@@ -115,23 +145,33 @@ function nextFor(id){const w=W[id];let soft=null;
     /* Kein offener Weg: ein weicher Schritt, der andere Stützen nicht blockiert */
     soft=f?{t:f.other?`Zu ${w.n} gibt es noch keine eigene Probe. Probier eine aus demselben Bereich.`:`Denk die Probe „${ptl(f.p)}“ noch einmal durch.`,probe:f.p.id,hint:id,soft:true}:{t:"Sieh dir die Belastungsproben an.",tabgo:"ueben",soft:true}}
   if(!lived(id)){const rel=u=>!META.includes(u.id)&&(u.w===id||u.cat===w.cat),st=u=>S.ueb[u.id]&&S.ueb[u.id].status;
-    const act=activeUeb().find(x=>rel(U[x]));if(act)return {t:`Schließ die Übung „${U[act].t}“ ab.`,tabgo:"ueben"};
+    const act=activeUeb().find(x=>S.ueb[x].v===2?S.ueb[x].fuer===id:rel(U[x]));if(act)return {t:`Schließ die Übung „${uv(U[act]).t}“ ab.`,uebrun:act};
     const u=UEBUNGEN.find(u=>rel(u)&&u.w===id&&!st(u))||UEBUNGEN.find(u=>rel(u)&&!st(u))||UEBUNGEN.find(u=>rel(u));
     if(u&&activeUeb().length>=MAXACT)return {t:`Schließ zuerst eine laufende Übung ab. Danach kannst du ${w.n} in einer Übung leben.`,tabgo:"ueben"};
-    if(u)return {t:`Lebe ${w.n} in der Übung „${u.t}“.`,ueb:u.id};
+    if(u)return {t:`Lebe ${w.n} in der Übung „${uv(u).t}“.`,ueb:u.id,uhint:id};
     soft=soft||{t:"Sieh dir die Übungen an.",tabgo:"ueben",soft:true}}
   if(soft)return soft;
   if(!affirmed(id)){const L=S.leit[id];return {t:`Bekräftige deinen Leitsatz für ${w.n}, wenn die App nachfragt${L&&L.next>now()?`, voraussichtlich am ${fmtDate(L.next)}`:""}.`,wert:id,wait:true}}
   return null}
 function blindOffer(){const p=PROBEN.filter(p=>blindDue(p.id)).sort((a,b)=>S.proben[a.id].t-S.proben[b.id].t)[0];
   return p?{t:`Vor einiger Zeit hast du die Probe „${ptl(p)}“ entschieden. Wenn du magst, entscheide sie noch einmal, ohne deine alte Antwort zu sehen.`,probe:p.id,blind:true,id:null}:null}
-function nextStep(){
+/* Laufende Übungen im nächsten Schritt, zurückhaltend: höchstens eine Übungsfrage am Tag (S.askDay merkt sich den Tag,
+   an dem man darauf getippt hat). Gefragt wird nur, wenn die Frist um ist, wenn eine Übung schon geschafft ist (einmal je
+   Durchgang, v.doneAsk) oder wenn gestern und heute nichts eingetragen ist. Sonst bleibt der Aufbauschritt; die laufende
+   Übung ist im Reiter Üben erreichbar. Übungen ohne Frist fragen nie. */
+function uebAsk(){const tk=todayKey();if(S.askDay===tk)return null;const act=activeUeb().filter(uid=>!S.ueb[uid].keep&&dayIdx(S.ueb[uid])>=1);
+  for(const uid of act){const v=S.ueb[uid],e=uv(U[uid]);if(dayIdx(v)>=e.d)return {t:`Die Zeit für „${e.t}“ ist um. Wie lief es?`,uebrun:uid,fuer:v.fuer}}
+  for(const uid of act){const v=S.ueb[uid],e=uv(U[uid]);if(!v.doneAsk&&(!v.doneAskDay||v.doneAskDay===todayKey())&&(e.d>1)&&nJa(v)>=needDays(uid,v)){if(!v.doneAskDay){v.doneAskDay=todayKey();persist()}return {t:`„${e.t}“ ist geschafft. Magst du die Übung abschließen?`,uebrun:uid,fuer:v.fuer,doneAsk:1}}}
+  for(const uid of act){const v=S.ueb[uid],e=uv(U[uid]),di=dayIdx(v),lg=v.log||{};if(e.d>1&&!lg[di]&&!lg[di-1]&&nJa(v)<needDays(uid,v))return {t:`Wie lief „${e.t}“ in den letzten Tagen?`,uebrun:uid,fuer:v.fuer}}
+  return null}
+function nextStep(){const n=nextBuild(),a=n.finder?null:uebAsk();if(!a)return n;return Object.assign(a,{id:a.fuer&&S.kern.includes(a.fuer)?a.fuer:n.id})}
+function nextBuild(){
   if(!S.kern.length)return {t:"Finde heraus, welche Werte dich tragen. Es dauert etwa fünf Minuten.",finder:true,id:null};
   let wait=null,soft=null;
   for(const id of S.kern){const n=nextFor(id);if(!n)continue;if(n.wait){if(!wait)wait=Object.assign(n,{id})}else if(n.soft){if(!soft)soft=Object.assign(n,{id})}else return Object.assign(n,{id})}
   if(S.kern.length<MAXKERN)return {t:"Wähle eine weitere Stütze.",tabgo:"werte",id:null};
   return soft||blindOffer()||wait||{t:"Dein Gerüst steht. Bleib im Gespräch mit dir: Impulse lesen, Proben entscheiden.",tabgo:"imp",id:null}}
-const actAttr=n=>n.finder?`data-finder="1"`:n.wert?`data-wert="${n.wert}"`:n.ueb?`data-ueb="${n.ueb}"`:n.probe?`data-probe-open="${n.probe}"${n.blind?` data-blind="1"`:""}${n.hint?` data-phint="${n.hint}"`:""}`:`data-tabgo="${n.tabgo||"ueben"}"`;
+const actAttr=n=>n.finder?`data-finder="1"`:n.wert?`data-wert="${n.wert}"`:n.uebrun?`data-uebrun="${n.uebrun}"${n.doneAsk?` data-doneask="1"`:""}`:n.ueb?`data-ueb="${n.ueb}"${n.uhint?` data-uhint="${n.uhint}"`:""}`:n.probe?`data-probe-open="${n.probe}"${n.blind?` data-blind="1"`:""}${n.hint?` data-phint="${n.hint}"`:""}`:`data-tabgo="${n.tabgo||"ueben"}"`;
 
 /* Kurze Namen in zwei Zeilen fürs Gerüst */
 const HY={selbstachtung:"Selbst-achtung",gelassenheit:"Gelassen-heit",loyalitaet:"Loyali-tät",verlaesslichkeit:"Verläss-lichkeit",dankbarkeit:"Dank-barkeit",gerechtigkeit:"Gerech-tigkeit",zivilcourage:"Zivil-courage",solidaritaet:"Solida-rität",gewaltfreiheit:"Gewalt-freiheit",beteiligung:"Betei-ligung",genuegsamkeit:"Genüg-samkeit",zukunftsverantwortung:"Verantwortung-für Kommende",ehrfurcht:"Ehrfurcht-vor dem Leben",naturverbundenheit:"Natur-verbundenheit",folgerichtigkeit:"Folge-richtigkeit",weitherzigkeit:"Weit-herzigkeit",wahrhaftigkeit:"Wahr-haftigkeit",differenzierung:"Differen-zierung",verantwortlichkeit:"Verant-wortlichkeit",demut:"Erkenntnis-demut",integritaet:"Integri-tät",zuwendung:"Zu-wendung",offenheit:"Offen-heit",vergebung:"Ver-gebung",muendigkeit:"Mündig-keit",echtheit:"Echt-heit",disziplin:"Diszi-plin",freiheit:"Frei-heit",wachstum:"Wachs-tum",fuersorge:"Für-sorge",vertrauen:"Ver-trauen",erinnerung:"Erin-nerung",toleranz:"Tole-ranz",sorgfalt:"Sorg-falt",fairness:"Fair-ness"};
@@ -299,7 +339,7 @@ function pillarTap(id){const svg=document.querySelector(".gsvg");if(!svg)return;
   if(segs.length)lightUp(segs[segs.length-1]);
   $("#ginfo").innerHTML=`<div class="pinfo" ${cc(w.cat)}><div class="sh"><span class="label">${dot(w.cat)}${w.n}</span><span class="label">Stufe ${l} von 5</span></div>
    <ul class="steps5">${steps(id).map(([t,ok])=>`<li class="${ok?"ok":""}"><i></i>${t}</li>`).join("")}</ul>
-   <div class="row">${n?`<button class="btn primary" ${actAttr(n)}>${n.wait?"Leitsatz ansehen":n.wert?"Leitsatz schreiben":n.probe?"Probe öffnen":n.ueb?"Übung ansehen":"Weiter"}</button>`:""}<button class="btn" data-wert="${id}">Stütze öffnen</button></div></div>`;
+   <div class="row">${n?`<button class="btn primary" ${actAttr(n)}>${n.wait?"Leitsatz ansehen":n.wert?"Leitsatz schreiben":n.probe?"Probe öffnen":n.ueb||n.uebrun?"Übung ansehen":"Weiter"}</button>`:""}<button class="btn" data-wert="${id}">Stütze öffnen</button></div></div>`;
   const pi=$("#ginfo .pinfo");if(pi&&!calm())pi.animate([{opacity:0,transform:"translateY(6px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)"})}
 /* Neue Stäbe zeichnen sich nacheinander ein. freshUntil merkt sich, wann das letzte Aufleuchten endet,
    damit ein Moment erst danach erscheint. Die Vibration dazu gibt es schon beim Tippen (buzz("ok")), nicht hier. */
@@ -312,10 +352,15 @@ function playFresh(){if(!S.fresh.length)return;const list=S.fresh.slice();S.fres
 
 /* ---------- Bautagebuch, Einstellungen, Über ---------- */
 function journalFold(){
-  const nRead=Object.keys(S.read).length,nPr=nPrDone(),done=Object.entries(S.ueb).filter(([id,v])=>U[id]&&v.status==="done");
+  const nRead=Object.keys(S.read).length,nPr=nPrDone();
+  /* Alle Durchgänge einer Übung, auch frühere: Abschlüsse mit Stimmung, Tagen, Plan oder Notiz; beendete nur mit Plan */
+  const runs=Object.keys(S.ueb).filter(id=>U[id]).flatMap(id=>runsOf(id).map(r=>[id,r]));
+  const done=runs.filter(([,r])=>r.status==="done");
   const t=tally(),top=Object.entries(t).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const lv=S.kern.map(id=>[id,livedCount(id)]).filter(x=>x[1]>0);
   const optT=(p,o)=>p.o[o]?p.o[o].t:"";
-  const journal=[...done.filter(([,v])=>v.note||v.mood||v.days!=null).map(([id,v])=>({id,t:v.end,c:U[id].cat,title:U[id].t,sub:[v.mood?{gut:"Hat mir gutgetan",mix:"Gemischt",nein:"Eher nicht"}[v.mood]:"Übung",v.days!=null?`an ${v.days} von ${U[id].d} Tagen`:""].filter(Boolean).join(" · "),note:v.note})),
+  const journal=[...runs.filter(([,v])=>v.status==="done"?(v.note||v.mood||v.days!=null||v.plan):(v.status==="dropped"&&v.plan)).map(([id,v])=>({id,t:v.end||v.start,c:U[id].cat,title:uv(U[id]).t,
+      sub:[v.status==="dropped"?"Beendet":v.mood?{gut:"Hat mir gutgetan",mix:"Gemischt",nein:"Eher nicht"}[v.mood]:"Übung",v.days==null?"":EINMAL.has(id)&&v.v===2?(v.days?"gemacht":""):v.keep?`an ${v.days} ${v.days===1?"Tag":"Tagen"}, ohne Frist weitergeführt`:`an ${v.days} von ${U[id].d} Tagen`,v.v===2&&v.fuer&&W[v.fuer]?`für ${W[v.fuer].n}`:""].filter(Boolean).join(" · "),plan:v.plan,note:v.note})),
     ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&v.r).map(([id,v])=>({id,t:v.t,c:P[id].cat,title:ptl(P[id]),sub:"Belastungsprobe",note:v.r})),
     ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&v.wq).map(([id,v])=>({id,t:v.wqt||v.t,c:"miteinander",title:ptl(P[id]),sub:"Prüfstein Würde",note:v.wq})),
     ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&Array.isArray(v.hist)&&v.hist.length&&v.o!=null).map(([id,v])=>{const h=v.hist[v.hist.length-1];const q=pv(P[id]);return {id,t:v.t,c:q.cat,title:q.t,sub:"Erneut entschieden",note:`Damals: ${optT(q,h.o)} Heute: ${optT(q,v.o)}`}}),
@@ -325,7 +370,8 @@ function journalFold(){
     <div class="tiles"><div><b>${nRead}</b><span>Impulse gelesen</span></div><div><b>${nPr}</b><span>Proben entschieden</span></div><div><b>${done.length}</b><span>Übungen geschafft</span></div></div>
     <p class="muted small">Hier verfällt nichts, wenn du eine Pause machst.</p>
     ${top.length?`<h3>Was in deinen Entscheidungen den Ausschlag gab</h3><div class="links">${top.map(([id,n])=>`<button class="tag" ${cc(W[id].cat)} data-wert="${id}">${dot(W[id].cat)}${W[id].n}<em>${n}</em></button>`).join("")}</div>`:""}
-    <h3>Notizen</h3>${journal.length?`<div class="journal">${journal.map(j=>`<div class="jr" ${cc(j.c)}><small>${fmtDate(j.t)} · ${j.sub}</small><b>${j.title}</b>${j.note?`<p>${esc(j.note)}</p>`:""}</div>`).join("")}</div>`:`<p class="muted small">Wenn du eine Übung abschließt oder eine Entscheidung begründest, erscheinen deine Notizen hier.</p>`}
+    ${lv.length?`<h3>Im Alltag gelebt</h3><div class="links">${lv.map(([id,n])=>`<button class="tag" ${cc(W[id].cat)} data-wert="${id}">${dot(W[id].cat)}${W[id].n}<em>${n}</em></button>`).join("")}</div>`:""}
+    <h3>Notizen</h3>${journal.length?`<div class="journal">${journal.map(j=>`<div class="jr" ${cc(j.c)}><small>${fmtDate(j.t)} · ${j.sub}</small><b>${j.title}</b>${j.plan?`<p class="jplan">${esc(j.plan)}</p>`:""}${j.note?`<p>${esc(j.note)}</p>`:""}</div>`).join("")}</div>`:`<p class="muted small">Wenn du eine Übung abschließt oder eine Entscheidung begründest, erscheinen deine Notizen hier.</p>`}
     <h3>Gemerkte Impulse</h3>${saved.length?`<div class="list">${saved.map(id=>{const b=I[id];return `<button class="li" data-open="${id}">${dot(b.cat)}<span class="tx"><b>${b.t}</b><small>${b.src}</small></span></button>`}).join("")}</div>`:`<p class="muted small">Tippe bei einem Impuls auf „Merken“, um ihn hier wiederzufinden.</p>`}
     ${got.length?`<h3>Momente</h3><div class="moms">${got.map(m=>`<span class="mom">${m.t}<small>${fmtDate(S.moments[m.id])}</small></span>`).join("")}</div>`:""}
   </div></details>`}
@@ -348,6 +394,8 @@ function settingsFold(){const sw=(id,on,label,sub)=>`<button class="setrow" data
    ${sw("antiScroll",S.settings.antiScroll,"Hinweis gegen Endlos-Lesen","Nach fünf Impulsen hintereinander schlägt die App vor, etwas zu prüfen oder auszuprobieren.")}
    <div class="setrow static"><span><b>Tägliche Erinnerung</b><small>Ein täglicher Termin in deinem eigenen Kalender. Die App selbst schickt keine Nachrichten und sammelt keine Daten.</small></span></div>
    <div class="row"><input type="time" id="rtime" value="${S.settings.remindTime}" aria-label="Uhrzeit"><button class="btn" id="dailyics">Apple-Kalender</button><a class="btn" id="dailyg" href="${dailyGoogle()}" target="_blank" rel="noopener">Google Kalender</a></div>
+   <div class="setrow static"><span><b>Erinnerung an Übungen</b><small>Diese Uhrzeit schlägt die App vor, wenn sie dir nach dem Annehmen einer Übung eine Erinnerung anbietet.</small></span></div>
+   <div class="row"><input type="time" id="utimedef" value="${S.settings.uebTime}" aria-label="Uhrzeit für Übungs-Erinnerungen"></div>
    <h3 id="pfhead">Beispiele anpassen</h3>
    <p class="muted small">Damit die Beispiele in Proben und Übungen zu deinem Leben passen. Jede Frage ist freiwillig. Deine Angaben bleiben auf diesem Gerät.</p>
    ${pfForm()}
@@ -516,41 +564,102 @@ const activeUeb=()=>Object.entries(S.ueb).filter(([,v])=>v&&v.status==="active")
 function suggestUeb(){const free=UEBUNGEN.filter(u=>!S.ueb[u.id]);if(!free.length)return null;
   const kc=new Set(S.kern.map(id=>W[id].cat)),kw=new Set(S.kern);const pref=free.filter(u=>kw.has(u.w)),pref2=free.filter(u=>kc.has(u.cat));
   const list=pref.length?pref:pref2.length?pref2:free;return list[(Math.floor(now()/DAY)+(S.uskip||0))%list.length]}
-function uebCard(e,mode){e=uv(e);const v=S.ueb[e.id];let extra="";
-  if(mode==="active"){const total=e.d,el=Math.min(total,Math.floor((now()-v.start)/DAY)),left=Math.max(0,total-el);
-    extra=`<div class="prog"><div class="meter"><span style="width:${Math.max(4,Math.round(el/total*100))}%"></span></div><span class="label">${left?`Noch ${left} Tag${left>1?"e":""} · bis ${fmtDate(v.start+total*DAY)}`:"Zeit ist um. Wie lief es?"}</span></div>
-    <div class="row"><button class="btn primary" data-done="${e.id}">${early(e.id)?"Früher abschließen":"Geschafft"}</button><button class="btn" data-remind="${e.id}">Erinnern</button><button class="btn" data-ueb="${e.id}">Anleitung</button><button class="linkbtn" data-drop="${e.id}">Abbrechen</button></div>${checkRow(e.id)}<button class="mini" data-ushare="${e.id}">Mit jemandem machen</button>`}
-  else extra=`<div class="row"><button class="btn primary" data-accept="${e.id}" ${activeUeb().length>=MAXACT?"disabled":""}>Annehmen</button><button class="btn" data-ueb="${e.id}">Mehr dazu</button>${mode==="suggest"?`<button class="linkbtn" id="uother">Anderer Vorschlag</button>`:""}</div><button class="mini" data-ushare="${e.id}">Mit jemandem machen</button>${activeUeb().length>=MAXACT?`<p class="muted small">Du hast schon ${MAXACT} Übungen laufen. Schließ zuerst eine ab, bevor du eine neue beginnst.</p>`:""}`;
-  return `<article class="exp" ${cc(e.cat)}><div class="meta"><span>${dot(e.cat)}${W[e.w].n}</span><span>${e.d===1?"Heute":e.d+" Tage"}</span></div><h2>${e.t}</h2><p>${e.x}</p>${extra}</article>`}
+/* Laufende Übung: oben das freiwillige Feld für Plan, Satz oder Notiz (Aufforderung aus u.p; p:false heißt kein Feld),
+   dann der Stand, der Tageseintrag (Gemacht / Keine Gelegenheit / Diesmal nicht) mit kleinen Tagesmarken und die Knöpfe.
+   „Früher abschließen“ ist ein Textknopf; Hauptknopf ist „Geschafft“ erst, wenn die Zeit um ist oder die Übung schon geschafft ist. */
+const PLAN_DEF="Dein Plan oder deine Notiz, nur für dich";
+const Tg=x=>x===1?"einem Tag":`${x} Tagen`;
+let logBack={};
+function logHTML(e,v){if(!(e.d>1||v.keep))return "";const di=dayIdx(v),maxD=v.keep?di:e.d-1,lg=v.log||{};
+  const canT=di<=maxD,canY=di>=1&&di-1<=maxD;
+  /* Einmal-Übung mit „Gemacht“: keine Tageszeile mehr, nur der Stand und ein Weg, den Eintrag zurückzunehmen */
+  if(EINMAL.has(e.id)&&nJa(v)>=1){const k=+Object.keys(lg).find(x=>lg[x]==="ja");
+    return `<div class="ulog done1"><p class="muted small ustand">Gemacht am ${fmtDate(new Date(v.start).setHours(12,0,0,0)+k*DAY).replace(/\.$/,"")}. Damit ist die Übung geschafft. Du kannst sie abschließen, wann du magst.</p><button class="linkbtn" data-log="${e.id}" data-day="${k}" data-val="ja">Eintrag zurücknehmen</button></div>`}
+  if(!canT&&!canY)return "";
+  const back=!canT||(!!logBack[e.id]&&canY),k=back?di-1:di,cur=lg[k]||null;
+  const from=v.keep?Math.max(0,di-6):0,to=v.keep?di:e.d-1;let marks="";
+  for(let i=from;i<=to;i++)marks+=`<i class="${lg[i]||"leer"}${i>di?" fut":""}${i===k?" now":""}"></i>`;
+  const n=nJa(v),need=needDays(e.id,v);
+  const stand=EINMAL.has(e.id)?(n?"Gemacht. Damit ist die Übung geschafft. Du kannst sie abschließen, wann du magst.":"Ein einziges Mal genügt. Trag „Gemacht“ ein, sobald es so weit ist.")
+    :n>=need?`An ${Tg(n)} gemacht. Damit gilt die Übung als geschafft.`
+    :`${n?`Bisher an ${Tg(n)} gemacht. `:""}Ab ${Tg(need)} gilt die Übung als geschafft. ${GELEG.has(e.id)?"Tage ohne Gelegenheit zählen nicht mit.":"Ein verpasster Tag ändert nichts."}`;
+  const sw=canT&&canY?`<button class="linkbtn" data-logback="${e.id}">${back?"Zurück zu heute":"Gestern nachtragen"}</button>`:"";
+  return `<div class="ulog"><div class="sh"><span class="label">${back?"Gestern":"Heute"} · Tag ${k+1}${v.keep?"":` von ${e.d}`}</span>${sw}</div>
+   <div class="chips wrap lchips" role="group" aria-label="Eintrag für ${back?"gestern":"heute"}">${LOGW.map(([x,t])=>`<button class="chip" aria-label="${t}" data-log="${e.id}" data-day="${k}" data-val="${x}" aria-pressed="${cur===x}">${t.replace("Gelegenheit","Gelegen&shy;heit")}</button>`).join("")}</div>
+   <div class="marks" aria-hidden="true">${marks}</div><p class="muted small ustand">${stand}</p></div>`}
+function uebCard(e,mode){e=uv(e);const v=S.ueb[e.id];let extra="",meta=W[e.w]?W[e.w].n:"",dur=e.d===1?"Heute":e.d+" Tage";
+  if(mode==="active"){const di=dayIdx(v),total=e.d,keep=!!v.keep,fw=v.fuer&&W[v.fuer]?W[v.fuer]:null;
+    /* Kopfzeile: die Stütze, für die man übt (sonst der Wert der Übung); rechts die Frist */
+    if(fw)meta=fw.n;dur=keep?"ohne Frist":total===1?"Heute":`bis ${fmtDate(v.start+(total-1)*DAY)}`;
+    const lab=e.p===false?null:(e.p||PLAN_DEF);
+    const plan=lab?`<div class="uplan"><label class="pl" for="plan-${e.id}">${esc(lab)}</label><textarea id="plan-${e.id}" data-plan="${e.id}" rows="2" placeholder="Freiwillig. Ein, zwei Sätze reichen.">${esc(v.plan||"")}</textarea><span class="psaved" aria-live="polite"></span></div>`:"";
+    const lg=logHTML(e,v);
+    /* Ohne Tageszeile (eintägig oder nach Fristende) steht der Stand in einer Zeile; sonst zeigen Tageszeile und Marken ihn. */
+    const prog=lg?"":`<div class="prog"><span class="label">${keep?`Läuft ohne Frist · seit ${fmtDate(v.start)}`:di<total?(total===1?"Heute":`Tag ${di+1} von ${total}`):"Zeit ist um. Wie lief es?"}</span></div>`;
+    const ea=early(e.id),reached=nJa(v)>=needDays(e.id,v)&&(total>1||keep),main=!ea||reached,up=!keep&&di>=total;
+    const forBtn=META.includes(e.id)?"":`<button class="linkbtn" data-fuer="${e.id}">${fw?"Stütze ändern":"Ohne Stütze · ändern"}</button>`;
+    extra=`${plan}${META.includes(e.id)?`<p class="muted small ufor">Diese Übung ordnet dein Gerüst. Sie setzt kein Bauteil.</p>`:""}${prog}${lg}
+    <div class="row">${main?`<button class="btn primary" data-done="${e.id}">Geschafft</button>`:""}${up&&total>1&&!EINMAL.has(e.id)?`<button class="btn" data-keep="${e.id}">Beibehalten</button>`:""}<button class="btn" data-remind="${e.id}">Erinnern</button></div>
+    <div class="row urow2">${main?"":`<button class="linkbtn" data-done="${e.id}">Früher abschließen</button>`}<button class="linkbtn" data-ueb="${e.id}">Anleitung</button>${forBtn}<button class="linkbtn" data-drop="${e.id}">Abbrechen</button></div><button class="mini" data-ushare="${e.id}">Mit jemandem machen</button>`;
+    return `<article class="exp run" ${cc(e.cat)} data-run="${e.id}"><div class="meta"><span>${dot(fw?fw.cat:e.cat)}${meta}</span><span class="nowrap">${dur}</span></div><h2>${e.t}</h2>${extra}</article>`}
+  extra=`<div class="row"><button class="btn primary" data-accept="${e.id}" ${activeUeb().length>=MAXACT?"disabled":""}>Annehmen</button><button class="btn" data-ueb="${e.id}">Mehr dazu</button>${mode==="suggest"?`<button class="linkbtn" id="uother">Anderer Vorschlag</button>`:""}</div><button class="mini" data-ushare="${e.id}">Mit jemandem machen</button>${activeUeb().length>=MAXACT?`<p class="muted small">Du hast schon ${MAXACT} Übungen laufen. Schließ zuerst eine ab, bevor du eine neue beginnst.</p>`:""}`;
+  return `<article class="exp" ${cc(e.cat)}><div class="meta"><span>${dot(e.cat)}${FREIWERT.has(e.id)?"Wert nach Wahl":meta}</span><span>${dur}</span></div><h2>${e.t}</h2><p>${e.x}</p>${extra}</article>`}
+const lastRun=id=>{const r=runsOf(id).filter(x=>x.status==="done");return r[r.length-1]||null};
 function viewUeben(){
   const p=currentProbe(),act=activeUeb(),sug=suggestUeb();
   const pc={alle:PROBEN.length},uc={alle:UEBUNGEN.length};CATKEYS.forEach(k=>{pc[k]=PROBEN.filter(x=>x.cat===k).length;uc[k]=UEBUNGEN.filter(x=>x.cat===k).length});
   const nDone=nPrDone();
   let h=`<section class="view"><header class="vh"><h1>Üben</h1><p>In Belastungsproben entscheidest du dich in schwierigen Lagen. In Übungen lebst du einen Wert im Alltag. Beides baut an deinem Gerüst.</p></header>`;
+  const run=`<div class="sec"><div class="sh"><span class="label">Übungen, die laufen</span><span class="label">${act.length} von ${MAXACT}</span></div>${act.length?act.map(id=>uebCard(U[id],"active")).join(""):`<p class="muted small">Übungen sind kleine Schritte, mit denen du einen Wert im Alltag lebst. Nichts davon muss perfekt gelingen.</p>`}</div>`;
+  /* Laufen Übungen, stehen sie oben, damit man nicht jedes Mal an der Probe vorbeiscrollt. */
+  if(act.length)h+=run;
   h+=`<div class="sec"><div class="sh"><span class="label">Belastungsprobe</span><span class="label">${nDone} von ${PROBEN.length} entschieden</span></div>${chips("pfilter",pFilter,pc)}${p?probeCard(p):""}</div>`;
-  h+=`<div class="sec"><div class="sh"><span class="label">Übungen, die laufen</span><span class="label">${act.length} von ${MAXACT}</span></div>${act.length?act.map(id=>uebCard(U[id],"active")).join(""):`<p class="muted small">Übungen sind kleine Schritte, mit denen du einen Wert im Alltag lebst. Nichts davon muss perfekt gelingen.</p>`}</div>`;
+  if(!act.length)h+=run;
   if(sug)h+=`<div class="sec"><div class="sh"><span class="label">Vorschlag für dich</span></div>${uebCard(sug,"suggest")}</div>`;
   const ul=UEBUNGEN.filter(u=>uFilter==="alle"||u.cat===uFilter),lim=uMore?ul.length:6;
-  h+=`<details class="fold" id="uebfold" ${S.uebOpen?"open":""}><summary><span>Alle Übungen</span><span class="label">${UEBUNGEN.length}</span>${CHEV}</summary><div class="fbody">${chips("ufilter",uFilter,uc)}<div class="list">${ul.slice(0,lim).map(u=>{const v=S.ueb[u.id];const st=v?(v.status==="active"?"läuft":v.status==="done"?"geschafft":"abgebrochen"):(u.d===1?"heute":u.d+" Tage");return `<button class="li" data-ueb="${u.id}">${dot(u.cat)}<span class="tx"><b>${u.t}</b></span><span class="aside">${st}</span></button>`}).join("")}</div>${ul.length>lim?`<button class="linkbtn" id="umore">${ul.length-lim} weitere anzeigen</button>`:""}</div></details>`;
+  h+=`<details class="fold" id="uebfold" ${S.uebOpen?"open":""}><summary><span>Alle Übungen</span><span class="label">${UEBUNGEN.length}</span>${CHEV}</summary><div class="fbody">${chips("ufilter",uFilter,uc)}<div class="list">${ul.slice(0,lim).map(u=>{const v=S.ueb[u.id],lr=lastRun(u.id);const st=v?(v.status==="active"?"läuft":v.status==="done"?(v.ok===false?"beendet":"geschafft"):lr?"geschafft":"abgebrochen"):(u.d===1?"heute":u.d+" Tage");return `<button class="li" data-ueb="${u.id}">${dot(u.cat)}<span class="tx"><b>${uv(u).t}</b></span><span class="aside">${st}</span></button>`}).join("")}</div>${ul.length>lim?`<button class="linkbtn" id="umore">${ul.length-lim} weitere anzeigen</button>`:""}</div></details>`;
   h+=`<details class="fold" id="prfold" ${S.prOpen?"open":""}><summary><span>Alle Belastungsproben</span><span class="label">${nDone} / ${PROBEN.length}</span>${CHEV}</summary><div class="fbody"><div class="list">${PROBEN.map(x=>`<button class="li" data-probe-open="${x.id}">${dot(x.cat)}<span class="tx"><b>${ptl(x)}</b></span><span class="aside">${S.proben[x.id]&&S.proben[x.id].o!=null?"entschieden":"offen"}</span></button>`).join("")}</div></div></details>`;
   return h+`</section>`}
-function uebSheet(id){const e=uv(U[id]),v=S.ueb[id],w=W[e.w];
+function uebSheet(id,hint){const e=uv(U[id]),v=S.ueb[id],w=W[e.w],nd=runsOf(id).filter(r=>r.status==="done").length,full=activeUeb().length>=MAXACT;
+  const acc=lab=>`<button class="btn${lab==="Annehmen"?" primary":""}" data-accept="${id}" ${hint?`data-uhint="${hint}"`:""} ${full?"disabled":""}>${lab}</button>`;
   sheet(`${invited===id?`<div class="gift"><span class="label">Eine Einladung</span><p>Jemand möchte diese Übung gemeinsam mit dir machen. Sie stammt aus dem Wertegerüst, einer kostenlosen App ohne Anmeldung.</p></div>`:""}<div class="label">${dot(e.cat)}${CATS[e.cat].n} · ${e.d===1?"Heute":e.d+" Tage"}</div><h2>${e.t}</h2><p class="lead">${e.x}</p><h3>So gehst du vor</h3><ol class="howto">${e.s.map(s=>`<li>${s}</li>`).join("")}</ol>
-  <h3>Welcher Wert dahintersteht</h3>${goBtn("wert",w.id,w.cat,S.kern.includes(w.id)?"Deine Stütze":"Wert",w.n)}
-  <div class="row">${!v||v.status==="dropped"?`<button class="btn primary" data-accept="${id}" ${activeUeb().length>=MAXACT?"disabled":""}>Annehmen</button>`:v.status==="active"?`<button class="btn primary" data-done="${id}">${early(id)?"Früher abschließen":"Geschafft"}</button>`:`<span class="label">Geschafft am ${fmtDate(v.end)}</span><button class="btn" data-accept="${id}" ${activeUeb().length>=MAXACT?"disabled":""}>Noch einmal</button>`}</div><button class="mini" data-ushare="${id}">Mit jemandem machen</button>`,e.cat)}
-/* Mehrtägige Übung vor ihrem Ende abschließen: Dann fragt die App, an wie vielen Tagen man sie gemacht hat.
-   Zur Wahl stehen nur Zahlen bis zur Zahl der Kalendertage seit dem Start. Ab einem Tag zählt die Übung als gelebt. */
-function early(id){const e=U[id],v=S.ueb[id];return !!(e&&v&&v.status==="active"&&e.d>1&&dayIdx(v)+1<e.d)}
-/* pre: Werte, mit denen das Blatt nach „Rückgängig“ wieder gefüllt wird (Stimmung, Notiz, Tage) */
-function doneSheet(id,pre){const e=U[id],v=S.ueb[id]||{},ea=early(id),mx=ea?Math.min(e.d,dayIdx(v)+1):0;
-  sheet(`<div class="label">${ea?"Früher abschließen":"Geschafft"}</div><h2>${e.t}</h2>${ea?`<p class="lead">Die Übung ist auf ${e.d} Tage angelegt. An wie vielen Tagen hast du sie gemacht?</p><div class="chips" id="udays">${Array.from({length:mx+1},(_,k)=>`<button class="chip" data-udays="${k}" aria-pressed="false">${k===0?"Noch an keinem":k===1?"An einem Tag":`An ${k} Tagen`}</button>`).join("")}</div><p class="muted small udnote" id="udaysnote">Für das Bauteil zählt die Übung ab einem Tag. Die Zahl steht in deinem Bautagebuch.</p>`:""}${v.checks&&Object.keys(v.checks).length?`<div class="dcurve"><span class="label">Deine Zwischenstationen</span>${spark(v)}</div>`:""}<p class="lead">Wie war es? Deine Antwort bleibt auf diesem Gerät.</p><div class="chips" id="moods">${[["gut","Hat mir gutgetan"],["mix","Gemischt"],["nein","Eher nicht"]].map(([k,n])=>`<button class="chip" data-mood="${k}" aria-pressed="false">${n}</button>`).join("")}</div><label class="label" for="note">Was nimmst du mit?</label><textarea id="note" placeholder="Ein, zwei Sätze reichen."></textarea><div class="row"><button class="btn primary" id="savedone" data-id="${id}">Speichern</button></div>`,e.cat);
+  <h3>Welcher Wert dahintersteht</h3>${FREIWERT.has(id)?`<p class="muted small">Den Wert wählst du selbst: Beim Annehmen nimmst du dir eine deiner Stützen vor.</p>`:goBtn("wert",w.id,w.cat,S.kern.includes(w.id)?"Deine Stütze":"Wert",w.n)}
+  ${META.includes(id)?`<p class="muted small">Diese Übung ordnet dein Gerüst. Sie setzt kein Bauteil, steht aber danach im Bautagebuch.</p>`:""}
+  <div class="row">${!v||v.status==="dropped"?acc("Annehmen"):v.status==="active"?`<button class="btn primary" data-done="${id}">${early(id)&&nJa(v)<needDays(id,v)?"Früher abschließen":"Geschafft"}</button>`:`<span class="label">${v.ok===false?"Beendet":"Geschafft"} am ${fmtDate(v.end)}</span>${acc("Noch einmal")}`}</div>
+  ${nd>1?`<p class="muted small">Du hast diese Übung schon ${nd}-mal abgeschlossen. Alle Durchgänge stehen im Bautagebuch.</p>`:""}<button class="mini" data-ushare="${id}">Mit jemandem machen</button>`,e.cat)}
+/* Annehmen: Für welche Stütze? Vorgeschlagen wird die Stütze mit dem Wert der Übung, sonst eine aus demselben Bereich.
+   Die Wahl lässt sich abwählen (dann ohne Stütze) und später auf der Karte ändern (change=true). */
+let accSel=null;
+function fuerNote(uid,k){if(!k)return "Ohne Stütze setzt die Übung kein Bauteil. Sie steht trotzdem in deinem Bautagebuch.";const n=W[k].n;
+  if(lived(k))return `${n} ist schon gelebt. Die Übung zählt dort als weitere gelebte Übung und steht im Bautagebuch.`;
+  return `${FREIWERT.has(uid)?`Die Übung gilt dann für ${n}. `:""}Wenn du sie schaffst, bekommt ${n} das Bauteil „gelebt“.`}
+function acceptSheet(id,hint,from,change){const e=uv(U[id]),meta=META.includes(id);accSel=change?(S.ueb[id]&&S.ueb[id].fuer)||null:defFuer(id,hint);
+  const body=meta?`<p class="lead">Diese Übung ordnet dein Gerüst. Sie setzt kein Bauteil, aber sie steht danach in deinem Bautagebuch.</p>`
+   :S.kern.length?`<p class="lead">${FREIWERT.has(id)?"Welchen Wert nimmst du dir vor? Wähle eine deiner Stützen.":"Für welche deiner Stützen machst du sie?"}</p><div class="chips wrap" id="fsel" role="group" aria-label="Stütze wählen">${S.kern.map(k=>`<button class="chip" ${cc(W[k].cat)} data-fsel="${k}" aria-pressed="${accSel===k}">${dot(W[k].cat)}${W[k].n}</button>`).join("")}</div><p class="muted small" id="fselnote">${fuerNote(id,accSel)}</p>`
+   :`<p class="lead">Du hast noch keine Stützen. Du kannst die Übung trotzdem machen. Sie steht danach in deinem Bautagebuch.</p>`;
+  sheet(`<div class="label">${dot(e.cat)}${change?"Stütze ändern":`Übung annehmen · ${e.d===1?"heute":e.d+" Tage"}`}</div><h2>${e.t}</h2>${body}<div>${change?"":`<div class="accrem"><button class="chip" id="accrem" aria-pressed="false">Erinnerung im Kalender</button><span class="accat"><label class="label" for="acctime">um</label><input type="time" id="acctime" value="${S.settings.uebTime||"19:00"}"></span></div><p class="muted small">Freiwillig. ${e.d===1?"Ein Termin":"Ein Termin an jedem Tag der Übung"} in deinem eigenen Kalender. Mehr Möglichkeiten gibt es auf der Karte unter „Erinnern“.</p>`}</div><div class="row">${change?`<button class="btn primary" id="fuergo" data-id="${id}">Speichern</button>`:`<button class="btn primary" id="acceptgo" data-id="${id}" data-from="${from?1:""}">Annehmen</button>`}</div>`,e.cat)}
+/* Mehrtägige Übung vor ihrem Ende abschließen. Eine Übung, die ohne Frist weiterläuft, ist nie „früher“. */
+function early(id){const e=U[id],v=S.ueb[id];return !!(e&&v&&v.status==="active"&&!v.keep&&e.d>1&&dayIdx(v)+1<e.d)}
+/* Abschluss: Bei mehrtägigen Übungen stehen die Tage aus den Einträgen schon da; ohne Einträge fragt die App danach.
+   pre: Werte, mit denen das Blatt nach „Rückgängig“ wieder gefüllt wird (Stimmung, Notiz, Tage) */
+function doneSheet(id,pre){const e=uv(U[id]),v=S.ueb[id]||{},ea=early(id),multi=e.d>1||!!v.keep,n=nJa(v),need=needDays(id,v),hasLog=!!(v.log&&Object.keys(v.log).length);
+  const one=multi&&EINMAL.has(id);
+  let mx=one?1:multi?(ea||v.keep?dayIdx(v)+1:e.d):0;if(!v.keep&&!one)mx=Math.min(mx,e.d);if(!one)mx=Math.max(mx,n);
+  const num=mx>7,lab=k=>one?(k?"Ja, gemacht":"Noch nicht"):num?String(k):k===0?"Noch an keinem":k===1?"An einem Tag":`An ${k} Tagen`;
+  const UDN0=`Für das Bauteil zählt die Übung ab ${Tg(need)}.${GELEG.has(id)&&!EINMAL.has(id)?" Tage ohne Gelegenheit zählen nicht mit.":""} Die Zahl steht in deinem Bautagebuch.`;
+  const lead=one?"Hast du es gemacht?":hasLog?`Nach deinen Einträgen hast du die Übung an ${Tg(n)} gemacht. Du kannst die Zahl noch ändern.`:ea?`Die Übung ist auf ${e.d} Tage angelegt. An wie vielen Tagen hast du sie gemacht?`:`An wie vielen Tagen hast du die Übung gemacht?`;
+  const fw=v.fuer&&W[v.fuer]?W[v.fuer]:null;
+  const info=META.includes(id)?`<p class="muted small">Diese Übung ordnet dein Gerüst. Sie setzt kein Bauteil.</p>`:v.v===2&&!fw?`<p class="muted small">Die Übung läuft ohne Stütze. Sie setzt kein Bauteil und steht im Bautagebuch.</p>`:"";
+  sheet(`<div class="label">${ea&&n<need?"Früher abschließen":"Geschafft"}</div><h2>${e.t}</h2>${info}${multi?`<p class="lead">${lead}</p><div class="chips wrap${num?" num":""}" id="udays">${Array.from({length:mx+1},(_,k)=>`<button class="chip" data-udays="${k}" aria-pressed="false">${lab(k)}</button>`).join("")}</div>${num?`<p class="muted small">Zahl der Tage, an denen du sie gemacht hast.</p>`:""}<p class="muted small udnote" id="udaysnote">${one?"Ein einziges Mal genügt.":UDN0}</p>`:""}${v.checks&&Object.keys(v.checks).length?`<div class="dcurve"><span class="label">Deine Zwischenstationen</span>${spark(v)}</div>`:""}<p class="lead">Wie war es? Deine Antwort bleibt auf diesem Gerät.</p><div class="chips wrap" id="moods">${[["gut","Hat mir gutgetan"],["mix","Gemischt"],["nein","Eher nicht"]].map(([k,n])=>`<button class="chip" data-mood="${k}" aria-pressed="false">${n}</button>`).join("")}</div><label class="label" for="note">Was nimmst du mit?</label><textarea id="note" placeholder="Ein, zwei Sätze reichen."></textarea><div class="row"><button class="btn primary" id="savedone" data-id="${id}">Speichern</button></div>`,e.cat);
   /* Tage und Stimmung: Antippen wählt, erneutes Antippen der gewählten Antwort hebt die Wahl auf */
-  const ud=$("#udays"),UDN=$("#udaysnote")?$("#udaysnote").textContent:"";
-  const setDays=c=>{ud.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));
-    $("#udaysnote").textContent=!c?UDN:c.dataset.udays==="0"?"Dann setzt diese Übung noch kein Bauteil. Du kannst sie auch weiterlaufen lassen und später abschließen.":"Danke für die ehrliche Zahl. Sie steht in deinem Bautagebuch."};
+  const ud=$("#udays");
+  const setDays=c=>{ud.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));const k=c?+c.dataset.udays:null;
+    $("#udaysnote").textContent=k==null?(one?"Ein einziges Mal genügt.":UDN0):k===0?"Dann setzt diese Übung noch kein Bauteil. Du kannst sie auch weiterlaufen lassen und später abschließen."
+      :one?"Danke. Damit ist die Übung geschafft.":k<need?`Danke für die ehrliche Zahl. Für das Bauteil zählt die Übung ab ${Tg(need)}. Du kannst sie auch weiterlaufen lassen.`:"Danke für die ehrliche Zahl. Sie steht in deinem Bautagebuch."};
   if(ud)ud.addEventListener("click",ev=>{const c=ev.target.closest("[data-udays]");if(!c)return;setDays(c.getAttribute("aria-pressed")==="true"?null:c)});
   const setMood=c=>$("#moods").querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));
   $("#moods").addEventListener("click",ev=>{const c=ev.target.closest("[data-mood]");if(!c)return;setMood(c.getAttribute("aria-pressed")==="true"?null:c)});
+  if(ud&&hasLog&&!pre){const c=ud.querySelector(`[data-udays="${Math.min(n,mx)}"]`);if(c)setDays(c)}
   if(pre){if(ud&&pre.days!=null){const c=ud.querySelector(`[data-udays="${pre.days}"]`);if(c)setDays(c)}if(pre.mood)setMood($(`#moods [data-mood="${pre.mood}"]`));if(pre.note)$("#note").value=pre.note}}
 
 /* ---------- Vertiefen ---------- */
@@ -755,22 +864,29 @@ function trace(el,col){if(calm()||!el)return;const r=el.getBoundingClientRect(),
 const pad=n=>String(n).padStart(2,"0");
 const icsDate=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
 const esc2=s=>s.replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;");
-function remindPlan(id,mode){const e=U[id],v=S.ueb[id],start=new Date(),endDay=new Date(v.start+e.d*DAY);
-  let first=new Date(),count=1,hour=8;
-  if(mode==="morgen"){first.setDate(first.getDate()+1);hour=8}
-  if(mode==="taeglich"){hour=19;if(first.getHours()>=19)first.setDate(first.getDate()+1);count=Math.max(1,Math.ceil((endDay-first)/DAY))}
-  if(mode==="ende"){first=new Date(endDay.getTime()-DAY);hour=18;if(first<start)first=new Date()}
-  first.setHours(hour,0,0,0);const end=new Date(first.getTime()+15*60000);
+/* Uhrzeit: im Erinnern-Blatt wählbar (remindAt), sonst die Standard-Uhrzeit aus den Einstellungen (S.settings.uebTime). */
+let remindMode="taeglich",remindAt=null;
+const remTime=()=>remindAt||S.settings.uebTime||"19:00";
+function remindPlan(id,mode,tm){const e=U[id],v=S.ueb[id],start=new Date(),lastDay=new Date(v.keep?now()+13*DAY:v.start+(e.d-1)*DAY);lastDay.setHours(23,59,0,0);
+  const [h,mi]=(tm||remTime()).split(":").map(Number);let first=new Date(),count=1;const at=d=>{d.setHours(h||0,mi||0,0,0);return d};
+  if(mode==="morgen")first.setDate(first.getDate()+1);
+  /* Täglich bis einschließlich zum letzten Tag der Übung */
+  if(mode==="taeglich"){if(at(new Date())<=start)first.setDate(first.getDate()+1);const f0=new Date(first);f0.setHours(0,0,0,0);const l0=new Date(lastDay);l0.setHours(0,0,0,0);count=Math.max(1,Math.round((l0-f0)/DAY)+1)}
+  if(mode==="ende"){first=new Date(lastDay);if(at(new Date(first))<start)first=new Date();if(at(new Date(first))<start)first.setDate(first.getDate()+1)}
+  at(first);const end=new Date(first.getTime()+15*60000);
   return {e,first,end,count,text:`Wertegerüst: ${e.t}`,details:`${e.x}\n\n${e.s.map(s=>"• "+s).join("\n")}\n\n${APP_URL}#ueben`}}
 function icsFor(p){return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Wertegeruest//DE","CALSCALE:GREGORIAN","BEGIN:VEVENT",`UID:${p.e.id}-${Date.now()}@wertegeruest`,`DTSTAMP:${icsDate(new Date())}`,`DTSTART:${icsDate(p.first)}`,`DTEND:${icsDate(p.end)}`,p.count>1?`RRULE:FREQ=DAILY;COUNT=${p.count}`:"",`SUMMARY:${esc2(p.text)}`,`DESCRIPTION:${esc2(p.details)}`,`URL:${APP_URL}`,"BEGIN:VALARM","ACTION:DISPLAY",`DESCRIPTION:${esc2(p.text)}`,"TRIGGER:PT0M","END:VALARM","END:VEVENT","END:VCALENDAR"].filter(Boolean).join("\r\n")}
 function googleFor(p){const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;let u=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(p.text)}&dates=${icsDate(p.first)}/${icsDate(p.end)}&ctz=${encodeURIComponent(tz)}&details=${encodeURIComponent(p.details)}`;if(p.count>1)u+=`&recur=${encodeURIComponent("RRULE:FREQ=DAILY;COUNT="+p.count)}`;return u}
-let remindMode="taeglich";
-function remindSheet(id){const e=U[id];const p=remindPlan(id,remindMode);const when=p.first.toLocaleString("de-DE",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
-  sheet(`<div class="label">Erinnerung</div><h2>${e.t}</h2><p class="lead">Die Erinnerung landet in deinem eigenen Kalender. So meldet sich dein Handy zuverlässig, auch wenn die App geschlossen ist.</p>
-  <div class="chips">${[["morgen","Morgen früh"],["taeglich","Jeden Abend bis zum Ende"],["ende","Am letzten Tag"]].map(([k,n])=>`<button class="chip" data-rmode="${k}" data-id="${id}" aria-pressed="${remindMode===k}">${n}</button>`).join("")}</div>
-  <p class="label">${p.count>1?`${p.count}× täglich um 19 Uhr, zuerst ${when}`:when}</p>
+/* offer: einmal direkt nach dem Annehmen, freiwillig, mit „Ohne Erinnerung weiter“ und „Nicht mehr anbieten“ */
+function remindSheet(id,offer){if(S.ueb[id]&&S.ueb[id].keep&&remindMode==="ende")remindMode="taeglich";const e=uv(U[id]),tm=remTime(),p=remindPlan(id,remindMode,tm);const when=p.first.toLocaleString("de-DE",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
+  const o=offer?` data-offer="1"`:"";
+  sheet(`<div class="label">${offer?"Übung angenommen":"Erinnerung"}</div><h2>${offer?"Soll dich dein Kalender erinnern?":e.t}</h2><p class="lead">${offer?`Für „${e.t}“. Das ist freiwillig. `:""}Die Erinnerung landet in deinem eigenen Kalender. So meldet sich dein Handy zuverlässig, auch wenn die App geschlossen ist.</p>
+  <div class="chips wrap">${(S.ueb[id]&&S.ueb[id].keep?[["morgen","Morgen"],["taeglich","Jeden Tag, zwei Wochen lang"]]:[["morgen","Morgen"],["taeglich","Jeden Tag bis zum Ende"],["ende","Am letzten Tag"]]).map(([k,n])=>`<button class="chip" data-rmode="${k}" data-id="${id}"${o} aria-pressed="${remindMode===k}">${n}</button>`).join("")}</div>
+  <div class="rtime"><label class="label" for="utime">Uhrzeit</label><input type="time" id="utime" value="${tm}" data-id="${id}"${o}></div>
+  <p class="label rwhen">${p.count>1?`${p.count}× täglich um ${tm} Uhr, zuerst am ${p.first.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}`:`${when} Uhr`}</p>
   <div class="row"><button class="btn primary" data-ics="${id}">Apple- oder iPhone-Kalender</button><a class="btn" href="${googleFor(p)}" target="_blank" rel="noopener">Google Kalender</a></div>
-  <p class="muted small">Der erste Knopf lädt eine Kalenderdatei, die auch Outlook und andere Kalender öffnen.</p>`,e.cat)}
+  <p class="muted small">Der erste Knopf lädt eine Kalenderdatei, die auch Outlook und andere Kalender öffnen. Die Standard-Uhrzeit stellst du in den Einstellungen ein.</p>
+  ${offer?`<div class="row"><button class="btn" id="shx2">Ohne Erinnerung weiter</button><button class="linkbtn" id="nooffer">Nicht mehr anbieten</button></div>`:""}`,e.cat)}
 function downloadFile(name,text){const url=URL.createObjectURL(new Blob([text],{type:"text/calendar;charset=utf-8"}));const l=document.createElement("a");l.href=url;l.download=name;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);toast("Kalenderdatei geöffnet. Du musst den Termin nur noch hinzufügen.")}
 
 /* ---------- Navigation ---------- */
@@ -813,15 +929,11 @@ const SPECIAL={
  "12-10":{t:"Heute ist der Tag der Menschenrechte.",b:"kant",u:"grenzewuerde"}};
 function specialToday(){const n=new Date();return SPECIAL[`${pad(n.getMonth()+1)}-${pad(n.getDate())}`]||null}
 
-/* ---------- Zwischenstationen bei Übungen ---------- */
-const CHECKW=["zäh","geht so","okay","gut","toll"];
+/* ---------- Tage einer Übung; spark zeigt die Zwischenstationen (zäh bis toll) aus älteren Speicherständen ---------- */
 const dayIdx=v=>Math.floor((new Date().setHours(0,0,0,0)-new Date(v.start).setHours(0,0,0,0))/DAY);
 function spark(v){const c=v.checks||{},ks=Object.keys(c).map(Number).sort((a,b)=>a-b);if(!ks.length)return "";const w=120,h=28,mx=Math.max(...ks,1);
   const pts=ks.map(k=>[ks.length>1?4+(k/mx)*(w-8):w/2,h-4-(c[k]-1)/4*(h-8)]);
   return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-label="Verlauf deiner Zwischenstationen">${pts.length>1?`<polyline points="${pts.map(p=>p.join(",")).join(" ")}"/>`:""}${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="2.6"/>`).join("")}</svg>`}
-/* Die Stufen bleiben nach dem Eintragen sichtbar; die gewählte ist markiert und lässt sich durch erneutes Antippen löschen. */
-function checkRow(id){const e=U[id],v=S.ueb[id];if(!(e.d>=3))return "";const di=dayIdx(v),cur=v.checks&&v.checks[di]!=null?v.checks[di]:null;
-  return `<div class="check"><div class="sh"><span class="label">Tag ${Math.min(e.d,di+1)} von ${e.d} · ${cur!=null?"heute eingetragen":"Wie läuft's?"}</span>${spark(v)}</div><div class="cdots">${CHECKW.map((w,i)=>`<button class="cdot" data-check="${id}" data-val="${i+1}" aria-pressed="${cur===i+1}"><i></i><span>${w}</span></button>`).join("")}</div></div>`}
 
 /* ---------- Momente: selten und nüchtern ---------- */
 const MOMENTS=[
@@ -829,7 +941,7 @@ const MOMENTS=[
  {id:"leit1",t:"Der erste Leitsatz",x:"Die App fragt in ein paar Tagen nach, ob du noch dazu stehst.",ok:()=>S.kern.some(hasLeit)},
  {id:"probe1",t:"Die erste Entscheidung",x:"Deine Wahl zählt für die Werte, die sie stärkt.",ok:()=>nPrDone()>=1},
  {id:"kern5",t:"Fünf Stützen",x:"Dein Gerüst hat jetzt alle Stützen. Ab jetzt geht es darum, sie zu festigen.",ok:()=>S.kern.length>=5},
- {id:"ueb1",t:"Die erste Übung",x:"Deine Notiz dazu findest du im Bautagebuch.",ok:()=>Object.values(S.ueb).some(v=>v&&v.status==="done")},
+ {id:"ueb1",t:"Die erste Übung",x:"Deine Notiz dazu findest du im Bautagebuch.",ok:()=>Object.keys(S.ueb).some(uid=>runsOf(uid).some(r=>r.status==="done"))},
  {id:"fest1",t:"Zum ersten Mal bekräftigt",x:"Je öfter du einen Leitsatz bekräftigst, desto seltener fragt die App nach.",ok:()=>Object.values(S.leit).some(l=>l&&l.n>=1)},
  {id:"probe10",t:"Zehn Entscheidungen",x:"Im Bautagebuch zeigt sich jetzt deutlicher, welche Werte bei dir den Ausschlag geben.",ok:()=>nPrDone()>=10},
  {id:"steht",t:"Das Gerüst trägt",x:"Alle fünf Stützen stehen mindestens auf der dritten Stufe.",ok:()=>S.kern.length>=5&&S.kern.every(id=>level(id)>=3)},
@@ -949,10 +1061,20 @@ document.addEventListener("click",e=>{
   if(d.wert){if(t.closest(".opt"))return;valueSheet(d.wert);return}
   if(d.gowlist){const l=$("#wlist");if(l)l.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});return}
   if(d.tabgo){if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab=d.tabgo;S.cur=null;render();window.scrollTo(0,0);return}
-  if(d.ueb){uebSheet(d.ueb);return}
+  if(d.ueb){uebSheet(d.ueb,d.uhint);return}
   if(d.ushare){shareUeb(d.ushare);return}
-  /* Zwischenstation: dieselbe Stufe noch einmal antippen löscht den Eintrag von heute */
-  if(d.check){const v=S.ueb[d.check],k=dayIdx(v);v.checks=v.checks||{};const off=v.checks[k]===+d.val;if(off)delete v.checks[k];else v.checks[k]=+d.val;save();render();toast(off?"Der Eintrag von heute ist gelöscht.":"Eingetragen.");return}
+  /* Tageseintrag: Gemacht / Keine Gelegenheit / Diesmal nicht. Dieselbe Antwort noch einmal antippen löscht den Eintrag. */
+  if(d.log){const v=S.ueb[d.log],k=+d.day;if(!v||!LOGW.some(x=>x[0]===d.val))return;const sn=snap();v.log=v.log||{};const off=v.log[k]===d.val;if(off)delete v.log[k];else{v.log[k]=d.val;buzz("ok")}
+    save();render();undoToast(off?"Der Eintrag ist gelöscht.":`Eingetragen: ${LOGW.find(x=>x[0]===d.val)[1]}.`,!off,sn);return}
+  if(d.logback){logBack[d.logback]=!logBack[d.logback];render();const c=document.querySelector(`[data-run="${d.logback}"] .ulog`);if(c)c.scrollIntoView({block:"nearest"});return}
+  if(d.keep){const v=S.ueb[d.keep];if(!v)return;const sn=snap();v.keep=true;save();render();undoToast("Die Übung läuft weiter, ohne Frist.",false,sn);return}
+  if(d.fuer){acceptSheet(d.fuer,null,false,true);return}
+  if(d.fsel){accSel=accSel===d.fsel?null:d.fsel;document.querySelectorAll("#fsel [data-fsel]").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.fsel===accSel)));const n=$("#fselnote"),id=($("#acceptgo")||$("#fuergo")||{dataset:{}}).dataset.id;if(n&&id)n.textContent=fuerNote(id,accSel);return}
+  if(t.id==="fuergo"){const id=t.dataset.id,v=S.ueb[id];if(!v)return;const sn=snap();v.fuer=accSel;save();closeSheet();render();
+    undoToast(accSel?`Die Übung gilt jetzt für ${W[accSel].n}.`:"Die Übung läuft jetzt ohne Stütze.",false,sn,{reopen:()=>acceptSheet(id,null,false,true)});return}
+  if(d.uebrun){const id=d.uebrun,v=S.ueb[id];if(!v)return;if(t.closest(".next")){S.askDay=todayKey();if(t.dataset.doneask)v.doneAsk=1;persist()}if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab="ueben";S.cur=null;render();
+    const c=document.querySelector(`[data-run="${id}"]`);if(c){c.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});setTimeout(()=>trace(c,`var(--c-${U[id].cat})`),350)}return}
+  if(t.id==="nooffer"){const sn=snap();S.settings.uebOffer=false;persist();closeSheet();undoToast("Die App bietet keine Erinnerung mehr an. „Erinnern“ auf der Karte bleibt.",false,sn,{after:()=>{S.settings.uebOffer=true;persist()}});return}
   /* Schalter: nur der Zustand wechselt, ohne Neuzeichnen, damit der Knopf sichtbar hinübergleitet */
   if(d.setting){let on;if(d.setting==="hell"){S.settings.theme=S.settings.theme==="hell"?"dunkel":"hell";applyTheme();on=S.settings.theme==="hell"}else{S.settings[d.setting]=S.settings[d.setting]===false;on=S.settings[d.setting]}
     persist();t.setAttribute("aria-checked",on);if(d.setting==="vibration"&&IOS)armHaps();return}
@@ -974,18 +1096,33 @@ document.addEventListener("click",e=>{
   if(d.ufilter){const nf=uFilter===d.ufilter?"alle":d.ufilter;if(nf===uFilter)return;uFilter=nf;uMore=false;render();return}
   if(d.wfilter){const nf=wFilter===d.wfilter?"alle":d.wfilter;if(nf===wFilter)return;wFilter=nf;render();return}
   if(t.id==="umore"){uMore=true;render();return}
-  if(d.accept){if(activeUeb().length>=MAXACT)return;const sn=snap(),aid=d.accept,fromSheet=!!$("#layer").innerHTML;S.ueb[d.accept]={status:"active",start:now()};save();if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab="ueben";render();{const c=document.querySelector(`[data-done="${d.accept}"]`);const card=c&&c.closest(".exp");if(card){card.scrollIntoView({block:"center"});trace(card,`var(--c-${U[d.accept].cat})`)}}undoToast("Übung angenommen.",false,sn,fromSheet?{reopen:()=>uebSheet(aid)}:null);return}
+  if(d.accept){if(activeUeb().length>=MAXACT)return;acceptSheet(d.accept,d.uhint,!!$("#layer").innerHTML);return}
+  /* Annehmen: Ein früherer Durchgang wandert unverändert in runs; der Plan wird als Vorschlag übernommen. */
+  if(t.id==="accrem"){t.setAttribute("aria-pressed",String(t.getAttribute("aria-pressed")!=="true"));return}
+  if(t.id==="acceptgo"){const aid=t.dataset.id;if(!U[aid]||activeUeb().length>=MAXACT)return;const sn=snap(),prev=S.ueb[aid],fromSheet=!!t.dataset.from;
+    let runs=[];if(prev){const r=JSON.parse(JSON.stringify(prev));runs=Array.isArray(r.runs)?r.runs:[];delete r.runs;delete r.ask;runs.push(r)}
+    S.ueb[aid]={v:2,status:"active",start:now(),fuer:META.includes(aid)?null:accSel,plan:prev&&prev.plan||""};if(runs.length)S.ueb[aid].runs=runs;buzz("ok");
+    {const rb0=$("#accrem");if(rb0)S.uebRem=rb0.getAttribute("aria-pressed")==="true"}
+    save();anim=false;tab="ueben";S.cur=null;render();const card=document.querySelector(`[data-run="${aid}"]`);if(card)card.scrollIntoView({block:"center"});
+    /* Erinnerung direkt aus dem Annehmen-Blatt: lädt die Kalenderdatei im selben Tippen; die Wahl wird für das nächste Mal gemerkt */
+    const rt=$("#acctime"),rem=!!S.uebRem&&!!rt;
+    if(rem){const tm=(rt&&rt.value)||S.settings.uebTime||"19:00";remindMode="taeglich";S.ueb[aid].remind="taeglich";persist();downloadFile(`wertegeruest-${aid}.ics`,icsFor(remindPlan(aid,"taeglich",tm)))}
+    $("#layer").innerHTML="";if(card)setTimeout(()=>trace(card,`var(--c-${U[aid].cat})`),200);
+    undoToast("Übung angenommen.",false,sn,fromSheet?{reopen:()=>uebSheet(aid)}:null);return}
   if(t.id==="uother"){S.uskip=(S.uskip||0)+1;persist();render();return}
-  if(d.drop){const sn=snap();S.ueb[d.drop]={status:"dropped",start:S.ueb[d.drop].start,end:now()};save();render();undoToast("Die Übung ist abgebrochen.",false,sn);return}
-  if(d.remind){remindSheet(d.remind);return}
-  if(d.rmode){remindMode=d.rmode;remindSheet(d.id);return}
-  if(d.ics){const p=remindPlan(d.ics,remindMode);downloadFile(`wertegeruest-${d.ics}.ics`,icsFor(p));S.ueb[d.ics].remind=remindMode;persist();return}
+  if(d.drop){const sn=snap();Object.assign(S.ueb[d.drop],{status:"dropped",end:now()});delete S.ueb[d.drop].ask;save();render();undoToast("Die Übung ist abgebrochen.",false,sn);return}
+  if(d.remind){remindAt=null;remindSheet(d.remind);return}
+  if(d.rmode){remindMode=d.rmode;remindSheet(d.id,!!d.offer);return}
+  if(d.ics){const p=remindPlan(d.ics,remindMode,remTime());downloadFile(`wertegeruest-${d.ics}.ics`,icsFor(p));S.ueb[d.ics].remind=remindMode;persist();return}
   if(d.done){doneSheet(d.done);return}
   if(t.id==="savedone"){const id=t.dataset.id,m=document.querySelector('#moods [aria-pressed="true"]'),ud=$("#udays");let days;
     if(ud){const c=ud.querySelector('[aria-pressed="true"]');if(!c){buzz("err");shake(ud);toast("Wähl zuerst, an wie vielen Tagen du die Übung gemacht hast.");return}days=+c.dataset.udays}
-    const sn=snap(),pre={mood:m?m.dataset.mood:null,note:$("#note").value.trim(),days};
-    S.ueb[id]=Object.assign(S.ueb[id]||{start:now()},{status:"done",end:now(),mood:pre.mood,note:pre.note});if(days!=null)S.ueb[id].days=days;else delete S.ueb[id].days;buzz("ok");closeSheet();toBuild();
-    undoToast(days===0?"Gespeichert. Die Notiz steht im Bautagebuch.":"Übung geschafft.",true,sn,{reopen:()=>doneSheet(id,pre)});return}
+    const sn=snap(),pre={mood:m?m.dataset.mood:null,note:$("#note").value.trim(),days},e=U[id],r=S.ueb[id]=S.ueb[id]||{start:now()};
+    Object.assign(r,{status:"done",end:now(),mood:pre.mood,note:pre.note});if(days!=null)r.days=days;else delete r.days;delete r.ask;
+    if(r.v!==2){r.v=2;if(!("fuer" in r))r.fuer=defFuer(id)}if(typeof r.plan==="string")r.plan=r.plan.trim();
+    /* Gelebt: eintägig mit dem Abschluss, mehrtägig ab rund 70 % der Tage, bei EINMAL ab einem Tag */
+    r.ok=!META.includes(id)&&(days==null?true:days>=needDays(id,r));buzz("ok");closeSheet();toBuild();
+    undoToast(r.ok?"Übung geschafft.":"Gespeichert. Die Notiz steht im Bautagebuch.",true,sn,{reopen:()=>doneSheet(id,pre)});return}
   if(t.id==="reset"){confirmReset=true;render();return}
   if(t.id==="resetno"){confirmReset=false;render();return}
   if(t.id==="resetyes"){const sn=snap();S={read:{},saved:{},kern:[],leit:{},proben:{},ueb:{},filter:"alle",history:[],cur:null,settings:S.settings,moments:{},welcomed:S.welcomed,fresh:[],lv:{},owMig:1};persist();confirmReset=false;render();undoToast("Alles zurückgesetzt.",false,sn);return}
@@ -993,7 +1130,12 @@ document.addEventListener("click",e=>{
 /* Nach einem Bauschritt: zum Gerüst, damit man das neue Teil einrasten sieht */
 function toBuild(){save();if(S.fresh.length){anim=false;tab="geruest";S.cur=null;render();window.scrollTo({top:0,behavior:"auto"})}else render()}
 let lastSum=0;document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("summary"))lastSum=Date.now()},true);
-document.addEventListener("change",e=>{if(e.target.id==="rtime"){S.settings.remindTime=e.target.value||"08:00";persist();const g=$("#dailyg");if(g)g.href=dailyGoogle()}});
+document.addEventListener("change",e=>{if(e.target.id==="rtime"){S.settings.remindTime=e.target.value||"08:00";persist();const g=$("#dailyg");if(g)g.href=dailyGoogle()}
+  if(e.target.id==="utimedef"){S.settings.uebTime=e.target.value||"19:00";persist()}
+  if(e.target.id==="utime"&&e.target.value){remindAt=e.target.value;remindSheet(e.target.dataset.id,!!e.target.dataset.offer)}});
+/* Plan auf der laufenden Karte: wird beim Tippen gespeichert; ein leiser Hinweis bestätigt es. */
+let planTimer=0;document.addEventListener("input",e=>{const id=e.target.dataset&&e.target.dataset.plan;if(!id||!S.ueb[id])return;S.ueb[id].plan=e.target.value;persist();
+  const st=e.target.parentNode.querySelector(".psaved");clearTimeout(planTimer);if(st)st.textContent="";planTimer=setTimeout(()=>{if(st&&st.isConnected)st.textContent="Gespeichert. Beim Abschluss steht es im Bautagebuch."},700)});
 document.addEventListener("toggle",e=>{const t=e.target;const map={jfold:"jOpen",aboutfold:"aboutOpen",uebfold:"uebOpen",prfold:"prOpen",setfold:"setOpen",wqfold:"wqOpen"};if(map[t.id]){S[map[t.id]]=t.open;persist()}if(t.classList&&t.classList.contains("fold")&&t.open&&Date.now()-lastSum<600){const b=t.querySelector(".fbody");if(b&&!calm())b.animate([{opacity:0,transform:"translateY(-4px)"},{opacity:1,transform:"none"}],{duration:380,easing:"cubic-bezier(.2,.8,.2,1)"})}},true);
 document.addEventListener("keydown",e=>{if(e.target.closest&&e.target.closest("textarea,input:not(.hap)"))return;
   if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.pil){e.preventDefault();pillarTap(e.target.dataset.pil);return}

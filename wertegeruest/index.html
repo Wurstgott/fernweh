@@ -271,6 +271,41 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .spark polyline{fill:none;stroke:var(--lit);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .spark circle{fill:var(--lit)}
 .dcurve{margin:12px 0}
+/* Begleitung laufender Übungen: Plan, Stütze, Tageseintrag mit Tagesmarken. Matt und flach, ohne Zählerdruck. */
+.uplan{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+.uplan textarea+.psaved{margin-top:-2px}
+.uplan .pl{font-size:14.5px;line-height:1.4;color:var(--muted)}
+.uplan textarea{min-height:68px;font-size:16px}
+.psaved{font-size:12.5px;color:var(--faint);min-height:1.3em;line-height:1.3}
+.exp .ufor{align-self:flex-start;margin-top:0;font-size:13.5px}
+#fsel,.panel .chips.wrap{margin-top:10px}
+.exp p.ufor{margin:4px 0 0}
+.ulog{margin-top:14px;padding-top:12px;border-top:1px solid var(--hair)}
+.uplan+.ulog,.uplan+.prog{margin-top:4px}
+.ulog .sh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.ulog .sh .linkbtn{font-size:13.5px;min-height:32px}
+.chips.lchips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.chips.lchips .chip{min-height:46px;justify-content:center;text-align:center;white-space:normal;line-height:1.2;border-radius:10px;padding:6px 4px;hyphens:manual;overflow-wrap:anywhere}
+.marks{display:flex;gap:4px;margin:10px 0 4px}
+.marks i{flex:1;max-width:24px;height:6px;border-radius:2px;border:1px solid var(--line);background:transparent}
+.marks i.ja{background:var(--c,var(--lit));border-color:transparent}
+.marks i.keine{background:var(--s2);border-color:var(--line)}
+.marks i.nein{border-style:solid;border-color:var(--muted)}
+.marks i.leer{border-style:dashed;border-color:var(--ghost)}
+.marks i.fut{opacity:.45}
+.marks i.now{box-shadow:0 4px 0 -2px var(--muted)}
+.ustand{margin:6px 0 0}
+.urow2{margin-top:6px;gap:4px 18px}
+.chips.num .chip{min-width:44px;justify-content:center;padding-inline:10px}
+.accrem{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:18px}
+.accat{display:inline-flex;align-items:center;gap:8px}
+.accat input{width:auto;min-width:110px;padding:8px 10px}
+.ulog.done1{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.exp.run .prog{margin-top:12px}
+.rtime{display:flex;align-items:center;gap:12px;margin-top:14px}
+.rtime input{width:auto;min-width:120px}
+.rwhen{margin-top:12px}
+.jr .jplan{border-left:2px solid var(--hair);padding-left:10px;color:var(--muted);font-size:15px}
 
 /* ---------- Werte ---------- */
 .slots{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
@@ -473,7 +508,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 .chip,.tag{overflow:visible}
 .linkbtn::after{width:calc(100% + 8px)}
 .fundlbl{display:block;width:max-content;margin-inline:auto;padding:4px 8px}
-#topline::after{content:none}
+.pill#topline::after{content:none}
 /* Einheitlicher, dezenter Druckzustand: eine leichte Fläche, sofort beim Drücken, langsam beim Loslassen */
 :is(.tabs button,.lg,.leit,.fr,.fopt,.setrow:not(.static),.fold summary,.vchip,.li,.go,.slot,.chip,.tag,.note,.draw,.next,.findcard,.opt:not([aria-disabled])){transition-property:background-color,border-color,color,opacity;transition-duration:.25s}
 :is(.tabs button,.lg,.leit,.fr,.fopt,.setrow:not(.static),.fold summary,.vchip,.li,.go,.slot,.chip,.tag,.note,.draw,.findcard,.opt:not([aria-disabled])):active{background-color:var(--s2);transition-duration:0s}
@@ -608,6 +643,9 @@ input.hap{-webkit-appearance:none;appearance:none;position:absolute;inset:0;widt
 
 /* Freier Platz: Vorschläge sind Aktionen, nicht abgewählte Ergebnisse, darum voll sichtbar */
 .fr[data-kern]{opacity:1}
+
+.exp.run .meta .nowrap{white-space:nowrap;flex:none}
+.exp.run .meta>span:first-child{min-width:0}
 
 </style>
 
@@ -1445,33 +1483,47 @@ const PROBEN=[
  h:"Wer wenig Geld hat, kann nicht alles nach seinen Werten kaufen, und das ist kein Versagen. Weitherzigkeit zeigt sich dort, wo du einen Spielraum hast. Gebraucht kaufen ist oft der Weg, der Geldbeutel und Gewissen zugleich schont.",f:"Bei welchen Dingen ist dir wichtig, wie sie hergestellt wurden, und bei welchen nicht?"}
 ];
 
-/* Übungen: kleine Schritte, mit denen sich Werte im Alltag verankern */
+/* Übungen: kleine Schritte, mit denen sich Werte im Alltag verankern.
+   d = Dauer in Tagen, w = Wert, p = Aufforderung für das freiwillige Ergebnisfeld auf der laufenden Karte.
+   Mehrtägige Übungen gelten an etwa 5 von 7 Tagen als geschafft. Neue Übungen stehen hinten (IDs nie ändern). */
 const UEBUNGEN=[
-{id:"werteinventur",cat:"selbst",d:1,w:"echtheit",t:"Deine fünf Stützen",x:"Wähle aus allen Werten der App bis zu fünf, die dich tragen sollen. Nicht die, die gut klingen, sondern die, nach denen du wirklich leben willst.",s:["Geh unter „Werte“ die Liste einmal in Ruhe durch","Markiere alles, was dich anspricht","Streich so lange, bis höchstens fünf übrig sind","Frag bei jedem: Woran würde man das bei mir merken?"]},
-{id:"leitsatz",cat:"selbst",d:1,w:"integritaet",t:"Ein Leitsatz",x:"Formuliere für einen deiner Stützwerte einen Satz, der mit „Ich stehe dafür ein, dass …“ beginnt. Ein guter Leitsatz ist konkret und gilt auch, wenn es unbequem wird.",s:["Wähle einen Stützwert","Schreib den Satz so konkret wie möglich","Denk an eine Lage, in der er dich etwas kosten würde","Trag ihn unter „Werte“ beim Wert ein"]},
-{id:"zornnotiz",cat:"selbst",d:1,w:"gewaltfreiheit",t:"Die Zorn-Notiz",x:"Gib einem Zorn, der dich beschäftigt, einen begrenzten Raum. Schreib fünfzehn Minuten, ohne dich zu erklären oder zu rechtfertigen. Danach leg das Blatt weg und geh nach draußen. Die Satzanfänge unten helfen dir beim Schreiben.",s:["Ich bin zornig, weil …","Dieser Zorn zeigt mir, wie wichtig mir … ist","Ich möchte nicht, dass dieser Zorn mich dazu bringt, …","Weglegen, spazieren gehen, die Gegenwart wahrnehmen"]},
-{id:"wenndann",cat:"selbst",d:7,w:"disziplin",t:"Wenn-dann für den Ernstfall",x:"Werte geraten im Moment der Entscheidung leicht unter die Räder. Ein vorab gefasster Plan hilft, dann nach ihnen zu handeln.",s:["Wähle einen Wert und eine Lage, in der er oft unter Druck gerät","Formuliere: Wenn …, dann …","Sag den Plan dreimal laut","Notiere jeden Tag, ob die Lage eintrat und was du getan hast"]},
-{id:"werttag",cat:"selbst",d:1,w:"folgerichtigkeit",t:"Ein Tag, ein Wert",x:"Nimm dir für einen Tag einen einzigen Wert vor und achte darauf, wo er im Alltag vorkommt.",s:["Wähle morgens einen Wert","Leg dir eine kleine Erinnerung, etwa als Handy-Hintergrund","Achte auf drei Momente, in denen er gefragt war","Notiere abends: Wo habe ich nach ihm gehandelt, wo nicht?"]},
-{id:"wertequadrat",cat:"selbst",d:1,w:"differenzierung",t:"Dein Wertequadrat",x:"Nimm eine Zwickmühle, in der du hin- und hergerissen bist, und ordne sie: zwei Werte, die beide etwas Richtiges wollen, und ihr jeweiliges Zuviel.",s:["Schreib die beiden Werte nebeneinander","Schreib unter jeden, wie er übertrieben aussähe","Frag: Zu welchem Zuviel neige ich?","Such eine Handlung, die beide Werte ernst nimmt"]},
-{id:"neinsagen",cat:"selbst",d:7,w:"selbstachtung",t:"Freundlich Nein sagen",x:"Wer nie Nein sagt, dessen Ja verliert an Wert. Übe eine Woche lang, kleine Bitten freundlich und ohne lange Begründung abzulehnen, wenn sie nicht passen.",s:["Achte auf Momente, in denen du automatisch Ja sagst","Gönn dir eine Bedenkzeit: Ich sag dir morgen Bescheid","Sag Nein in einem Satz, ohne Ausreden","Notiere, wie die anderen reagiert haben"]},
-{id:"zuhoeren",cat:"naehe",d:7,w:"zuwendung",t:"Zehn Minuten ganz Ohr",x:"Hör einem Menschen jeden Tag zehn Minuten lang zu, ohne Ratschläge zu geben und ohne aufs Handy zu schauen.",s:["Wähle jeden Tag eine Person","Handy umdrehen oder weglegen","Nur nachfragen, nicht bewerten","Zum Schluss zusammenfassen, was du verstanden hast"]},
-{id:"ehrlichesfeedback",cat:"naehe",d:1,w:"wahrhaftigkeit",t:"Ehrlich und freundlich",x:"Gib einem Menschen, der dir wichtig ist, einen ehrlichen Hinweis, den du bisher zurückgehalten hast, so freundlich wie möglich.",s:["Wähle einen Hinweis, der dem anderen wirklich nützt","Frag vorher: Darf ich dir etwas sagen?","Sprich über ein Verhalten, nicht über die Person","Frag hinterher, wie es bei ihm ankam"]},
-{id:"entschuldigung",cat:"naehe",d:1,w:"verantwortlichkeit",t:"Eine vollständige Entschuldigung",x:"Gibt es jemanden, bei dem du dich nie richtig entschuldigt hast? Hol es nach, mit Eingeständnis und Angebot zur Wiedergutmachung.",s:["Benenne genau, was du getan hast","Sag: Das war mein Fehler","Verzichte auf Rechtfertigungen","Frag: Kann ich etwas wiedergutmachen?"]},
-{id:"vergebungsbrief",cat:"naehe",d:1,w:"vergebung",t:"Ein Brief, den du nicht abschickst",x:"Schreib einem Menschen, der dich gekränkt hat, einen Brief. Du schickst ihn nicht ab. Es geht darum, die Kränkung zu ordnen, nicht um Versöhnung.",s:["Beschreib, was passiert ist und was es mit dir gemacht hat","Schreib, was du dir gewünscht hättest","Überleg, ob und was du loslassen möchtest","Bewahr den Brief auf oder vernichte ihn bewusst"]},
-{id:"widerspruch",cat:"naehe",d:7,w:"loyalitaet",t:"Freundlich widersprechen",x:"Sag eine Woche lang einmal am Tag „Da sehe ich es anders“, wenn es stimmt, ruhig und mit einem Grund.",s:["Achte auf Momente, in denen du nur aus Höflichkeit nickst","Sag deinen Satz und einen Grund","Hör dir die Antwort wirklich an","Notiere, ob das Gespräch besser oder schlechter wurde"]},
-{id:"grenzewuerde",cat:"miteinander",d:7,w:"wuerde",t:"Grenze ohne Herabsetzung",x:"Wenn jemand abfällig über andere spricht, setz eine klare Grenze, ohne ihn selbst herabzusetzen. Übe eine Woche lang, solche Momente zu bemerken und zu antworten.",s:["Leg dir einen Satz zurecht, etwa: Ich sehe das anders, und so möchte ich nicht über Menschen reden","Sprich über die Aussage, nicht über die Person","Bleib ruhig, auch wenn der andere lauter wird","Notiere, was du gesagt hast und wie es ankam"]},
-{id:"zivilplan",cat:"miteinander",d:1,w:"zivilcourage",t:"Dein Plan fürs Eingreifen",x:"Wer vorher weiß, was er tun würde, handelt im Ernstfall eher. Mach dir einen persönlichen Plan, ohne dich selbst in Gefahr zu bringen.",s:["Hinschauen und die Lage einschätzen","Andere gezielt ansprechen: Sie mit der Brille, helfen Sie mir","Hilfe holen: 110 oder Personal","Die betroffene Person ansprechen, nicht den Täter angreifen"]},
-{id:"namen",cat:"miteinander",d:1,w:"erinnerung",t:"Ein Name, ein Leben",x:"Lies die Geschichte eines einzelnen Menschen, der verfolgt oder ermordet wurde. Nicht als Zahl, sondern als Mensch mit Hoffnungen, Humor und Liebe.",s:["Such dir einen Stolperstein in deiner Nähe oder eine Biografie bei einer Gedenkstätte","Lies, was über diesen Menschen bekannt ist","Notiere eine Sache, die dich berührt hat","Erzähl jemandem von ihm oder ihr"]},
-{id:"stolperstein",cat:"miteinander",d:7,w:"erinnerung",t:"Stolpersteine pflegen",x:"Stolpersteine erinnern vor Wohnhäusern an Menschen, die im Nationalsozialismus verfolgt wurden. Mit der Zeit werden sie dunkel. Polieren ist eine stille Geste der Erinnerung.",s:["Finde Stolpersteine in deiner Nähe, etwa über eine Online-Karte","Nimm ein weiches Tuch und etwas Messingpflege mit","Polier den Stein und lies den Namen laut","Halte einen Moment inne"]},
-{id:"begegnung",cat:"miteinander",d:14,w:"toleranz",t:"Eine echte Begegnung",x:"Führe in den nächsten zwei Wochen ein längeres Gespräch mit jemandem aus einer Lebenswelt, die dir fremd ist, auf Augenhöhe und mit echtem Interesse.",s:["Überleg, über welche Gruppe du vor allem Meinungen, aber kaum Kontakte hast","Such eine Gelegenheit: Verein, Nachbarschaft, Arbeit","Frag nach Geschichten, nicht nach Positionen","Notiere, was dich überrascht hat"]},
-{id:"gegenseite",cat:"urteil",d:1,w:"fairness",t:"Die Gegenseite stark machen",x:"Nimm eine Frage, bei der du eine feste Meinung hast, und formuliere das stärkste Argument der Gegenseite, so gut, dass jemand von dort sagen würde: Ja, genau so meine ich das.",s:["Wähle ein Thema, das dich bewegt","Schreib das beste Gegenargument in eigenen Worten","Frag dich, was daran stimmt","Prüfe, ob sich deine Meinung verschoben oder gefestigt hat"]},
-{id:"querlesen",cat:"urteil",d:7,w:"muendigkeit",t:"Querlesen üben",x:"Prüfe eine Woche lang jeden Tag eine Nachricht oder einen Beitrag wie ein Profi: nicht die Seite lesen, sondern nachschauen, wer dahintersteckt.",s:["Neuen Tab öffnen und nach der Quelle suchen","Prüfen, was unabhängige Seiten über sie sagen","Die Kernaussage bei einer zweiten Quelle suchen","Notieren, was du gefunden hast"]},
-{id:"kipause",cat:"urteil",d:3,w:"muendigkeit",t:"Selbst zu Ende denken",x:"Triff drei Tage lang jede wichtigere Entscheidung zuerst ohne KI und Suchmaschine. Danach darfst du nachschauen und vergleichen.",s:["Schreib deine eigene Antwort oder Entscheidung auf","Schau danach, was KI oder Suche sagen","Vergleiche: Wo lagst du richtig, wo hast du etwas übersehen?","Notiere, wie sich das eigene Nachdenken angefühlt hat"]},
-{id:"genugwoche",cat:"welt",d:7,w:"genuegsamkeit",t:"Eine Woche Genug",x:"Kauf eine Woche lang nichts Neues außer Lebensmitteln und Dingen, die wirklich nötig sind. Schreib auf, was du kaufen wolltest.",s:["Leg eine Liste für Kaufwünsche an","Schreib jeden Wunsch auf, statt ihn zu erfüllen","Prüfe nach der Woche, was davon noch wichtig ist","Leihe oder tausche, wo es geht"]},
-{id:"reparatur",cat:"welt",d:14,w:"sorgfalt",t:"Reparieren statt ersetzen",x:"Such dir einen kaputten Gegenstand und bring ihn in den nächsten zwei Wochen wieder zum Laufen, selbst oder mit Hilfe.",s:["Wähle etwas, das du sonst ersetzen würdest","Such eine Anleitung oder ein Reparaturcafé","Repariere es selbst oder lass es dir zeigen","Notiere, was du gelernt hast"]},
-{id:"naturzeit",cat:"welt",d:7,w:"naturverbundenheit",t:"Zehn Minuten Lebendiges",x:"Beobachte eine Woche lang jeden Tag zehn Minuten lang ein Lebewesen: einen Baum, Vögel, Insekten oder eine Pflanze.",s:["Such dir jeden Tag einen Platz draußen","Handy in die Tasche","Beobachte ein Lebewesen genau","Notiere eine Sache, die du vorher nicht bemerkt hast"]},
-{id:"fussabdruck",cat:"welt",d:1,w:"folgerichtigkeit",t:"Dein größter Hebel",x:"Finde heraus, wo du am meisten bewirken kannst, statt dich in Kleinigkeiten zu verlieren. Ein guter Weg ist der CO2-Rechner des Umweltbundesamts.",s:["Rechne deinen Fußabdruck grob aus","Finde die drei größten Posten","Wähle einen davon, den du wirklich verändern kannst","Mach einen konkreten Plan für die nächsten drei Monate"]},
-{id:"brief2060",cat:"welt",d:1,w:"zukunftsverantwortung",t:"Ein Brief ins Jahr 2060",x:"Schreib einem Kind, das im Jahr 2060 erwachsen ist, einen Brief: Was hast du getan, damit es gut leben kann? Was hättest du gern getan?",s:["Stell dir das Kind konkret vor","Schreib ehrlich, auch über Versäumnisse","Schreib, was du ihm wünschst","Leite daraus einen Schritt für dieses Jahr ab"]}
+{id:"werteinventur",cat:"selbst",d:1,w:"echtheit",t:"Passen deine Stützen noch?",x:"Diese Übung ist eine Reflexion. Sie ordnet dein Gerüst und setzt selbst kein Bauteil. Am meisten bringt sie, wenn du dein Gerüst schon ein paar Wochen hast. Frag bei jeder Stütze, ob sie dich wirklich trägt oder nur gut klingt.",s:["Lies deine Stützen unter „Werte“. Hast du noch keine, geh die Liste in Ruhe durch und streich, bis höchstens fünf übrig sind.","Schreib zu jeder Stütze einen Moment aus den letzten Wochen, an dem man sie bei dir gemerkt hätte","Findest du bei einer keinen Moment, frag dich, ob sie wirklich zu dir gehört","Tausch höchstens eine aus, oder lass alles, wie es ist"],p:"Woran hat man deine Stützen zuletzt bei dir gemerkt?"},
+{id:"leitsatz",cat:"selbst",d:1,w:"integritaet",t:"Ein Leitsatz",x:"Formuliere für eine deiner Stützen einen Satz, der mit „Ich stehe dafür ein, dass …“ beginnt. Ein guter Leitsatz ist konkret und gilt auch, wenn es unbequem wird. Die Übung selbst setzt kein Bauteil. Der Leitsatz zählt als Bauteil, sobald du ihn unter „Werte“ beim Wert einträgst.",s:["Wähle eine Stütze","Schreib den Satz so konkret wie möglich","Denk an eine Lage, in der er dich etwas kosten würde","Lies ihn noch einmal: Verlangt er, dass du dich selbst aufgibst? Dann schreib dazu, wo seine Grenze liegt.","Trag ihn unter „Werte“ beim Wert ein"],p:"Dein Leitsatz: Ich stehe dafür ein, dass …"},
+{id:"zornnotiz",cat:"selbst",d:1,w:"gewaltfreiheit",t:"Die Zorn-Notiz",x:"Gib einem Zorn, der dich beschäftigt, einen begrenzten Raum. Schreib auf Papier, mindestens fünf und höchstens fünfzehn Minuten, ohne dich zu erklären oder zu rechtfertigen. Die Satzanfänge unten helfen dir. Danach legst du das Blatt weg.",s:["Ich bin zornig, weil …","Dieser Zorn zeigt mir, wie wichtig mir … ist","Ich möchte nicht, dass dieser Zorn mich dazu bringt, …","Wenn es um einen Menschen geht: Was ich an seinem Verhalten ablehne, ist …, und trotzdem ist er oder sie …","Leg das Blatt weg und mach etwas anderes: kurz rausgehen, ans Fenster, Musik, ein Glas Wasser"],p:"Wenn du magst: Mein Zorn zeigt mir, dass mir … wichtig ist."},
+{id:"wenndann",cat:"selbst",d:7,w:"disziplin",t:"Wenn-dann für den schwierigen Moment",x:"Werte geraten im Moment der Entscheidung leicht unter die Räder. Ein vorab gefasster Plan hilft, dann nach ihnen zu handeln. Zum Beispiel: Wenn im Chat über jemanden gelästert wird, dann schreibe ich „Lass mal“. Kommt die Lage an einem Tag nicht vor, ist das keine Lücke.",s:["Wähle einen Wert und eine Lage, in der er oft unter Druck gerät","Schreib den Plan auf: Wenn …, dann …","Überleg, was dich im Moment davon abhalten könnte, und schreib dafür einen zweiten Satz: Wenn …, dann …","Stell dir die Lage zweimal genau vor und sag dir den Plan innerlich","Halte abends kurz fest, ob die Lage kam und was du getan hast"],p:"Dein Wenn-dann-Satz: Wenn …, dann …"},
+{id:"werttag",cat:"selbst",d:1,w:"folgerichtigkeit",t:"Ein Tag, ein Wert",x:"Nimm dir für einen Tag einen einzigen Wert vor und achte darauf, wo er im Alltag vorkommt. Das kann eine deiner Stützen sein oder ein Wert, der dir gerade fehlt.",s:["Wähle zu Beginn deines Tages einen Wert","Leg dir eine kleine Erinnerung, die nur du verstehst, etwa einen Zettel in der Tasche","Achte auf drei Momente, in denen er gefragt war","Halte am Ende des Tages fest: Wo hast du nach ihm gehandelt, wo nicht?"],p:"Dein Wert für heute, und ein Moment, in dem er gefragt war"},
+{id:"wertequadrat",cat:"selbst",d:1,w:"differenzierung",t:"Dein Wertequadrat",x:"Denk an eine Lage, in der du hin- und hergerissen bist. Welche zwei Werte ziehen da an dir? Beide wollen etwas Richtiges, und beide können übertrieben werden. Ein Beispiel: Loyalität und Kritikbereitschaft. Zu viel Loyalität wird blinde Gefolgschaft, zu viel Kritik wird Nörgelei. Unter „Werte“ findest du zu jedem Wert ein fertiges Quadrat.",s:["Schreib die beiden Werte nebeneinander","Schreib unter jeden, wie er übertrieben aussähe","Frag dich: Zu welchem Zuviel neige ich?","Such eine Handlung, die beide Werte ernst nimmt"],p:"Deine zwei Werte, ihr Zuviel und eine Handlung für beide"},
+{id:"neinsagen",cat:"selbst",d:7,w:"selbstachtung",t:"Freundlich Nein sagen",x:"Ein Nein schützt, was dir wichtig ist. Übe eine Woche lang, kleine Bitten freundlich und ohne lange Begründung abzulehnen, wenn sie nicht passen. Ein Ja, das du bewusst gibst, zählt genauso. Es geht ums Wählen, nicht ums Neinsagen um jeden Preis. Wo ein Nein kaum möglich ist, etwa weil bei der Arbeit Leute fehlen, liegt das nicht an dir. Das gehört dann in ein Gespräch mit der Leitung.",s:["Achte auf Momente, in denen du automatisch Ja sagst","Gönn dir Bedenkzeit: Ich sag dir morgen Bescheid.","Sag Nein in einem Satz, ohne Ausreden. Gegenüber Erwachsenen oder Vorgesetzten hilft eine Alternative: Heute schaffe ich das nicht. Morgen kann ich.","Halte fest, wie die anderen reagiert haben. Wenn du dich nach einem Nein schlecht fühlst, ist das normal und kein Zeichen, dass es falsch war."],p:"Dein Satz für ein freundliches Nein"},
+{id:"zuhoeren",cat:"naehe",d:7,w:"zuwendung",t:"Zehn Minuten ganz Ohr",x:"Hör an etwa fünf von sieben Tagen einem Menschen zehn Minuten lang zu, ohne Ratschläge zu geben und ohne aufs Handy zu schauen. Ein Telefonat zählt auch. Ein verpasster Tag ändert nichts.",s:["Wähle eine Person, gern auch jeden Tag eine andere","Handy umdrehen oder weglegen","Nur nachfragen, nicht bewerten und keinen Rat geben","Sag am Ende in einem Satz, was du dir gemerkt hast, etwa: Klingt, als hätte dich das echt geärgert."],p:"Wem hast du zugehört, und was hast du dir gemerkt?"},
+{id:"ehrlichesfeedback",cat:"naehe",d:3,w:"wahrhaftigkeit",t:"Ehrlich und freundlich",x:"Gib einem Menschen, der dir wichtig ist, einen ehrlichen Hinweis, den du bisher zurückgehalten hast, so freundlich wie möglich. Du hast dafür ein paar Tage Zeit. Wähle einen ruhigen Moment und nicht gerade einen, in dem die andere Person in einer Krise steckt. Sobald du es gesagt hast, ist die Übung geschafft.",s:["Wähle einen Hinweis, der der anderen Person wirklich nützt","Fang zum Beispiel so an: Darf ich dir mal was sagen? Mir ist aufgefallen, dass … Ich sag das, weil du mir wichtig bist.","Sprich über ein Verhalten, nicht über die Person","Wenn es passt, frag später, wie es bei der anderen Person angekommen ist"],p:"Dein erster Satz, und wie er ankam"},
+{id:"entschuldigung",cat:"naehe",d:7,w:"verantwortlichkeit",t:"Eine vollständige Entschuldigung",x:"Gibt es jemanden, bei dem du dich nie richtig entschuldigt hast? Hol es nach, mit Eingeständnis und Angebot zur Wiedergutmachung. Du hast dafür eine Woche Zeit, etwa bis du die Person das nächste Mal siehst. Sobald du dich entschuldigt hast, ist die Übung geschafft. Bei Menschen, die dir selbst schaden, ist Abstand wichtiger als eine Entschuldigung.",s:["Benenne genau, was du getan hast","Sag: Das war mein Fehler","Verzichte auf Rechtfertigungen, auch auf ein „aber“","Frag: Kann ich etwas wiedergutmachen?","Die andere Person muss die Entschuldigung nicht annehmen. Du entschuldigst dich, weil es richtig ist. Wenn es dich danach beschäftigt, sprich mit jemandem, dem du vertraust."],p:"Was willst du genau sagen, und was könntest du wiedergutmachen?"},
+{id:"vergebungsbrief",cat:"naehe",d:3,w:"vergebung",t:"Ein Brief, den du nicht abschickst",x:"Schreib einem Menschen, der dich gekränkt hat, einen Brief auf Papier. Du schickst ihn nicht ab. Es geht darum, die Kränkung zu ordnen, nicht um Versöhnung. Wähle eine Kränkung, an die du denken kannst, ohne dass es dich überrollt. Nimm dir ruhig mehrere Tage Zeit, schreib nicht direkt vor dem Schlafen, und hör auf, wenn es zu viel wird. Wenn es um Gewalt geht, mach das lieber gemeinsam mit einem Menschen, dem du vertraust.",s:["Beschreib, was passiert ist und was es mit dir gemacht hat","Schreib, was du dir gewünscht hättest","Schreib, was du loslassen möchtest und was nicht. Beides darf sein.","Bewahr den Brief auf oder vernichte ihn bewusst","Es ist in Ordnung, wenn sich noch nichts gelöst hat. Wenn es dich länger beschäftigt, sprich mit jemandem darüber. Anonym und kostenlos erreichst du die TelefonSeelsorge unter 0800 111 0 111, Kinder und Jugendliche die Nummer gegen Kummer unter 116 111."],p:"Wenn du magst: Ich lasse los, dass … Ich lasse nicht los, dass …"},
+{id:"widerspruch",cat:"naehe",d:7,w:"loyalitaet",t:"Freundlich widersprechen",x:"Loyalität heißt nicht, zu allem zu nicken. Wer einem Menschen wichtig ist, darf ihm auch widersprechen. Achte eine Woche lang darauf, wann du bei Menschen, die dir nahe sind, nur aus Höflichkeit nickst. Schon das Bemerken zählt. Wenn es dir wichtig ist, sag es, in der Stufe, die zu dir passt, im Gespräch oder im Chat. Dreimal in der Woche ist schon viel.",s:["Achte auf Momente, in denen du nur aus Höflichkeit nickst","Erste Stufe, eine Frage: Bist du sicher? Oder: Wie meinst du das?","Zweite Stufe, ein Ich-Satz: Ich sehe das ein bisschen anders.","Dritte Stufe, mit Grund: Da sehe ich es anders, weil …","Hör dir die Antwort wirklich an und halte fest, ob das Gespräch besser oder schlechter wurde"],p:"Wo hast du genickt, und was hättest du gern gesagt?"},
+{id:"grenzewuerde",cat:"miteinander",d:7,w:"wuerde",t:"Grenze ohne Herabsetzung",x:"Wenn jemand abfällig über andere spricht, setz eine klare Grenze, ohne ihn selbst herabzusetzen. Übe eine Woche lang, solche Momente zu bemerken und zu antworten. Schon das Bemerken zählt, und an Tagen ohne solche Momente gibt es nichts zu tun. Für Gruppenchats gibt es die Übung „Grenze im Chat“.",s:["Leg dir einen Satz zurecht, kurz oder länger: Hm, seh ich anders. Oder: So möchte ich nicht über sie reden.","Sprich über die Aussage, nicht über die Person","Bleib ruhig, auch wenn der andere lauter wird. Wenn jemand bedrohlich wird, geh weg und hol Hilfe.","Wenn du im Moment nichts sagen konntest, sprich die Person später allein an. Das zählt auch.","Halte fest, was du gesagt hast und wie es ankam"],p:"Dein Satz für den Moment, in dem jemand herabgesetzt wird"},
+{id:"zivilplan",cat:"miteinander",d:1,w:"zivilcourage",t:"Dein Plan fürs Eingreifen",x:"Wer vorher weiß, was er tun würde, handelt im Ernstfall eher. Mach dir einen persönlichen Plan für einen Ort, an dem du oft bist, ohne dich selbst in Gefahr zu bringen.",s:["Denk an einen Ort, an dem du oft bist: Bus, Schulhof, Bahnhof, Supermarkt","Hinschauen und die Lage einschätzen","Andere gezielt ansprechen: Sie mit der Brille, helfen Sie mir.","Hilfe holen: 110, Busfahrer, Zugbegleitung oder Personal","Die betroffene Person ansprechen, nicht den Täter angreifen. Auch Ablenken hilft, etwa nach der Uhrzeit fragen.","Schreib deinen Plan in drei Sätzen auf und sprich ihn einmal mit jemandem durch"],p:"Dein Eingreif-Plan: Wo bist du, was sagst du, wen holst du dazu?"},
+{id:"namen",cat:"miteinander",d:1,w:"erinnerung",t:"Ein Name, ein Leben",x:"Lies die Geschichte eines einzelnen Menschen, der im Nationalsozialismus verfolgt oder ermordet wurde. Nicht als Zahl, sondern als Mensch mit Hoffnungen, Humor und Liebe. Du kannst auch eine Biografie aus einer anderen verfolgten Gruppe wählen, etwa Sinti und Roma, Menschen mit Behinderung, Homosexuelle oder politisch Verfolgte. Manche Geschichten sind schwer zu lesen. Mach Pausen und sprich mit jemandem darüber.",s:["Such eine Biografie, etwa bei den Arolsen Archives, im Gedenkbuch des Bundesarchivs oder auf der Stolperstein-Seite deiner Stadt","Lies, was über diesen Menschen bekannt ist","Notiere eine Sache, die dich berührt hat","Erzähl jemandem von ihm oder ihr"],p:"Der Name, und eine Sache, die dich berührt hat"},
+{id:"stolperstein",cat:"miteinander",d:14,w:"erinnerung",t:"Einen Stolperstein putzen",x:"Stolpersteine erinnern vor Wohnhäusern an Menschen, die im Nationalsozialismus verfolgt wurden. Mit der Zeit werden sie dunkel. Putzen ist eine stille Geste der Erinnerung. Du hast dafür zwei Wochen Zeit, getan ist es an einem Nachmittag. Sobald du den Stein geputzt hast, ist die Übung geschafft. Gibt es bei dir keine Steine, lies eine Biografie auf der Stolperstein-Seite einer Stadt und erzähl sie weiter. Wenn dich die Geschichte dahinter beschäftigt, sprich mit jemandem darüber.",s:["Frag bei der Stolperstein-Initiative deiner Stadt, ob und womit du putzen darfst","Finde einen Stein in deiner Nähe, etwa über die Seite der Initiative","Lies vorher, was über den Menschen bekannt ist, und nimm jemanden mit, wenn du magst","Putz den Stein, lies den Namen und halte einen Moment inne"],p:"Der Name auf dem Stein, und was du über diesen Menschen weißt"},
+{id:"begegnung",cat:"miteinander",d:14,w:"toleranz",t:"Eine echte Begegnung",x:"Führe in den nächsten zwei Wochen ein längeres Gespräch mit jemandem aus einer Lebenswelt, die dir fremd ist, auf Augenhöhe und mit echtem Interesse. Der andere Mensch ist kein Übungsobjekt. Sag ruhig, warum du fragst, und erzähl auch etwas von dir. Wenn du noch jung bist, wähle jemanden, den du schon flüchtig kennst, etwa aus der Parallelklasse oder dem Verein, an einem Ort, an dem andere dabei sind. Triff dich nicht allein mit Fremden aus dem Netz. Findet sich lange keine Gelegenheit, ist das normal. Sobald das Gespräch stattgefunden hat, ist die Übung geschafft.",s:["Überleg, über welche Gruppe du vor allem Meinungen, aber kaum Kontakte hast","Such eine Gelegenheit: Verein, Nachbarschaft, Sprachcafé, Gemeinde, Ehrenamt oder Arbeit","Frag nach Geschichten, nicht nach Positionen","Notiere, was dich überrascht hat. Wenn dich etwas an dem Gespräch beunruhigt hat, erzähl es einem Menschen, dem du vertraust."],p:"Mit wem hast du gesprochen, und was hat dich überrascht?"},
+{id:"gegenseite",cat:"urteil",d:1,w:"fairness",t:"Die Gegenseite stark machen",x:"Nimm eine Frage, bei der du eine feste Meinung hast, und formuliere das stärkste Argument der Gegenseite, so gut, dass jemand von dort sagen würde: Ja, genau so meine ich das. Du musst der Gegenseite nicht zustimmen. Es geht darum, ihre Gründe so gut zu verstehen, dass du fair widersprechen kannst. Eine Grenze gibt es: Ob Menschen gleich viel wert sind, steht hier nicht zur Debatte.",s:["Wähle ein Thema, das dich bewegt, etwa Handyverbot an Schulen, Tempolimit, Homeoffice oder Wehrpflicht","Schreib das beste Gegenargument in eigenen Worten","Frag dich, was daran stimmt","Prüfe, ob sich deine Meinung verschoben oder gefestigt hat"],p:"Das stärkste Argument der Gegenseite, in deinen Worten"},
+{id:"querlesen",cat:"urteil",d:3,w:"muendigkeit",t:"Erst prüfen, dann teilen",x:"Prüfe drei Tage lang je einen Beitrag, bevor du ihn glaubst oder weiterleitest: ein Video auf TikTok oder Instagram, eine weitergeleitete Nachricht in WhatsApp oder einen Artikel in der Zeitung. Du musst dafür nichts Besonderes können. Drei kurze Fragen reichen. Ein Beispiel: Ein Video warnt vor Handystrahlung. Ein Tipp auf das Profil zeigt, dass der Account Aufkleber gegen Strahlung verkauft.",s:["Halt kurz an, bevor du teilst oder dich aufregst","Wer steckt dahinter? Tipp auf das Profil oder frag, von wem die Nachricht ursprünglich kommt. Was verkauft der Account, seit wann gibt es ihn?","Berichtet auch eine bekannte Nachrichtenquelle darüber, etwa die Tagesschau oder deine Zeitung? Bei Kettennachrichten hilft es, den ersten Satz zusammen mit dem Wort Faktencheck zu suchen.","Halte in einem Satz fest, was du herausgefunden hast"],p:"Was hast du geprüft, und was kam heraus?"},
+{id:"kipause",cat:"urteil",d:3,w:"muendigkeit",t:"Selbst zu Ende denken",x:"Denk drei Tage lang bei wichtigeren Fragen, Aufgaben oder Entscheidungen zuerst selbst nach, bevor du KI, eine Suchmaschine oder andere Menschen fragst. Danach darfst du nachschauen und vergleichen.",s:["Schreib deine eigene Antwort oder Entscheidung auf","Schau danach, was KI, Suche oder andere Menschen sagen","Vergleiche: Wo lagst du richtig, wo hast du etwas übersehen?","Notiere, wie sich das eigene Nachdenken angefühlt hat"],p:"Deine eigene Antwort, bevor du jemanden fragst"},
+{id:"genugwoche",cat:"welt",d:7,w:"genuegsamkeit",t:"Eine Woche Genug",x:"Kauf eine Woche lang nichts Neues außer Lebensmitteln und Dingen, die du diese Woche wirklich brauchst. Im Zweifel schreib den Wunsch auf und warte. Wenn du an einem Tag doch etwas kaufst, ist die Woche nicht verloren. Wenn du ohnehin wenig kaufst, achte stattdessen darauf, was du dir wünschst und wann Werbung dich anspricht.",s:["Leg eine Liste für Kaufwünsche an","Schreib jeden Wunsch auf, statt ihn gleich zu erfüllen","Leih oder tausch, wo es geht","Geh nach der Woche die Liste durch: noch wichtig, nicht mehr wichtig oder leihen?"],p:"Deine Wunschliste für diese Woche"},
+{id:"reparatur",cat:"welt",d:14,w:"sorgfalt",t:"Reparieren statt ersetzen",x:"Such dir einen kaputten Gegenstand und bring ihn wieder zum Laufen, selbst oder mit Hilfe. Du hast dafür höchstens zwei Wochen Zeit. Sobald er repariert ist, ist die Übung geschafft. Klappt es trotz ernsthaftem Versuch nicht, zählt der Versuch auch.",s:["Wähle etwas, das du sonst ersetzen würdest","Such eine Anleitung oder ein Reparaturcafé","Repariere es selbst oder lass es dir zeigen, gern zusammen mit jemandem, der es noch nicht kann","Notiere, was du gelernt hast"],p:"Was hast du repariert, und was hast du dabei gelernt?"},
+{id:"naturzeit",cat:"welt",d:7,w:"naturverbundenheit",t:"Ein paar Minuten Lebendiges",x:"Beobachte an etwa fünf von sieben Tagen fünf bis zehn Minuten lang ein Lebewesen: einen Baum, Vögel, Insekten oder eine Pflanze, draußen oder vom Fenster aus. Was man genau kennt, schützt man eher.",s:["Such dir einen Platz draußen oder am Fenster","Handy in die Tasche","Beobachte ein Lebewesen genau","Notiere eine Sache, die du vorher nicht bemerkt hast"],p:"Was hast du heute bemerkt, das dir vorher entgangen ist?"},
+{id:"fussabdruck",cat:"welt",d:1,w:"folgerichtigkeit",t:"Dein größter Hebel",x:"Nicht jede kleine Entscheidung muss eine Gewissensfrage sein. Finde einen Bereich, in dem du wirklich etwas bewegen kannst, und mach dafür einen kleinen Plan. Wenn der größte Posten nicht in deiner Hand liegt, etwa der Weg zur Arbeit oder die Heizung in der Mietwohnung, ist das kein Versagen. Dann suchst du einen Hebel, der in deiner Hand liegt.",s:["Schätz grob ein, wo du am meisten verbrauchst: Wohnen und Heizen, Unterwegssein, Essen oder Kaufen. Wer es genauer wissen will, kann den CO2-Rechner des Umweltbundesamts nutzen. Nötig ist er nicht.","Frag bei jedem Bereich: Entscheide ich hier selbst mit?","Wähle einen Bereich, in dem du Spielraum hast. Liegt keiner in deiner Hand, such einen Hebel in deinem Umfeld: eine Fahrgemeinschaft oder ein Vorschlag in Familie, Schule, Verein oder Betrieb.","Mach einen konkreten Plan für die nächsten drei Monate"],p:"Dein Hebel und dein erster Schritt"},
+{id:"brief2060",cat:"welt",d:1,w:"zukunftsverantwortung",t:"Ein Brief ins Jahr 2060",x:"Schreib einem Menschen, der im Jahr 2060 erwachsen ist, einen Brief: einem Kind aus deiner Familie, einem Kind, das du kennst, oder deinem eigenen späteren Ich. Wenn du selbst noch jung bist, schreib einem Kind, das 2060 so alt ist wie du heute. Was tust du, damit es gut leben kann? Was möchtest du noch tun?",s:["Stell dir den Menschen konkret vor","Schreib ehrlich, auch über das, was dir nicht gelungen ist","Schreib, was du ihm wünschst","Leite daraus einen Schritt für dieses Jahr ab","Wenn du magst, leg fest, wann du den Brief wieder lesen oder übergeben willst"],p:"Dein Schritt für dieses Jahr"},
+/* ----- Neu (Oktober 2026) ----- */
+{id:"tatmensch",cat:"urteil",d:1,w:"differenzierung",t:"Die Tat und der Mensch",x:"Denk an einen Menschen, dessen Verhalten du entschieden ablehnst. Das kann jemand aus deinem Alltag sein oder jemand aus den Nachrichten. Schreib zwei Sätze. Der erste sagt klar, was du ablehnst. Der zweite hält fest, dass dieser Mensch mehr ist als seine Tat. Zum Beispiel: Ich lehne ab, dass du über die Neue lästerst. Trotzdem bist du für mich jemand, mit dem ich reden will. Der zweite Satz nimmt dem ersten nichts weg. Wähle für den Anfang niemanden, der dir selbst schwer geschadet hat.",s:["Ich lehne ab, dass du …","Trotzdem bist du …","Prüf den ersten Satz: Beschreibt er eine Tat, oder klebt er dem Menschen ein Etikett auf? Schreib ihn so, dass er die Tat beschreibt.","Frag dich: Was müsste passieren, damit er oder sie anders handelt?"],p:"Ich lehne ab, dass … Trotzdem bist du …"},
+{id:"eigeneworte",cat:"urteil",d:7,w:"gewaltfreiheit",t:"Auf die eigenen Worte hören",x:"Achte eine Woche lang darauf, wann du selbst oder andere über Menschen sprechen wie über Tiere, Dinge oder Monster, etwa mit Wörtern wie „Abschaum“, „Viecher“ oder „die sind doch alle …“. Solche Wörter fallen schnell, im Ärger, im Chat, in Kommentaren. Es geht nicht darum, dich zu ertappen, sondern ums Hinhören. An etwa fünf von sieben Tagen darauf zu achten, reicht.",s:["Hör hin: im Gespräch, im Chat, in Kommentaren und bei dir selbst","Schreib einen solchen Satz auf, ohne Namen","Formuliere ihn um, sodass die Kritik bleibt und der Mensch auch. Aus „Das ist Abschaum“ wird etwa: Was er getan hat, ist widerlich.","Halte fest, ob dir das Umformulieren schwerer oder leichter fiel, als du dachtest"],p:"Ein Satz, den du gehört hast, und wie du ihn umformulierst"},
+{id:"grenzechat",cat:"miteinander",d:7,w:"mut",t:"Grenze im Chat",x:"In Gruppenchats wird oft über andere gelästert, und ein lachendes Smiley ist schnell geschickt. Übe eine Woche lang, dort eine Grenze zu setzen, ohne jemanden vorzuführen. Ein kurzer Satz reicht. Wenn dir das in der Gruppe zu viel ist, schreib der Person privat. Das zählt genauso. An Tagen, an denen nichts passiert, gibt es nichts zu tun.",s:["Leg dir einen kurzen Satz zurecht, etwa: Lass mal, das ist nicht witzig. Oder: Muss nicht sein.","Schick kein Lach-Smiley mit und leite nichts weiter, was jemanden herabsetzt","Schreib über die Nachricht, nicht über die Person, und mach keine Screenshots, um jemanden bloßzustellen","Wenn es in der Gruppe zu viel ist, schreib privat, der Person, die gelästert hat, oder der, über die gelästert wurde","Bei Drohungen oder Bloßstellung sag einem Menschen Bescheid, dem du vertraust"],p:"Dein Satz für den Chat"},
+{id:"strafeschutz",cat:"urteil",d:1,w:"gerechtigkeit",t:"Strafe, Schutz oder Vergeltung?",x:"Wenn wir von einem schweren Unrecht hören, wollen wir, dass etwas passiert. Aber was genau? Nimm eine Nachricht über eine Tat, die dich wütend gemacht hat, oder einen Streit aus deinem Alltag, und sortiere, was du dir wünschst. Wähle etwas, das dich beschäftigt, aber nicht überrollt. Der Wunsch nach Vergeltung ist menschlich. Es hilft, ihn zu erkennen, statt ihm einfach zu folgen.",s:["Schreib ehrlich auf, was du dir für die Person wünschst, die das getan hat","Sortiere: Was davon ist Strafe, also eine gerechte Folge? Was ist Schutz für andere? Was ist Vergeltung, also der Wunsch, dass es ihr schlecht geht?","Frag dich: Was braucht der Mensch, dem Unrecht geschehen ist?","Prüf, ob dein Wunsch die Person als Menschen behandelt, der Verantwortung tragen kann. Nur ein Mensch kann schuldig sein."],p:"Was wünschst du dir: Strafe, Schutz oder Vergeltung?"},
+{id:"verstehen",cat:"urteil",d:7,w:"neugier",t:"Den verstehen, den ich nicht mag",x:"Neugier heißt nicht Zustimmung. Wähle einen Menschen, dessen Meinung oder Art dir gegen den Strich geht, und versuch eine Woche lang zu verstehen, wie er dazu gekommen ist. Verstehen heißt nicht verzeihen. Du darfst danach genauso widersprechen wie vorher, nur besser begründet. Ihr müsst euch nicht jeden Tag sehen. Nicht gemeint sind Menschen, die dich bedrohen oder herabsetzen.",s:["Wähle eine Person aus deinem Alltag: Familie, Klasse, Verein, Arbeit oder Nachbarschaft","Wenn ihr euch begegnet, stell zuerst eine echte Frage, etwa: Wie bist du dazu gekommen? Was ist dir daran wichtig?","Lass deinen Widerspruch diesmal warten und hör zu","Halte fest: Was verstehst du jetzt besser, und was lehnst du weiterhin ab?"],p:"Was verstehst du jetzt besser, und was lehnst du weiter ab?"},
+{id:"kleinegeste",cat:"naehe",d:7,w:"fuersorge",t:"Eine kleine Geste",x:"Fürsorge zeigt sich oft im Kleinen. Achte an etwa fünf von sieben Tagen darauf, wem eine kleine Geste guttun könnte, und tu sie. Eine Nachricht, ein Anruf, eine Tasse Tee oder eine Hand beim Tragen reicht. Frag lieber, was jemand braucht, als schon zu wissen, was gut für ihn ist.",s:["Denk an zwei oder drei Menschen, die gerade still geworden sind oder viel zu tragen haben","Wähle eine kleine Geste, die zu dir und zur Person passt","Frag, bevor du hilfst: Kann ich dir was abnehmen?","Achte darauf, dass du dich dabei nicht selbst übernimmst"],p:"Wem tat deine Geste gut, und welche war es?"},
+{id:"anpacken",cat:"miteinander",d:14,w:"solidaritaet",t:"Einmal mit anpacken",x:"Solidarität gilt auch Menschen, die du nicht kennst. Such dir in den nächsten zwei Wochen eine Stelle in deiner Nähe, die anderen hilft, und pack einmal mit an. Das kann eine Stunde bei der Tafel sein, eine Sammelaktion in der Schule, eine Kleiderkammer, ein Sprachcafé oder eine Nachbarschaftshilfe. Wer wenig Zeit oder Geld hat, kann Dinge abgeben oder anderen davon erzählen. Sobald du einmal dabei warst, ist die Übung geschafft.",s:["Such heraus, wer in deiner Nähe Hilfe organisiert","Frag, was dort wirklich gebraucht wird, statt selbst zu entscheiden, was gut wäre","Mach einmal mit. Wenn du noch jung bist, gern zusammen mit einem Erwachsenen oder deiner Klasse.","Notiere, was du erlebt hast und ob du wiederkommen willst"],p:"Wo hast du mit angepackt, und was hast du erlebt?"},
+{id:"dankfaellig",cat:"naehe",d:1,w:"dankbarkeit",t:"Ein Dank, der fällig ist",x:"Denk an einen Menschen, der dir einmal geholfen oder dich geprägt hat und dem du nie richtig gedankt hast: eine Lehrerin von früher, ein Trainer, eine Nachbarin, jemand aus der Familie. Schreib ihm oder ihr eine Nachricht oder einen Brief und sag konkret, was er oder sie für dich getan hat.",s:["Wähle einen Menschen","Schreib konkret: Was hat er oder sie getan, und was hat es dir bedeutet?","Schick den Dank ab, gib ihn persönlich oder lies ihn vor","Wenn das nicht mehr geht, weil der Mensch nicht erreichbar ist oder nicht mehr lebt, bewahr den Brief auf oder erzähl jemandem von ihm oder ihr"],p:"Wem dankst du, und wofür?"},
+{id:"aendernlassen",cat:"selbst",d:1,w:"gelassenheit",t:"Ändern oder lassen",x:"Gelassenheit heißt nicht, dass dir alles egal ist. Sie heißt, zu unterscheiden, was du ändern kannst und was nicht. Nimm dir drei Dinge vor, die dich gerade ärgern oder beschäftigen, und sortiere sie.",s:["Schreib drei Dinge auf, die dich gerade ärgern oder beschäftigen","Sortiere: Kann ich das ändern, teilweise ändern oder gar nicht?","Für das, was du ändern kannst: Leg einen ersten kleinen Schritt fest","Für das, was du nicht ändern kannst: Überleg, wie es weniger Raum bekommt, etwa indem du einmal mit jemandem darüber sprichst und es dann ruhen lässt"],p:"Was du änderst, und was du lässt"},
+{id:"irren",cat:"urteil",d:3,w:"demut",t:"Ich könnte mich irren",x:"Wer damit rechnet, sich zu irren, urteilt nicht schwächer, sondern genauer. Achte drei Tage lang in Gesprächen oder beim Lesen darauf, wo du dir ganz sicher bist. Frag dich dann, woran du merken würdest, dass du falschliegst.",s:["Achte auf einen Moment, in dem du dir ganz sicher bist","Frag dich: Was müsste ich erfahren, damit ich meine Meinung ändere?","Sag oder schreib einmal: Da könnte ich falschliegen, lass uns nachsehen.","Halte fest, ob du recht hattest oder etwas dazugelernt hast"],p:"Wo warst du dir sicher, und was hätte dich umgestimmt?"},
+{id:"weitergeben",cat:"welt",d:7,w:"teilen",t:"Etwas weitergeben",x:"Viele Dinge liegen ungenutzt herum, die jemand anderes gut gebrauchen könnte. Gib in dieser Woche etwas weiter, das du nicht mehr brauchst, oder verleih etwas, das du selten nutzt. Sobald es bei jemandem angekommen ist, ist die Übung geschafft.",s:["Such ein, zwei Dinge, die bei dir nur herumliegen: ein Buch, Kleidung, Werkzeug, ein Spiel","Überleg, wer es brauchen könnte: Nachbarschaft, Freunde, ein Bücherschrank, eine Kleiderkammer oder eine Verschenk-Gruppe","Gib es weiter, ohne etwas dafür zu verlangen","Notiere, wie es sich angefühlt hat, etwas abzugeben"],p:"Was hast du weitergegeben, und an wen?"}
 ];
 
 /* Personalisierung der Beispiele („kurzer Check“).
@@ -1486,7 +1538,8 @@ const UEBUNGEN=[
    {k.name}/{K.name}    Wort aus KONTEXTE, je nach Lebensphase.
    {gm.name}/{GM.name}  Wort aus GEMEINSCHAFT, je nach Gruppe (oder ersatzweise Lebensphase).
    Ein Feld kann statt eines Textes ein Objekt nach Lebensphase sein: {schule:"…",beruf:"…"}.
-   Fehlt die Phase darin, gilt der Originaltext.
+   Fehlt die Phase darin, gilt der Originaltext. „schicht“ erbt von „beruf“, „ruhestand“ von „anderes“ (siehe ERBE).
+   Hat ein Rollen-Slot keinen Rückfall (rueckfall:null) und passt niemand aus dem Profil, gilt ebenfalls der Originaltext.
 
    Formen einer Rolle (Schlüssel nach dem männlichen Muster, damit man sie leicht liest):
    dein/deinen/deinem   erste Nennung in der Du-Ansprache (Nominativ/Akkusativ/Dativ)
@@ -1502,23 +1555,28 @@ const PERSONAL_FRAGEN=[
  {id:"phase",typ:"eins",
   frage:"Womit verbringst du gerade die meiste Zeit?",
   hinweis:"Danach richten sich Orte wie Klasse, Betrieb, Hochschule oder Team in den Beispielen.",
-  optionen:[{v:"schule",t:"Schule"},{v:"ausbildung",t:"Ausbildung"},{v:"studium",t:"Studium"},{v:"beruf",t:"Arbeit"},{v:"anderes",t:"Etwas anderes"}]},
+  optionen:[{v:"schule",t:"Schule"},{v:"ausbildung",t:"Ausbildung"},{v:"studium",t:"Studium"},{v:"beruf",t:"Arbeit"},
+   {v:"schicht",t:"Arbeit im Schichtdienst"},{v:"ruhestand",t:"Ruhestand"},{v:"anderes",t:"Etwas anderes"}]},
  {id:"nah",typ:"mehrere",
   frage:"Wer ist dir nah und darf in den Beispielen vorkommen?",
   hinweis:"Wähle so viele, wie du magst. Diese Menschen kommen dann in den Beispielen vor, wenn es um jemanden geht, der dir nahesteht.",
   gruppen:[
-   {t:"Familie",optionen:["mutter","vater","schwester","bruder","oma","opa","tochter","sohn"]},
+   {t:"Familie",optionen:["mutter","vater","schwester","bruder","oma","opa","tochter","sohn","enkelin","enkel"]},
    {t:"Freundschaft und Beziehung",optionen:["freundin","freund","partnerin","partner"]},
    /* Nur das Paar, das zur gewählten Lebensphase passt, wird gezeigt. */
    {t:"Schule, Studium oder Arbeit",optionen:["mitschuelerin","mitschueler","kommilitonin","kommilitone","kollegin","kollege"],
-    nachPhase:{schule:["mitschuelerin","mitschueler"],studium:["kommilitonin","kommilitone"],ausbildung:["kollegin","kollege"],beruf:["kollegin","kollege"],_:["kollegin","kollege"]}},
+    nachPhase:{schule:["mitschuelerin","mitschueler"],studium:["kommilitonin","kommilitone"],ausbildung:["kollegin","kollege"],beruf:["kollegin","kollege"],
+     schicht:["kollegin","kollege"],ruhestand:[],_:["kollegin","kollege"]}},
    {t:"Jemand anderes",optionen:["mensch"]}]},
  {id:"gruppe",typ:"mehrere",
   frage:"Wo bist du regelmäßig mit anderen zusammen?",
   hinweis:"Zum Beispiel in deiner freien Zeit. Wenn nichts davon passt, überspring die Frage einfach.",
   optionen:[{v:"sport",t:"Sportverein oder Mannschaft"},{v:"musik",t:"Musik in einer Gruppe"},{v:"ehrenamt",t:"Ehrenamt oder Initiative"},{v:"jugend",t:"Jugendgruppe oder Pfadfinder"},{v:"gemeinde",t:"Gemeinde oder Glaubensgemeinschaft"}]}
 ];
-const PHASEN=["schule","ausbildung","studium","beruf","anderes"];
+const PHASEN=["schule","ausbildung","studium","beruf","schicht","ruhestand","anderes"];
+/* Lebensphasen, die von einer anderen erben: Was für „schicht“ fehlt, kommt aus „beruf“, was für „ruhestand“ fehlt, aus „anderes“. */
+const ERBE={schicht:"beruf",ruhestand:"anderes"};
+const _kette=ph=>{const k=[];while(ph&&!k.includes(ph)){k.push(ph);ph=ERBE[ph]}return k};
 
 /* ---------- Rollen mit allen Formen ---------- */
 const ROLLEN=(()=>{
@@ -1553,6 +1611,8 @@ const ROLLEN=(()=>{
  add("opa","m","Opa",formen("m",s("Opa")));
  add("tochter","f","Tochter",formen("f",s("Tochter")));
  add("sohn","m","Sohn",formen("m",s("Sohn")));
+ add("enkelin","f","Enkelin",formen("f",s("Enkelin")));
+ add("enkel","m","Enkel",formen("m",s("Enkel")));
  add("freundin","f","Beste Freundin",formen("f",s("Freundin"),"best"));
  add("freund","m","Bester Freund",formen("m",s("Freund"),"best"));
  add("partnerin","f","Partnerin",formen("f",s("Partnerin")));
@@ -1577,8 +1637,8 @@ const ROLLEN=(()=>{
  add("gute_freundin","f","",unbestimmt("f",s("Freundin"),"gut"),{intern:true});
  return R})();
 
-const FAMILIE=["mutter","vater","schwester","bruder","oma","opa","tochter","sohn"];
-const RG={eltern:["mutter","vater"],geschwister:["schwester","bruder"],gross:["oma","opa"],kinder:["tochter","sohn"],
+const FAMILIE=["mutter","vater","schwester","bruder","oma","opa","tochter","sohn","enkelin","enkel"];
+const RG={eltern:["mutter","vater"],geschwister:["schwester","bruder"],gross:["oma","opa"],kinder:["tochter","sohn"],enkel:["enkelin","enkel"],
  freunde:["freundin","freund"],partner:["partnerin","partner"],
  kollegial:["mitschuelerin","mitschueler","kommilitonin","kommilitone","kollegin","kollege"],arbeit:["kollegin","kollege"]};
 const _pool=(...g)=>g.flatMap(x=>RG[x]||[x]);
@@ -1611,7 +1671,18 @@ const KONTEXTE={
     einMitglied:"ein Kollege",eineKollegin:"eine Kollegin",einerKollegin:"einer Kollegin",einladen:"etwa zum Mittagessen",
     pruefungSatz:"musst du bei der Arbeit eine wichtige Präsentation halten",lerneDanach:"bereite mich danach vor",deinerPruefung:"deiner Präsentation",
     inBesprechung:"in einer Besprechung",clique:"dein Freundeskreis",geld:"Am Ende des Monats ist dein Geld knapp.",imUmfeld:"im Viertel"},
- anderes:{clique:"dein Freundeskreis",geld:"Dein Geld ist gerade knapp.",imUmfeld:"im Viertel",chat:"Gruppenchat",pause:"Pause"}
+ /* Erbt alles Übrige von „beruf“ */
+ schicht:{nachDem:"nach der Schicht",pause:"Pause",einspringen:"eine zusätzliche Schicht zu übernehmen",einladen:"etwa in der Pause an meinen Tisch",
+    pruefungSatz:"hast du eine wichtige Prüfung in einer Fortbildung",lerneDanach:"lerne danach",deinerPruefung:"deiner Prüfung",
+    inBesprechung:"in einer Teambesprechung"},
+ anderes:{clique:"dein Freundeskreis",geld:"Dein Geld ist gerade knapp.",imUmfeld:"im Viertel",chat:"Gruppenchat",pause:"Pause"},
+ /* Erbt alles Übrige von „anderes“, dann vom Original */
+ ruhestand:{gruppe:"Verein",inGruppe:"in deinem Verein",ort:"Verein",nachDem:"am Nachmittag",
+    chefin:"die Leiterin deines Vereins",chefinDat:"der Leiterin",einspringen:"auszuhelfen",
+    leitung:"Kursleitung",leitungDat:"der Kursleitung",
+    einMitglied:"ein Mitglied",eineKollegin:"eine Mitstreiterin",einerKollegin:"einer Mitstreiterin",einladen:"etwa zum Kaffee",
+    pruefungSatz:"hast du einen wichtigen Termin, für den du noch viel vorbereiten musst",lerneDanach:"bereite mich danach vor",deinerPruefung:"deinem Termin",
+    inBesprechung:"in einer Versammlung",geld:"Deine Rente ist knapp."}
 };
 
 /* ---------- Gemeinschaft: zuerst eine gewählte Gruppe, sonst die Lebensphase, sonst _ (Original) ---------- */
@@ -1635,7 +1706,11 @@ const GEMEINSCHAFT={
  studium:{tAus:"aus dem Studiengang",mitglied:"ein Kommilitone aus deinem Studiengang",ausUns:"aus dem Studiengang",leitung:"der Studiengangsleitung",traeger:"die Hochschule",traegerEin:"eine Hochschule",
     brauchtDich:"Deine Lerngruppe braucht dich aber gerade jetzt für ein wichtiges Referat.",wichtig:"Die anderen zählen auf mich."},
  beruf:{tAus:"aus dem Team",mitglied:"ein Kollege",ausUns:"aus dem Team",leitung:"der Chefin",traeger:"die Firma",traegerEin:"eine Firma",
-    brauchtDich:"Dein Team braucht dich aber gerade jetzt für ein wichtiges Projekt.",wichtig:"Die anderen zählen auf mich."}
+    brauchtDich:"Dein Team braucht dich aber gerade jetzt für ein wichtiges Projekt.",wichtig:"Die anderen zählen auf mich."},
+ /* „schicht“ erbt von „beruf“ */
+ schicht:{brauchtDich:"Dein Team braucht dich aber gerade jetzt, weil mehrere Schichten nicht besetzt sind."},
+ ruhestand:{tAus:"aus dem Verein",mitglied:"ein Mitglied aus deinem Verein",ausUns:"aus dem Verein",leitung:"dem Vorstand",traeger:"der Verein",traegerEin:"ein Verein",
+    brauchtDich:"Dein Verein braucht dich aber gerade jetzt für eine wichtige Aktion.",wichtig:"Die anderen zählen auf mich."}
 };
 
 /* ---------- Varianten ----------
@@ -1646,7 +1721,7 @@ const GEMEINSCHAFT={
 const VARIANTEN={
  /* ----- Rollen: nahe Menschen ----- */
  "p:beleidigung":{neutral:true,
-  rollen:{nah:{pool:_pool("geschwister","eltern","gross","kinder","freunde","partner","kollegial","mensch"),rueckfall:"mensch"}},
+  rollen:{nah:{pool:_pool("geschwister","eltern","gross","kinder","enkel","freunde","partner","kollegial","mensch"),rueckfall:"mensch"}},
   felder:{x:"Jemand beleidigt {nah.deinen} vor deinen Augen grob. Du spürst, wie der Zorn in dir hochkocht.",
    o:[null,"Ich lasse meinem Zorn freien Lauf und beleidige den Angreifer zurück. Alle sollen sehen, auf wessen Seite ich stehe.","Ich gehe mit {nah.meinem} weg und kümmere mich um {nah.ihn}."]}},
  "p:geschenk":{neutral:true,
@@ -1654,7 +1729,7 @@ const VARIANTEN={
   felder:{x:"{V.dein} hat dir einen Pullover gestrickt, der überhaupt nicht dein Geschmack ist. {V.er} fragt erwartungsvoll, ob dir der Pullover gefällt.",
    f:"Was will {v.er} eigentlich wissen, wenn {v.er} fragt?"}},
  "p:zelten":{neutral:true,
-  rollen:{fam:{pool:_pool("eltern","geschwister","gross","kinder","partner"),rueckfall:"mensch"},fr:{pool:_pool("freunde"),rueckfall:"freund"}},
+  rollen:{fam:{pool:_pool("eltern","geschwister","gross","kinder","enkel","partner"),rueckfall:"mensch"},fr:{pool:_pool("freunde"),rueckfall:"freund"}},
   felder:{x:"Du hast mit {fam.deinem} ein Wochenende zum Zelten an einem See geplant, ohne Handyempfang. {Fam.er} freut sich riesig darauf. Am selben Samstag feiert {fr.dein} Geburtstag.",
    o:["Ich fahre mit. Draußen am See bin ich gern, und {fam.mein} freut sich.","Ich gehe zur Party. Ich habe {fr.meinem} schon lange zugesagt.",null],
    h:"Hier ziehen zwei Arten von Nähe gegeneinander. Eine gehaltene Zusage sagt etwas über dich. Ein Wochenende draußen mit {fam.deinem2} lässt sich später schwer nachholen. Ein Kompromiss ist oft gut, solange er nicht beide Seiten nur halb bedient."}},
@@ -1696,12 +1771,14 @@ const VARIANTEN={
  "p:kitext":{
   felder:{x:{ausbildung:"Ein anderer Azubi hat sein Berichtsheft für mehrere Wochen komplett von einer KI schreiben lassen und gibt es als eigene Arbeit ab. Er weiß, dass du es mitbekommen hast, und bittet dich, nichts zu sagen.",
     studium:"Ein Kommilitone hat seine Hausarbeit komplett von einer KI schreiben lassen und gibt sie als eigene ab. Er weiß, dass du es mitbekommen hast, und bittet dich, nichts zu sagen.",
-    beruf:"Ein Kollege lässt einen wichtigen Bericht komplett von einer KI schreiben und gibt ihn als eigene Arbeit aus, obwohl das bei euch nicht erlaubt ist. Er weiß, dass du es mitbekommen hast, und bittet dich, nichts zu sagen."},
+    beruf:"Ein Kollege lässt einen wichtigen Bericht komplett von einer KI schreiben und gibt ihn als eigene Arbeit aus, obwohl das bei euch nicht erlaubt ist. Er weiß, dass du es mitbekommen hast, und bittet dich, nichts zu sagen.",
+    ruhestand:"Ein Bekannter aus deinem Kurs an der Volkshochschule hat seine Abschlussarbeit komplett von einer KI schreiben lassen und gibt sie als eigene ab. Er weiß, dass du es mitbekommen hast, und bittet dich, nichts zu sagen."},
    o:[null,null,"Ich sage {k.leitungDat} Bescheid, weil es den anderen gegenüber unfair ist."]}},
  "p:fehler":{
   felder:{x:{schule:"Beim Verkauf auf dem Schulfest hast du dich verrechnet, und ein Kunde hat zu viel bezahlt. Niemand hat es bemerkt, und es würde vermutlich nie auffallen.",
     studium:"Bei deinem Nebenjob ist dir ein Fehler passiert, der einen Kunden etwas Geld kostet. Niemand hat es bemerkt, und es würde vermutlich nie auffallen.",
-    ausbildung:"Im Betrieb ist dir ein Fehler passiert, der einen Kunden etwas Geld kostet. Niemand hat es bemerkt, und es würde vermutlich nie auffallen."}}},
+    ausbildung:"Im Betrieb ist dir ein Fehler passiert, der einen Kunden etwas Geld kostet. Niemand hat es bemerkt, und es würde vermutlich nie auffallen.",
+    ruhestand:"Beim Kuchenverkauf auf einem Fest hast du dich verrechnet, und eine Kundin hat zu viel bezahlt. Niemand hat es bemerkt, und es würde vermutlich nie auffallen."}}},
  "p:umzug":{
   felder:{x:"Ein älterer Nachbar, der allein lebt, fragt, ob du ihm am Samstag beim Umzug in eine kleinere Wohnung hilfst. Am Montag {k.pruefungSatz}.",
    o:["Ich helfe ein paar Stunden und {k.lerneDanach}.",null,null],
@@ -1726,6 +1803,7 @@ const VARIANTEN={
    x:{ausbildung:"Das kleine Wäldchen neben deinem Betrieb soll für einen neuen Sportplatz gerodet werden. Viele freuen sich auf den Platz. Du bist oft in dem Wäldchen, in der Mittagspause und nach Feierabend.",
     studium:"Das kleine Wäldchen neben deiner Hochschule soll für einen neuen Sportplatz gerodet werden. Viele freuen sich auf den Platz. Du bist oft in dem Wäldchen, zwischen den Veranstaltungen und danach.",
     beruf:"Das kleine Wäldchen neben deiner Arbeitsstelle soll für einen neuen Sportplatz gerodet werden. Viele freuen sich auf den Platz. Du bist oft in dem Wäldchen, in der Mittagspause und nach Feierabend.",
+    schicht:"Das kleine Wäldchen neben deiner Arbeitsstelle soll für einen neuen Sportplatz gerodet werden. Viele freuen sich auf den Platz. Du bist oft in dem Wäldchen, in den Pausen und nach der Schicht.",
     anderes:"Das kleine Wäldchen in deinem Viertel soll für einen neuen Sportplatz gerodet werden. Viele freuen sich auf den Platz. Du gehst oft in dem Wäldchen spazieren."},
    o:[null,"Ich bin für den Platz. Viele {k.imUmfeld} haben keinen Verein und brauchen einen Ort zum Spielen.",null]}},
  "p:billigshirt":{
@@ -1741,9 +1819,79 @@ const VARIANTEN={
   felder:{x:"Du bist erschöpft und brauchst dringend Ruhe. {gm.brauchtDich}",
    o:[null,"Ich mache mit. {gm.wichtig}",null]}},
 
- /* ----- Übungen ----- */
+ /* ----- Übungen -----
+    Übungen werden nicht nach Index angepasst, sondern über ersetze: [{alt, neu, in?}]. alt ist ein wörtliches Stück
+    aus ueben.js, neu ein Text (mit Platzhaltern) oder ein Objekt nach Lebensphase. in schränkt auf ein Feld ein
+    (t, x, s oder p). Fehlt alt im Original (weil ueben.js umformuliert wurde), bleibt der Text einfach unverändert;
+    der Test in scratchpad/uebtest meldet das. Rollen-Slots ohne Rückfall (rueckfall:null) erwähnen nahe Menschen
+    nur, wenn sie im Profil stehen; ohne Profil bleibt jede Übung wörtlich wie im Original. */
  "u:begegnung":{
-  felder:{s:[null,"Such eine Gelegenheit: Verein, Nachbarschaft, {k.ort}",null,null]}},
+  ersetze:[{in:"s",alt:"Sprachcafé, Gemeinde, Ehrenamt oder Arbeit",
+   neu:{schule:"Sprachcafé, Gemeinde, Ehrenamt oder Schule",ausbildung:"Sprachcafé, Gemeinde, Ehrenamt, Berufsschule oder Betrieb",
+    studium:"Sprachcafé, Gemeinde, Ehrenamt oder Hochschule",anderes:"Sprachcafé, Gemeinde oder Ehrenamt"}}]},
+ "u:wenndann":{
+  ersetze:[{in:"x",alt:"Wenn im Chat über jemanden gelästert wird",
+   neu:{schule:"Wenn im Klassenchat über jemanden gelästert wird",ausbildung:"Wenn im Gruppenchat der Azubis über jemanden gelästert wird",
+    studium:"Wenn im Semesterchat über jemanden gelästert wird",beruf:"Wenn im Teamchat über jemanden gelästert wird",
+    ruhestand:"Wenn im Familienchat über jemanden gelästert wird"}}]},
+ "u:neinsagen":{
+  rollen:{v:{pool:_pool("kollegial","eltern","geschwister","gross","kinder","enkel","freunde","partner"),rueckfall:null}},
+  ersetze:[
+   {in:"x",alt:"Wo ein Nein kaum möglich ist, etwa weil bei der Arbeit Leute fehlen, liegt das nicht an dir. Das gehört dann in ein Gespräch mit der Leitung.",
+    neu:{schule:"Wo ein Nein kaum möglich ist, etwa bei Pflichten in der Schule, liegt das nicht an dir. Wird es dir zu viel, sprich mit deiner Klassenleitung oder einem anderen Erwachsenen, dem du vertraust.",
+     ausbildung:"Wo ein Nein kaum möglich ist, etwa weil im Betrieb Leute fehlen, liegt das nicht an dir. Das gehört dann in ein Gespräch mit deiner Ausbilderin oder deinem Ausbilder.",
+     studium:"Wo ein Nein kaum möglich ist, etwa weil beim Nebenjob Leute fehlen, liegt das nicht an dir. Das gehört dann in ein Gespräch mit der Leitung.",
+     schicht:"Wo ein Nein kaum möglich ist, etwa weil im Dienstplan Leute fehlen, liegt das nicht an dir. Das gehört dann in ein Gespräch mit der Leitung.",
+     anderes:"Wo ein Nein kaum möglich ist, etwa weil sonst alles an dir hängen bleibt, liegt das nicht an dir. Das gehört dann in ein offenes Gespräch mit den anderen.",
+     ruhestand:"Wo ein Nein kaum möglich ist, etwa weil in der Familie oder im Ehrenamt sonst alles an dir hängen bleibt, liegt das nicht an dir. Das gehört dann in ein offenes Gespräch mit den anderen."}},
+   {in:"s",alt:"Achte auf Momente, in denen du automatisch Ja sagst",neu:"Achte auf Momente, in denen du automatisch Ja sagst, etwa gegenüber {v.deinem}"},
+   {in:"s",alt:"Gegenüber Erwachsenen oder Vorgesetzten hilft eine Alternative",
+    neu:{schule:"Gegenüber Erwachsenen, etwa Lehrkräften, hilft eine Alternative",ausbildung:"Gegenüber Vorgesetzten im Betrieb hilft eine Alternative",
+     beruf:"Gegenüber Vorgesetzten hilft eine Alternative",anderes:"Gegenüber Menschen, die viel von dir erwarten, hilft eine Alternative"}}]},
+ "u:zuhoeren":{
+  rollen:{v:{pool:_pool("eltern","geschwister","gross","kinder","enkel","freunde","partner","kollegial"),rueckfall:null}},
+  ersetze:[{in:"s",alt:"Wähle eine Person, gern auch jeden Tag eine andere",neu:"Wähle eine Person, etwa {v.deinen}, gern auch jeden Tag eine andere"}]},
+ "u:ehrlichesfeedback":{
+  rollen:{v:{pool:_pool("eltern","geschwister","gross","kinder","enkel","freunde","partner","kollegial"),rueckfall:null}},
+  ersetze:[{in:"x",alt:"Gib einem Menschen, der dir wichtig ist, einen",neu:"Gib einem Menschen, der dir wichtig ist, etwa {v.deinem}, einen"}]},
+ "u:widerspruch":{
+  rollen:{v:{pool:_pool("eltern","geschwister","gross","kinder","enkel","freunde","partner","kollegial"),rueckfall:null}},
+  ersetze:[{in:"x",alt:"wann du bei Menschen, die dir nahe sind, nur aus Höflichkeit nickst",neu:"wann du bei Menschen, die dir nahe sind, etwa bei {v.deinem}, nur aus Höflichkeit nickst"}]},
+ "u:zivilplan":{
+  ersetze:[{in:"s",alt:"Bus, Schulhof, Bahnhof, Supermarkt",
+   neu:{ausbildung:"Bus, Berufsschule, Bahnhof, Supermarkt",studium:"Bus, Mensa, Bahnhof, Supermarkt",beruf:"Bus, Arbeitsweg, Bahnhof, Supermarkt",
+    schicht:"Bus, Parkplatz nach der Spätschicht, Bahnhof, Supermarkt",anderes:"Bus, Bahnhof, Supermarkt, Park",ruhestand:"Bus, Wochenmarkt, Bahnhof, Supermarkt"}}]},
+ "u:fussabdruck":{
+  ersetze:[
+   {in:"x",alt:"etwa der Weg zur Arbeit oder die Heizung in der Mietwohnung",
+    neu:{schule:"etwa der Schulweg oder die Heizung zu Hause",ausbildung:"etwa der Weg zum Betrieb oder die Heizung in der Mietwohnung",
+     studium:"etwa der Weg zur Hochschule oder die Heizung in der Mietwohnung",schicht:"etwa der Weg zur Schicht, wenn um diese Zeit kein Bus fährt, oder die Heizung in der Mietwohnung",
+     anderes:"etwa ein weiter Weg oder die Heizung in der Mietwohnung",ruhestand:"etwa ein weiter Weg zum Einkaufen oder die Heizung in der Mietwohnung"}},
+   {in:"s",alt:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Schule, Verein oder Betrieb",
+    neu:{schule:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Klasse oder Verein",ausbildung:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Verein oder Betrieb",
+     studium:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Verein oder Hochschule",beruf:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Verein oder Betrieb",
+     schicht:"eine Fahrgemeinschaft mit Leuten aus deiner Schicht oder ein Vorschlag in Familie, Verein oder Betrieb",ruhestand:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Verein oder Gemeinde"}}]},
+ "u:brief2060":{
+  /* Enkel haben Vorrang: Sie sind 2060 eher erwachsen als die Kinder schon erwachsener Eltern. */
+  rollen:{v:{pool:_pool("kinder","enkel"),vorrang:RG.enkel,rueckfall:null}},
+  ersetze:[{in:"x",alt:"einen Brief: einem Kind aus deiner Familie,",neu:"einen Brief: {v.deinem},"}]},
+ "u:grenzechat":{
+  ersetze:[{in:"x",alt:"In Gruppenchats wird oft über andere gelästert",
+   neu:{schule:"In Gruppenchats wie dem Klassenchat wird oft über andere gelästert",ausbildung:"In Gruppenchats wie dem Azubi-Chat wird oft über andere gelästert",
+    studium:"In Gruppenchats wie dem Semesterchat wird oft über andere gelästert",beruf:"In Gruppenchats wie dem Teamchat wird oft über andere gelästert",
+    ruhestand:"In Gruppenchats, auch in der Familie oder im Verein, wird oft über andere gelästert"}}]},
+ "u:verstehen":{
+  ersetze:[{in:"s",alt:"Familie, Klasse, Verein, Arbeit oder Nachbarschaft",
+   neu:{schule:"Familie, Klasse, Verein oder Nachbarschaft",ausbildung:"Familie, Betrieb, Berufsschule, Verein oder Nachbarschaft",
+    studium:"Familie, Hochschule, Nebenjob, Verein oder Nachbarschaft",beruf:"Familie, Arbeit, Verein oder Nachbarschaft",
+    anderes:"Familie, Verein, Freundeskreis oder Nachbarschaft",ruhestand:"Familie, Verein, Gemeinde oder Nachbarschaft"}}]},
+ "u:kleinegeste":{
+  rollen:{v:{pool:_pool("eltern","geschwister","gross","kinder","enkel","freunde","partner","kollegial"),rueckfall:null}},
+  ersetze:[{in:"s",alt:"die gerade still geworden sind oder viel zu tragen haben",neu:"die gerade still geworden sind oder viel zu tragen haben. Vielleicht gehört {v.dein} dazu."}]},
+ "u:anpacken":{
+  ersetze:[{in:"x",alt:"eine Sammelaktion in der Schule",
+   neu:{ausbildung:"eine Sammelaktion im Betrieb",studium:"eine Sammelaktion an der Hochschule",beruf:"eine Sammelaktion bei der Arbeit",
+    anderes:"eine Sammelaktion in der Nachbarschaft",ruhestand:"eine Sammelaktion in der Gemeinde"}}]},
 
  /* ----- Wertebeispiele (b) ----- */
  "b:mut":{felder:{b:"Du stellst {k.inBesprechung} eine unbequeme Frage."}},
@@ -1766,51 +1914,63 @@ function normProfil(p){p=p&&typeof p==="object"?p:{};
 /* Stabile Wahl: Jede passende Person bekommt pro Schlüssel und Slot eine feste Punktzahl, die höchste gewinnt.
    Kommt später eine Person dazu, ändert sich die Wahl nur, wenn genau sie gewinnt. */
 function _waehle(kand,key,slot){let best=null,bs=-1;kand.forEach(c=>{const s=_hash(key+"|"+slot+"|"+c);if(s>bs){bs=s;best=c}});return best}
+/* vorrang: Stehen Personen daraus im Profil, wird nur unter ihnen gewählt. rueckfall:null = niemand (Originaltext). */
 function rollenWahl(schluessel,profil){const pr=normProfil(profil),v=VARIANTEN[schluessel]||{},res={},used=[];
- Object.keys(v.rollen||{}).forEach(slot=>{const d=v.rollen[slot],kand=d.pool.filter(r=>pr.nah.includes(r)&&!used.includes(r));
-  const r=kand.length?_waehle(kand,schluessel,slot):d.rueckfall;used.push(r);res[slot]=r});return res}
+ Object.keys(v.rollen||{}).forEach(slot=>{const d=v.rollen[slot];let kand=d.pool.filter(r=>pr.nah.includes(r)&&!used.includes(r));
+  if(d.vorrang&&kand.some(r=>d.vorrang.includes(r)))kand=kand.filter(r=>d.vorrang.includes(r));
+  const r=kand.length?_waehle(kand,schluessel,slot):(d.rueckfall==null?null:d.rueckfall);if(r)used.push(r);res[slot]=r});return res}
 function _gemeinschaft(pr,key){if(pr.gruppe.length)return GEMEINSCHAFT[_waehle(pr.gruppe,key,"gm")];
- return GEMEINSCHAFT[pr.phase]||GEMEINSCHAFT._}
+ return Object.assign({},GEMEINSCHAFT._,..._kette(pr.phase).reverse().map(k=>GEMEINSCHAFT[k]||{}))}
 const _gross=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
 
 /* personalisiere(text, profil, schluessel): löst Platzhalter auf. text ist ein Text oder ein Objekt nach Lebensphase.
    Gibt null zurück, wenn es für diese Lebensphase keine eigene Fassung gibt; dann gilt der Originaltext.
    Ohne Profil (null) greifen die Rückfälle: Kontexte wie im Original, Familienrollen neutral. */
 function personalisiere(text,profil,schluessel){
- const pr=normProfil(profil);
- if(text&&typeof text==="object"){text=pr.phase&&typeof text[pr.phase]==="string"?text[pr.phase]:null}
+ const pr=normProfil(profil),kette=_kette(pr.phase);
+ if(text&&typeof text==="object"){const ph=kette.find(k=>typeof text[k]==="string");text=ph?text[ph]:null}
  if(typeof text!=="string")return null;
  if(text.indexOf("{")<0)return text;
- const wahl=rollenWahl(schluessel,pr),gm=_gemeinschaft(pr,schluessel),kt=Object.assign({},KONTEXTE._,KONTEXTE[pr.phase]||{});
+ const wahl=rollenWahl(schluessel,pr),gm=_gemeinschaft(pr,schluessel),
+  kt=Object.assign({},KONTEXTE._,...kette.slice().reverse().map(k=>KONTEXTE[k]||{}));
+ let niemand=false;
  let out=text.replace(/\{([A-Za-z]+)\.([^{}]*)\}/g,(m,slot,form)=>{
   const gross=slot.charAt(0)!==slot.charAt(0).toLowerCase(),s=slot.toLowerCase();let r;
   if(s==="k")r=kt[form];
   else if(s==="gm")r=gm[form]!=null?gm[form]:GEMEINSCHAFT._[form];
-  else{const rolle=ROLLEN[wahl[s]];if(!rolle)return "⟦"+m+"⟧";
+  else{if(wahl[s]===null){niemand=true;return ""}
+   const rolle=ROLLEN[wahl[s]];if(!rolle)return "⟦"+m+"⟧";
    if(form.startsWith("g:")){const t=form.slice(2).split("|");r=t[{m:0,f:1,n:2}[rolle.g]];if(r==null)r=t[0]}
    else if(form.startsWith("ist:")){const q=form.slice(4),i=q.indexOf("?"),ids=q.slice(0,i).split(","),t=q.slice(i+1).split("|");r=ids.includes(rolle.id)?t[0]:t[1]}
    else r=rolle.f[form]}
   if(r==null)return "⟦"+m+"⟧";
   return gross?_gross(r):r});
+ /* Ein Slot ohne Rückfall hat niemanden gefunden: Dann gilt der Originaltext. */
+ if(niemand)return null;
  /* Relativsatz der neutralen Rolle: Komma setzen, wenn der Satz weitergeht */
  out=out.replace(/\u0001(?=\s+[^\s.,;:!?“”])/g,",").replace(/\u0001/g,"");
  return out}
 
 function _aktiv(v,profil){return !!v&&(!v.wenn||v.wenn(normProfil(profil)))}
 function _feld(tpl,orig,profil,key){if(tpl==null)return orig;const r=personalisiere(tpl,profil,key);return r==null?orig:r}
+/* Ersetzt wörtliche Stücke (alt) im Originaltext. Unabhängig von Index und Reihenfolge der Schritte. */
+function _ersetze(text,liste,profil,key,feld){if(typeof text!=="string"||!liste)return text;
+ liste.forEach(e=>{if(e.in&&e.in!==feld||text.indexOf(e.alt)<0)return;const neu=personalisiere(e.neu,profil,key);
+  if(neu!=null)text=text.split(e.alt).join(neu)});return text}
 /* Kopie einer Probe mit personalisierten Texten. Werte (w) und Reihenfolge der Optionen bleiben gleich. */
-function personalisiereProbe(p,profil){const key="p:"+p.id,v=VARIANTEN[key];if(!_aktiv(v,profil))return p;const F=v.felder;
- const out=Object.assign({},p);["t","x","h","f"].forEach(k=>{out[k]=_feld(F[k],p[k],profil,key)});
- out.o=p.o.map((o,i)=>Object.assign({},o,{t:_feld(F.o&&F.o[i],o.t,profil,key),w:o.w}));return out}
-function personalisiereUebung(u,profil){const key="u:"+u.id,v=VARIANTEN[key];if(!_aktiv(v,profil))return u;const F=v.felder;
- const out=Object.assign({},u);["t","x"].forEach(k=>{out[k]=_feld(F[k],u[k],profil,key)});
- out.s=u.s.map((s,i)=>_feld(F.s&&F.s[i],s,profil,key));return out}
+function personalisiereProbe(p,profil){const key="p:"+p.id,v=VARIANTEN[key];if(!_aktiv(v,profil))return p;const F=v.felder||{};
+ const out=Object.assign({},p),E=v.ersetze;["t","x","h","f"].forEach(k=>{out[k]=_ersetze(_feld(F[k],p[k],profil,key),E,profil,key,k)});
+ out.o=p.o.map((o,i)=>Object.assign({},o,{t:_ersetze(_feld(F.o&&F.o[i],o.t,profil,key),E,profil,key,"o"),w:o.w}));return out}
+/* Übungen: t, x, p und jeder Schritt in s. felder (nach Index) wird noch verstanden, Übungen nutzen aber ersetze. */
+function personalisiereUebung(u,profil){const key="u:"+u.id,v=VARIANTEN[key];if(!_aktiv(v,profil))return u;const F=v.felder||{},E=v.ersetze;
+ const out=Object.assign({},u);["t","x","p"].forEach(k=>{if(typeof u[k]==="string")out[k]=_ersetze(_feld(F[k],u[k],profil,key),E,profil,key,k)});
+ out.s=(u.s||[]).map((s,i)=>_ersetze(_feld(F.s&&F.s[i],s,profil,key),E,profil,key,"s"));return out}
 function personalisiereWert(w,profil){const key="b:"+w.id,v=VARIANTEN[key];if(!_aktiv(v,profil))return w;
  return Object.assign({},w,{b:_feld(v.felder.b,w.b,profil,key)})}
 /* Für den sanften Hinweis: Hängt diese Probe von einem nahen Menschen ab? */
 const hatPersonRolle=id=>{const v=VARIANTEN["p:"+id];return !!(v&&(v.rollen||v.neutral))};
 
-if(typeof module!=="undefined")module.exports={PERSONAL_FRAGEN,PHASEN,ROLLEN,KONTEXTE,GEMEINSCHAFT,VARIANTEN,
+if(typeof module!=="undefined")module.exports={PERSONAL_FRAGEN,PHASEN,ERBE,ROLLEN,KONTEXTE,GEMEINSCHAFT,VARIANTEN,
  personalisiere,personalisiereProbe,personalisiereUebung,personalisiereWert,rollenWahl,normProfil,hatPersonRolle};
 
 </script>
@@ -1835,7 +1995,7 @@ const uv=u=>u&&typeof personalisiereUebung==="function"?personalisiereUebung(u,P
 const wb=w=>typeof personalisiereWert==="function"?personalisiereWert(w,PRO()).b:w.b;
 /* Einstellungen. „Vibration“ hieß früher „Haptik“ (settings.haptik); der alte Wert wird übernommen. */
 {const old=S.settings&&typeof S.settings==="object"&&!Array.isArray(S.settings)?S.settings:{};
- S.settings=Object.assign({antiScroll:true,remindTime:"08:00",theme:"dunkel"},old);
+ S.settings=Object.assign({antiScroll:true,remindTime:"08:00",theme:"dunkel",uebTime:"19:00"},old);
  if(typeof S.settings.vibration!=="boolean")S.settings.vibration=old.haptik!==false;delete S.settings.haptik}
 S.moments=S.moments||{};S.leit=S.leit||{};S.proben=S.proben||{};S.ueb=S.ueb||{};S.saved=S.saved||{};S.read=S.read||{};S.history=S.history||[];S.fresh=S.fresh||[];
 const CATKEYS=Object.keys(CATS);
@@ -1884,7 +2044,9 @@ document.addEventListener("focusin",e=>{if(typing(e.target)&&document.querySelec
 function doUndo(){const u=undoState;if(!u)return;endUndo();
   /* Reine Ansichts-Einstellungen (aufgeklappte Bereiche, Einstellungen) bleiben, wie sie gerade sind. */
   const keep={settings:S.settings};["jOpen","aboutOpen","uebOpen","prOpen","setOpen","wqOpen"].forEach(k=>{if(k in S)keep[k]=S[k]});
-  S=Object.assign(JSON.parse(u.sn.s),keep);tab=u.sn.tab;pcur=u.sn.pcur;pBlind=u.sn.pBlind;pHint=u.sn.pHint;confirmReset=false;
+  const was=S;S=Object.assign(JSON.parse(u.sn.s),keep);
+  /* Pläne auf laufenden Karten werden beim Tippen gespeichert und sind keine Aktion: Rückgängig lässt sie, wie sie sind. */
+  Object.keys(S.ueb||{}).forEach(uid=>{const a=S.ueb[uid],b=was.ueb&&was.ueb[uid];if(a&&b&&a.status==="active"&&a.start===b.start&&typeof b.plan==="string")a.plan=b.plan});tab=u.sn.tab;pcur=u.sn.pcur;pBlind=u.sn.pBlind;pHint=u.sn.pHint;confirmReset=false;
   clearTimeout(momentTimer);persist();applyTheme();
   if(!u.reopen&&$("#layer").innerHTML)$("#layer").innerHTML="";
   anim=false;render();if(u.reopen)u.reopen();if(u.after)u.after();toast("Rückgängig gemacht.")}
@@ -1903,10 +2065,38 @@ function tested(id){return Object.entries(S.proben).some(([pid,v])=>{const p=P[p
 /* Übungen, die nur das Gerüst selbst betreffen, zählen nicht als „im Alltag gelebt“. Bei früher abgeschlossenen
    mehrtägigen Übungen steht in v.days, an wie vielen Tagen man sie gemacht hat; ab einem Tag zählt sie. */
 const META=["werteinventur","leitsatz"];
-function lived(id){const w=W[id];return Object.entries(S.ueb).some(([uid,v])=>v&&v.status==="done"&&U[uid]&&!META.includes(uid)&&(v.days==null||v.days>=1)&&(U[uid].w===id||U[uid].cat===w.cat))}
+/* Begleitung der Übungen (Stand 20.10.2026). Ein Eintrag S.ueb[uid] ist der aktuelle Durchgang; frühere Durchgänge liegen
+   unverändert in S.ueb[uid].runs. Neue Durchgänge tragen v:2, die beim Annehmen gewählte Stütze (fuer, null = ohne Stütze),
+   den Plan (plan), die Tageseinträge (log: Tag → "ja" | "keine" | "nein") und beim Abschluss ok (zählt als gelebt).
+   Alte Durchgänge ohne v:2 zählen weiter nach der alten Regel (Wert oder Bereich der Übung, ab einem Tag); Wert und Bereich
+   von damals sind in lw/lc festgehalten, damit spätere Textänderungen in ueben.js kein Bauteil entziehen.
+   EINMAL: mit einer einmaligen Handlung geschafft. GELEG: „Keine Gelegenheit“ verkleinert die Zahl der nötigen Tage.
+   FREIWERT: Der Wert der Übung ist die gewählte Stütze. */
+const EINMAL=new Set(["ehrlichesfeedback","entschuldigung","stolperstein","begegnung","reparatur","anpacken","weitergeben","vergebungsbrief"]);
+const GELEG=new Set(["wenndann","neinsagen","widerspruch","grenzewuerde","grenzechat","eigeneworte","verstehen"]);
+const FREIWERT=new Set(["wenndann","werttag"]);
+const LOGW=[["ja","Gemacht"],["keine","Keine Gelegenheit"],["nein","Diesmal nicht"]];
+const runsOf=uid=>{const v=S.ueb[uid];return v&&typeof v==="object"?[...(Array.isArray(v.runs)?v.runs:[]),v]:[]};
+const nJa=r=>r&&r.log?Object.values(r.log).filter(x=>x==="ja").length:0;
+/* Tage, ab denen eine mehrtägige Übung als geschafft gilt: rund 70 % der Dauer, mindestens 1 */
+function needDays(uid,r){const e=U[uid];if(!e||e.d<=1||EINMAL.has(uid)||(r&&r.alt))return 1;let n=e.d;
+  if(GELEG.has(uid)&&r&&r.log)n=Math.max(1,n-Object.values(r.log).filter(x=>x==="keine").length);return Math.max(1,Math.round(n*.7))}
+function runCounts(uid,r){if(!r||r.status!=="done"||META.includes(uid))return false;return r.v===2?!!r.ok:(r.days==null||r.days>=1)}
+function runFor(uid,r,id){if(r.v===2)return r.fuer===id;const e=U[uid],w=r.lw||(e&&e.w),c=r.lc||(e&&e.cat);return w===id||(!!W[id]&&c===W[id].cat)}
+function livedCount(id){let n=0;Object.keys(S.ueb).forEach(uid=>runsOf(uid).forEach(r=>{if(runCounts(uid,r)&&runFor(uid,r,id))n++}));return n}
+function lived(id){return livedCount(id)>0}
+/* Vorschlag für die Stütze: der Wert der Übung, sonst eine Stütze aus demselben Bereich; bei FREIWERT sonst die erste Stütze. */
+function defFuer(uid,hint){const u=U[uid];if(!u||META.includes(uid)||!S.kern.length)return null;if(hint&&S.kern.includes(hint))return hint;
+  /* Zuerst eine Stütze, die noch nicht gelebt ist (wichtig bei „Noch einmal“), sonst dieselbe Reihenfolge ohne diese Bedingung */
+  const pick=f=>{if(S.kern.includes(u.w)&&f(u.w))return u.w;return S.kern.find(k=>W[k].cat===u.cat&&f(k))||S.kern.find(k=>W[u.w]&&W[k].cat===W[u.w].cat&&f(k))||(FREIWERT.has(uid)?S.kern.find(f):null)};
+  return pick(k=>!lived(k))||pick(()=>true)||null}
+/* Umzug alter Speicherstände: alte Abschlüsse merken sich Wert und Bereich; laufende alte Übungen bekommen die vorgeschlagene Stütze. */
+if(!S.uebMig){Object.keys(S.ueb).forEach(uid=>{const v=S.ueb[uid];if(!v||typeof v!=="object")return;
+  runsOf(uid).forEach(r=>{if(r.v!==2&&U[uid]){if(!r.lw)r.lw=U[uid].w;if(!r.lc)r.lc=U[uid].cat}});
+  if(v.status==="active"&&v.v!==2){v.v=2;v.fuer=defFuer(uid);v.alt=1;if(v.checks&&!v.log){v.log={};Object.keys(v.checks).forEach(k=>v.log[k]="ja")}}});S.uebMig=1;persist()}
 function hasLeit(id){return !!(S.leit[id]&&S.leit[id].t)}
 function affirmed(id){return !!(S.leit[id]&&S.leit[id].n>=2)}
-function steps(id){return [["Als Stütze gewählt",S.kern.includes(id)],["Leitsatz formuliert",hasLeit(id)],["In einer Belastungsprobe geprüft",tested(id)],["In einer Übung gelebt",lived(id)],["Leitsatz zweimal bekräftigt",affirmed(id)]]}
+function steps(id){const nl=livedCount(id);return [["Als Stütze gewählt",S.kern.includes(id)],["Leitsatz formuliert",hasLeit(id)],["In einer Belastungsprobe geprüft",tested(id)],[nl>1?`In ${nl} Übungen gelebt`:"In einer Übung gelebt",nl>0],["Leitsatz zweimal bekräftigt",affirmed(id)]]}
 function level(id){if(!S.kern.includes(id))return 0;return steps(id).filter(s=>s[1]).length}
 function dueLeit(){return S.kern.filter(id=>hasLeit(id)&&(S.leit[id].next||0)<=now())}
 function tally(){const c={};Object.entries(S.proben).forEach(([pid,v])=>{const p=P[pid];if(p&&v&&v.o!=null&&p.o[v.o])pw(pid,v,v.o).forEach(w=>c[w]=(c[w]||0)+1)});return c}
@@ -1932,23 +2122,33 @@ function nextFor(id){const w=W[id];let soft=null;
     /* Kein offener Weg: ein weicher Schritt, der andere Stützen nicht blockiert */
     soft=f?{t:f.other?`Zu ${w.n} gibt es noch keine eigene Probe. Probier eine aus demselben Bereich.`:`Denk die Probe „${ptl(f.p)}“ noch einmal durch.`,probe:f.p.id,hint:id,soft:true}:{t:"Sieh dir die Belastungsproben an.",tabgo:"ueben",soft:true}}
   if(!lived(id)){const rel=u=>!META.includes(u.id)&&(u.w===id||u.cat===w.cat),st=u=>S.ueb[u.id]&&S.ueb[u.id].status;
-    const act=activeUeb().find(x=>rel(U[x]));if(act)return {t:`Schließ die Übung „${U[act].t}“ ab.`,tabgo:"ueben"};
+    const act=activeUeb().find(x=>S.ueb[x].v===2?S.ueb[x].fuer===id:rel(U[x]));if(act)return {t:`Schließ die Übung „${uv(U[act]).t}“ ab.`,uebrun:act};
     const u=UEBUNGEN.find(u=>rel(u)&&u.w===id&&!st(u))||UEBUNGEN.find(u=>rel(u)&&!st(u))||UEBUNGEN.find(u=>rel(u));
     if(u&&activeUeb().length>=MAXACT)return {t:`Schließ zuerst eine laufende Übung ab. Danach kannst du ${w.n} in einer Übung leben.`,tabgo:"ueben"};
-    if(u)return {t:`Lebe ${w.n} in der Übung „${u.t}“.`,ueb:u.id};
+    if(u)return {t:`Lebe ${w.n} in der Übung „${uv(u).t}“.`,ueb:u.id,uhint:id};
     soft=soft||{t:"Sieh dir die Übungen an.",tabgo:"ueben",soft:true}}
   if(soft)return soft;
   if(!affirmed(id)){const L=S.leit[id];return {t:`Bekräftige deinen Leitsatz für ${w.n}, wenn die App nachfragt${L&&L.next>now()?`, voraussichtlich am ${fmtDate(L.next)}`:""}.`,wert:id,wait:true}}
   return null}
 function blindOffer(){const p=PROBEN.filter(p=>blindDue(p.id)).sort((a,b)=>S.proben[a.id].t-S.proben[b.id].t)[0];
   return p?{t:`Vor einiger Zeit hast du die Probe „${ptl(p)}“ entschieden. Wenn du magst, entscheide sie noch einmal, ohne deine alte Antwort zu sehen.`,probe:p.id,blind:true,id:null}:null}
-function nextStep(){
+/* Laufende Übungen im nächsten Schritt, zurückhaltend: höchstens eine Übungsfrage am Tag (S.askDay merkt sich den Tag,
+   an dem man darauf getippt hat). Gefragt wird nur, wenn die Frist um ist, wenn eine Übung schon geschafft ist (einmal je
+   Durchgang, v.doneAsk) oder wenn gestern und heute nichts eingetragen ist. Sonst bleibt der Aufbauschritt; die laufende
+   Übung ist im Reiter Üben erreichbar. Übungen ohne Frist fragen nie. */
+function uebAsk(){const tk=todayKey();if(S.askDay===tk)return null;const act=activeUeb().filter(uid=>!S.ueb[uid].keep&&dayIdx(S.ueb[uid])>=1);
+  for(const uid of act){const v=S.ueb[uid],e=uv(U[uid]);if(dayIdx(v)>=e.d)return {t:`Die Zeit für „${e.t}“ ist um. Wie lief es?`,uebrun:uid,fuer:v.fuer}}
+  for(const uid of act){const v=S.ueb[uid],e=uv(U[uid]);if(!v.doneAsk&&(!v.doneAskDay||v.doneAskDay===todayKey())&&(e.d>1)&&nJa(v)>=needDays(uid,v)){if(!v.doneAskDay){v.doneAskDay=todayKey();persist()}return {t:`„${e.t}“ ist geschafft. Magst du die Übung abschließen?`,uebrun:uid,fuer:v.fuer,doneAsk:1}}}
+  for(const uid of act){const v=S.ueb[uid],e=uv(U[uid]),di=dayIdx(v),lg=v.log||{};if(e.d>1&&!lg[di]&&!lg[di-1]&&nJa(v)<needDays(uid,v))return {t:`Wie lief „${e.t}“ in den letzten Tagen?`,uebrun:uid,fuer:v.fuer}}
+  return null}
+function nextStep(){const n=nextBuild(),a=n.finder?null:uebAsk();if(!a)return n;return Object.assign(a,{id:a.fuer&&S.kern.includes(a.fuer)?a.fuer:n.id})}
+function nextBuild(){
   if(!S.kern.length)return {t:"Finde heraus, welche Werte dich tragen. Es dauert etwa fünf Minuten.",finder:true,id:null};
   let wait=null,soft=null;
   for(const id of S.kern){const n=nextFor(id);if(!n)continue;if(n.wait){if(!wait)wait=Object.assign(n,{id})}else if(n.soft){if(!soft)soft=Object.assign(n,{id})}else return Object.assign(n,{id})}
   if(S.kern.length<MAXKERN)return {t:"Wähle eine weitere Stütze.",tabgo:"werte",id:null};
   return soft||blindOffer()||wait||{t:"Dein Gerüst steht. Bleib im Gespräch mit dir: Impulse lesen, Proben entscheiden.",tabgo:"imp",id:null}}
-const actAttr=n=>n.finder?`data-finder="1"`:n.wert?`data-wert="${n.wert}"`:n.ueb?`data-ueb="${n.ueb}"`:n.probe?`data-probe-open="${n.probe}"${n.blind?` data-blind="1"`:""}${n.hint?` data-phint="${n.hint}"`:""}`:`data-tabgo="${n.tabgo||"ueben"}"`;
+const actAttr=n=>n.finder?`data-finder="1"`:n.wert?`data-wert="${n.wert}"`:n.uebrun?`data-uebrun="${n.uebrun}"${n.doneAsk?` data-doneask="1"`:""}`:n.ueb?`data-ueb="${n.ueb}"${n.uhint?` data-uhint="${n.uhint}"`:""}`:n.probe?`data-probe-open="${n.probe}"${n.blind?` data-blind="1"`:""}${n.hint?` data-phint="${n.hint}"`:""}`:`data-tabgo="${n.tabgo||"ueben"}"`;
 
 /* Kurze Namen in zwei Zeilen fürs Gerüst */
 const HY={selbstachtung:"Selbst-achtung",gelassenheit:"Gelassen-heit",loyalitaet:"Loyali-tät",verlaesslichkeit:"Verläss-lichkeit",dankbarkeit:"Dank-barkeit",gerechtigkeit:"Gerech-tigkeit",zivilcourage:"Zivil-courage",solidaritaet:"Solida-rität",gewaltfreiheit:"Gewalt-freiheit",beteiligung:"Betei-ligung",genuegsamkeit:"Genüg-samkeit",zukunftsverantwortung:"Verantwortung-für Kommende",ehrfurcht:"Ehrfurcht-vor dem Leben",naturverbundenheit:"Natur-verbundenheit",folgerichtigkeit:"Folge-richtigkeit",weitherzigkeit:"Weit-herzigkeit",wahrhaftigkeit:"Wahr-haftigkeit",differenzierung:"Differen-zierung",verantwortlichkeit:"Verant-wortlichkeit",demut:"Erkenntnis-demut",integritaet:"Integri-tät",zuwendung:"Zu-wendung",offenheit:"Offen-heit",vergebung:"Ver-gebung",muendigkeit:"Mündig-keit",echtheit:"Echt-heit",disziplin:"Diszi-plin",freiheit:"Frei-heit",wachstum:"Wachs-tum",fuersorge:"Für-sorge",vertrauen:"Ver-trauen",erinnerung:"Erin-nerung",toleranz:"Tole-ranz",sorgfalt:"Sorg-falt",fairness:"Fair-ness"};
@@ -2116,7 +2316,7 @@ function pillarTap(id){const svg=document.querySelector(".gsvg");if(!svg)return;
   if(segs.length)lightUp(segs[segs.length-1]);
   $("#ginfo").innerHTML=`<div class="pinfo" ${cc(w.cat)}><div class="sh"><span class="label">${dot(w.cat)}${w.n}</span><span class="label">Stufe ${l} von 5</span></div>
    <ul class="steps5">${steps(id).map(([t,ok])=>`<li class="${ok?"ok":""}"><i></i>${t}</li>`).join("")}</ul>
-   <div class="row">${n?`<button class="btn primary" ${actAttr(n)}>${n.wait?"Leitsatz ansehen":n.wert?"Leitsatz schreiben":n.probe?"Probe öffnen":n.ueb?"Übung ansehen":"Weiter"}</button>`:""}<button class="btn" data-wert="${id}">Stütze öffnen</button></div></div>`;
+   <div class="row">${n?`<button class="btn primary" ${actAttr(n)}>${n.wait?"Leitsatz ansehen":n.wert?"Leitsatz schreiben":n.probe?"Probe öffnen":n.ueb||n.uebrun?"Übung ansehen":"Weiter"}</button>`:""}<button class="btn" data-wert="${id}">Stütze öffnen</button></div></div>`;
   const pi=$("#ginfo .pinfo");if(pi&&!calm())pi.animate([{opacity:0,transform:"translateY(6px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)"})}
 /* Neue Stäbe zeichnen sich nacheinander ein. freshUntil merkt sich, wann das letzte Aufleuchten endet,
    damit ein Moment erst danach erscheint. Die Vibration dazu gibt es schon beim Tippen (buzz("ok")), nicht hier. */
@@ -2129,10 +2329,15 @@ function playFresh(){if(!S.fresh.length)return;const list=S.fresh.slice();S.fres
 
 /* ---------- Bautagebuch, Einstellungen, Über ---------- */
 function journalFold(){
-  const nRead=Object.keys(S.read).length,nPr=nPrDone(),done=Object.entries(S.ueb).filter(([id,v])=>U[id]&&v.status==="done");
+  const nRead=Object.keys(S.read).length,nPr=nPrDone();
+  /* Alle Durchgänge einer Übung, auch frühere: Abschlüsse mit Stimmung, Tagen, Plan oder Notiz; beendete nur mit Plan */
+  const runs=Object.keys(S.ueb).filter(id=>U[id]).flatMap(id=>runsOf(id).map(r=>[id,r]));
+  const done=runs.filter(([,r])=>r.status==="done");
   const t=tally(),top=Object.entries(t).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const lv=S.kern.map(id=>[id,livedCount(id)]).filter(x=>x[1]>0);
   const optT=(p,o)=>p.o[o]?p.o[o].t:"";
-  const journal=[...done.filter(([,v])=>v.note||v.mood||v.days!=null).map(([id,v])=>({id,t:v.end,c:U[id].cat,title:U[id].t,sub:[v.mood?{gut:"Hat mir gutgetan",mix:"Gemischt",nein:"Eher nicht"}[v.mood]:"Übung",v.days!=null?`an ${v.days} von ${U[id].d} Tagen`:""].filter(Boolean).join(" · "),note:v.note})),
+  const journal=[...runs.filter(([,v])=>v.status==="done"?(v.note||v.mood||v.days!=null||v.plan):(v.status==="dropped"&&v.plan)).map(([id,v])=>({id,t:v.end||v.start,c:U[id].cat,title:uv(U[id]).t,
+      sub:[v.status==="dropped"?"Beendet":v.mood?{gut:"Hat mir gutgetan",mix:"Gemischt",nein:"Eher nicht"}[v.mood]:"Übung",v.days==null?"":EINMAL.has(id)&&v.v===2?(v.days?"gemacht":""):v.keep?`an ${v.days} ${v.days===1?"Tag":"Tagen"}, ohne Frist weitergeführt`:`an ${v.days} von ${U[id].d} Tagen`,v.v===2&&v.fuer&&W[v.fuer]?`für ${W[v.fuer].n}`:""].filter(Boolean).join(" · "),plan:v.plan,note:v.note})),
     ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&v.r).map(([id,v])=>({id,t:v.t,c:P[id].cat,title:ptl(P[id]),sub:"Belastungsprobe",note:v.r})),
     ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&v.wq).map(([id,v])=>({id,t:v.wqt||v.t,c:"miteinander",title:ptl(P[id]),sub:"Prüfstein Würde",note:v.wq})),
     ...Object.entries(S.proben).filter(([id,v])=>P[id]&&v&&Array.isArray(v.hist)&&v.hist.length&&v.o!=null).map(([id,v])=>{const h=v.hist[v.hist.length-1];const q=pv(P[id]);return {id,t:v.t,c:q.cat,title:q.t,sub:"Erneut entschieden",note:`Damals: ${optT(q,h.o)} Heute: ${optT(q,v.o)}`}}),
@@ -2142,7 +2347,8 @@ function journalFold(){
     <div class="tiles"><div><b>${nRead}</b><span>Impulse gelesen</span></div><div><b>${nPr}</b><span>Proben entschieden</span></div><div><b>${done.length}</b><span>Übungen geschafft</span></div></div>
     <p class="muted small">Hier verfällt nichts, wenn du eine Pause machst.</p>
     ${top.length?`<h3>Was in deinen Entscheidungen den Ausschlag gab</h3><div class="links">${top.map(([id,n])=>`<button class="tag" ${cc(W[id].cat)} data-wert="${id}">${dot(W[id].cat)}${W[id].n}<em>${n}</em></button>`).join("")}</div>`:""}
-    <h3>Notizen</h3>${journal.length?`<div class="journal">${journal.map(j=>`<div class="jr" ${cc(j.c)}><small>${fmtDate(j.t)} · ${j.sub}</small><b>${j.title}</b>${j.note?`<p>${esc(j.note)}</p>`:""}</div>`).join("")}</div>`:`<p class="muted small">Wenn du eine Übung abschließt oder eine Entscheidung begründest, erscheinen deine Notizen hier.</p>`}
+    ${lv.length?`<h3>Im Alltag gelebt</h3><div class="links">${lv.map(([id,n])=>`<button class="tag" ${cc(W[id].cat)} data-wert="${id}">${dot(W[id].cat)}${W[id].n}<em>${n}</em></button>`).join("")}</div>`:""}
+    <h3>Notizen</h3>${journal.length?`<div class="journal">${journal.map(j=>`<div class="jr" ${cc(j.c)}><small>${fmtDate(j.t)} · ${j.sub}</small><b>${j.title}</b>${j.plan?`<p class="jplan">${esc(j.plan)}</p>`:""}${j.note?`<p>${esc(j.note)}</p>`:""}</div>`).join("")}</div>`:`<p class="muted small">Wenn du eine Übung abschließt oder eine Entscheidung begründest, erscheinen deine Notizen hier.</p>`}
     <h3>Gemerkte Impulse</h3>${saved.length?`<div class="list">${saved.map(id=>{const b=I[id];return `<button class="li" data-open="${id}">${dot(b.cat)}<span class="tx"><b>${b.t}</b><small>${b.src}</small></span></button>`}).join("")}</div>`:`<p class="muted small">Tippe bei einem Impuls auf „Merken“, um ihn hier wiederzufinden.</p>`}
     ${got.length?`<h3>Momente</h3><div class="moms">${got.map(m=>`<span class="mom">${m.t}<small>${fmtDate(S.moments[m.id])}</small></span>`).join("")}</div>`:""}
   </div></details>`}
@@ -2153,7 +2359,7 @@ function aboutFold(){return `<details class="fold" id="aboutfold" ${S.aboutOpen|
   <p>Werte geraten oft in Spannung zueinander. Das ist kein Zeichen von Haltlosigkeit, sondern normal. Stabil wird ein Gerüst, wenn du deine Werte kennst, sie in schwierigen Lagen abwägst und sie im Alltag lebst. Darum gibt es Impulse zum Nachdenken, Belastungsproben zum Entscheiden und Übungen zum Tun.</p>
   <h3>So wächst eine Stütze</h3><p>Jede Stütze hat fünf Bauteile: gewählt, Leitsatz, geprüft, gelebt und bekräftigt. Die Stäbe berühren sich kaum. Wie bei einer Tensegrity-Skulptur hält Spannung das Ganze zusammen: feine Seile verbinden benachbarte Stabenden, und wenn du in einer Belastungsprobe zwischen zwei deiner Werte abgewogen hast, kommt ein farbiges Spannseil dazu. Werte dürfen also in Spannung zueinander stehen. Gerade das macht das Gerüst stabil.</p>
   <h3>Wie sicher ist ein Impuls?</h3><div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)}<span class="muted">${["Philosophie, Zeitzeugnis oder Denkmodell","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder sehr viele Studien"][l]}</span></div>`).join("")}</div>
-  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 20.10.2026, 01:49 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
+  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 20.10.2026, 11:46 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
   <div class="row"><button class="btn" id="shareapp">App weiterempfehlen</button></div>
   <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
   <div class="credit"><span class="label">Von wem</span><p>Das Wertegerüst ist ein privates Projekt von <b>Carlo Maximilian Engeländer</b>. Idee, Auswahl, Texte und Gestaltung stammen von ihm.</p><p class="muted small">© 2026 Carlo Maximilian Engeländer. Alle Rechte vorbehalten. Du darfst die App gern nutzen und den Link weitergeben, auch im Unterricht. Inhalte, Texte und Gestaltung dürfen aber nicht ohne Erlaubnis kopiert, verändert oder anderswo veröffentlicht werden.</p></div>
@@ -2165,6 +2371,8 @@ function settingsFold(){const sw=(id,on,label,sub)=>`<button class="setrow" data
    ${sw("antiScroll",S.settings.antiScroll,"Hinweis gegen Endlos-Lesen","Nach fünf Impulsen hintereinander schlägt die App vor, etwas zu prüfen oder auszuprobieren.")}
    <div class="setrow static"><span><b>Tägliche Erinnerung</b><small>Ein täglicher Termin in deinem eigenen Kalender. Die App selbst schickt keine Nachrichten und sammelt keine Daten.</small></span></div>
    <div class="row"><input type="time" id="rtime" value="${S.settings.remindTime}" aria-label="Uhrzeit"><button class="btn" id="dailyics">Apple-Kalender</button><a class="btn" id="dailyg" href="${dailyGoogle()}" target="_blank" rel="noopener">Google Kalender</a></div>
+   <div class="setrow static"><span><b>Erinnerung an Übungen</b><small>Diese Uhrzeit schlägt die App vor, wenn sie dir nach dem Annehmen einer Übung eine Erinnerung anbietet.</small></span></div>
+   <div class="row"><input type="time" id="utimedef" value="${S.settings.uebTime}" aria-label="Uhrzeit für Übungs-Erinnerungen"></div>
    <h3 id="pfhead">Beispiele anpassen</h3>
    <p class="muted small">Damit die Beispiele in Proben und Übungen zu deinem Leben passen. Jede Frage ist freiwillig. Deine Angaben bleiben auf diesem Gerät.</p>
    ${pfForm()}
@@ -2333,41 +2541,102 @@ const activeUeb=()=>Object.entries(S.ueb).filter(([,v])=>v&&v.status==="active")
 function suggestUeb(){const free=UEBUNGEN.filter(u=>!S.ueb[u.id]);if(!free.length)return null;
   const kc=new Set(S.kern.map(id=>W[id].cat)),kw=new Set(S.kern);const pref=free.filter(u=>kw.has(u.w)),pref2=free.filter(u=>kc.has(u.cat));
   const list=pref.length?pref:pref2.length?pref2:free;return list[(Math.floor(now()/DAY)+(S.uskip||0))%list.length]}
-function uebCard(e,mode){e=uv(e);const v=S.ueb[e.id];let extra="";
-  if(mode==="active"){const total=e.d,el=Math.min(total,Math.floor((now()-v.start)/DAY)),left=Math.max(0,total-el);
-    extra=`<div class="prog"><div class="meter"><span style="width:${Math.max(4,Math.round(el/total*100))}%"></span></div><span class="label">${left?`Noch ${left} Tag${left>1?"e":""} · bis ${fmtDate(v.start+total*DAY)}`:"Zeit ist um. Wie lief es?"}</span></div>
-    <div class="row"><button class="btn primary" data-done="${e.id}">${early(e.id)?"Früher abschließen":"Geschafft"}</button><button class="btn" data-remind="${e.id}">Erinnern</button><button class="btn" data-ueb="${e.id}">Anleitung</button><button class="linkbtn" data-drop="${e.id}">Abbrechen</button></div>${checkRow(e.id)}<button class="mini" data-ushare="${e.id}">Mit jemandem machen</button>`}
-  else extra=`<div class="row"><button class="btn primary" data-accept="${e.id}" ${activeUeb().length>=MAXACT?"disabled":""}>Annehmen</button><button class="btn" data-ueb="${e.id}">Mehr dazu</button>${mode==="suggest"?`<button class="linkbtn" id="uother">Anderer Vorschlag</button>`:""}</div><button class="mini" data-ushare="${e.id}">Mit jemandem machen</button>${activeUeb().length>=MAXACT?`<p class="muted small">Du hast schon ${MAXACT} Übungen laufen. Schließ zuerst eine ab, bevor du eine neue beginnst.</p>`:""}`;
-  return `<article class="exp" ${cc(e.cat)}><div class="meta"><span>${dot(e.cat)}${W[e.w].n}</span><span>${e.d===1?"Heute":e.d+" Tage"}</span></div><h2>${e.t}</h2><p>${e.x}</p>${extra}</article>`}
+/* Laufende Übung: oben das freiwillige Feld für Plan, Satz oder Notiz (Aufforderung aus u.p; p:false heißt kein Feld),
+   dann der Stand, der Tageseintrag (Gemacht / Keine Gelegenheit / Diesmal nicht) mit kleinen Tagesmarken und die Knöpfe.
+   „Früher abschließen“ ist ein Textknopf; Hauptknopf ist „Geschafft“ erst, wenn die Zeit um ist oder die Übung schon geschafft ist. */
+const PLAN_DEF="Dein Plan oder deine Notiz, nur für dich";
+const Tg=x=>x===1?"einem Tag":`${x} Tagen`;
+let logBack={};
+function logHTML(e,v){if(!(e.d>1||v.keep))return "";const di=dayIdx(v),maxD=v.keep?di:e.d-1,lg=v.log||{};
+  const canT=di<=maxD,canY=di>=1&&di-1<=maxD;
+  /* Einmal-Übung mit „Gemacht“: keine Tageszeile mehr, nur der Stand und ein Weg, den Eintrag zurückzunehmen */
+  if(EINMAL.has(e.id)&&nJa(v)>=1){const k=+Object.keys(lg).find(x=>lg[x]==="ja");
+    return `<div class="ulog done1"><p class="muted small ustand">Gemacht am ${fmtDate(new Date(v.start).setHours(12,0,0,0)+k*DAY).replace(/\.$/,"")}. Damit ist die Übung geschafft. Du kannst sie abschließen, wann du magst.</p><button class="linkbtn" data-log="${e.id}" data-day="${k}" data-val="ja">Eintrag zurücknehmen</button></div>`}
+  if(!canT&&!canY)return "";
+  const back=!canT||(!!logBack[e.id]&&canY),k=back?di-1:di,cur=lg[k]||null;
+  const from=v.keep?Math.max(0,di-6):0,to=v.keep?di:e.d-1;let marks="";
+  for(let i=from;i<=to;i++)marks+=`<i class="${lg[i]||"leer"}${i>di?" fut":""}${i===k?" now":""}"></i>`;
+  const n=nJa(v),need=needDays(e.id,v);
+  const stand=EINMAL.has(e.id)?(n?"Gemacht. Damit ist die Übung geschafft. Du kannst sie abschließen, wann du magst.":"Ein einziges Mal genügt. Trag „Gemacht“ ein, sobald es so weit ist.")
+    :n>=need?`An ${Tg(n)} gemacht. Damit gilt die Übung als geschafft.`
+    :`${n?`Bisher an ${Tg(n)} gemacht. `:""}Ab ${Tg(need)} gilt die Übung als geschafft. ${GELEG.has(e.id)?"Tage ohne Gelegenheit zählen nicht mit.":"Ein verpasster Tag ändert nichts."}`;
+  const sw=canT&&canY?`<button class="linkbtn" data-logback="${e.id}">${back?"Zurück zu heute":"Gestern nachtragen"}</button>`:"";
+  return `<div class="ulog"><div class="sh"><span class="label">${back?"Gestern":"Heute"} · Tag ${k+1}${v.keep?"":` von ${e.d}`}</span>${sw}</div>
+   <div class="chips wrap lchips" role="group" aria-label="Eintrag für ${back?"gestern":"heute"}">${LOGW.map(([x,t])=>`<button class="chip" aria-label="${t}" data-log="${e.id}" data-day="${k}" data-val="${x}" aria-pressed="${cur===x}">${t.replace("Gelegenheit","Gelegen&shy;heit")}</button>`).join("")}</div>
+   <div class="marks" aria-hidden="true">${marks}</div><p class="muted small ustand">${stand}</p></div>`}
+function uebCard(e,mode){e=uv(e);const v=S.ueb[e.id];let extra="",meta=W[e.w]?W[e.w].n:"",dur=e.d===1?"Heute":e.d+" Tage";
+  if(mode==="active"){const di=dayIdx(v),total=e.d,keep=!!v.keep,fw=v.fuer&&W[v.fuer]?W[v.fuer]:null;
+    /* Kopfzeile: die Stütze, für die man übt (sonst der Wert der Übung); rechts die Frist */
+    if(fw)meta=fw.n;dur=keep?"ohne Frist":total===1?"Heute":`bis ${fmtDate(v.start+(total-1)*DAY)}`;
+    const lab=e.p===false?null:(e.p||PLAN_DEF);
+    const plan=lab?`<div class="uplan"><label class="pl" for="plan-${e.id}">${esc(lab)}</label><textarea id="plan-${e.id}" data-plan="${e.id}" rows="2" placeholder="Freiwillig. Ein, zwei Sätze reichen.">${esc(v.plan||"")}</textarea><span class="psaved" aria-live="polite"></span></div>`:"";
+    const lg=logHTML(e,v);
+    /* Ohne Tageszeile (eintägig oder nach Fristende) steht der Stand in einer Zeile; sonst zeigen Tageszeile und Marken ihn. */
+    const prog=lg?"":`<div class="prog"><span class="label">${keep?`Läuft ohne Frist · seit ${fmtDate(v.start)}`:di<total?(total===1?"Heute":`Tag ${di+1} von ${total}`):"Zeit ist um. Wie lief es?"}</span></div>`;
+    const ea=early(e.id),reached=nJa(v)>=needDays(e.id,v)&&(total>1||keep),main=!ea||reached,up=!keep&&di>=total;
+    const forBtn=META.includes(e.id)?"":`<button class="linkbtn" data-fuer="${e.id}">${fw?"Stütze ändern":"Ohne Stütze · ändern"}</button>`;
+    extra=`${plan}${META.includes(e.id)?`<p class="muted small ufor">Diese Übung ordnet dein Gerüst. Sie setzt kein Bauteil.</p>`:""}${prog}${lg}
+    <div class="row">${main?`<button class="btn primary" data-done="${e.id}">Geschafft</button>`:""}${up&&total>1&&!EINMAL.has(e.id)?`<button class="btn" data-keep="${e.id}">Beibehalten</button>`:""}<button class="btn" data-remind="${e.id}">Erinnern</button></div>
+    <div class="row urow2">${main?"":`<button class="linkbtn" data-done="${e.id}">Früher abschließen</button>`}<button class="linkbtn" data-ueb="${e.id}">Anleitung</button>${forBtn}<button class="linkbtn" data-drop="${e.id}">Abbrechen</button></div><button class="mini" data-ushare="${e.id}">Mit jemandem machen</button>`;
+    return `<article class="exp run" ${cc(e.cat)} data-run="${e.id}"><div class="meta"><span>${dot(fw?fw.cat:e.cat)}${meta}</span><span class="nowrap">${dur}</span></div><h2>${e.t}</h2>${extra}</article>`}
+  extra=`<div class="row"><button class="btn primary" data-accept="${e.id}" ${activeUeb().length>=MAXACT?"disabled":""}>Annehmen</button><button class="btn" data-ueb="${e.id}">Mehr dazu</button>${mode==="suggest"?`<button class="linkbtn" id="uother">Anderer Vorschlag</button>`:""}</div><button class="mini" data-ushare="${e.id}">Mit jemandem machen</button>${activeUeb().length>=MAXACT?`<p class="muted small">Du hast schon ${MAXACT} Übungen laufen. Schließ zuerst eine ab, bevor du eine neue beginnst.</p>`:""}`;
+  return `<article class="exp" ${cc(e.cat)}><div class="meta"><span>${dot(e.cat)}${FREIWERT.has(e.id)?"Wert nach Wahl":meta}</span><span>${dur}</span></div><h2>${e.t}</h2><p>${e.x}</p>${extra}</article>`}
+const lastRun=id=>{const r=runsOf(id).filter(x=>x.status==="done");return r[r.length-1]||null};
 function viewUeben(){
   const p=currentProbe(),act=activeUeb(),sug=suggestUeb();
   const pc={alle:PROBEN.length},uc={alle:UEBUNGEN.length};CATKEYS.forEach(k=>{pc[k]=PROBEN.filter(x=>x.cat===k).length;uc[k]=UEBUNGEN.filter(x=>x.cat===k).length});
   const nDone=nPrDone();
   let h=`<section class="view"><header class="vh"><h1>Üben</h1><p>In Belastungsproben entscheidest du dich in schwierigen Lagen. In Übungen lebst du einen Wert im Alltag. Beides baut an deinem Gerüst.</p></header>`;
+  const run=`<div class="sec"><div class="sh"><span class="label">Übungen, die laufen</span><span class="label">${act.length} von ${MAXACT}</span></div>${act.length?act.map(id=>uebCard(U[id],"active")).join(""):`<p class="muted small">Übungen sind kleine Schritte, mit denen du einen Wert im Alltag lebst. Nichts davon muss perfekt gelingen.</p>`}</div>`;
+  /* Laufen Übungen, stehen sie oben, damit man nicht jedes Mal an der Probe vorbeiscrollt. */
+  if(act.length)h+=run;
   h+=`<div class="sec"><div class="sh"><span class="label">Belastungsprobe</span><span class="label">${nDone} von ${PROBEN.length} entschieden</span></div>${chips("pfilter",pFilter,pc)}${p?probeCard(p):""}</div>`;
-  h+=`<div class="sec"><div class="sh"><span class="label">Übungen, die laufen</span><span class="label">${act.length} von ${MAXACT}</span></div>${act.length?act.map(id=>uebCard(U[id],"active")).join(""):`<p class="muted small">Übungen sind kleine Schritte, mit denen du einen Wert im Alltag lebst. Nichts davon muss perfekt gelingen.</p>`}</div>`;
+  if(!act.length)h+=run;
   if(sug)h+=`<div class="sec"><div class="sh"><span class="label">Vorschlag für dich</span></div>${uebCard(sug,"suggest")}</div>`;
   const ul=UEBUNGEN.filter(u=>uFilter==="alle"||u.cat===uFilter),lim=uMore?ul.length:6;
-  h+=`<details class="fold" id="uebfold" ${S.uebOpen?"open":""}><summary><span>Alle Übungen</span><span class="label">${UEBUNGEN.length}</span>${CHEV}</summary><div class="fbody">${chips("ufilter",uFilter,uc)}<div class="list">${ul.slice(0,lim).map(u=>{const v=S.ueb[u.id];const st=v?(v.status==="active"?"läuft":v.status==="done"?"geschafft":"abgebrochen"):(u.d===1?"heute":u.d+" Tage");return `<button class="li" data-ueb="${u.id}">${dot(u.cat)}<span class="tx"><b>${u.t}</b></span><span class="aside">${st}</span></button>`}).join("")}</div>${ul.length>lim?`<button class="linkbtn" id="umore">${ul.length-lim} weitere anzeigen</button>`:""}</div></details>`;
+  h+=`<details class="fold" id="uebfold" ${S.uebOpen?"open":""}><summary><span>Alle Übungen</span><span class="label">${UEBUNGEN.length}</span>${CHEV}</summary><div class="fbody">${chips("ufilter",uFilter,uc)}<div class="list">${ul.slice(0,lim).map(u=>{const v=S.ueb[u.id],lr=lastRun(u.id);const st=v?(v.status==="active"?"läuft":v.status==="done"?(v.ok===false?"beendet":"geschafft"):lr?"geschafft":"abgebrochen"):(u.d===1?"heute":u.d+" Tage");return `<button class="li" data-ueb="${u.id}">${dot(u.cat)}<span class="tx"><b>${uv(u).t}</b></span><span class="aside">${st}</span></button>`}).join("")}</div>${ul.length>lim?`<button class="linkbtn" id="umore">${ul.length-lim} weitere anzeigen</button>`:""}</div></details>`;
   h+=`<details class="fold" id="prfold" ${S.prOpen?"open":""}><summary><span>Alle Belastungsproben</span><span class="label">${nDone} / ${PROBEN.length}</span>${CHEV}</summary><div class="fbody"><div class="list">${PROBEN.map(x=>`<button class="li" data-probe-open="${x.id}">${dot(x.cat)}<span class="tx"><b>${ptl(x)}</b></span><span class="aside">${S.proben[x.id]&&S.proben[x.id].o!=null?"entschieden":"offen"}</span></button>`).join("")}</div></div></details>`;
   return h+`</section>`}
-function uebSheet(id){const e=uv(U[id]),v=S.ueb[id],w=W[e.w];
+function uebSheet(id,hint){const e=uv(U[id]),v=S.ueb[id],w=W[e.w],nd=runsOf(id).filter(r=>r.status==="done").length,full=activeUeb().length>=MAXACT;
+  const acc=lab=>`<button class="btn${lab==="Annehmen"?" primary":""}" data-accept="${id}" ${hint?`data-uhint="${hint}"`:""} ${full?"disabled":""}>${lab}</button>`;
   sheet(`${invited===id?`<div class="gift"><span class="label">Eine Einladung</span><p>Jemand möchte diese Übung gemeinsam mit dir machen. Sie stammt aus dem Wertegerüst, einer kostenlosen App ohne Anmeldung.</p></div>`:""}<div class="label">${dot(e.cat)}${CATS[e.cat].n} · ${e.d===1?"Heute":e.d+" Tage"}</div><h2>${e.t}</h2><p class="lead">${e.x}</p><h3>So gehst du vor</h3><ol class="howto">${e.s.map(s=>`<li>${s}</li>`).join("")}</ol>
-  <h3>Welcher Wert dahintersteht</h3>${goBtn("wert",w.id,w.cat,S.kern.includes(w.id)?"Deine Stütze":"Wert",w.n)}
-  <div class="row">${!v||v.status==="dropped"?`<button class="btn primary" data-accept="${id}" ${activeUeb().length>=MAXACT?"disabled":""}>Annehmen</button>`:v.status==="active"?`<button class="btn primary" data-done="${id}">${early(id)?"Früher abschließen":"Geschafft"}</button>`:`<span class="label">Geschafft am ${fmtDate(v.end)}</span><button class="btn" data-accept="${id}" ${activeUeb().length>=MAXACT?"disabled":""}>Noch einmal</button>`}</div><button class="mini" data-ushare="${id}">Mit jemandem machen</button>`,e.cat)}
-/* Mehrtägige Übung vor ihrem Ende abschließen: Dann fragt die App, an wie vielen Tagen man sie gemacht hat.
-   Zur Wahl stehen nur Zahlen bis zur Zahl der Kalendertage seit dem Start. Ab einem Tag zählt die Übung als gelebt. */
-function early(id){const e=U[id],v=S.ueb[id];return !!(e&&v&&v.status==="active"&&e.d>1&&dayIdx(v)+1<e.d)}
-/* pre: Werte, mit denen das Blatt nach „Rückgängig“ wieder gefüllt wird (Stimmung, Notiz, Tage) */
-function doneSheet(id,pre){const e=U[id],v=S.ueb[id]||{},ea=early(id),mx=ea?Math.min(e.d,dayIdx(v)+1):0;
-  sheet(`<div class="label">${ea?"Früher abschließen":"Geschafft"}</div><h2>${e.t}</h2>${ea?`<p class="lead">Die Übung ist auf ${e.d} Tage angelegt. An wie vielen Tagen hast du sie gemacht?</p><div class="chips" id="udays">${Array.from({length:mx+1},(_,k)=>`<button class="chip" data-udays="${k}" aria-pressed="false">${k===0?"Noch an keinem":k===1?"An einem Tag":`An ${k} Tagen`}</button>`).join("")}</div><p class="muted small udnote" id="udaysnote">Für das Bauteil zählt die Übung ab einem Tag. Die Zahl steht in deinem Bautagebuch.</p>`:""}${v.checks&&Object.keys(v.checks).length?`<div class="dcurve"><span class="label">Deine Zwischenstationen</span>${spark(v)}</div>`:""}<p class="lead">Wie war es? Deine Antwort bleibt auf diesem Gerät.</p><div class="chips" id="moods">${[["gut","Hat mir gutgetan"],["mix","Gemischt"],["nein","Eher nicht"]].map(([k,n])=>`<button class="chip" data-mood="${k}" aria-pressed="false">${n}</button>`).join("")}</div><label class="label" for="note">Was nimmst du mit?</label><textarea id="note" placeholder="Ein, zwei Sätze reichen."></textarea><div class="row"><button class="btn primary" id="savedone" data-id="${id}">Speichern</button></div>`,e.cat);
+  <h3>Welcher Wert dahintersteht</h3>${FREIWERT.has(id)?`<p class="muted small">Den Wert wählst du selbst: Beim Annehmen nimmst du dir eine deiner Stützen vor.</p>`:goBtn("wert",w.id,w.cat,S.kern.includes(w.id)?"Deine Stütze":"Wert",w.n)}
+  ${META.includes(id)?`<p class="muted small">Diese Übung ordnet dein Gerüst. Sie setzt kein Bauteil, steht aber danach im Bautagebuch.</p>`:""}
+  <div class="row">${!v||v.status==="dropped"?acc("Annehmen"):v.status==="active"?`<button class="btn primary" data-done="${id}">${early(id)&&nJa(v)<needDays(id,v)?"Früher abschließen":"Geschafft"}</button>`:`<span class="label">${v.ok===false?"Beendet":"Geschafft"} am ${fmtDate(v.end)}</span>${acc("Noch einmal")}`}</div>
+  ${nd>1?`<p class="muted small">Du hast diese Übung schon ${nd}-mal abgeschlossen. Alle Durchgänge stehen im Bautagebuch.</p>`:""}<button class="mini" data-ushare="${id}">Mit jemandem machen</button>`,e.cat)}
+/* Annehmen: Für welche Stütze? Vorgeschlagen wird die Stütze mit dem Wert der Übung, sonst eine aus demselben Bereich.
+   Die Wahl lässt sich abwählen (dann ohne Stütze) und später auf der Karte ändern (change=true). */
+let accSel=null;
+function fuerNote(uid,k){if(!k)return "Ohne Stütze setzt die Übung kein Bauteil. Sie steht trotzdem in deinem Bautagebuch.";const n=W[k].n;
+  if(lived(k))return `${n} ist schon gelebt. Die Übung zählt dort als weitere gelebte Übung und steht im Bautagebuch.`;
+  return `${FREIWERT.has(uid)?`Die Übung gilt dann für ${n}. `:""}Wenn du sie schaffst, bekommt ${n} das Bauteil „gelebt“.`}
+function acceptSheet(id,hint,from,change){const e=uv(U[id]),meta=META.includes(id);accSel=change?(S.ueb[id]&&S.ueb[id].fuer)||null:defFuer(id,hint);
+  const body=meta?`<p class="lead">Diese Übung ordnet dein Gerüst. Sie setzt kein Bauteil, aber sie steht danach in deinem Bautagebuch.</p>`
+   :S.kern.length?`<p class="lead">${FREIWERT.has(id)?"Welchen Wert nimmst du dir vor? Wähle eine deiner Stützen.":"Für welche deiner Stützen machst du sie?"}</p><div class="chips wrap" id="fsel" role="group" aria-label="Stütze wählen">${S.kern.map(k=>`<button class="chip" ${cc(W[k].cat)} data-fsel="${k}" aria-pressed="${accSel===k}">${dot(W[k].cat)}${W[k].n}</button>`).join("")}</div><p class="muted small" id="fselnote">${fuerNote(id,accSel)}</p>`
+   :`<p class="lead">Du hast noch keine Stützen. Du kannst die Übung trotzdem machen. Sie steht danach in deinem Bautagebuch.</p>`;
+  sheet(`<div class="label">${dot(e.cat)}${change?"Stütze ändern":`Übung annehmen · ${e.d===1?"heute":e.d+" Tage"}`}</div><h2>${e.t}</h2>${body}<div>${change?"":`<div class="accrem"><button class="chip" id="accrem" aria-pressed="false">Erinnerung im Kalender</button><span class="accat"><label class="label" for="acctime">um</label><input type="time" id="acctime" value="${S.settings.uebTime||"19:00"}"></span></div><p class="muted small">Freiwillig. ${e.d===1?"Ein Termin":"Ein Termin an jedem Tag der Übung"} in deinem eigenen Kalender. Mehr Möglichkeiten gibt es auf der Karte unter „Erinnern“.</p>`}</div><div class="row">${change?`<button class="btn primary" id="fuergo" data-id="${id}">Speichern</button>`:`<button class="btn primary" id="acceptgo" data-id="${id}" data-from="${from?1:""}">Annehmen</button>`}</div>`,e.cat)}
+/* Mehrtägige Übung vor ihrem Ende abschließen. Eine Übung, die ohne Frist weiterläuft, ist nie „früher“. */
+function early(id){const e=U[id],v=S.ueb[id];return !!(e&&v&&v.status==="active"&&!v.keep&&e.d>1&&dayIdx(v)+1<e.d)}
+/* Abschluss: Bei mehrtägigen Übungen stehen die Tage aus den Einträgen schon da; ohne Einträge fragt die App danach.
+   pre: Werte, mit denen das Blatt nach „Rückgängig“ wieder gefüllt wird (Stimmung, Notiz, Tage) */
+function doneSheet(id,pre){const e=uv(U[id]),v=S.ueb[id]||{},ea=early(id),multi=e.d>1||!!v.keep,n=nJa(v),need=needDays(id,v),hasLog=!!(v.log&&Object.keys(v.log).length);
+  const one=multi&&EINMAL.has(id);
+  let mx=one?1:multi?(ea||v.keep?dayIdx(v)+1:e.d):0;if(!v.keep&&!one)mx=Math.min(mx,e.d);if(!one)mx=Math.max(mx,n);
+  const num=mx>7,lab=k=>one?(k?"Ja, gemacht":"Noch nicht"):num?String(k):k===0?"Noch an keinem":k===1?"An einem Tag":`An ${k} Tagen`;
+  const UDN0=`Für das Bauteil zählt die Übung ab ${Tg(need)}.${GELEG.has(id)&&!EINMAL.has(id)?" Tage ohne Gelegenheit zählen nicht mit.":""} Die Zahl steht in deinem Bautagebuch.`;
+  const lead=one?"Hast du es gemacht?":hasLog?`Nach deinen Einträgen hast du die Übung an ${Tg(n)} gemacht. Du kannst die Zahl noch ändern.`:ea?`Die Übung ist auf ${e.d} Tage angelegt. An wie vielen Tagen hast du sie gemacht?`:`An wie vielen Tagen hast du die Übung gemacht?`;
+  const fw=v.fuer&&W[v.fuer]?W[v.fuer]:null;
+  const info=META.includes(id)?`<p class="muted small">Diese Übung ordnet dein Gerüst. Sie setzt kein Bauteil.</p>`:v.v===2&&!fw?`<p class="muted small">Die Übung läuft ohne Stütze. Sie setzt kein Bauteil und steht im Bautagebuch.</p>`:"";
+  sheet(`<div class="label">${ea&&n<need?"Früher abschließen":"Geschafft"}</div><h2>${e.t}</h2>${info}${multi?`<p class="lead">${lead}</p><div class="chips wrap${num?" num":""}" id="udays">${Array.from({length:mx+1},(_,k)=>`<button class="chip" data-udays="${k}" aria-pressed="false">${lab(k)}</button>`).join("")}</div>${num?`<p class="muted small">Zahl der Tage, an denen du sie gemacht hast.</p>`:""}<p class="muted small udnote" id="udaysnote">${one?"Ein einziges Mal genügt.":UDN0}</p>`:""}${v.checks&&Object.keys(v.checks).length?`<div class="dcurve"><span class="label">Deine Zwischenstationen</span>${spark(v)}</div>`:""}<p class="lead">Wie war es? Deine Antwort bleibt auf diesem Gerät.</p><div class="chips wrap" id="moods">${[["gut","Hat mir gutgetan"],["mix","Gemischt"],["nein","Eher nicht"]].map(([k,n])=>`<button class="chip" data-mood="${k}" aria-pressed="false">${n}</button>`).join("")}</div><label class="label" for="note">Was nimmst du mit?</label><textarea id="note" placeholder="Ein, zwei Sätze reichen."></textarea><div class="row"><button class="btn primary" id="savedone" data-id="${id}">Speichern</button></div>`,e.cat);
   /* Tage und Stimmung: Antippen wählt, erneutes Antippen der gewählten Antwort hebt die Wahl auf */
-  const ud=$("#udays"),UDN=$("#udaysnote")?$("#udaysnote").textContent:"";
-  const setDays=c=>{ud.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));
-    $("#udaysnote").textContent=!c?UDN:c.dataset.udays==="0"?"Dann setzt diese Übung noch kein Bauteil. Du kannst sie auch weiterlaufen lassen und später abschließen.":"Danke für die ehrliche Zahl. Sie steht in deinem Bautagebuch."};
+  const ud=$("#udays");
+  const setDays=c=>{ud.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));const k=c?+c.dataset.udays:null;
+    $("#udaysnote").textContent=k==null?(one?"Ein einziges Mal genügt.":UDN0):k===0?"Dann setzt diese Übung noch kein Bauteil. Du kannst sie auch weiterlaufen lassen und später abschließen."
+      :one?"Danke. Damit ist die Übung geschafft.":k<need?`Danke für die ehrliche Zahl. Für das Bauteil zählt die Übung ab ${Tg(need)}. Du kannst sie auch weiterlaufen lassen.`:"Danke für die ehrliche Zahl. Sie steht in deinem Bautagebuch."};
   if(ud)ud.addEventListener("click",ev=>{const c=ev.target.closest("[data-udays]");if(!c)return;setDays(c.getAttribute("aria-pressed")==="true"?null:c)});
   const setMood=c=>$("#moods").querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));
   $("#moods").addEventListener("click",ev=>{const c=ev.target.closest("[data-mood]");if(!c)return;setMood(c.getAttribute("aria-pressed")==="true"?null:c)});
+  if(ud&&hasLog&&!pre){const c=ud.querySelector(`[data-udays="${Math.min(n,mx)}"]`);if(c)setDays(c)}
   if(pre){if(ud&&pre.days!=null){const c=ud.querySelector(`[data-udays="${pre.days}"]`);if(c)setDays(c)}if(pre.mood)setMood($(`#moods [data-mood="${pre.mood}"]`));if(pre.note)$("#note").value=pre.note}}
 
 /* ---------- Vertiefen ---------- */
@@ -2572,22 +2841,29 @@ function trace(el,col){if(calm()||!el)return;const r=el.getBoundingClientRect(),
 const pad=n=>String(n).padStart(2,"0");
 const icsDate=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
 const esc2=s=>s.replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;");
-function remindPlan(id,mode){const e=U[id],v=S.ueb[id],start=new Date(),endDay=new Date(v.start+e.d*DAY);
-  let first=new Date(),count=1,hour=8;
-  if(mode==="morgen"){first.setDate(first.getDate()+1);hour=8}
-  if(mode==="taeglich"){hour=19;if(first.getHours()>=19)first.setDate(first.getDate()+1);count=Math.max(1,Math.ceil((endDay-first)/DAY))}
-  if(mode==="ende"){first=new Date(endDay.getTime()-DAY);hour=18;if(first<start)first=new Date()}
-  first.setHours(hour,0,0,0);const end=new Date(first.getTime()+15*60000);
+/* Uhrzeit: im Erinnern-Blatt wählbar (remindAt), sonst die Standard-Uhrzeit aus den Einstellungen (S.settings.uebTime). */
+let remindMode="taeglich",remindAt=null;
+const remTime=()=>remindAt||S.settings.uebTime||"19:00";
+function remindPlan(id,mode,tm){const e=U[id],v=S.ueb[id],start=new Date(),lastDay=new Date(v.keep?now()+13*DAY:v.start+(e.d-1)*DAY);lastDay.setHours(23,59,0,0);
+  const [h,mi]=(tm||remTime()).split(":").map(Number);let first=new Date(),count=1;const at=d=>{d.setHours(h||0,mi||0,0,0);return d};
+  if(mode==="morgen")first.setDate(first.getDate()+1);
+  /* Täglich bis einschließlich zum letzten Tag der Übung */
+  if(mode==="taeglich"){if(at(new Date())<=start)first.setDate(first.getDate()+1);const f0=new Date(first);f0.setHours(0,0,0,0);const l0=new Date(lastDay);l0.setHours(0,0,0,0);count=Math.max(1,Math.round((l0-f0)/DAY)+1)}
+  if(mode==="ende"){first=new Date(lastDay);if(at(new Date(first))<start)first=new Date();if(at(new Date(first))<start)first.setDate(first.getDate()+1)}
+  at(first);const end=new Date(first.getTime()+15*60000);
   return {e,first,end,count,text:`Wertegerüst: ${e.t}`,details:`${e.x}\n\n${e.s.map(s=>"• "+s).join("\n")}\n\n${APP_URL}#ueben`}}
 function icsFor(p){return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Wertegeruest//DE","CALSCALE:GREGORIAN","BEGIN:VEVENT",`UID:${p.e.id}-${Date.now()}@wertegeruest`,`DTSTAMP:${icsDate(new Date())}`,`DTSTART:${icsDate(p.first)}`,`DTEND:${icsDate(p.end)}`,p.count>1?`RRULE:FREQ=DAILY;COUNT=${p.count}`:"",`SUMMARY:${esc2(p.text)}`,`DESCRIPTION:${esc2(p.details)}`,`URL:${APP_URL}`,"BEGIN:VALARM","ACTION:DISPLAY",`DESCRIPTION:${esc2(p.text)}`,"TRIGGER:PT0M","END:VALARM","END:VEVENT","END:VCALENDAR"].filter(Boolean).join("\r\n")}
 function googleFor(p){const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;let u=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(p.text)}&dates=${icsDate(p.first)}/${icsDate(p.end)}&ctz=${encodeURIComponent(tz)}&details=${encodeURIComponent(p.details)}`;if(p.count>1)u+=`&recur=${encodeURIComponent("RRULE:FREQ=DAILY;COUNT="+p.count)}`;return u}
-let remindMode="taeglich";
-function remindSheet(id){const e=U[id];const p=remindPlan(id,remindMode);const when=p.first.toLocaleString("de-DE",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
-  sheet(`<div class="label">Erinnerung</div><h2>${e.t}</h2><p class="lead">Die Erinnerung landet in deinem eigenen Kalender. So meldet sich dein Handy zuverlässig, auch wenn die App geschlossen ist.</p>
-  <div class="chips">${[["morgen","Morgen früh"],["taeglich","Jeden Abend bis zum Ende"],["ende","Am letzten Tag"]].map(([k,n])=>`<button class="chip" data-rmode="${k}" data-id="${id}" aria-pressed="${remindMode===k}">${n}</button>`).join("")}</div>
-  <p class="label">${p.count>1?`${p.count}× täglich um 19 Uhr, zuerst ${when}`:when}</p>
+/* offer: einmal direkt nach dem Annehmen, freiwillig, mit „Ohne Erinnerung weiter“ und „Nicht mehr anbieten“ */
+function remindSheet(id,offer){if(S.ueb[id]&&S.ueb[id].keep&&remindMode==="ende")remindMode="taeglich";const e=uv(U[id]),tm=remTime(),p=remindPlan(id,remindMode,tm);const when=p.first.toLocaleString("de-DE",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
+  const o=offer?` data-offer="1"`:"";
+  sheet(`<div class="label">${offer?"Übung angenommen":"Erinnerung"}</div><h2>${offer?"Soll dich dein Kalender erinnern?":e.t}</h2><p class="lead">${offer?`Für „${e.t}“. Das ist freiwillig. `:""}Die Erinnerung landet in deinem eigenen Kalender. So meldet sich dein Handy zuverlässig, auch wenn die App geschlossen ist.</p>
+  <div class="chips wrap">${(S.ueb[id]&&S.ueb[id].keep?[["morgen","Morgen"],["taeglich","Jeden Tag, zwei Wochen lang"]]:[["morgen","Morgen"],["taeglich","Jeden Tag bis zum Ende"],["ende","Am letzten Tag"]]).map(([k,n])=>`<button class="chip" data-rmode="${k}" data-id="${id}"${o} aria-pressed="${remindMode===k}">${n}</button>`).join("")}</div>
+  <div class="rtime"><label class="label" for="utime">Uhrzeit</label><input type="time" id="utime" value="${tm}" data-id="${id}"${o}></div>
+  <p class="label rwhen">${p.count>1?`${p.count}× täglich um ${tm} Uhr, zuerst am ${p.first.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}`:`${when} Uhr`}</p>
   <div class="row"><button class="btn primary" data-ics="${id}">Apple- oder iPhone-Kalender</button><a class="btn" href="${googleFor(p)}" target="_blank" rel="noopener">Google Kalender</a></div>
-  <p class="muted small">Der erste Knopf lädt eine Kalenderdatei, die auch Outlook und andere Kalender öffnen.</p>`,e.cat)}
+  <p class="muted small">Der erste Knopf lädt eine Kalenderdatei, die auch Outlook und andere Kalender öffnen. Die Standard-Uhrzeit stellst du in den Einstellungen ein.</p>
+  ${offer?`<div class="row"><button class="btn" id="shx2">Ohne Erinnerung weiter</button><button class="linkbtn" id="nooffer">Nicht mehr anbieten</button></div>`:""}`,e.cat)}
 function downloadFile(name,text){const url=URL.createObjectURL(new Blob([text],{type:"text/calendar;charset=utf-8"}));const l=document.createElement("a");l.href=url;l.download=name;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);toast("Kalenderdatei geöffnet. Du musst den Termin nur noch hinzufügen.")}
 
 /* ---------- Navigation ---------- */
@@ -2630,15 +2906,11 @@ const SPECIAL={
  "12-10":{t:"Heute ist der Tag der Menschenrechte.",b:"kant",u:"grenzewuerde"}};
 function specialToday(){const n=new Date();return SPECIAL[`${pad(n.getMonth()+1)}-${pad(n.getDate())}`]||null}
 
-/* ---------- Zwischenstationen bei Übungen ---------- */
-const CHECKW=["zäh","geht so","okay","gut","toll"];
+/* ---------- Tage einer Übung; spark zeigt die Zwischenstationen (zäh bis toll) aus älteren Speicherständen ---------- */
 const dayIdx=v=>Math.floor((new Date().setHours(0,0,0,0)-new Date(v.start).setHours(0,0,0,0))/DAY);
 function spark(v){const c=v.checks||{},ks=Object.keys(c).map(Number).sort((a,b)=>a-b);if(!ks.length)return "";const w=120,h=28,mx=Math.max(...ks,1);
   const pts=ks.map(k=>[ks.length>1?4+(k/mx)*(w-8):w/2,h-4-(c[k]-1)/4*(h-8)]);
   return `<svg class="spark" viewBox="0 0 ${w} ${h}" aria-label="Verlauf deiner Zwischenstationen">${pts.length>1?`<polyline points="${pts.map(p=>p.join(",")).join(" ")}"/>`:""}${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="2.6"/>`).join("")}</svg>`}
-/* Die Stufen bleiben nach dem Eintragen sichtbar; die gewählte ist markiert und lässt sich durch erneutes Antippen löschen. */
-function checkRow(id){const e=U[id],v=S.ueb[id];if(!(e.d>=3))return "";const di=dayIdx(v),cur=v.checks&&v.checks[di]!=null?v.checks[di]:null;
-  return `<div class="check"><div class="sh"><span class="label">Tag ${Math.min(e.d,di+1)} von ${e.d} · ${cur!=null?"heute eingetragen":"Wie läuft's?"}</span>${spark(v)}</div><div class="cdots">${CHECKW.map((w,i)=>`<button class="cdot" data-check="${id}" data-val="${i+1}" aria-pressed="${cur===i+1}"><i></i><span>${w}</span></button>`).join("")}</div></div>`}
 
 /* ---------- Momente: selten und nüchtern ---------- */
 const MOMENTS=[
@@ -2646,7 +2918,7 @@ const MOMENTS=[
  {id:"leit1",t:"Der erste Leitsatz",x:"Die App fragt in ein paar Tagen nach, ob du noch dazu stehst.",ok:()=>S.kern.some(hasLeit)},
  {id:"probe1",t:"Die erste Entscheidung",x:"Deine Wahl zählt für die Werte, die sie stärkt.",ok:()=>nPrDone()>=1},
  {id:"kern5",t:"Fünf Stützen",x:"Dein Gerüst hat jetzt alle Stützen. Ab jetzt geht es darum, sie zu festigen.",ok:()=>S.kern.length>=5},
- {id:"ueb1",t:"Die erste Übung",x:"Deine Notiz dazu findest du im Bautagebuch.",ok:()=>Object.values(S.ueb).some(v=>v&&v.status==="done")},
+ {id:"ueb1",t:"Die erste Übung",x:"Deine Notiz dazu findest du im Bautagebuch.",ok:()=>Object.keys(S.ueb).some(uid=>runsOf(uid).some(r=>r.status==="done"))},
  {id:"fest1",t:"Zum ersten Mal bekräftigt",x:"Je öfter du einen Leitsatz bekräftigst, desto seltener fragt die App nach.",ok:()=>Object.values(S.leit).some(l=>l&&l.n>=1)},
  {id:"probe10",t:"Zehn Entscheidungen",x:"Im Bautagebuch zeigt sich jetzt deutlicher, welche Werte bei dir den Ausschlag geben.",ok:()=>nPrDone()>=10},
  {id:"steht",t:"Das Gerüst trägt",x:"Alle fünf Stützen stehen mindestens auf der dritten Stufe.",ok:()=>S.kern.length>=5&&S.kern.every(id=>level(id)>=3)},
@@ -2766,10 +3038,20 @@ document.addEventListener("click",e=>{
   if(d.wert){if(t.closest(".opt"))return;valueSheet(d.wert);return}
   if(d.gowlist){const l=$("#wlist");if(l)l.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});return}
   if(d.tabgo){if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab=d.tabgo;S.cur=null;render();window.scrollTo(0,0);return}
-  if(d.ueb){uebSheet(d.ueb);return}
+  if(d.ueb){uebSheet(d.ueb,d.uhint);return}
   if(d.ushare){shareUeb(d.ushare);return}
-  /* Zwischenstation: dieselbe Stufe noch einmal antippen löscht den Eintrag von heute */
-  if(d.check){const v=S.ueb[d.check],k=dayIdx(v);v.checks=v.checks||{};const off=v.checks[k]===+d.val;if(off)delete v.checks[k];else v.checks[k]=+d.val;save();render();toast(off?"Der Eintrag von heute ist gelöscht.":"Eingetragen.");return}
+  /* Tageseintrag: Gemacht / Keine Gelegenheit / Diesmal nicht. Dieselbe Antwort noch einmal antippen löscht den Eintrag. */
+  if(d.log){const v=S.ueb[d.log],k=+d.day;if(!v||!LOGW.some(x=>x[0]===d.val))return;const sn=snap();v.log=v.log||{};const off=v.log[k]===d.val;if(off)delete v.log[k];else{v.log[k]=d.val;buzz("ok")}
+    save();render();undoToast(off?"Der Eintrag ist gelöscht.":`Eingetragen: ${LOGW.find(x=>x[0]===d.val)[1]}.`,!off,sn);return}
+  if(d.logback){logBack[d.logback]=!logBack[d.logback];render();const c=document.querySelector(`[data-run="${d.logback}"] .ulog`);if(c)c.scrollIntoView({block:"nearest"});return}
+  if(d.keep){const v=S.ueb[d.keep];if(!v)return;const sn=snap();v.keep=true;save();render();undoToast("Die Übung läuft weiter, ohne Frist.",false,sn);return}
+  if(d.fuer){acceptSheet(d.fuer,null,false,true);return}
+  if(d.fsel){accSel=accSel===d.fsel?null:d.fsel;document.querySelectorAll("#fsel [data-fsel]").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.fsel===accSel)));const n=$("#fselnote"),id=($("#acceptgo")||$("#fuergo")||{dataset:{}}).dataset.id;if(n&&id)n.textContent=fuerNote(id,accSel);return}
+  if(t.id==="fuergo"){const id=t.dataset.id,v=S.ueb[id];if(!v)return;const sn=snap();v.fuer=accSel;save();closeSheet();render();
+    undoToast(accSel?`Die Übung gilt jetzt für ${W[accSel].n}.`:"Die Übung läuft jetzt ohne Stütze.",false,sn,{reopen:()=>acceptSheet(id,null,false,true)});return}
+  if(d.uebrun){const id=d.uebrun,v=S.ueb[id];if(!v)return;if(t.closest(".next")){S.askDay=todayKey();if(t.dataset.doneask)v.doneAsk=1;persist()}if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab="ueben";S.cur=null;render();
+    const c=document.querySelector(`[data-run="${id}"]`);if(c){c.scrollIntoView({block:"start",behavior:calm()?"auto":"smooth"});setTimeout(()=>trace(c,`var(--c-${U[id].cat})`),350)}return}
+  if(t.id==="nooffer"){const sn=snap();S.settings.uebOffer=false;persist();closeSheet();undoToast("Die App bietet keine Erinnerung mehr an. „Erinnern“ auf der Karte bleibt.",false,sn,{after:()=>{S.settings.uebOffer=true;persist()}});return}
   /* Schalter: nur der Zustand wechselt, ohne Neuzeichnen, damit der Knopf sichtbar hinübergleitet */
   if(d.setting){let on;if(d.setting==="hell"){S.settings.theme=S.settings.theme==="hell"?"dunkel":"hell";applyTheme();on=S.settings.theme==="hell"}else{S.settings[d.setting]=S.settings[d.setting]===false;on=S.settings[d.setting]}
     persist();t.setAttribute("aria-checked",on);if(d.setting==="vibration"&&IOS)armHaps();return}
@@ -2791,18 +3073,33 @@ document.addEventListener("click",e=>{
   if(d.ufilter){const nf=uFilter===d.ufilter?"alle":d.ufilter;if(nf===uFilter)return;uFilter=nf;uMore=false;render();return}
   if(d.wfilter){const nf=wFilter===d.wfilter?"alle":d.wfilter;if(nf===wFilter)return;wFilter=nf;render();return}
   if(t.id==="umore"){uMore=true;render();return}
-  if(d.accept){if(activeUeb().length>=MAXACT)return;const sn=snap(),aid=d.accept,fromSheet=!!$("#layer").innerHTML;S.ueb[d.accept]={status:"active",start:now()};save();if($("#layer").innerHTML)$("#layer").innerHTML="";anim=true;tab="ueben";render();{const c=document.querySelector(`[data-done="${d.accept}"]`);const card=c&&c.closest(".exp");if(card){card.scrollIntoView({block:"center"});trace(card,`var(--c-${U[d.accept].cat})`)}}undoToast("Übung angenommen.",false,sn,fromSheet?{reopen:()=>uebSheet(aid)}:null);return}
+  if(d.accept){if(activeUeb().length>=MAXACT)return;acceptSheet(d.accept,d.uhint,!!$("#layer").innerHTML);return}
+  /* Annehmen: Ein früherer Durchgang wandert unverändert in runs; der Plan wird als Vorschlag übernommen. */
+  if(t.id==="accrem"){t.setAttribute("aria-pressed",String(t.getAttribute("aria-pressed")!=="true"));return}
+  if(t.id==="acceptgo"){const aid=t.dataset.id;if(!U[aid]||activeUeb().length>=MAXACT)return;const sn=snap(),prev=S.ueb[aid],fromSheet=!!t.dataset.from;
+    let runs=[];if(prev){const r=JSON.parse(JSON.stringify(prev));runs=Array.isArray(r.runs)?r.runs:[];delete r.runs;delete r.ask;runs.push(r)}
+    S.ueb[aid]={v:2,status:"active",start:now(),fuer:META.includes(aid)?null:accSel,plan:prev&&prev.plan||""};if(runs.length)S.ueb[aid].runs=runs;buzz("ok");
+    {const rb0=$("#accrem");if(rb0)S.uebRem=rb0.getAttribute("aria-pressed")==="true"}
+    save();anim=false;tab="ueben";S.cur=null;render();const card=document.querySelector(`[data-run="${aid}"]`);if(card)card.scrollIntoView({block:"center"});
+    /* Erinnerung direkt aus dem Annehmen-Blatt: lädt die Kalenderdatei im selben Tippen; die Wahl wird für das nächste Mal gemerkt */
+    const rt=$("#acctime"),rem=!!S.uebRem&&!!rt;
+    if(rem){const tm=(rt&&rt.value)||S.settings.uebTime||"19:00";remindMode="taeglich";S.ueb[aid].remind="taeglich";persist();downloadFile(`wertegeruest-${aid}.ics`,icsFor(remindPlan(aid,"taeglich",tm)))}
+    $("#layer").innerHTML="";if(card)setTimeout(()=>trace(card,`var(--c-${U[aid].cat})`),200);
+    undoToast("Übung angenommen.",false,sn,fromSheet?{reopen:()=>uebSheet(aid)}:null);return}
   if(t.id==="uother"){S.uskip=(S.uskip||0)+1;persist();render();return}
-  if(d.drop){const sn=snap();S.ueb[d.drop]={status:"dropped",start:S.ueb[d.drop].start,end:now()};save();render();undoToast("Die Übung ist abgebrochen.",false,sn);return}
-  if(d.remind){remindSheet(d.remind);return}
-  if(d.rmode){remindMode=d.rmode;remindSheet(d.id);return}
-  if(d.ics){const p=remindPlan(d.ics,remindMode);downloadFile(`wertegeruest-${d.ics}.ics`,icsFor(p));S.ueb[d.ics].remind=remindMode;persist();return}
+  if(d.drop){const sn=snap();Object.assign(S.ueb[d.drop],{status:"dropped",end:now()});delete S.ueb[d.drop].ask;save();render();undoToast("Die Übung ist abgebrochen.",false,sn);return}
+  if(d.remind){remindAt=null;remindSheet(d.remind);return}
+  if(d.rmode){remindMode=d.rmode;remindSheet(d.id,!!d.offer);return}
+  if(d.ics){const p=remindPlan(d.ics,remindMode,remTime());downloadFile(`wertegeruest-${d.ics}.ics`,icsFor(p));S.ueb[d.ics].remind=remindMode;persist();return}
   if(d.done){doneSheet(d.done);return}
   if(t.id==="savedone"){const id=t.dataset.id,m=document.querySelector('#moods [aria-pressed="true"]'),ud=$("#udays");let days;
     if(ud){const c=ud.querySelector('[aria-pressed="true"]');if(!c){buzz("err");shake(ud);toast("Wähl zuerst, an wie vielen Tagen du die Übung gemacht hast.");return}days=+c.dataset.udays}
-    const sn=snap(),pre={mood:m?m.dataset.mood:null,note:$("#note").value.trim(),days};
-    S.ueb[id]=Object.assign(S.ueb[id]||{start:now()},{status:"done",end:now(),mood:pre.mood,note:pre.note});if(days!=null)S.ueb[id].days=days;else delete S.ueb[id].days;buzz("ok");closeSheet();toBuild();
-    undoToast(days===0?"Gespeichert. Die Notiz steht im Bautagebuch.":"Übung geschafft.",true,sn,{reopen:()=>doneSheet(id,pre)});return}
+    const sn=snap(),pre={mood:m?m.dataset.mood:null,note:$("#note").value.trim(),days},e=U[id],r=S.ueb[id]=S.ueb[id]||{start:now()};
+    Object.assign(r,{status:"done",end:now(),mood:pre.mood,note:pre.note});if(days!=null)r.days=days;else delete r.days;delete r.ask;
+    if(r.v!==2){r.v=2;if(!("fuer" in r))r.fuer=defFuer(id)}if(typeof r.plan==="string")r.plan=r.plan.trim();
+    /* Gelebt: eintägig mit dem Abschluss, mehrtägig ab rund 70 % der Tage, bei EINMAL ab einem Tag */
+    r.ok=!META.includes(id)&&(days==null?true:days>=needDays(id,r));buzz("ok");closeSheet();toBuild();
+    undoToast(r.ok?"Übung geschafft.":"Gespeichert. Die Notiz steht im Bautagebuch.",true,sn,{reopen:()=>doneSheet(id,pre)});return}
   if(t.id==="reset"){confirmReset=true;render();return}
   if(t.id==="resetno"){confirmReset=false;render();return}
   if(t.id==="resetyes"){const sn=snap();S={read:{},saved:{},kern:[],leit:{},proben:{},ueb:{},filter:"alle",history:[],cur:null,settings:S.settings,moments:{},welcomed:S.welcomed,fresh:[],lv:{},owMig:1};persist();confirmReset=false;render();undoToast("Alles zurückgesetzt.",false,sn);return}
@@ -2810,7 +3107,12 @@ document.addEventListener("click",e=>{
 /* Nach einem Bauschritt: zum Gerüst, damit man das neue Teil einrasten sieht */
 function toBuild(){save();if(S.fresh.length){anim=false;tab="geruest";S.cur=null;render();window.scrollTo({top:0,behavior:"auto"})}else render()}
 let lastSum=0;document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("summary"))lastSum=Date.now()},true);
-document.addEventListener("change",e=>{if(e.target.id==="rtime"){S.settings.remindTime=e.target.value||"08:00";persist();const g=$("#dailyg");if(g)g.href=dailyGoogle()}});
+document.addEventListener("change",e=>{if(e.target.id==="rtime"){S.settings.remindTime=e.target.value||"08:00";persist();const g=$("#dailyg");if(g)g.href=dailyGoogle()}
+  if(e.target.id==="utimedef"){S.settings.uebTime=e.target.value||"19:00";persist()}
+  if(e.target.id==="utime"&&e.target.value){remindAt=e.target.value;remindSheet(e.target.dataset.id,!!e.target.dataset.offer)}});
+/* Plan auf der laufenden Karte: wird beim Tippen gespeichert; ein leiser Hinweis bestätigt es. */
+let planTimer=0;document.addEventListener("input",e=>{const id=e.target.dataset&&e.target.dataset.plan;if(!id||!S.ueb[id])return;S.ueb[id].plan=e.target.value;persist();
+  const st=e.target.parentNode.querySelector(".psaved");clearTimeout(planTimer);if(st)st.textContent="";planTimer=setTimeout(()=>{if(st&&st.isConnected)st.textContent="Gespeichert. Beim Abschluss steht es im Bautagebuch."},700)});
 document.addEventListener("toggle",e=>{const t=e.target;const map={jfold:"jOpen",aboutfold:"aboutOpen",uebfold:"uebOpen",prfold:"prOpen",setfold:"setOpen",wqfold:"wqOpen"};if(map[t.id]){S[map[t.id]]=t.open;persist()}if(t.classList&&t.classList.contains("fold")&&t.open&&Date.now()-lastSum<600){const b=t.querySelector(".fbody");if(b&&!calm())b.animate([{opacity:0,transform:"translateY(-4px)"},{opacity:1,transform:"none"}],{duration:380,easing:"cubic-bezier(.2,.8,.2,1)"})}},true);
 document.addEventListener("keydown",e=>{if(e.target.closest&&e.target.closest("textarea,input:not(.hap)"))return;
   if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.pil){e.preventDefault();pillarTap(e.target.dataset.pil);return}
@@ -2824,7 +3126,7 @@ function fromHash(){const h=location.hash.slice(1);if(["imp","werte","ueben","ge
 if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
-const BUILD="20.10.2026, 01:49";
+const BUILD="20.10.2026, 11:46";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("wg-upd")}catch(e){}if(done===m[1])return;

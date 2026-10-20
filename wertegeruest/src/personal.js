@@ -10,7 +10,8 @@
    {k.name}/{K.name}    Wort aus KONTEXTE, je nach Lebensphase.
    {gm.name}/{GM.name}  Wort aus GEMEINSCHAFT, je nach Gruppe (oder ersatzweise Lebensphase).
    Ein Feld kann statt eines Textes ein Objekt nach Lebensphase sein: {schule:"…",beruf:"…"}.
-   Fehlt die Phase darin, gilt der Originaltext.
+   Fehlt die Phase darin, gilt der Originaltext. „schicht“ erbt von „beruf“, „ruhestand“ von „anderes“ (siehe ERBE).
+   Hat ein Rollen-Slot keinen Rückfall (rueckfall:null) und passt niemand aus dem Profil, gilt ebenfalls der Originaltext.
 
    Formen einer Rolle (Schlüssel nach dem männlichen Muster, damit man sie leicht liest):
    dein/deinen/deinem   erste Nennung in der Du-Ansprache (Nominativ/Akkusativ/Dativ)
@@ -26,23 +27,28 @@ const PERSONAL_FRAGEN=[
  {id:"phase",typ:"eins",
   frage:"Womit verbringst du gerade die meiste Zeit?",
   hinweis:"Danach richten sich Orte wie Klasse, Betrieb, Hochschule oder Team in den Beispielen.",
-  optionen:[{v:"schule",t:"Schule"},{v:"ausbildung",t:"Ausbildung"},{v:"studium",t:"Studium"},{v:"beruf",t:"Arbeit"},{v:"anderes",t:"Etwas anderes"}]},
+  optionen:[{v:"schule",t:"Schule"},{v:"ausbildung",t:"Ausbildung"},{v:"studium",t:"Studium"},{v:"beruf",t:"Arbeit"},
+   {v:"schicht",t:"Arbeit im Schichtdienst"},{v:"ruhestand",t:"Ruhestand"},{v:"anderes",t:"Etwas anderes"}]},
  {id:"nah",typ:"mehrere",
   frage:"Wer ist dir nah und darf in den Beispielen vorkommen?",
   hinweis:"Wähle so viele, wie du magst. Diese Menschen kommen dann in den Beispielen vor, wenn es um jemanden geht, der dir nahesteht.",
   gruppen:[
-   {t:"Familie",optionen:["mutter","vater","schwester","bruder","oma","opa","tochter","sohn"]},
+   {t:"Familie",optionen:["mutter","vater","schwester","bruder","oma","opa","tochter","sohn","enkelin","enkel"]},
    {t:"Freundschaft und Beziehung",optionen:["freundin","freund","partnerin","partner"]},
    /* Nur das Paar, das zur gewählten Lebensphase passt, wird gezeigt. */
    {t:"Schule, Studium oder Arbeit",optionen:["mitschuelerin","mitschueler","kommilitonin","kommilitone","kollegin","kollege"],
-    nachPhase:{schule:["mitschuelerin","mitschueler"],studium:["kommilitonin","kommilitone"],ausbildung:["kollegin","kollege"],beruf:["kollegin","kollege"],_:["kollegin","kollege"]}},
+    nachPhase:{schule:["mitschuelerin","mitschueler"],studium:["kommilitonin","kommilitone"],ausbildung:["kollegin","kollege"],beruf:["kollegin","kollege"],
+     schicht:["kollegin","kollege"],ruhestand:[],_:["kollegin","kollege"]}},
    {t:"Jemand anderes",optionen:["mensch"]}]},
  {id:"gruppe",typ:"mehrere",
   frage:"Wo bist du regelmäßig mit anderen zusammen?",
   hinweis:"Zum Beispiel in deiner freien Zeit. Wenn nichts davon passt, überspring die Frage einfach.",
   optionen:[{v:"sport",t:"Sportverein oder Mannschaft"},{v:"musik",t:"Musik in einer Gruppe"},{v:"ehrenamt",t:"Ehrenamt oder Initiative"},{v:"jugend",t:"Jugendgruppe oder Pfadfinder"},{v:"gemeinde",t:"Gemeinde oder Glaubensgemeinschaft"}]}
 ];
-const PHASEN=["schule","ausbildung","studium","beruf","anderes"];
+const PHASEN=["schule","ausbildung","studium","beruf","schicht","ruhestand","anderes"];
+/* Lebensphasen, die von einer anderen erben: Was für „schicht“ fehlt, kommt aus „beruf“, was für „ruhestand“ fehlt, aus „anderes“. */
+const ERBE={schicht:"beruf",ruhestand:"anderes"};
+const _kette=ph=>{const k=[];while(ph&&!k.includes(ph)){k.push(ph);ph=ERBE[ph]}return k};
 
 /* ---------- Rollen mit allen Formen ---------- */
 const ROLLEN=(()=>{
@@ -77,6 +83,8 @@ const ROLLEN=(()=>{
  add("opa","m","Opa",formen("m",s("Opa")));
  add("tochter","f","Tochter",formen("f",s("Tochter")));
  add("sohn","m","Sohn",formen("m",s("Sohn")));
+ add("enkelin","f","Enkelin",formen("f",s("Enkelin")));
+ add("enkel","m","Enkel",formen("m",s("Enkel")));
  add("freundin","f","Beste Freundin",formen("f",s("Freundin"),"best"));
  add("freund","m","Bester Freund",formen("m",s("Freund"),"best"));
  add("partnerin","f","Partnerin",formen("f",s("Partnerin")));
@@ -101,8 +109,8 @@ const ROLLEN=(()=>{
  add("gute_freundin","f","",unbestimmt("f",s("Freundin"),"gut"),{intern:true});
  return R})();
 
-const FAMILIE=["mutter","vater","schwester","bruder","oma","opa","tochter","sohn"];
-const RG={eltern:["mutter","vater"],geschwister:["schwester","bruder"],gross:["oma","opa"],kinder:["tochter","sohn"],
+const FAMILIE=["mutter","vater","schwester","bruder","oma","opa","tochter","sohn","enkelin","enkel"];
+const RG={eltern:["mutter","vater"],geschwister:["schwester","bruder"],gross:["oma","opa"],kinder:["tochter","sohn"],enkel:["enkelin","enkel"],
  freunde:["freundin","freund"],partner:["partnerin","partner"],
  kollegial:["mitschuelerin","mitschueler","kommilitonin","kommilitone","kollegin","kollege"],arbeit:["kollegin","kollege"]};
 const _pool=(...g)=>g.flatMap(x=>RG[x]||[x]);
@@ -135,7 +143,18 @@ const KONTEXTE={
     einMitglied:"ein Kollege",eineKollegin:"eine Kollegin",einerKollegin:"einer Kollegin",einladen:"etwa zum Mittagessen",
     pruefungSatz:"musst du bei der Arbeit eine wichtige Präsentation halten",lerneDanach:"bereite mich danach vor",deinerPruefung:"deiner Präsentation",
     inBesprechung:"in einer Besprechung",clique:"dein Freundeskreis",geld:"Am Ende des Monats ist dein Geld knapp.",imUmfeld:"im Viertel"},
- anderes:{clique:"dein Freundeskreis",geld:"Dein Geld ist gerade knapp.",imUmfeld:"im Viertel",chat:"Gruppenchat",pause:"Pause"}
+ /* Erbt alles Übrige von „beruf“ */
+ schicht:{nachDem:"nach der Schicht",pause:"Pause",einspringen:"eine zusätzliche Schicht zu übernehmen",einladen:"etwa in der Pause an meinen Tisch",
+    pruefungSatz:"hast du eine wichtige Prüfung in einer Fortbildung",lerneDanach:"lerne danach",deinerPruefung:"deiner Prüfung",
+    inBesprechung:"in einer Teambesprechung"},
+ anderes:{clique:"dein Freundeskreis",geld:"Dein Geld ist gerade knapp.",imUmfeld:"im Viertel",chat:"Gruppenchat",pause:"Pause"},
+ /* Erbt alles Übrige von „anderes“, dann vom Original */
+ ruhestand:{gruppe:"Verein",inGruppe:"in deinem Verein",ort:"Verein",nachDem:"am Nachmittag",
+    chefin:"die Leiterin deines Vereins",chefinDat:"der Leiterin",einspringen:"auszuhelfen",
+    leitung:"Kursleitung",leitungDat:"der Kursleitung",
+    einMitglied:"ein Mitglied",eineKollegin:"eine Mitstreiterin",einerKollegin:"einer Mitstreiterin",einladen:"etwa zum Kaffee",
+    pruefungSatz:"hast du einen wichtigen Termin, für den du noch viel vorbereiten musst",lerneDanach:"bereite mich danach vor",deinerPruefung:"deinem Termin",
+    inBesprechung:"in einer Versammlung",geld:"Deine Rente ist knapp."}
 };
 
 /* ---------- Gemeinschaft: zuerst eine gewählte Gruppe, sonst die Lebensphase, sonst _ (Original) ---------- */
@@ -159,7 +178,11 @@ const GEMEINSCHAFT={
  studium:{tAus:"aus dem Studiengang",mitglied:"ein Kommilitone aus deinem Studiengang",ausUns:"aus dem Studiengang",leitung:"der Studiengangsleitung",traeger:"die Hochschule",traegerEin:"eine Hochschule",
     brauchtDich:"Deine Lerngruppe braucht dich aber gerade jetzt für ein wichtiges Referat.",wichtig:"Die anderen zählen auf mich."},
  beruf:{tAus:"aus dem Team",mitglied:"ein Kollege",ausUns:"aus dem Team",leitung:"der Chefin",traeger:"die Firma",traegerEin:"eine Firma",
-    brauchtDich:"Dein Team braucht dich aber gerade jetzt für ein wichtiges Projekt.",wichtig:"Die anderen zählen auf mich."}
+    brauchtDich:"Dein Team braucht dich aber gerade jetzt für ein wichtiges Projekt.",wichtig:"Die anderen zählen auf mich."},
+ /* „schicht“ erbt von „beruf“ */
+ schicht:{brauchtDich:"Dein Team braucht dich aber gerade jetzt, weil mehrere Schichten nicht besetzt sind."},
+ ruhestand:{tAus:"aus dem Verein",mitglied:"ein Mitglied aus deinem Verein",ausUns:"aus dem Verein",leitung:"dem Vorstand",traeger:"der Verein",traegerEin:"ein Verein",
+    brauchtDich:"Dein Verein braucht dich aber gerade jetzt für eine wichtige Aktion.",wichtig:"Die anderen zählen auf mich."}
 };
 
 /* ---------- Varianten ----------
@@ -170,7 +193,7 @@ const GEMEINSCHAFT={
 const VARIANTEN={
  /* ----- Rollen: nahe Menschen ----- */
  "p:beleidigung":{neutral:true,
-  rollen:{nah:{pool:_pool("geschwister","eltern","gross","kinder","freunde","partner","kollegial","mensch"),rueckfall:"mensch"}},
+  rollen:{nah:{pool:_pool("geschwister","eltern","gross","kinder","enkel","freunde","partner","kollegial","mensch"),rueckfall:"mensch"}},
   felder:{x:"Jemand beleidigt {nah.deinen} vor deinen Augen grob. Du spürst, wie der Zorn in dir hochkocht.",
    o:[null,"Ich lasse meinem Zorn freien Lauf und beleidige den Angreifer zurück. Alle sollen sehen, auf wessen Seite ich stehe.","Ich gehe mit {nah.meinem} weg und kümmere mich um {nah.ihn}."]}},
  "p:geschenk":{neutral:true,
@@ -178,7 +201,7 @@ const VARIANTEN={
   felder:{x:"{V.dein} hat dir einen Pullover gestrickt, der überhaupt nicht dein Geschmack ist. {V.er} fragt erwartungsvoll, ob dir der Pullover gefällt.",
    f:"Was will {v.er} eigentlich wissen, wenn {v.er} fragt?"}},
  "p:zelten":{neutral:true,
-  rollen:{fam:{pool:_pool("eltern","geschwister","gross","kinder","partner"),rueckfall:"mensch"},fr:{pool:_pool("freunde"),rueckfall:"freund"}},
+  rollen:{fam:{pool:_pool("eltern","geschwister","gross","kinder","enkel","partner"),rueckfall:"mensch"},fr:{pool:_pool("freunde"),rueckfall:"freund"}},
   felder:{x:"Du hast mit {fam.deinem} ein Wochenende zum Zelten an einem See geplant, ohne Handyempfang. {Fam.er} freut sich riesig darauf. Am selben Samstag feiert {fr.dein} Geburtstag.",
    o:["Ich fahre mit. Draußen am See bin ich gern, und {fam.mein} freut sich.","Ich gehe zur Party. Ich habe {fr.meinem} schon lange zugesagt.",null],
    h:"Hier ziehen zwei Arten von Nähe gegeneinander. Eine gehaltene Zusage sagt etwas über dich. Ein Wochenende draußen mit {fam.deinem2} lässt sich später schwer nachholen. Ein Kompromiss ist oft gut, solange er nicht beide Seiten nur halb bedient."}},
@@ -220,12 +243,14 @@ const VARIANTEN={
  "p:kitext":{
   felder:{x:{ausbildung:"Ein anderer Azubi hat sein Berichtsheft für mehrere Wochen komplett von einer KI schreiben lassen und gibt es als eigene Arbeit ab. Er weiß, dass du es mitbekommen hast, und bittet dich, nichts zu sagen.",
     studium:"Ein Kommilitone hat seine Hausarbeit komplett von einer KI schreiben lassen und gibt sie als eigene ab. Er weiß, dass du es mitbekommen hast, und bittet dich, nichts zu sagen.",
-    beruf:"Ein Kollege lässt einen wichtigen Bericht komplett von einer KI schreiben und gibt ihn als eigene Arbeit aus, obwohl das bei euch nicht erlaubt ist. Er weiß, dass du es mitbekommen hast, und bittet dich, nichts zu sagen."},
+    beruf:"Ein Kollege lässt einen wichtigen Bericht komplett von einer KI schreiben und gibt ihn als eigene Arbeit aus, obwohl das bei euch nicht erlaubt ist. Er weiß, dass du es mitbekommen hast, und bittet dich, nichts zu sagen.",
+    ruhestand:"Ein Bekannter aus deinem Kurs an der Volkshochschule hat seine Abschlussarbeit komplett von einer KI schreiben lassen und gibt sie als eigene ab. Er weiß, dass du es mitbekommen hast, und bittet dich, nichts zu sagen."},
    o:[null,null,"Ich sage {k.leitungDat} Bescheid, weil es den anderen gegenüber unfair ist."]}},
  "p:fehler":{
   felder:{x:{schule:"Beim Verkauf auf dem Schulfest hast du dich verrechnet, und ein Kunde hat zu viel bezahlt. Niemand hat es bemerkt, und es würde vermutlich nie auffallen.",
     studium:"Bei deinem Nebenjob ist dir ein Fehler passiert, der einen Kunden etwas Geld kostet. Niemand hat es bemerkt, und es würde vermutlich nie auffallen.",
-    ausbildung:"Im Betrieb ist dir ein Fehler passiert, der einen Kunden etwas Geld kostet. Niemand hat es bemerkt, und es würde vermutlich nie auffallen."}}},
+    ausbildung:"Im Betrieb ist dir ein Fehler passiert, der einen Kunden etwas Geld kostet. Niemand hat es bemerkt, und es würde vermutlich nie auffallen.",
+    ruhestand:"Beim Kuchenverkauf auf einem Fest hast du dich verrechnet, und eine Kundin hat zu viel bezahlt. Niemand hat es bemerkt, und es würde vermutlich nie auffallen."}}},
  "p:umzug":{
   felder:{x:"Ein älterer Nachbar, der allein lebt, fragt, ob du ihm am Samstag beim Umzug in eine kleinere Wohnung hilfst. Am Montag {k.pruefungSatz}.",
    o:["Ich helfe ein paar Stunden und {k.lerneDanach}.",null,null],
@@ -250,6 +275,7 @@ const VARIANTEN={
    x:{ausbildung:"Das kleine Wäldchen neben deinem Betrieb soll für einen neuen Sportplatz gerodet werden. Viele freuen sich auf den Platz. Du bist oft in dem Wäldchen, in der Mittagspause und nach Feierabend.",
     studium:"Das kleine Wäldchen neben deiner Hochschule soll für einen neuen Sportplatz gerodet werden. Viele freuen sich auf den Platz. Du bist oft in dem Wäldchen, zwischen den Veranstaltungen und danach.",
     beruf:"Das kleine Wäldchen neben deiner Arbeitsstelle soll für einen neuen Sportplatz gerodet werden. Viele freuen sich auf den Platz. Du bist oft in dem Wäldchen, in der Mittagspause und nach Feierabend.",
+    schicht:"Das kleine Wäldchen neben deiner Arbeitsstelle soll für einen neuen Sportplatz gerodet werden. Viele freuen sich auf den Platz. Du bist oft in dem Wäldchen, in den Pausen und nach der Schicht.",
     anderes:"Das kleine Wäldchen in deinem Viertel soll für einen neuen Sportplatz gerodet werden. Viele freuen sich auf den Platz. Du gehst oft in dem Wäldchen spazieren."},
    o:[null,"Ich bin für den Platz. Viele {k.imUmfeld} haben keinen Verein und brauchen einen Ort zum Spielen.",null]}},
  "p:billigshirt":{
@@ -265,9 +291,79 @@ const VARIANTEN={
   felder:{x:"Du bist erschöpft und brauchst dringend Ruhe. {gm.brauchtDich}",
    o:[null,"Ich mache mit. {gm.wichtig}",null]}},
 
- /* ----- Übungen ----- */
+ /* ----- Übungen -----
+    Übungen werden nicht nach Index angepasst, sondern über ersetze: [{alt, neu, in?}]. alt ist ein wörtliches Stück
+    aus ueben.js, neu ein Text (mit Platzhaltern) oder ein Objekt nach Lebensphase. in schränkt auf ein Feld ein
+    (t, x, s oder p). Fehlt alt im Original (weil ueben.js umformuliert wurde), bleibt der Text einfach unverändert;
+    der Test in scratchpad/uebtest meldet das. Rollen-Slots ohne Rückfall (rueckfall:null) erwähnen nahe Menschen
+    nur, wenn sie im Profil stehen; ohne Profil bleibt jede Übung wörtlich wie im Original. */
  "u:begegnung":{
-  felder:{s:[null,"Such eine Gelegenheit: Verein, Nachbarschaft, {k.ort}",null,null]}},
+  ersetze:[{in:"s",alt:"Sprachcafé, Gemeinde, Ehrenamt oder Arbeit",
+   neu:{schule:"Sprachcafé, Gemeinde, Ehrenamt oder Schule",ausbildung:"Sprachcafé, Gemeinde, Ehrenamt, Berufsschule oder Betrieb",
+    studium:"Sprachcafé, Gemeinde, Ehrenamt oder Hochschule",anderes:"Sprachcafé, Gemeinde oder Ehrenamt"}}]},
+ "u:wenndann":{
+  ersetze:[{in:"x",alt:"Wenn im Chat über jemanden gelästert wird",
+   neu:{schule:"Wenn im Klassenchat über jemanden gelästert wird",ausbildung:"Wenn im Gruppenchat der Azubis über jemanden gelästert wird",
+    studium:"Wenn im Semesterchat über jemanden gelästert wird",beruf:"Wenn im Teamchat über jemanden gelästert wird",
+    ruhestand:"Wenn im Familienchat über jemanden gelästert wird"}}]},
+ "u:neinsagen":{
+  rollen:{v:{pool:_pool("kollegial","eltern","geschwister","gross","kinder","enkel","freunde","partner"),rueckfall:null}},
+  ersetze:[
+   {in:"x",alt:"Wo ein Nein kaum möglich ist, etwa weil bei der Arbeit Leute fehlen, liegt das nicht an dir. Das gehört dann in ein Gespräch mit der Leitung.",
+    neu:{schule:"Wo ein Nein kaum möglich ist, etwa bei Pflichten in der Schule, liegt das nicht an dir. Wird es dir zu viel, sprich mit deiner Klassenleitung oder einem anderen Erwachsenen, dem du vertraust.",
+     ausbildung:"Wo ein Nein kaum möglich ist, etwa weil im Betrieb Leute fehlen, liegt das nicht an dir. Das gehört dann in ein Gespräch mit deiner Ausbilderin oder deinem Ausbilder.",
+     studium:"Wo ein Nein kaum möglich ist, etwa weil beim Nebenjob Leute fehlen, liegt das nicht an dir. Das gehört dann in ein Gespräch mit der Leitung.",
+     schicht:"Wo ein Nein kaum möglich ist, etwa weil im Dienstplan Leute fehlen, liegt das nicht an dir. Das gehört dann in ein Gespräch mit der Leitung.",
+     anderes:"Wo ein Nein kaum möglich ist, etwa weil sonst alles an dir hängen bleibt, liegt das nicht an dir. Das gehört dann in ein offenes Gespräch mit den anderen.",
+     ruhestand:"Wo ein Nein kaum möglich ist, etwa weil in der Familie oder im Ehrenamt sonst alles an dir hängen bleibt, liegt das nicht an dir. Das gehört dann in ein offenes Gespräch mit den anderen."}},
+   {in:"s",alt:"Achte auf Momente, in denen du automatisch Ja sagst",neu:"Achte auf Momente, in denen du automatisch Ja sagst, etwa gegenüber {v.deinem}"},
+   {in:"s",alt:"Gegenüber Erwachsenen oder Vorgesetzten hilft eine Alternative",
+    neu:{schule:"Gegenüber Erwachsenen, etwa Lehrkräften, hilft eine Alternative",ausbildung:"Gegenüber Vorgesetzten im Betrieb hilft eine Alternative",
+     beruf:"Gegenüber Vorgesetzten hilft eine Alternative",anderes:"Gegenüber Menschen, die viel von dir erwarten, hilft eine Alternative"}}]},
+ "u:zuhoeren":{
+  rollen:{v:{pool:_pool("eltern","geschwister","gross","kinder","enkel","freunde","partner","kollegial"),rueckfall:null}},
+  ersetze:[{in:"s",alt:"Wähle eine Person, gern auch jeden Tag eine andere",neu:"Wähle eine Person, etwa {v.deinen}, gern auch jeden Tag eine andere"}]},
+ "u:ehrlichesfeedback":{
+  rollen:{v:{pool:_pool("eltern","geschwister","gross","kinder","enkel","freunde","partner","kollegial"),rueckfall:null}},
+  ersetze:[{in:"x",alt:"Gib einem Menschen, der dir wichtig ist, einen",neu:"Gib einem Menschen, der dir wichtig ist, etwa {v.deinem}, einen"}]},
+ "u:widerspruch":{
+  rollen:{v:{pool:_pool("eltern","geschwister","gross","kinder","enkel","freunde","partner","kollegial"),rueckfall:null}},
+  ersetze:[{in:"x",alt:"wann du bei Menschen, die dir nahe sind, nur aus Höflichkeit nickst",neu:"wann du bei Menschen, die dir nahe sind, etwa bei {v.deinem}, nur aus Höflichkeit nickst"}]},
+ "u:zivilplan":{
+  ersetze:[{in:"s",alt:"Bus, Schulhof, Bahnhof, Supermarkt",
+   neu:{ausbildung:"Bus, Berufsschule, Bahnhof, Supermarkt",studium:"Bus, Mensa, Bahnhof, Supermarkt",beruf:"Bus, Arbeitsweg, Bahnhof, Supermarkt",
+    schicht:"Bus, Parkplatz nach der Spätschicht, Bahnhof, Supermarkt",anderes:"Bus, Bahnhof, Supermarkt, Park",ruhestand:"Bus, Wochenmarkt, Bahnhof, Supermarkt"}}]},
+ "u:fussabdruck":{
+  ersetze:[
+   {in:"x",alt:"etwa der Weg zur Arbeit oder die Heizung in der Mietwohnung",
+    neu:{schule:"etwa der Schulweg oder die Heizung zu Hause",ausbildung:"etwa der Weg zum Betrieb oder die Heizung in der Mietwohnung",
+     studium:"etwa der Weg zur Hochschule oder die Heizung in der Mietwohnung",schicht:"etwa der Weg zur Schicht, wenn um diese Zeit kein Bus fährt, oder die Heizung in der Mietwohnung",
+     anderes:"etwa ein weiter Weg oder die Heizung in der Mietwohnung",ruhestand:"etwa ein weiter Weg zum Einkaufen oder die Heizung in der Mietwohnung"}},
+   {in:"s",alt:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Schule, Verein oder Betrieb",
+    neu:{schule:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Klasse oder Verein",ausbildung:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Verein oder Betrieb",
+     studium:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Verein oder Hochschule",beruf:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Verein oder Betrieb",
+     schicht:"eine Fahrgemeinschaft mit Leuten aus deiner Schicht oder ein Vorschlag in Familie, Verein oder Betrieb",ruhestand:"eine Fahrgemeinschaft oder ein Vorschlag in Familie, Verein oder Gemeinde"}}]},
+ "u:brief2060":{
+  /* Enkel haben Vorrang: Sie sind 2060 eher erwachsen als die Kinder schon erwachsener Eltern. */
+  rollen:{v:{pool:_pool("kinder","enkel"),vorrang:RG.enkel,rueckfall:null}},
+  ersetze:[{in:"x",alt:"einen Brief: einem Kind aus deiner Familie,",neu:"einen Brief: {v.deinem},"}]},
+ "u:grenzechat":{
+  ersetze:[{in:"x",alt:"In Gruppenchats wird oft über andere gelästert",
+   neu:{schule:"In Gruppenchats wie dem Klassenchat wird oft über andere gelästert",ausbildung:"In Gruppenchats wie dem Azubi-Chat wird oft über andere gelästert",
+    studium:"In Gruppenchats wie dem Semesterchat wird oft über andere gelästert",beruf:"In Gruppenchats wie dem Teamchat wird oft über andere gelästert",
+    ruhestand:"In Gruppenchats, auch in der Familie oder im Verein, wird oft über andere gelästert"}}]},
+ "u:verstehen":{
+  ersetze:[{in:"s",alt:"Familie, Klasse, Verein, Arbeit oder Nachbarschaft",
+   neu:{schule:"Familie, Klasse, Verein oder Nachbarschaft",ausbildung:"Familie, Betrieb, Berufsschule, Verein oder Nachbarschaft",
+    studium:"Familie, Hochschule, Nebenjob, Verein oder Nachbarschaft",beruf:"Familie, Arbeit, Verein oder Nachbarschaft",
+    anderes:"Familie, Verein, Freundeskreis oder Nachbarschaft",ruhestand:"Familie, Verein, Gemeinde oder Nachbarschaft"}}]},
+ "u:kleinegeste":{
+  rollen:{v:{pool:_pool("eltern","geschwister","gross","kinder","enkel","freunde","partner","kollegial"),rueckfall:null}},
+  ersetze:[{in:"s",alt:"die gerade still geworden sind oder viel zu tragen haben",neu:"die gerade still geworden sind oder viel zu tragen haben. Vielleicht gehört {v.dein} dazu."}]},
+ "u:anpacken":{
+  ersetze:[{in:"x",alt:"eine Sammelaktion in der Schule",
+   neu:{ausbildung:"eine Sammelaktion im Betrieb",studium:"eine Sammelaktion an der Hochschule",beruf:"eine Sammelaktion bei der Arbeit",
+    anderes:"eine Sammelaktion in der Nachbarschaft",ruhestand:"eine Sammelaktion in der Gemeinde"}}]},
 
  /* ----- Wertebeispiele (b) ----- */
  "b:mut":{felder:{b:"Du stellst {k.inBesprechung} eine unbequeme Frage."}},
@@ -290,49 +386,61 @@ function normProfil(p){p=p&&typeof p==="object"?p:{};
 /* Stabile Wahl: Jede passende Person bekommt pro Schlüssel und Slot eine feste Punktzahl, die höchste gewinnt.
    Kommt später eine Person dazu, ändert sich die Wahl nur, wenn genau sie gewinnt. */
 function _waehle(kand,key,slot){let best=null,bs=-1;kand.forEach(c=>{const s=_hash(key+"|"+slot+"|"+c);if(s>bs){bs=s;best=c}});return best}
+/* vorrang: Stehen Personen daraus im Profil, wird nur unter ihnen gewählt. rueckfall:null = niemand (Originaltext). */
 function rollenWahl(schluessel,profil){const pr=normProfil(profil),v=VARIANTEN[schluessel]||{},res={},used=[];
- Object.keys(v.rollen||{}).forEach(slot=>{const d=v.rollen[slot],kand=d.pool.filter(r=>pr.nah.includes(r)&&!used.includes(r));
-  const r=kand.length?_waehle(kand,schluessel,slot):d.rueckfall;used.push(r);res[slot]=r});return res}
+ Object.keys(v.rollen||{}).forEach(slot=>{const d=v.rollen[slot];let kand=d.pool.filter(r=>pr.nah.includes(r)&&!used.includes(r));
+  if(d.vorrang&&kand.some(r=>d.vorrang.includes(r)))kand=kand.filter(r=>d.vorrang.includes(r));
+  const r=kand.length?_waehle(kand,schluessel,slot):(d.rueckfall==null?null:d.rueckfall);if(r)used.push(r);res[slot]=r});return res}
 function _gemeinschaft(pr,key){if(pr.gruppe.length)return GEMEINSCHAFT[_waehle(pr.gruppe,key,"gm")];
- return GEMEINSCHAFT[pr.phase]||GEMEINSCHAFT._}
+ return Object.assign({},GEMEINSCHAFT._,..._kette(pr.phase).reverse().map(k=>GEMEINSCHAFT[k]||{}))}
 const _gross=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
 
 /* personalisiere(text, profil, schluessel): löst Platzhalter auf. text ist ein Text oder ein Objekt nach Lebensphase.
    Gibt null zurück, wenn es für diese Lebensphase keine eigene Fassung gibt; dann gilt der Originaltext.
    Ohne Profil (null) greifen die Rückfälle: Kontexte wie im Original, Familienrollen neutral. */
 function personalisiere(text,profil,schluessel){
- const pr=normProfil(profil);
- if(text&&typeof text==="object"){text=pr.phase&&typeof text[pr.phase]==="string"?text[pr.phase]:null}
+ const pr=normProfil(profil),kette=_kette(pr.phase);
+ if(text&&typeof text==="object"){const ph=kette.find(k=>typeof text[k]==="string");text=ph?text[ph]:null}
  if(typeof text!=="string")return null;
  if(text.indexOf("{")<0)return text;
- const wahl=rollenWahl(schluessel,pr),gm=_gemeinschaft(pr,schluessel),kt=Object.assign({},KONTEXTE._,KONTEXTE[pr.phase]||{});
+ const wahl=rollenWahl(schluessel,pr),gm=_gemeinschaft(pr,schluessel),
+  kt=Object.assign({},KONTEXTE._,...kette.slice().reverse().map(k=>KONTEXTE[k]||{}));
+ let niemand=false;
  let out=text.replace(/\{([A-Za-z]+)\.([^{}]*)\}/g,(m,slot,form)=>{
   const gross=slot.charAt(0)!==slot.charAt(0).toLowerCase(),s=slot.toLowerCase();let r;
   if(s==="k")r=kt[form];
   else if(s==="gm")r=gm[form]!=null?gm[form]:GEMEINSCHAFT._[form];
-  else{const rolle=ROLLEN[wahl[s]];if(!rolle)return "⟦"+m+"⟧";
+  else{if(wahl[s]===null){niemand=true;return ""}
+   const rolle=ROLLEN[wahl[s]];if(!rolle)return "⟦"+m+"⟧";
    if(form.startsWith("g:")){const t=form.slice(2).split("|");r=t[{m:0,f:1,n:2}[rolle.g]];if(r==null)r=t[0]}
    else if(form.startsWith("ist:")){const q=form.slice(4),i=q.indexOf("?"),ids=q.slice(0,i).split(","),t=q.slice(i+1).split("|");r=ids.includes(rolle.id)?t[0]:t[1]}
    else r=rolle.f[form]}
   if(r==null)return "⟦"+m+"⟧";
   return gross?_gross(r):r});
+ /* Ein Slot ohne Rückfall hat niemanden gefunden: Dann gilt der Originaltext. */
+ if(niemand)return null;
  /* Relativsatz der neutralen Rolle: Komma setzen, wenn der Satz weitergeht */
  out=out.replace(/\u0001(?=\s+[^\s.,;:!?“”])/g,",").replace(/\u0001/g,"");
  return out}
 
 function _aktiv(v,profil){return !!v&&(!v.wenn||v.wenn(normProfil(profil)))}
 function _feld(tpl,orig,profil,key){if(tpl==null)return orig;const r=personalisiere(tpl,profil,key);return r==null?orig:r}
+/* Ersetzt wörtliche Stücke (alt) im Originaltext. Unabhängig von Index und Reihenfolge der Schritte. */
+function _ersetze(text,liste,profil,key,feld){if(typeof text!=="string"||!liste)return text;
+ liste.forEach(e=>{if(e.in&&e.in!==feld||text.indexOf(e.alt)<0)return;const neu=personalisiere(e.neu,profil,key);
+  if(neu!=null)text=text.split(e.alt).join(neu)});return text}
 /* Kopie einer Probe mit personalisierten Texten. Werte (w) und Reihenfolge der Optionen bleiben gleich. */
-function personalisiereProbe(p,profil){const key="p:"+p.id,v=VARIANTEN[key];if(!_aktiv(v,profil))return p;const F=v.felder;
- const out=Object.assign({},p);["t","x","h","f"].forEach(k=>{out[k]=_feld(F[k],p[k],profil,key)});
- out.o=p.o.map((o,i)=>Object.assign({},o,{t:_feld(F.o&&F.o[i],o.t,profil,key),w:o.w}));return out}
-function personalisiereUebung(u,profil){const key="u:"+u.id,v=VARIANTEN[key];if(!_aktiv(v,profil))return u;const F=v.felder;
- const out=Object.assign({},u);["t","x"].forEach(k=>{out[k]=_feld(F[k],u[k],profil,key)});
- out.s=u.s.map((s,i)=>_feld(F.s&&F.s[i],s,profil,key));return out}
+function personalisiereProbe(p,profil){const key="p:"+p.id,v=VARIANTEN[key];if(!_aktiv(v,profil))return p;const F=v.felder||{};
+ const out=Object.assign({},p),E=v.ersetze;["t","x","h","f"].forEach(k=>{out[k]=_ersetze(_feld(F[k],p[k],profil,key),E,profil,key,k)});
+ out.o=p.o.map((o,i)=>Object.assign({},o,{t:_ersetze(_feld(F.o&&F.o[i],o.t,profil,key),E,profil,key,"o"),w:o.w}));return out}
+/* Übungen: t, x, p und jeder Schritt in s. felder (nach Index) wird noch verstanden, Übungen nutzen aber ersetze. */
+function personalisiereUebung(u,profil){const key="u:"+u.id,v=VARIANTEN[key];if(!_aktiv(v,profil))return u;const F=v.felder||{},E=v.ersetze;
+ const out=Object.assign({},u);["t","x","p"].forEach(k=>{if(typeof u[k]==="string")out[k]=_ersetze(_feld(F[k],u[k],profil,key),E,profil,key,k)});
+ out.s=(u.s||[]).map((s,i)=>_ersetze(_feld(F.s&&F.s[i],s,profil,key),E,profil,key,"s"));return out}
 function personalisiereWert(w,profil){const key="b:"+w.id,v=VARIANTEN[key];if(!_aktiv(v,profil))return w;
  return Object.assign({},w,{b:_feld(v.felder.b,w.b,profil,key)})}
 /* Für den sanften Hinweis: Hängt diese Probe von einem nahen Menschen ab? */
 const hatPersonRolle=id=>{const v=VARIANTEN["p:"+id];return !!(v&&(v.rollen||v.neutral))};
 
-if(typeof module!=="undefined")module.exports={PERSONAL_FRAGEN,PHASEN,ROLLEN,KONTEXTE,GEMEINSCHAFT,VARIANTEN,
+if(typeof module!=="undefined")module.exports={PERSONAL_FRAGEN,PHASEN,ERBE,ROLLEN,KONTEXTE,GEMEINSCHAFT,VARIANTEN,
  personalisiere,personalisiereProbe,personalisiereUebung,personalisiereWert,rollenWahl,normProfil,hatPersonRolle};
