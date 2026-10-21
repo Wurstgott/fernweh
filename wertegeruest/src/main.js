@@ -832,6 +832,16 @@ function settleFill(src,x,y){let el=src.isConnected?src:null;if(!el&&tapMark&&ta
   if(!el||!selNow(el)||calm())return;el.style.setProperty("--px",x+"px");el.style.setProperty("--py",y+"px");el.classList.remove("fillin");void el.offsetWidth;el.classList.add("fillin")}
 document.addEventListener("pointerdown",e=>{const el=famHost(e.target);if(!el){tapMark=null;return}const r=el.getBoundingClientRect();
   tapMark={el,key:tapKey(el),x:e.clientX-r.left,y:e.clientY-r.top,t:now()}},{passive:true,capture:true});
+/* Wischen ist kein Tippen: Hat sich der Finger nach dem Aufsetzen mehr als 10 px bewegt oder ist dabei etwas
+   gescrollt, löst das Loslassen nichts aus (keine Auswahl, keine Aktion). Eingabefelder bleiben unberührt. */
+let tch=null;
+addEventListener("touchstart",e=>{const t=e.touches[0];tch=e.touches.length>1?{moved:true,t:now()}:{x:t.clientX,y:t.clientY,moved:false,t:now()}},{passive:true,capture:true});
+addEventListener("touchmove",e=>{if(!tch||tch.moved)return;const t=e.touches[0];if(Math.hypot(t.clientX-tch.x,t.clientY-tch.y)>10)tch.moved=true},{passive:true,capture:true});
+addEventListener("pointerdown",e=>{if(e.pointerType!=="touch")tch=null},{passive:true,capture:true});
+addEventListener("touchend",()=>{if(tch){tch.up=true;tch.ut=now()}},{passive:true,capture:true});
+document.addEventListener("scroll",()=>{if(tch&&!tch.up&&now()-tch.t>60)tch.moved=true},{passive:true,capture:true});
+addEventListener("click",e=>{const m=tch&&tch.moved&&(!tch.up||now()-tch.ut<700);tch=null;if(!m||!e.isTrusted)return;
+  if(e.target.closest&&e.target.closest("textarea,select,label,input:not(.hap)"))return;e.preventDefault();e.stopImmediatePropagation()},true);
 /* Der unsichtbare Schalter soll keinen Fokus behalten (sonst gälte er als Eingabefeld). */
 document.addEventListener("click",e=>{if(e.target.classList&&e.target.classList.contains("hap"))e.target.blur()},true);
 addEventListener("click",()=>{buzzKind=null},true);
