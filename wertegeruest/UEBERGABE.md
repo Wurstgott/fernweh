@@ -35,7 +35,7 @@ Die App ist eine einzige HTML-Datei ohne Abhängigkeiten. `src/build.py` setzt s
 - `ueben.js`: `PROBEN` (Belastungsproben) und `UEBUNGEN` (45 Übungen, jeder der 40 Werte hat mindestens eine). Jede Übung hat `p`, die Aufforderung für das Plan-Feld. IDs nie ändern, neue Übungen hinten anhängen.
 - `personal.js`: Personalisierung (`PERSONAL_FRAGEN`, `ROLLEN` mit grammatischen Formen, `KONTEXTE`, `VARIANTEN`, `personalisiere`, `personalisiereUebung`). Übungen werden über wörtliche Textstellen (`ersetze`) angepasst, nicht über Indizes. Ohne Profil bleiben alle Texte neutral.
 - `main.js`: die gesamte Logik.
-- Icons: `icon-512.png`, `icon-192.png`, `apple-touch-icon.png`, `icon-maskable-512.png` (Motiv „Dreiklang“, auch als `LOGO` in der Kopfzeile).
+- Icons: `icon-512.png`, `icon-192.png`, `apple-touch-icon.png`, `icon-maskable-512.png` (Motiv „Gegenüber“: zwei Stäbe lehnen sich zu, ein warmer Faden hält sie, beide stehen auf der Würde-Linie; per Blindtest mit drei Juroren gegen sechs Entwürfe gewählt; auch als `LOGO` in der Kopfzeile).
 
 Bauen: `cd wertegeruest/src && python3 build.py`. Das schreibt `../index.html` und `artifact.html` (Vorschau, nicht im Repository).
 

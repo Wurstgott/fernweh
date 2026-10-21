@@ -557,9 +557,9 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 
 /* ---------- Klickbild: jede Klickfamilie antwortet anders, ruhig, matt und flach ---------- */
 /* Unsichtbarer Schalter für den Tick auf dem iPhone. Er bedeckt das ganze Element, zeigt nichts und hält keinen Fokus. */
-input.hap{-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;opacity:0;z-index:6;cursor:pointer;border-radius:inherit;background:none;outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-:is(.chip,.logo,.mark)>input.hap{inset:auto;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
-:disabled>input.hap,[aria-disabled="true"]>input.hap{display:none}
+.hap{display:block;-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;opacity:0;z-index:6;cursor:pointer;border-radius:inherit;background:none;outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+:is(.chip,.logo,.mark)>.hap{inset:auto;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
+:disabled>.hap,[aria-disabled="true"]>.hap{display:none}
 .setrow{position:relative}
 /* Effekte dürfen nicht über den Bildschirmrand ragen, sonst ließe sich die Seite seitlich verschieben */
 .app{overflow-x:clip}
@@ -655,6 +655,8 @@ input.hap{-webkit-appearance:none;appearance:none;position:absolute;inset:0;widt
 
 .exp.run .meta .nowrap{white-space:nowrap;flex:none}
 .exp.run .meta>span:first-child{min-width:0}
+
+.hapsw{position:fixed;left:0;bottom:0;width:1px;height:1px;margin:0;opacity:0;pointer-events:none;z-index:-1}
 
 </style>
 
@@ -2028,7 +2030,7 @@ const CHEV='<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4
    wartet der Toast und erscheint danach. Liegt er über einem sichtbaren Eingabefeld, rückt er nach oben. */
 let toastHeld=null,toastTimer=0;
 /* toast(html,true): Rückmeldung zu einem Erfolg; davor zeichnet sich ein Haken. */
-const typing=el=>!!el&&/TEXTAREA|INPUT/.test(el.tagName)&&!(el.classList&&el.classList.contains("hap"));
+const typing=el=>!!el&&/TEXTAREA|INPUT/.test(el.tagName)&&!(el.classList&&(el.classList.contains("hap")||el.classList.contains("hapsw")));
 /* Liegt die Meldung über einem sichtbaren Eingabefeld? */
 const covers=t=>{const r=t.getBoundingClientRect();return [...document.querySelectorAll("textarea,input:not([type=checkbox])")].filter(f=>!f.closest(".sheet.out")).some(f=>{const q=f.getBoundingClientRect();return q.height&&q.bottom>r.top-8&&q.top<r.bottom+8&&q.bottom>0&&q.top<innerHeight})};
 function toast(m,ok){if(momentOpen){toastHeld=[m,ok];return}
@@ -2241,7 +2243,7 @@ function pillarSVG(id,i){let g="";for(let k=0;k<5;k++){const r=rod(k*5+i,id),on=
     g+=`<line x1="${r.a[0].toFixed(0)}" y1="${r.a[1].toFixed(0)}" x2="${r.b[0].toFixed(0)}" y2="${r.b[1].toFixed(0)}" ${on?`stroke="var(--c-${W[id].cat})" stroke-width="14"`:`stroke="var(--ghost)" stroke-width="5" stroke-dasharray="6 14"`} stroke-linecap="round"/>`}
   return `<svg class="psvg" viewBox="30 20 300 260" aria-hidden="true">${g}</svg>`}
 /* Zeichen in der Kopfzeile: drei Stäbe, die sich nicht berühren, über der Würde. Farben folgen hell/dunkel. */
-const LOGO=`<svg viewBox="112 115 800 800" aria-hidden="true" stroke-linecap="round"><line x1="540" y1="187" x2="627" y2="456" stroke="var(--c-selbst)" stroke-width="126"/><line x1="764" y1="674" x2="488" y2="615" stroke="var(--c-naehe)" stroke-width="126"/><line x1="230" y1="624" x2="419" y2="415" stroke="var(--c-miteinander)" stroke-width="126"/><line x1="222" y1="863" x2="802" y2="863" stroke="var(--logo-w)" stroke-width="86"/></svg>`;
+const LOGO=`<svg viewBox="152 152 720 720" aria-hidden="true"><line x1="380" y1="322" x2="644" y2="322" stroke="var(--logo-w)" stroke-width="54"/><line x1="290" y1="684" x2="400" y2="240" stroke="var(--c-selbst)" stroke-width="124" stroke-linecap="round"/><line x1="734" y1="684" x2="624" y2="240" stroke="var(--c-miteinander)" stroke-width="124" stroke-linecap="round"/><line x1="232" y1="792" x2="792" y2="792" stroke="var(--logo-w)" stroke-width="64" stroke-linecap="round"/></svg>`;
 /* Kleine Wolke für Willkommen und Momente; ohne eigene Stützen ein Beispiel */
 const SAMPLE=["mut","vertrauen","gerechtigkeit","genuegsamkeit","wahrhaftigkeit"],SAMPLEL=[3,4,5,3,4];
 function miniSVG(cls){const has=S.kern.length>0;let g="";const list=[];
@@ -2378,7 +2380,7 @@ function aboutFold(){return `<details class="fold" id="aboutfold" ${S.aboutOpen|
   <p>Werte geraten oft in Spannung zueinander. Das ist kein Zeichen von Haltlosigkeit, sondern normal. Stabil wird ein Gerüst, wenn du deine Werte kennst, sie in schwierigen Lagen abwägst und sie im Alltag lebst. Darum gibt es Impulse zum Nachdenken, Belastungsproben zum Entscheiden und Übungen zum Tun.</p>
   <h3>So wächst eine Stütze</h3><p>Jede Stütze hat fünf Bauteile: gewählt, Leitsatz, geprüft, gelebt und bekräftigt. Die Stäbe berühren sich kaum. Wie bei einer Tensegrity-Skulptur hält Spannung das Ganze zusammen: feine Seile verbinden benachbarte Stabenden, und wenn du in einer Belastungsprobe zwischen zwei deiner Werte abgewogen hast, kommt ein farbiges Spannseil dazu. Werte dürfen also in Spannung zueinander stehen. Gerade das macht das Gerüst stabil.</p>
   <h3>Wie sicher ist ein Impuls?</h3><div class="legend">${[3,2,1,0].map(l=>`<div>${evHTML(l)}<span class="muted">${["Philosophie, Zeitzeugnis oder Denkmodell","eine einzelne Studie oder nur Zusammenhänge","mehrere Studien, aber mit Grenzen","Meta-Analysen, große Längsschnitte oder sehr viele Studien"][l]}</span></div>`).join("")}</div>
-  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 20.10.2026, 15:41 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
+  <p class="muted small">Stand der Recherche: Oktober 2026. App-Version vom 21.10.2026, 12:41 Uhr. Die App ersetzt keine Beratung oder Therapie. Wenn es dir schlecht geht, ist die Telefonseelsorge rund um die Uhr erreichbar: 0800 111 0 111. Alles, was du hier wählst, schreibst und entscheidest, bleibt nur in diesem Browser auf diesem Gerät.</p>
   <div class="row"><button class="btn" id="shareapp">App weiterempfehlen</button></div>
   <div class="row">${confirmReset?`<span>Wirklich alles löschen?</span><button class="btn primary" id="resetyes">Ja, löschen</button><button class="btn" id="resetno">Abbrechen</button>`:`<button class="linkbtn" id="reset">Fortschritt zurücksetzen</button>`}</div>
   <div class="credit"><span class="label">Von wem</span><p>Das Wertegerüst ist ein privates Projekt von <b>Carlo Maximilian Engeländer</b>. Idee, Auswahl, Texte und Gestaltung stammen von ihm.</p><p class="muted small">© 2026 Carlo Maximilian Engeländer. Alle Rechte vorbehalten. Du darfst die App gern nutzen und den Link weitergeben, auch im Unterricht. Inhalte, Texte und Gestaltung dürfen aber nicht ohne Erlaubnis kopiert, verändert oder anderswo veröffentlicht werden.</p></div>
@@ -2801,15 +2803,18 @@ let buzzKind=null;
 function buzz(k){buzzKind=k}
 function vib(k){if(!vibOn()||!PAT[k]||typeof navigator.vibrate!=="function")return;try{navigator.vibrate(PAT[k])}catch(e){}}
 /* iPhone: Safari vibriert nur, wenn ein Finger selbst einen <input type="checkbox" switch> umlegt; programmierte,
-   mehrfache oder verzögerte Ticks spielt iOS nicht ab. Darum liegt in jedem Element, das ticken soll, ein unsichtbarer
-   Schalter über der ganzen Fläche. Der Klick darauf läuft zum Element hoch, closest() findet dessen data-Attribute,
+   mehrfache oder verzögerte Ticks spielt iOS nicht ab. Darum liegt in jedem Element, das ticken soll, ein unsichtbares
+   Etikett (label) für einen einzigen versteckten Schalter über der ganzen Fläche. Ein Etikett hält, anders als der Schalter
+   selbst, die Wischgeste nicht fest: Wischen scrollt immer, auch wenn es auf einem Feld beginnt. Der Klick darauf läuft zum Element hoch, closest() findet dessen data-Attribute,
    die Aktion läuft also genau einmal. Neu gezeichnete Elemente bekommen den Schalter über den MutationObserver.
    Nicht in Links, ausgeblendet bei deaktivierten Knöpfen (CSS), für Screenreader und Tastatur unsichtbar. */
 const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 /* Bei ausgeschalteter Vibration bleibt nur der Schalter „Vibration“ selbst versorgt, damit das Einschalten tickt. */
-function armHaps(){const on=vibOn(),keep="[data-setting=vibration]";if(!on)document.querySelectorAll("input.hap").forEach(i=>{if(!i.parentElement.matches(keep))i.remove()});
-  document.querySelectorAll(on?HAPSEL:keep).forEach(el=>{if(el.tagName==="A"||el.querySelector(":scope>input.hap"))return;
-    const i=document.createElement("input");i.type="checkbox";i.setAttribute("switch","");i.className="hap";i.tabIndex=-1;i.setAttribute("aria-hidden","true");el.appendChild(i)})}
+function armHaps(){const on=vibOn(),keep="[data-setting=vibration]";
+  if(!document.getElementById("hapsw")){const i=document.createElement("input");i.type="checkbox";i.setAttribute("switch","");i.id="hapsw";i.className="hapsw";i.tabIndex=-1;i.setAttribute("aria-hidden","true");document.body.appendChild(i)}
+  if(!on)document.querySelectorAll(".hap").forEach(i=>{if(!i.parentElement.matches(keep))i.remove()});
+  document.querySelectorAll(on?HAPSEL:keep).forEach(el=>{if(el.tagName==="A"||el.querySelector(":scope>.hap"))return;
+    const l=document.createElement("label");l.className="hap";l.htmlFor="hapsw";l.setAttribute("aria-hidden","true");el.appendChild(l)})}
 if(IOS){armHaps();new MutationObserver(armHaps).observe(document.body,{childList:true,subtree:true})}
 const CK='<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 /* Welle: eine weiche, matte Scheibe breitet sich vom Finger aus und verblasst in 600 ms. Erst beim Loslassen,
@@ -2837,9 +2842,12 @@ addEventListener("pointerdown",e=>{if(e.pointerType!=="touch")tch=null},{passive
 addEventListener("touchend",()=>{if(tch){tch.up=true;tch.ut=now()}},{passive:true,capture:true});
 document.addEventListener("scroll",()=>{if(tch&&!tch.up&&now()-tch.t>60)tch.moved=true},{passive:true,capture:true});
 addEventListener("click",e=>{const m=tch&&tch.moved&&(!tch.up||now()-tch.ut<700);tch=null;if(!m||!e.isTrusted)return;
-  if(e.target.closest&&e.target.closest("textarea,select,label,input:not(.hap)"))return;e.preventDefault();e.stopImmediatePropagation()},true);
+  if(e.target.closest&&e.target.closest("textarea,select,label:not(.hap),input:not(.hap):not(.hapsw)"))return;e.preventDefault();e.stopImmediatePropagation()},true);
+/* Tippen auf ein Etikett legt den versteckten Schalter sofort um, noch bevor die Aktion das Element neu zeichnet
+   (ein entferntes Etikett würde den Schalter sonst nicht mehr erreichen). */
+addEventListener("click",e=>{if(!e.isTrusted||!e.target.classList||!e.target.classList.contains("hap"))return;e.preventDefault();const sw=document.getElementById("hapsw");if(sw)sw.click()},true);
 /* Der unsichtbare Schalter soll keinen Fokus behalten (sonst gälte er als Eingabefeld). */
-document.addEventListener("click",e=>{if(e.target.classList&&e.target.classList.contains("hap"))e.target.blur()},true);
+document.addEventListener("click",e=>{if(e.target.id==="hapsw")setTimeout(()=>e.target.blur(),0)},true);
 addEventListener("click",()=>{buzzKind=null},true);
 addEventListener("click",e=>{const k=buzzKind;buzzKind=null;if(!e.isTrusted)return;const el=famHost(e.target);
   const fam=el?famOf(el):(e.target.closest&&e.target.closest(".gsvg [data-pil]")?"sel":null);vib(k||fam);
@@ -3155,7 +3163,7 @@ function fromHash(){const h=location.hash.slice(1);if(["imp","werte","ueben","ge
 if(location.hash)fromHash();
 window.addEventListener("hashchange",()=>{fromHash();render()});
 shownDay=todayKey();render();
-const BUILD="20.10.2026, 15:41";
+const BUILD="21.10.2026, 12:41";
 function checkUpdate(){if(!/github\.io$/.test(location.hostname))return;
   fetch(location.pathname,{cache:"reload"}).then(r=>r.text()).then(t=>{const m=t.match(/const BUILD="([^"]+)"/);if(!m||m[1]===BUILD)return;
     let done=null;try{done=sessionStorage.getItem("wg-upd")}catch(e){}if(done===m[1])return;

@@ -543,9 +543,9 @@ textarea:focus,input:focus{outline:none;border-color:var(--muted)}
 
 /* ---------- Klickbild: jede Klickfamilie antwortet anders, ruhig, matt und flach ---------- */
 /* Unsichtbarer Schalter für den Tick auf dem iPhone. Er bedeckt das ganze Element, zeigt nichts und hält keinen Fokus. */
-input.hap{-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;opacity:0;z-index:6;cursor:pointer;border-radius:inherit;background:none;outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-:is(.chip,.logo,.mark)>input.hap{inset:auto;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
-:disabled>input.hap,[aria-disabled="true"]>input.hap{display:none}
+.hap{display:block;-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;opacity:0;z-index:6;cursor:pointer;border-radius:inherit;background:none;outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+:is(.chip,.logo,.mark)>.hap{inset:auto;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
+:disabled>.hap,[aria-disabled="true"]>.hap{display:none}
 .setrow{position:relative}
 /* Effekte dürfen nicht über den Bildschirmrand ragen, sonst ließe sich die Seite seitlich verschieben */
 .app{overflow-x:clip}
@@ -641,3 +641,5 @@ input.hap{-webkit-appearance:none;appearance:none;position:absolute;inset:0;widt
 
 .exp.run .meta .nowrap{white-space:nowrap;flex:none}
 .exp.run .meta>span:first-child{min-width:0}
+
+.hapsw{position:fixed;left:0;bottom:0;width:1px;height:1px;margin:0;opacity:0;pointer-events:none;z-index:-1}
